@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "./theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,10 +20,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased relative overflow-x-hidden`}>
+        <ThemeProvider>
+        {/* Animated SVG Background */}
+        <div className="fixed inset-0 -z-50 w-full h-full pointer-events-none select-none">
+          <img src="/animated-bg.svg" alt="Animated Background" className="w-full h-full object-cover" draggable="false" />
+        </div>
         {children}
+        </ThemeProvider>
       </body>
     </html>
   );

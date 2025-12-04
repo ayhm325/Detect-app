@@ -1,0 +1,47 @@
+{
+  "$schema": "https://example.com/design-tokens.schema.json",
+  "colors": {
+    "primary": { "value": "#F7963B", "description": "Brand primary (warm orange)" },
+    "secondary": { "value": "#3BF7F4", "description": "Electric cyan accent" },
+    "accent": { "value": "#3B3EF7", "description": "Deep electric blue" },
+    "bright": { "value": "#FFC76A", "description": "Bright warm highlight" },
+    "dark": { "value": "#BF6700", "description": "Deep warm contrast" },
+    "neutral": { "value": "#0f172a", "description": "Slate/neutral base (Dark mode base)" },
+    "text": { "value": "#0b0b0b", "description": "Default text on light backgrounds" },
+    "background": { "value": "#ffffff", "description": "Default app background" },
+
+    "primary-100": { "value": "#FDD7B2", "description": "Light tint of primary" },
+    "primary-500": { "value": "#F7963B", "description": "Base primary" },
+    "primary-900": { "value": "#9F4D00", "description": "Dark shade of primary" },
+
+    "secondary-100": { "value": "#C9FFFE", "description": "Light tint of secondary" },
+    "secondary-500": { "value": "#3BF7F4", "description": "Base secondary" },
+    "secondary-900": { "value": "#137A78", "description": "Dark shade of secondary" },
+
+    "accent-100": { "value": "#C8C9FE", "description": "Light tint of accent" },
+    "accent-500": { "value": "#3B3EF7", "description": "Base accent" },
+    "accent-900": { "value": "#1E217D", "description": "Dark shade of accent" },
+
+    "bright-100": { "value": "#FFE7B8", "description": "Light tint of bright" },
+    "bright-500": { "value": "#FFC76A", "description": "Base bright" },
+    "bright-900": { "value": "#B37B1D", "description": "Dark shade of bright" },
+
+    "dark-100": { "value": "#F6EADF", "description": "Light tint of dark" },
+    "dark-500": { "value": "#BF6700", "description": "Base dark" },
+    "dark-900": { "value": "#5E3200", "description": "Deep dark shade" }
+  },
+  "radii": {
+    "sm": "8px",
+    "md": "12px",
+    "lg": "16px",
+    "xl": "24px"
+  },
+  "shadows": {
+    "soft": "0 8px 24px rgba(0,0,0,0.08)",
+    "lift": "0 12px 32px rgba(0,0,0,0.12)"
+  },
+  "opacity": {
+    "glass": "0.65",
+    "hoverSheen": "0.35"
+  }
+}

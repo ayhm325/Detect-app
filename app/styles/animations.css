@@ -1,0 +1,132 @@
+/* Animated gradient + hologram shimmer + floating shapes */
+.hologram-bg {
+  background-image: linear-gradient(135deg,
+    var(--color-secondary),
+    var(--color-primary),
+    var(--color-accent),
+    var(--color-bright)
+  );
+  background-size: 200% 200%;
+  animation: gradientFlow 14s ease infinite;
+}
+
+.hue-animated {
+  animation: hueShift 10s linear infinite;
+}
+
+.holo-sheen {
+  position: relative;
+  overflow: hidden;
+}
+.holo-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg,
+    transparent 0%,
+    rgba(255,255,255,var(--opacity-sheen)) 15%,
+    transparent 30%
+  );
+  background-size: 200% 100%;
+  transform: translateX(-100%);
+}
+.holo-sheen:hover::after {
+  animation: holoSheen 1200ms ease forwards;
+}
+
+.floaty-shape {
+  animation: floaty 6s ease-in-out infinite;
+}
+
+/* Motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .hologram-bg,
+  .hue-animated,
+  .holo-sheen::after,
+  .floaty-shape {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@keyframes hueShift {
+  0% { filter: hue-rotate(0deg) }
+  50% { filter: hue-rotate(45deg) }
+  100% { filter: hue-rotate(0deg) }
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+
+@keyframes holoSheen {
+  0% { background-position: -200% 0 }
+  100% { background-position: 200% 0 }
+}
+
+@keyframes floaty {
+  0% { transform: translateY(0) rotate(0deg) }
+  50% { transform: translateY(-6px) rotate(2deg) }
+  100% { transform: translateY(0) rotate(0deg) }
+}
+
+/* SignUpSide Enhanced Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(6, 182, 212, 0.8);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes typewriter {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
