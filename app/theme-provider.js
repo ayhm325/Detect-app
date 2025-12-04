@@ -1,25 +1,37 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
 
 const STORAGE_KEY = "app-theme";
+
+// Create context FIRST before using it
+const ThemeContext = createContext({ theme: "light", setTheme: () => {} });
 
 export function ThemeProvider({ children, defaultTheme = "light" }) {
   const [theme, setTheme] = useState(defaultTheme);
 
   useEffect(() => {
-    const saved = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
-    if (saved === "light" || saved === "dark") {
-      setTheme(saved);
-    } else {
-      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setTheme(prefersDark ? "dark" : "light");
-    }
+    if (typeof window === "undefined") return;
+    
+    // تجاهل أي قيمة محفوظة، اجعل الافتراضي دائماً نهاري
+    window.localStorage.removeItem(STORAGE_KEY);
+    setTheme("light");
   }, []);
 
   useEffect(() => {
     const root = document.documentElement;
+    // Sync explicit theme classes to override prefers-color-scheme media queries
+    if (theme === "dark") {
+      root.classList.add("dark");
+      root.classList.remove("light");
+    } else {
+      root.classList.add("light");
+      root.classList.remove("dark");
+    }
+    
+    // Keep data-theme attribute for compatibility
     root.setAttribute("data-theme", theme);
+    
     try {
       window.localStorage.setItem(STORAGE_KEY, theme);
     } catch {}
@@ -31,10 +43,6 @@ export function ThemeProvider({ children, defaultTheme = "light" }) {
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
-
-import { createContext, useContext } from "react";
-
-const ThemeContext = createContext({ theme: "light", setTheme: () => {} });
 
 export function useTheme() {
   return useContext(ThemeContext);

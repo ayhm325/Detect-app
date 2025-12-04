@@ -2,19 +2,21 @@ import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import FeaturesSection from "./components/FeaturesSection";
 import WorkflowSection from "./components/WorkflowSection";
+import StatsSection from "./components/StatsSection";
+import TestimonialsSection from "./components/TestimonialsSection";
 import Footer from "./components/Footer";
-import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col font-sans relative" dir="rtl" lang="ar">
-      <div className="fixed inset-0 -z-20 select-none pointer-events-none" aria-hidden="true">
-        <Image src="/bg-hero.svg" alt="bg" fill priority sizes="100vw" className="w-full h-full object-cover" />
-      </div>
+    <div className="min-h-screen flex flex-col font-sans" dir="rtl" lang="ar">
       <Navbar />
-      <HeroSection />
-      <FeaturesSection />
-      <WorkflowSection />
+      <main className="flex-1">
+        <HeroSection />
+        <FeaturesSection />
+        <WorkflowSection />
+        <StatsSection />
+        <TestimonialsSection />
+      </main>
       <Footer />
     </div>
   );

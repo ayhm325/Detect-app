@@ -8,7 +8,7 @@ function generateParticles(count) {
     size: Math.random() * 3 + 1,
     duration: Math.random() * 10 + 15,
     delay: Math.random() * 5,
-    color: ['cyan', 'blue', 'pink'][Math.floor(Math.random() * 3)],
+    color: ['yellow', 'orange', 'red'][Math.floor(Math.random() * 3)],
     vx: Math.random() * 2 - 1,
     vy: Math.random() * 2 - 1,
   }));

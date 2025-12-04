@@ -43,7 +43,11 @@
   .hologram-bg,
   .hue-animated,
   .holo-sheen::after,
-  .floaty-shape {
+  .floaty-shape,
+  .animate-float,
+  .animate-fadeIn,
+  .animate-gradient,
+  .animate-bounce {
     animation: none !important;
     transition: none !important;
   }
@@ -76,7 +80,7 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -129,4 +133,111 @@
   50% {
     transform: translateY(-10px);
   }
+}
+
+/* New Homepage Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  50% {
+    transform: translateY(-20px) translateX(0);
+  }
+  75% {
+    transform: translateY(-10px) translateX(-5px);
+  }
+}
+
+@keyframes floatParticle {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translate(20px, -40px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-30px, -80px);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(10px, -120px);
+    opacity: 0.7;
+  }
+}
+
+@keyframes gridMove {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(80px, 80px);
+  }
+}
+
+@keyframes dataFlow {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(100px, -100px) scale(1.5);
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(200px, -200px) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes scanLine {
+  0% {
+    top: -10%;
+  }
+  50% {
+    top: 110%;
+  }
+  100% {
+    top: -10%;
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 5s ease infinite;
+}
+
+.animate-bounce {
+  animation: bounce 2s ease-in-out infinite;
 }

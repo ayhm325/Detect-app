@@ -90,12 +90,10 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
       </div>
 
       {/* Main Content Area - Adjusted for fixed sidebar */}
-      <style jsx>{`
-        .main-content-wrapper {
-          margin-left: ${collapsed ? "80px" : "256px"};
-          transition: margin-left 0.3s ease;
-        }
-      `}</style>
+      <div 
+        className="main-content-wrapper transition-all duration-300"
+        style={{ marginLeft: collapsed ? "80px" : "256px" }}
+      />
     </>
   );
 }

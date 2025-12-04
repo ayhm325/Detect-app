@@ -111,7 +111,7 @@ export default function PatientProfilePage() {
         {/* Profile Card */}
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-8 border border-gray-200 dark:border-slate-700">
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-linear-to-br from-blue-400 to-purple-600 flex items-center justify-center text-white text-4xl font-bold">
+            <div className="w-24 h-24 rounded-full bg-linear-to-br from-yellow-400 to-red-600 flex items-center justify-center text-white text-4xl font-bold">
               {profileData.fullName.split(" ").map(n => n[0]).slice(0, 2).join("")}
             </div>
             <div className="flex-1">

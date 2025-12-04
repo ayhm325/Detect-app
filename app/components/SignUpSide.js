@@ -57,15 +57,15 @@ export default function SignUpSide() {
   }, []);
 
   const features = [
-    { icon: FaRobot, label: "تحليل فوري ودقيق", color: "cyan" },
-    { icon: FaShield, label: "بياناتك بأمان تام", color: "pink" },
-    { icon: FaUserAstronaut, label: "واجهة مستقبلية سهلة", color: "blue" }
+    { icon: FaRobot, label: "تحليل فوري ودقيق", color: "yellow" },
+    { icon: FaShield, label: "بياناتك بأمان تام", color: "red" },
+    { icon: FaUserAstronaut, label: "واجهة مستقبلية سهلة", color: "orange" }
   ];
 
   return (
     <div 
       ref={containerRef}
-      className="hidden md:flex w-full h-full bg-linear-to-br from-[#0f172a] via-[#1e293b] to-[#0ea5e9] relative overflow-hidden rounded-none p-0 group"
+      className="hidden md:flex w-full min-h-full bg-linear-to-br from-yellow-600 via-amber-500 to-red-600 relative overflow-hidden rounded-none p-0 group"
     >
       {/* إضافة الـ CSS ديناميكي للجزيئات - فقط عند التحميل على الكلاينت */}
       {isClient && particles.length > 0 && (
@@ -84,7 +84,7 @@ export default function SignUpSide() {
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" className="animate-[spin_20s_linear_infinite]" style={{ opacity: 0.1 }}>
           <defs>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#0ea5e9" strokeWidth="0.5" />
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#fbbf24" strokeWidth="0.5" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
@@ -101,8 +101,8 @@ export default function SignUpSide() {
             top: `${particle.y}%`,
             width: `${particle.size}px`,
             height: `${particle.size}px`,
-            backgroundColor: particle.color === "cyan" ? "#06b6d4" : particle.color === "blue" ? "#3b82f6" : "#ec4899",
-            boxShadow: `0 0 ${particle.size * 4}px ${particle.color === "cyan" ? "#06b6d4" : particle.color === "blue" ? "#3b82f6" : "#ec4899"}`,
+            backgroundColor: particle.color === "yellow" ? "#fbbf24" : particle.color === "orange" ? "#f97316" : "#dc2626",
+            boxShadow: `0 0 ${particle.size * 4}px ${particle.color === "yellow" ? "#fbbf24" : particle.color === "orange" ? "#f97316" : "#dc2626"}`,
             animation: `float-${particle.id} ${particle.duration}s ease-in-out ${particle.delay}s infinite`,
             filter: "blur(0.5px)"
           }}
@@ -112,14 +112,14 @@ export default function SignUpSide() {
       {/* خلفية نيون متقدمة */}
       <div className="absolute inset-0 z-1 pointer-events-none">
         <svg width="100%" height="100%" className="absolute inset-0" style={{ filter: 'blur(8px)' }}>
-          <circle cx="80" cy="80" r="60" fill="#0ea5e9" fillOpacity="0.18" className="animate-pulse" />
-          <circle cx="90%" cy="30%" r="80" fill="#38bdf8" fillOpacity="0.12" className="animate-pulse" />
-          <circle cx="60%" cy="80%" r="60" fill="#f472b6" fillOpacity="0.10" className="animate-pulse" />
+          <circle cx="80" cy="80" r="60" fill="#fbbf24" fillOpacity="0.18" className="animate-pulse" />
+          <circle cx="90%" cy="30%" r="80" fill="#f59e0b" fillOpacity="0.12" className="animate-pulse" />
+          <circle cx="60%" cy="80%" r="60" fill="#dc2626" fillOpacity="0.10" className="animate-pulse" />
         </svg>
         
         {/* إضاءة تتبع الماوس */}
         <div
-          className="absolute w-96 h-96 bg-cyan-400 rounded-full blur-3xl pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity duration-500"
+          className="absolute w-96 h-96 bg-yellow-300 rounded-full blur-3xl pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity duration-500"
           style={{
             left: `${mousePos.x * 100}%`,
             top: `${mousePos.y * 100}%`,
@@ -127,8 +127,8 @@ export default function SignUpSide() {
           }}
         />
 
-        <div className="absolute left-1/2 top-1/4 w-40 h-40 bg-cyan-400 opacity-20 rounded-full blur-2xl animate-pulse" />
-        <div className="absolute right-10 bottom-10 w-32 h-32 bg-pink-500 opacity-10 rounded-full blur-2xl animate-pulse" />
+        <div className="absolute left-1/2 top-1/4 w-40 h-40 bg-yellow-300 opacity-20 rounded-full blur-2xl animate-pulse" />
+        <div className="absolute right-10 bottom-10 w-32 h-32 bg-red-400 opacity-10 rounded-full blur-2xl animate-pulse" />
       </div>
 
       {/* محتوى رئيسي */}
@@ -138,10 +138,10 @@ export default function SignUpSide() {
         <div className="flex space-x-8 mb-8 mt-4">
           {[FaUserAstronaut, FaRobot, FaShield].map((Icon, idx) => (
             <div key={idx} className="relative group/icon">
-              <div className="absolute -inset-4 bg-linear-to-r from-cyan-500 to-blue-500 rounded-full opacity-0 group-hover/icon:opacity-20 blur transition duration-500" />
+              <div className="absolute -inset-4 bg-linear-to-r from-yellow-400 to-red-600 rounded-full opacity-0 group-hover/icon:opacity-20 blur transition duration-500" />
               <Icon
                 className={`text-7xl md:text-8xl drop-shadow-neon transition-all duration-300 group-hover/icon:scale-125 group-hover/icon:rotate-12 cursor-pointer ${
-                  idx === 0 ? "text-cyan-400" : idx === 1 ? "text-pink-400" : "text-blue-400"
+                  idx === 0 ? "text-yellow-300" : idx === 1 ? "text-orange-300" : "text-red-300"
                 }`}
               />
             </div>
@@ -150,11 +150,11 @@ export default function SignUpSide() {
 
         {/* العنوان مع تأثير typewriter */}
         <div className="flex flex-col items-center gap-6 flex-1 justify-center">
-          <h3 className="text-4xl md:text-5xl font-extrabold text-cyan-300 text-center drop-shadow-neon animate-[fadeIn_0.8s_ease-in-out]">
+          <h3 className="text-4xl md:text-5xl font-extrabold text-yellow-100 text-center drop-shadow-neon animate-[fadeIn_0.8s_ease-in-out]">
             انضم إلى عالم التشخيص الذكي
           </h3>
           
-          <p className="text-zinc-300 text-center max-w-2xl text-xl md:text-2xl leading-relaxed animate-[fadeIn_1s_ease-in-out_0.2s_both]">
+          <p className="text-white text-center max-w-2xl text-xl md:text-2xl leading-relaxed animate-[fadeIn_1s_ease-in-out_0.2s_both]">
             أنشئ حسابك واكتشف قوة الذكاء الاصطناعي في كشف الالتهاب الرئوي من صور الأشعة.
           </p>
 
@@ -168,16 +168,16 @@ export default function SignUpSide() {
               >
                 <div className={`flex items-center gap-3 p-4 rounded-lg backdrop-blur-sm transition-all duration-300 ${
                   activeFeature === idx
-                    ? `bg-${feature.color}-400/20 border border-${feature.color}-400/50 shadow-lg shadow-${feature.color}-500/30`
-                    : "bg-slate-700/20 border border-slate-600/30 hover:border-slate-500/50"
+                    ? `bg-white/20 border border-white/50 shadow-lg shadow-white/30`
+                    : "bg-white/10 border border-white/20 hover:border-white/30"
                 }`}>
-                  <feature.icon className={`text-2xl transition-all group-hover/feature:scale-125 group-hover/feature:rotate-180 text-${feature.color}-400`} />
+                  <feature.icon className={`text-2xl transition-all group-hover/feature:scale-125 group-hover/feature:rotate-180 text-white`} />
                   <span className={`text-lg font-medium transition-colors ${
-                    activeFeature === idx ? `text-${feature.color}-300` : "text-blue-200/80"
+                    activeFeature === idx ? `text-white` : "text-white/80"
                   }`}>
                     {feature.label}
                   </span>
-                  <FaArrowRight className={`ml-auto text-${feature.color}-400 transition-all ${activeFeature === idx ? "translate-x-2" : ""}`} />
+                  <FaArrowRight className={`ml-auto text-white transition-all ${activeFeature === idx ? "translate-x-2" : ""}`} />
                 </div>
               </div>
             ))}
@@ -186,26 +186,26 @@ export default function SignUpSide() {
 
         {/* إحصائيات ديناميكية */}
         <div className="grid grid-cols-3 gap-4 w-full max-w-md mb-4">
-          <div className="bg-linear-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-lg p-3 text-center backdrop-blur-sm hover:border-cyan-400/50 transition-all hover:shadow-lg hover:shadow-cyan-500/20">
-            <p className="text-2xl font-bold text-cyan-300">{Math.floor(stats.users / 100)}</p>
-            <p className="text-xs text-gray-400 mt-1">مستخدم نشط</p>
+          <div className="bg-white/20 border border-white/30 rounded-lg p-3 text-center backdrop-blur-sm hover:border-white/50 transition-all hover:shadow-lg hover:shadow-white/20">
+            <p className="text-2xl font-bold text-white">{Math.floor(stats.users / 100)}</p>
+            <p className="text-xs text-white/80 mt-1">مستخدم نشط</p>
           </div>
           
-          <div className="bg-linear-to-br from-blue-500/20 to-purple-500/20 border border-blue-400/30 rounded-lg p-3 text-center backdrop-blur-sm hover:border-blue-400/50 transition-all hover:shadow-lg hover:shadow-blue-500/20">
-            <p className="text-2xl font-bold text-blue-300">{Math.floor(stats.analyses / 100)}</p>
-            <p className="text-xs text-gray-400 mt-1">تحليل</p>
+          <div className="bg-white/20 border border-white/30 rounded-lg p-3 text-center backdrop-blur-sm hover:border-white/50 transition-all hover:shadow-lg hover:shadow-white/20">
+            <p className="text-2xl font-bold text-white">{Math.floor(stats.analyses / 100)}</p>
+            <p className="text-xs text-white/80 mt-1">تحليل</p>
           </div>
           
-          <div className="bg-linear-to-br from-pink-500/20 to-rose-500/20 border border-pink-400/30 rounded-lg p-3 text-center backdrop-blur-sm hover:border-pink-400/50 transition-all hover:shadow-lg hover:shadow-pink-500/20">
-            <p className="text-2xl font-bold text-pink-300">{stats.accuracy.toFixed(1)}%</p>
-            <p className="text-xs text-gray-400 mt-1">دقة</p>
+          <div className="bg-white/20 border border-white/30 rounded-lg p-3 text-center backdrop-blur-sm hover:border-white/50 transition-all hover:shadow-lg hover:shadow-white/20">
+            <p className="text-2xl font-bold text-white">{stats.accuracy.toFixed(1)}%</p>
+            <p className="text-xs text-white/80 mt-1">دقة</p>
           </div>
         </div>
 
         {/* زر CTA */}
         <div className="relative group/cta mb-2">
-          <div className="absolute -inset-1 bg-linear-to-r from-cyan-500 via-blue-500 to-pink-500 rounded-lg blur opacity-50 group-hover/cta:opacity-100 transition duration-300" />
-          <button className="relative px-6 py-3 bg-slate-900 text-white rounded-lg font-semibold flex items-center gap-2 hover:bg-slate-800 transition-all hover:scale-105">
+          <div className="absolute -inset-1 bg-linear-to-r from-yellow-300 via-orange-400 to-red-500 rounded-lg blur opacity-50 group-hover/cta:opacity-100 transition duration-300" />
+          <button className="relative px-6 py-3 bg-white text-red-600 rounded-lg font-semibold flex items-center gap-2 hover:bg-yellow-50 transition-all hover:scale-105">
             <FaCheck className="text-sm" />
             ابدأ الآن
             <FaArrowRight className="text-sm" />

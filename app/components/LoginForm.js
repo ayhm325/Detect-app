@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { FaFacebook, FaGoogle, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaShield } from "react-icons/fa6";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LoginForm() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -52,64 +53,52 @@ export default function LoginForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative flex flex-col gap-6 w-full h-full justify-center items-center bg-linear-to-br from-slate-900 via-slate-800 to-black backdrop-blur-xl shadow-2xl p-8 md:p-16 text-lg overflow-hidden border border-cyan-400/20"
+      className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl p-8 md:p-12 border border-yellow-100 dark:border-zinc-800 space-y-6"
     >
-      {/* خلفية cyberpunk محسّنة */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        {/* شبكة خطوط نيون */}
-        <svg width="100%" height="100%" viewBox="0 0 800 600" className="absolute inset-0 w-full h-full" style={{mixBlendMode:'screen'}}>
-          <defs>
-            <linearGradient id="neonLine" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#00fff7" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="#a259ff" stopOpacity="0.5" />
-            </linearGradient>
-          </defs>
-          {[...Array(8)].map((_, i) => (
-            <line key={i} x1="0" y1={75*i+40} x2="800" y2={75*i+40} stroke="url(#neonLine)" strokeWidth="2" opacity="0.12" />
-          ))}
-          {[...Array(6)].map((_, i) => (
-            <line key={i+10} x1={i*160+40} y1="0" x2={i*160+40} y2="600" stroke="url(#neonLine)" strokeWidth="2" opacity="0.08" />
-          ))}
-        </svg>
-        {/* جسيمات ضوء متوهجة */}
-        <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-cyan-500 opacity-10 rounded-full blur-3xl" />
-        <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-purple-500 opacity-10 rounded-full blur-3xl" />
+      {/* العنوان والأيقونة */}
+      <div className="flex flex-col items-center text-center space-y-3">
+        <div className="p-4 bg-gradient-to-br from-yellow-100 to-red-100 dark:from-yellow-900/30 dark:to-red-900/30 rounded-2xl">
+          <FaShield className="text-5xl text-yellow-600 dark:text-yellow-400" />
+        </div>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-red-600 bg-clip-text text-transparent">
+          تسجيل الدخول
+        </h1>
+        <p className="text-base text-gray-600 dark:text-gray-400">أدخل بيانات حسابك للمتابعة</p>
       </div>
 
-      {/* المحتوى */}
-      <div className="relative z-10 flex flex-col gap-4 w-full max-w-md">
-        {/* الأيقونة والعنوان */}
-        <div className="text-center mb-2">
-          <div className="inline-block p-4 bg-linear-to-br from-cyan-500 to-blue-600 rounded-full mb-4 shadow-lg">
-            <FaLock className="text-4xl text-white" />
+      {/* خيارات الدخول الاجتماعي */}
+      <div className="space-y-4">
+        <div className="flex gap-4">
+          <button
+            type="button"
+            className="flex-1 flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium shadow-lg transition-all hover:scale-[1.02] border-2 border-blue-400/30"
+          >
+            <FaFacebook className="text-xl" />
+            <span>Facebook</span>
+          </button>
+          <button
+            type="button"
+            className="flex-1 flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium shadow-lg transition-all hover:scale-[1.02] border-2 border-red-400/30"
+          >
+            <FaGoogle className="text-xl" />
+            <span>Google</span>
+          </button>
+        </div>
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300 dark:border-zinc-700"></div>
           </div>
-          <h2 className="text-4xl font-bold mb-2 text-white">تسجيل الدخول</h2>
-          <p className="text-gray-400 text-sm">أدخل بيانات حسابك للمتابعة</p>
-        </div>
-
-        {/* خيارات الدخول الاجتماعي */}
-        <div className="flex justify-center gap-4 mb-4">
-          <button type="button" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all hover:scale-110 ring-2 ring-blue-400/30">
-            <FaFacebook className="text-lg" />
-          </button>
-          <button type="button" className="flex items-center justify-center w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-all hover:scale-110 ring-2 ring-red-400/30">
-            <FaGoogle className="text-lg" />
-          </button>
-        </div>
-
-        {/* الفاصل */}
-        <div className="flex items-center gap-3 my-2">
-          <div className="flex-1 h-px bg-gray-600" />
-          <span className="text-gray-400 text-xs">أو</span>
-          <div className="flex-1 h-px bg-gray-600" />
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-white dark:bg-zinc-900 text-gray-500 dark:text-gray-400">أو باستخدام البريد الإلكتروني</span>
+          </div>
         </div>
       </div>
 
       {/* حقل البريد الإلكتروني */}
-      <div className="relative z-10 w-full max-w-md">
-        <label className="block text-sm font-medium text-gray-300 mb-2">البريد الإلكتروني</label>
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">البريد الإلكتروني</label>
         <div className="relative">
-          <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 text-lg" />
+          <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 text-xl" />
           <input
             type="email"
             name="email"
@@ -117,16 +106,16 @@ export default function LoginForm() {
             value={form.email}
             onChange={handleChange}
             required
-            className="w-full pl-12 pr-4 py-3 border-2 border-cyan-400/30 rounded-lg bg-slate-800/50 text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all"
+            className="w-full pl-12 pr-4 py-4 text-base border-2 border-gray-300 dark:border-zinc-700 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-500 focus:border-yellow-500 dark:focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all"
           />
         </div>
       </div>
 
       {/* حقل كلمة المرور */}
-      <div className="relative z-10 w-full max-w-md">
-        <label className="block text-sm font-medium text-gray-300 mb-2">كلمة المرور</label>
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">كلمة المرور</label>
         <div className="relative">
-          <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 text-lg" />
+          <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 text-xl" />
           <input
             type={showPassword ? "text" : "password"}
             name="password"
@@ -134,23 +123,23 @@ export default function LoginForm() {
             value={form.password}
             onChange={handleChange}
             required
-            className="w-full pl-12 pr-12 py-3 border-2 border-cyan-400/30 rounded-lg bg-slate-800/50 text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all"
+            className="w-full pl-12 pr-12 py-4 text-base border-2 border-gray-300 dark:border-zinc-700 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-500 focus:border-yellow-500 dark:focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-400 hover:text-cyan-300 transition-colors mt-1"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
           >
-            {showPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
+            {showPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
           </button>
         </div>
       </div>
 
       {/* رسالة الخطأ */}
       {error && (
-        <div className="relative z-10 w-full max-w-md bg-red-900/30 border border-red-500/50 rounded-lg p-3 text-red-300 text-sm flex items-center gap-2">
-          <FaShield className="text-lg shrink-0" />
-          <span>{error}</span>
+        <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-xl p-4 text-red-700 dark:text-red-400 text-base flex items-center gap-3">
+          <span className="text-xl shrink-0">⚠️</span>
+          <span className="font-medium">{error}</span>
         </div>
       )}
 
@@ -158,7 +147,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="relative z-10 w-full max-w-md py-3 rounded-lg bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold text-lg shadow-xl transition-all hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-4 rounded-xl bg-gradient-to-r from-yellow-500 to-red-500 hover:from-yellow-600 hover:to-red-600 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
@@ -171,13 +160,13 @@ export default function LoginForm() {
       </button>
 
       {/* روابط إضافية */}
-      <div className="relative z-10 w-full max-w-md flex flex-col gap-3 text-center mt-2">
-        <a href="#" className="text-cyan-400 hover:text-cyan-300 text-sm transition-colors">
+      <div className="flex flex-col gap-3 text-center text-sm">
+        <a href="#" className="text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 font-semibold transition-colors">
           هل نسيت كلمة المرور؟
         </a>
-        <div className="text-gray-400 text-sm">
+        <div className="text-gray-600 dark:text-gray-400">
           ليس لديك حساب؟{" "}
-          <a href="/signup" className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
+          <a href="/signup" className="text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 font-semibold transition-colors">
             سجل الآن
           </a>
         </div>

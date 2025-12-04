@@ -58,28 +58,28 @@ export default function PatientDashboard() {
       title: "حجز موعد",
       description: "احجز موعد مع طبيبك المعالج",
       icon: "📅",
-      gradient: "from-blue-600 to-blue-500",
+      gradient: "from-yellow-500 to-red-500",
       action: () => router.push("/patient/appointments")
     },
     {
       title: "رفع أشعة",
       description: "ارفع صور الأشعة للتحليل",
       icon: "🩻",
-      gradient: "from-green-600 to-green-500",
+      gradient: "from-yellow-400 to-orange-500",
       action: () => router.push("/patient/upload-xray")
     },
     {
       title: "عرض التقارير",
       description: "اطلع على تقاريرك الطبية",
       icon: "📋",
-      gradient: "from-purple-600 to-purple-500",
+      gradient: "from-red-500 to-red-600",
       action: () => router.push("/patient/results")
     },
     {
       title: "تواصل مع الطبيب",
       description: "أرسل رسالة لطبيبك",
       icon: "💬",
-      gradient: "from-orange-600 to-orange-500",
+      gradient: "from-yellow-500 to-amber-500",
       action: () => router.push("/patient/chat")
     }
   ];

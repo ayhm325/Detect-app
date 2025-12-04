@@ -152,7 +152,13 @@ export default function DoctorAppointmentsPage() {
   return (
     <DoctorLayout>
       <ToastContainer />
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 p-6">
+      <div
+        className={`min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6 text-gray-900 dark:text-gray-100
+        [&_div.bg-white]:dark:bg-zinc-900 [&_div.bg-white]:dark:border-zinc-800
+        [&_p.text-gray-900]:dark:text-white [&_p.text-gray-600]:dark:text-gray-300 [&_p.text-gray-500]:dark:text-gray-400
+        [&_span.text-gray-900]:dark:text-white [&_span.text-gray-600]:dark:text-gray-300
+        [&_input.bg-white]:dark:bg-zinc-900 [&_input.border-gray-300]:dark:border-zinc-700 [&_input.text-gray-900]:dark:text-gray-100`}
+      >
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">

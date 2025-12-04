@@ -1,34 +1,34 @@
 {
   "$schema": "https://example.com/design-tokens.schema.json",
   "colors": {
-    "primary": { "value": "#F7963B", "description": "Brand primary (warm orange)" },
-    "secondary": { "value": "#3BF7F4", "description": "Electric cyan accent" },
-    "accent": { "value": "#3B3EF7", "description": "Deep electric blue" },
-    "bright": { "value": "#FFC76A", "description": "Bright warm highlight" },
-    "dark": { "value": "#BF6700", "description": "Deep warm contrast" },
+    "primary": { "value": "#FBBF24", "description": "Brand primary (warm yellow)" },
+    "secondary": { "value": "#F59E0B", "description": "Warm amber accent" },
+    "accent": { "value": "#DC2626", "description": "Deep warm red" },
+    "bright": { "value": "#FCD34D", "description": "Bright warm highlight" },
+    "dark": { "value": "#B91C1C", "description": "Deep warm contrast" },
     "neutral": { "value": "#0f172a", "description": "Slate/neutral base (Dark mode base)" },
     "text": { "value": "#0b0b0b", "description": "Default text on light backgrounds" },
     "background": { "value": "#ffffff", "description": "Default app background" },
 
-    "primary-100": { "value": "#FDD7B2", "description": "Light tint of primary" },
-    "primary-500": { "value": "#F7963B", "description": "Base primary" },
-    "primary-900": { "value": "#9F4D00", "description": "Dark shade of primary" },
+    "primary-100": { "value": "#FEF3C7", "description": "Light tint of primary (yellow-100)" },
+    "primary-500": { "value": "#FBBF24", "description": "Base primary (yellow-400)" },
+    "primary-900": { "value": "#92400E", "description": "Dark shade of primary (amber-900)" },
 
-    "secondary-100": { "value": "#C9FFFE", "description": "Light tint of secondary" },
-    "secondary-500": { "value": "#3BF7F4", "description": "Base secondary" },
-    "secondary-900": { "value": "#137A78", "description": "Dark shade of secondary" },
+    "secondary-100": { "value": "#FED7AA", "description": "Light tint of secondary (orange-200)" },
+    "secondary-500": { "value": "#F59E0B", "description": "Base secondary (amber-500)" },
+    "secondary-900": { "value": "#78350F", "description": "Dark shade of secondary (amber-950)" },
 
-    "accent-100": { "value": "#C8C9FE", "description": "Light tint of accent" },
-    "accent-500": { "value": "#3B3EF7", "description": "Base accent" },
-    "accent-900": { "value": "#1E217D", "description": "Dark shade of accent" },
+    "accent-100": { "value": "#FEE2E2", "description": "Light tint of accent (red-100)" },
+    "accent-500": { "value": "#DC2626", "description": "Base accent (red-600)" },
+    "accent-900": { "value": "#7F1D1D", "description": "Dark shade of accent (red-950)" },
 
-    "bright-100": { "value": "#FFE7B8", "description": "Light tint of bright" },
-    "bright-500": { "value": "#FFC76A", "description": "Base bright" },
-    "bright-900": { "value": "#B37B1D", "description": "Dark shade of bright" },
+    "bright-100": { "value": "#FEF9C3", "description": "Light tint of bright (yellow-100)" },
+    "bright-500": { "value": "#FCD34D", "description": "Base bright (yellow-300)" },
+    "bright-900": { "value": "#854D0E", "description": "Dark shade of bright (yellow-900)" },
 
-    "dark-100": { "value": "#F6EADF", "description": "Light tint of dark" },
-    "dark-500": { "value": "#BF6700", "description": "Base dark" },
-    "dark-900": { "value": "#5E3200", "description": "Deep dark shade" }
+    "dark-100": { "value": "#FECACA", "description": "Light tint of dark (red-200)" },
+    "dark-500": { "value": "#B91C1C", "description": "Base dark (red-700)" },
+    "dark-900": { "value": "#450A0A", "description": "Deep dark shade (red-950)" }
   },
   "radii": {
     "sm": "8px",

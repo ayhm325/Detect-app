@@ -2,81 +2,227 @@
 "use client";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import translations from "../lib/translations";
 
 export default function WorkflowSection() {
   const pathname = usePathname();
-  const currentLocale = pathname.startsWith("/ar") ? "ar" : "en";
+  const currentLocale = pathname.startsWith("/en") ? "en" : "ar";
   const t = translations[currentLocale];
+  const [flowParticles, setFlowParticles] = useState([]);
+
+  useEffect(() => {
+    // Generate particle animations on client only to avoid SSR randomness
+    setFlowParticles(
+      [...Array(12)].map((_, i) => ({
+        id: i,
+        left: (i * 8.3 + 5) % 100,
+        top: (i * 12 + 10) % 100,
+        color: i % 3 === 0 ? '#FBBF24' : i % 3 === 1 ? '#F59E0B' : '#EF4444',
+        duration: 8 + Math.random() * 4,
+        delay: Math.random() * 3,
+      }))
+    );
+  }, []);
+
   return (
-    <section className="relative w-full py-20 bg-linear-to-br from-[#0ff2] via-[#7f00ff22] to-[#000c] overflow-hidden workflow-glass-bg">
-      {/* Glassy animated background with floating lines */}
-      <div className="absolute inset-0 pointer-events-none select-none z-0">
-        <svg className="w-full h-full animate-pulse-slow" viewBox="0 0 1440 400" fill="none">
+    <section className="relative w-full py-20 sm:py-24 bg-gradient-to-tr from-red-50 via-white to-yellow-50 dark:bg-gradient-to-tr dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 overflow-hidden">
+      {/* Animated Circuit Board Background */}
+      <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+        {/* Animated Circuit Lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <radialGradient id="workflowBg" cx="50%" cy="50%" r="80%">
-              <stop offset="0%" stopColor="#00fff7" stopOpacity="0.10" />
-              <stop offset="100%" stopColor="#7f00ff" stopOpacity="0.05" />
-            </radialGradient>
+            <linearGradient id="circuitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style={{ stopColor: '#FBBF24', stopOpacity: 0.8 }} />
+              <stop offset="50%" style={{ stopColor: '#F59E0B', stopOpacity: 0.6 }} />
+              <stop offset="100%" style={{ stopColor: '#EF4444', stopOpacity: 0.8 }} />
+            </linearGradient>
           </defs>
-          <rect width="1440" height="400" fill="url(#workflowBg)" />
-          {/* Animated dashed lines */}
-          {Array.from({length: 8}).map((_,i) => (
-            <line key={i} x1={i*180} y1="0" x2={i*180} y2="400" stroke="#00fff7" strokeWidth="2" strokeDasharray="12 12" opacity="0.08" />
-          ))}
+          
+          {/* Horizontal Circuit Lines */}
+          <g stroke="url(#circuitGrad)" strokeWidth="2" fill="none">
+            <line x1="0" y1="20%" x2="100%" y2="20%" opacity="0.6">
+              <animate attributeName="stroke-dasharray" values="0,1000;1000,0" dur="20s" repeatCount="indefinite" />
+            </line>
+            <line x1="0" y1="40%" x2="100%" y2="40%" opacity="0.5">
+              <animate attributeName="stroke-dasharray" values="0,1000;1000,0" dur="25s" repeatCount="indefinite" />
+            </line>
+            <line x1="0" y1="60%" x2="100%" y2="60%" opacity="0.4">
+              <animate attributeName="stroke-dasharray" values="0,1000;1000,0" dur="22s" repeatCount="indefinite" />
+            </line>
+            <line x1="0" y1="80%" x2="100%" y2="80%" opacity="0.6">
+              <animate attributeName="stroke-dasharray" values="0,1000;1000,0" dur="28s" repeatCount="indefinite" />
+            </line>
+          </g>
+
+          {/* Vertical Circuit Lines */}
+          <g stroke="url(#circuitGrad)" strokeWidth="2" fill="none">
+            <line x1="20%" y1="0" x2="20%" y2="100%" opacity="0.5">
+              <animate attributeName="stroke-dasharray" values="1000,0;0,1000" dur="18s" repeatCount="indefinite" />
+            </line>
+            <line x1="50%" y1="0" x2="50%" y2="100%" opacity="0.4">
+              <animate attributeName="stroke-dasharray" values="1000,0;0,1000" dur="24s" repeatCount="indefinite" />
+            </line>
+            <line x1="80%" y1="0" x2="80%" y2="100%" opacity="0.5">
+              <animate attributeName="stroke-dasharray" values="1000,0;0,1000" dur="20s" repeatCount="indefinite" />
+            </line>
+          </g>
+
+          {/* Circuit Nodes */}
+          <g fill="url(#circuitGrad)">
+            <circle cx="20%" cy="20%" r="4" opacity="0.7">
+              <animate attributeName="r" values="4;8;4" dur="3s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="50%" cy="40%" r="4" opacity="0.7">
+              <animate attributeName="r" values="4;8;4" dur="3.5s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.7;1;0.7" dur="3.5s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="80%" cy="60%" r="4" opacity="0.7">
+              <animate attributeName="r" values="4;8;4" dur="4s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.7;1;0.7" dur="4s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="20%" cy="80%" r="4" opacity="0.7">
+              <animate attributeName="r" values="4;8;4" dur="3.2s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.7;1;0.7" dur="3.2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="80%" cy="20%" r="4" opacity="0.7">
+              <animate attributeName="r" values="4;8;4" dur="3.8s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.7;1;0.7" dur="3.8s" repeatCount="indefinite" />
+            </circle>
+          </g>
         </svg>
+
+        {/* Flowing Data Particles */}
+        <div className="absolute inset-0">
+          {flowParticles.map((p) => (
+            <div
+              key={p.id}
+              className="absolute w-2 h-2 rounded-full"
+              style={{
+                left: `${p.left}%`,
+                top: `${p.top}%`,
+                background: p.color,
+                boxShadow: `0 0 10px ${p.color}`,
+                animation: `dataFlow ${p.duration}s linear infinite`,
+                animationDelay: `${p.delay}s`,
+                opacity: 0.6,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Hexagonal Grid Pattern */}
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FBBF24' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundSize: '60px 60px'
+        }} />
+
+        {/* Glowing Orbs */}
+        <div className="absolute top-10 left-10 w-[400px] h-[400px] bg-gradient-to-br from-yellow-300/20 via-amber-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-10 right-10 w-[450px] h-[450px] bg-gradient-to-tl from-red-300/20 via-orange-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+
+        {/* Scanning Line Effect */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-50" style={{
+            animation: 'scanLine 8s ease-in-out infinite',
+            boxShadow: '0 0 20px rgba(251, 191, 36, 0.8)'
+          }} />
+        </div>
       </div>
-      <div className="max-w-5xl mx-auto px-6 relative z-10">
-        <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-14 text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-fuchsia-400 to-blue-400 drop-shadow-xl neon-text-glow">
-          {t.workflowTitle}
-        </h2>
-        <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-8">
-          {t.workflow.map((step, i) => (
-            <div key={i} className="group flex flex-col items-center workflow-glass-card rounded-3xl border-2 border-cyan-400/40 shadow-2xl p-8 gap-5 transition-all duration-300 hover:scale-105 hover:border-fuchsia-400/80 hover:shadow-fuchsia-400/40 relative overflow-hidden w-full md:w-1/3">
-              <div className="relative mb-2 flex items-center justify-center">
-                {/* 3D SVG frame with animated glow */}
-                <svg width="72" height="72" viewBox="0 0 72 72" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-0 animate-spin-slow" style={{filter:'drop-shadow(0 4px 24px #00fff7cc) drop-shadow(0 0 12px #7f00ffbb)'}}>
-                  <defs>
-                    <radialGradient id={`workflow3dBg${i}`} cx="50%" cy="40%" r="70%">
-                      <stop offset="0%" stopColor="#fff" stopOpacity="0.8" />
-                      <stop offset="60%" stopColor="#00fff7" stopOpacity="0.22" />
-                      <stop offset="100%" stopColor="#7f00ff" stopOpacity="0.13" />
-                    </radialGradient>
-                    <linearGradient id={`workflow3dEdge${i}`} x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#00fff7" />
-                      <stop offset="100%" stopColor="#7f00ff" />
-                    </linearGradient>
-                  </defs>
-                  <circle cx="36" cy="36" r="32" fill={`url(#workflow3dBg${i})`} stroke={`url(#workflow3dEdge${i})`} strokeWidth="3" />
-                  <ellipse cx="36" cy="28" rx="18" ry="7" fill="#fff" opacity="0.18" />
-                </svg>
-                {/* Icon image with animated floating effect */}
-                <Image src={step.icon} alt={step.title} width={56} height={56} className="relative z-10 drop-shadow-neon animate-float" style={{borderRadius:'50%'}} />
-                <svg width="56" height="56" viewBox="0 0 56 56" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
-                  <ellipse cx="28" cy="16" rx="16" ry="6" fill="#fff" opacity="0.22" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-fuchsia-400 to-blue-400 drop-shadow-lg neon-text-glow text-center">
-                {step.title}
-              </h3>
-              <p className="text-zinc-700 dark:text-zinc-200 text-center text-base font-medium bg-white/10 dark:bg-zinc-900/20 rounded-xl px-4 py-3 shadow backdrop-blur-md border border-cyan-400/10">
-                {step.desc}
-              </p>
-              {i < t.workflow.length - 1 && (
-                <div className="absolute right-0 md:left-1/2 md:-bottom-8 md:top-auto top-1/2 md:translate-x-0 -translate-y-1/2 md:translate-y-0 w-12 h-12 flex items-center justify-center z-20 animate-arrow-move">
-                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                    <defs>
-                      <linearGradient id="arrow3d" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor="#00fff7" />
-                        <stop offset="100%" stopColor="#7f00ff" />
-                      </linearGradient>
-                    </defs>
-                    <path d="M12 24h24m-8-8 8 8-8 8" stroke="url(#arrow3d)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Section Header */}
+        <div className="text-center mb-16 animate-fadeIn">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4">
+            <span className="bg-linear-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">
+              {t.workflowTitle || "كيف يعمل النظام"}
+            </span>
+          </h2>
+          <p className="text-lg text-yellow-800/80 dark:text-yellow-200/80 max-w-2xl mx-auto">
+            عملية بسيطة وسريعة للحصول على التشخيص الطبي
+          </p>
+        </div>
+
+        {/* Workflow Steps */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 relative">
+          {(t.workflow || [
+            { icon: "/icons/ai.svg", title: "1. تحميل الصورة", desc: "قم برفع صورة الأشعة الطبية" },
+            { icon: "/icons/xray.svg", title: "2. التحليل الذكي", desc: "الذكاء الاصطناعي يحلل الصورة" },
+            { icon: "/icons/result.svg", title: "3. النتيجة الفورية", desc: "احصل على التشخيص الدقيق" },
+          ]).map((step, i) => (
+            <div key={i} className="relative animate-fadeIn" style={{ animationDelay: `${i * 0.15}s` }}>
+              {/* Connection Line (Desktop) */}
+              {i < 2 && (
+                <div className="hidden md:block absolute top-1/2 left-full w-12 lg:w-20 h-0.5 -translate-y-1/2 z-0">
+                  <div className="w-full h-full bg-linear-to-r from-yellow-400 to-red-400 opacity-30" />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-red-400 rounded-full animate-pulse" />
                 </div>
               )}
+
+              {/* Step Card */}
+              <div className="group relative h-full">
+                {/* Glow Effect */}
+                <div className="absolute -inset-1 bg-linear-to-r from-yellow-400 to-red-600 rounded-3xl opacity-0 group-hover:opacity-30 blur-2xl transition-opacity duration-500" />
+                
+                {/* Card Content */}
+                <div className="relative h-full p-8 bg-white dark:bg-zinc-800 rounded-3xl border-2 border-yellow-200 dark:border-yellow-600/30 shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300">
+                  {/* Step Number Badge */}
+                  <div className="absolute -top-4 -right-4 w-12 h-12 bg-linear-to-br from-yellow-500 to-red-600 rounded-full flex items-center justify-center text-white font-black text-xl shadow-lg">
+                    {i + 1}
+                  </div>
+
+                  {/* Icon */}
+                  <div className="relative mb-6 inline-flex">
+                    <div className="absolute inset-0 bg-linear-to-br from-yellow-400 to-red-600 rounded-2xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity animate-pulse" />
+                    <div className="relative w-20 h-20 flex items-center justify-center bg-linear-to-br from-yellow-100 to-red-100 dark:from-yellow-900/50 dark:to-red-900/50 rounded-2xl shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                      <Image 
+                        src={step.icon} 
+                        alt={step.title} 
+                        width={48} 
+                        height={48} 
+                        className="drop-shadow-lg" 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3 text-yellow-800 dark:text-yellow-200">
+                    {step.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-yellow-900/70 dark:text-yellow-100/70 text-base leading-relaxed">
+                    {step.desc}
+                  </p>
+
+                  {/* Decorative Arrow */}
+                  {i < 2 && (
+                    <div className="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 -mb-8 text-red-400 animate-bounce">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           ))}
+        </div>
+
+        {/* Call to Action */}
+        <div className="mt-16 text-center animate-fadeIn" style={{ animationDelay: "0.6s" }}>
+          <div className="inline-flex items-center gap-4 p-6 bg-linear-to-r from-yellow-100 to-red-100 dark:from-yellow-900/30 dark:to-red-900/30 rounded-2xl border border-yellow-300 dark:border-yellow-600/30 shadow-lg">
+            <div className="text-4xl animate-bounce">⚡</div>
+            <div className="text-right">
+              <div className="text-lg font-bold text-yellow-800 dark:text-yellow-200">
+                جاهز للبدء؟
+              </div>
+              <div className="text-sm text-yellow-700/80 dark:text-yellow-300/80">
+                ابدأ التشخيص الآن ولا تضيع المزيد من الوقت
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

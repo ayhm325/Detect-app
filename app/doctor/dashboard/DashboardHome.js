@@ -175,16 +175,16 @@ export default function DashboardHome() {
   return (
     <>
       <ToastContainer />
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 p-6">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6 text-gray-900 dark:text-gray-100">
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                 <FaUserMd className="text-blue-600" />
                 لوحة التحكم الطبية
               </h1>
-              <p className="mt-2 text-gray-600">مرحباً بك د. أحمد محمد - {new Date().toLocaleDateString("ar-EG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
+              <p className="mt-2 text-gray-600 dark:text-gray-300">مرحباً بك د. أحمد محمد - {new Date().toLocaleDateString("ar-EG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
             </div>
             <button
               onClick={() => router.push("/doctor/notifications")}
@@ -204,7 +204,7 @@ export default function DashboardHome() {
               return (
                 <div
                   key={index}
-                  className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg border border-gray-100 transition-all hover:shadow-2xl"
+                  className="group relative overflow-hidden rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-lg border border-gray-100 dark:border-zinc-800 transition-all hover:shadow-2xl"
                 >
                   <div className={`absolute top-0 right-0 h-20 w-20 translate-x-8 -translate-y-8 transform rounded-full ${stat.bgLight} opacity-50 transition-transform group-hover:scale-150`}></div>
                   <div className="relative">
@@ -218,9 +218,9 @@ export default function DashboardHome() {
                       </div>
                     </div>
                     <div className="mt-4">
-                      <p className="text-sm text-gray-600">{stat.title}</p>
-                      <p className="mt-1 text-3xl font-bold text-gray-900">{stat.value}</p>
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{stat.title}</p>
+                      <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {stat.change} من الشهر الماضي
                       </p>
                     </div>
@@ -254,9 +254,9 @@ export default function DashboardHome() {
           {/* Main Content Grid */}
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Today's Appointments */}
-            <div className="lg:col-span-2 rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="lg:col-span-2 rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-lg border border-gray-100 dark:border-zinc-800">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <FaCalendarAlt className="text-blue-600" />
                   مواعيد اليوم
                 </h2>
@@ -271,24 +271,24 @@ export default function DashboardHome() {
                 {todayAppointments.map((apt) => (
                   <div
                     key={apt.id}
-                    className="flex items-center justify-between rounded-lg border border-gray-200 p-4 transition-all hover:bg-gray-50"
+                    className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-zinc-800 p-4 transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
                         <FaClock className="text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-bold text-gray-900">{apt.patient}</p>
-                        <p className="text-sm text-gray-600">{apt.type}</p>
+                        <p className="font-bold text-gray-900 dark:text-white">{apt.patient}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">{apt.type}</p>
                       </div>
                     </div>
                     <div className="text-left">
-                      <p className="font-medium text-gray-900">{apt.time}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{apt.time}</p>
                       <span
                         className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${
                           apt.status === "confirmed"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-orange-100 text-orange-700"
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200"
+                            : "bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-200"
                         }`}
                       >
                         {apt.status === "confirmed" ? "مؤكد" : "قيد الانتظار"}
@@ -300,9 +300,9 @@ export default function DashboardHome() {
             </div>
 
             {/* Pending Scans */}
-            <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-lg border border-gray-100 dark:border-zinc-800">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <FaXRay className="text-orange-600" />
                   فحوصات معلقة
                 </h2>
@@ -311,17 +311,17 @@ export default function DashboardHome() {
                 {pendingScans.map((scan) => (
                   <div
                     key={scan.id}
-                    className="rounded-lg border border-gray-200 p-4 transition-all hover:bg-gray-50"
+                    className="rounded-lg border border-gray-200 dark:border-zinc-800 p-4 transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <p className="font-bold text-gray-900">{scan.patient}</p>
+                      <p className="font-bold text-gray-900 dark:text-white">{scan.patient}</p>
                       <span
                         className={`rounded-full px-2 py-1 text-xs font-medium ${
                           scan.priority === "high"
-                            ? "bg-red-100 text-red-700"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-200"
                             : scan.priority === "medium"
-                            ? "bg-orange-100 text-orange-700"
-                            : "bg-blue-100 text-blue-700"
+                            ? "bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-200"
+                            : "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200"
                         }`}
                       >
                         {scan.priority === "high"
@@ -331,8 +331,8 @@ export default function DashboardHome() {
                           : "عادي"}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600">{scan.type}</p>
-                    <p className="text-xs text-gray-500 mt-1">{scan.date}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{scan.type}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{scan.date}</p>
                   </div>
                 ))}
                 <button
@@ -346,9 +346,9 @@ export default function DashboardHome() {
           </div>
 
           {/* Recent Activity */}
-          <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+          <div className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-lg border border-gray-100 dark:border-zinc-800">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <FaChartLine className="text-purple-600" />
                 النشاط الأخير
               </h2>
@@ -359,17 +359,17 @@ export default function DashboardHome() {
                 return (
                   <div
                     key={activity.id}
-                    className="rounded-lg border border-gray-200 p-4 transition-all hover:bg-gray-50"
+                    className="rounded-lg border border-gray-200 dark:border-zinc-800 p-4 transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
                   >
                     <div className="flex items-start gap-3">
                       <div className={`mt-1 ${activity.color}`}>
                         <Icon className="text-xl" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                           {activity.action}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{activity.time}</p>
                       </div>
                     </div>
                   </div>

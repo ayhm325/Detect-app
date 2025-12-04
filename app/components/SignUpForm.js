@@ -84,74 +84,87 @@ export default function SignUpForm() {
     <div className="relative w-full h-full flex items-center justify-center overflow-y-auto">
       {/* خلفية متحركة */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute left-1/2 top-1/4 w-96 h-96 bg-cyan-500 opacity-5 rounded-full blur-3xl" />
-        <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-purple-500 opacity-5 rounded-full blur-3xl" />
+        <div className="absolute left-1/2 top-1/4 w-96 h-96 bg-yellow-400 opacity-5 rounded-full blur-3xl" />
+        <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-red-500 opacity-5 rounded-full blur-3xl" />
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="relative z-10 flex flex-col w-full h-full max-w-none bg-linear-to-br from-slate-900 via-slate-800 to-black bg-opacity-95 shadow-2xl backdrop-blur-xl border border-cyan-400/20"
+        className="relative z-10 flex flex-col w-full h-full max-w-none bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl backdrop-blur-xl border border-yellow-400/20 dark:border-yellow-400/10 p-8"
       >
-        {/* Section 1: Header (10% height) */}
-        <div className="h-[10%] px-6 border-b border-cyan-400/10 flex items-center justify-center shrink-0">
-          <div className="flex items-center justify-center gap-3">
-            <div className="inline-block p-3 bg-linear-to-br from-cyan-500 to-blue-600 rounded-full shadow-lg">
-              <FaUserPlus className="text-3xl text-white" />
+        {/* Section 1: Header */}
+        <div className="mb-8 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="inline-block p-4 bg-linear-to-br from-yellow-400 to-red-600 rounded-full shadow-xl">
+              <FaUserPlus className="text-4xl text-white" />
             </div>
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white">إنشاء حساب</h2>
-              <p className="text-gray-400 text-sm">انضم لمنصتنا الطبية</p>
+              <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">إنشاء حساب جديد</h2>
+              <p className="text-zinc-600 dark:text-gray-400 text-base">انضم لمنصتنا الطبية المتقدمة</p>
             </div>
           </div>
         </div>
 
-        {/* Section 2: Social Login (8% height) */}
-        <div className="h-[8%] px-6 flex items-center justify-center gap-3 border-b border-cyan-400/10 shrink-0">
-          <button type="button" className="h-12 w-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all hover:scale-110 ring-2 ring-blue-400/30 flex items-center justify-center" title="Facebook">
-            <FaFacebook className="text-xl" />
-          </button>
-          <span className="text-gray-400 text-sm">أو</span>
-          <button type="button" className="h-12 w-12 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-all hover:scale-110 ring-2 ring-red-400/30 flex items-center justify-center" title="Google">
-            <FaGoogle className="text-xl" />
-          </button>
+        {/* Section 2: Social Login */}
+        <div className="mb-6 pb-6 border-b border-yellow-400/10">
+          <div className="flex items-center justify-center gap-4">
+            <button type="button" className="flex-1 max-w-[160px] h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-blue-400/30 flex items-center justify-center gap-2 font-medium" title="Facebook">
+              <FaFacebook className="text-xl" />
+              <span className="text-sm">Facebook</span>
+            </button>
+            <button type="button" className="flex-1 max-w-[160px] h-12 rounded-xl bg-red-500 hover:bg-red-600 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-red-400/30 flex items-center justify-center gap-2 font-medium" title="Google">
+              <FaGoogle className="text-xl" />
+              <span className="text-sm">Google</span>
+            </button>
+          </div>
+          <div className="flex items-center justify-center gap-3 mt-4">
+            <div className="h-px bg-zinc-300 dark:bg-zinc-700 flex-1"></div>
+            <span className="text-zinc-600 dark:text-gray-400 text-sm font-medium">أو التسجيل بالبريد</span>
+            <div className="h-px bg-zinc-300 dark:bg-zinc-700 flex-1"></div>
+          </div>
         </div>
 
-        {/* Section 3: Role Selection (12% height) */}
-        <div className="h-[12%] px-6 flex items-center justify-center gap-6 border-b border-cyan-400/10 shrink-0">
-          <button
-            type="button"
-            onClick={() => handleUserTypeChange("doctor")}
-            className={`w-16 h-16 rounded-full transition-all duration-300 flex items-center justify-center shrink-0 ${
-              form.userType === "doctor"
-                ? "bg-linear-to-br from-cyan-400 to-blue-600 text-white shadow-lg shadow-cyan-500/50 ring-2 ring-cyan-400/50 scale-110"
-                : "bg-slate-700/40 text-cyan-400 hover:text-cyan-300 border border-slate-600/50 hover:border-cyan-400/50"
-            }`}
-            title="Doctor"
-          >
-            <FaStethoscope className="text-3xl" />
-          </button>
-          
-          <button
-            type="button"
-            onClick={() => handleUserTypeChange("patient")}
-            className={`w-16 h-16 rounded-full transition-all duration-300 flex items-center justify-center shrink-0 ${
-              form.userType === "patient"
-                ? "bg-linear-to-br from-pink-400 to-rose-600 text-white shadow-lg shadow-pink-500/50 ring-2 ring-pink-400/50 scale-110"
-                : "bg-slate-700/40 text-pink-400 hover:text-pink-300 border border-slate-600/50 hover:border-pink-400/50"
-            }`}
-            title="Patient"
-          >
-            <FaBed className="text-3xl" />
-          </button>
+        {/* Section 3: Role Selection */}
+        <div className="mb-8">
+          <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-4 text-center">اختر نوع الحساب</label>
+          <div className="flex items-center justify-center gap-6">
+            <button
+              type="button"
+              onClick={() => handleUserTypeChange("doctor")}
+              className={`group flex items-center gap-4 px-8 py-4 rounded-2xl transition-all duration-300 min-w-[160px] ${
+                form.userType === "doctor"
+                  ? "bg-linear-to-br from-yellow-400 to-red-600 text-white shadow-xl shadow-yellow-500/30 ring-4 ring-yellow-400/30 scale-105"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-yellow-600 dark:text-yellow-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-2 border-zinc-300 dark:border-zinc-600 hover:border-yellow-400 hover:scale-105"
+              }`}
+              title="Doctor"
+            >
+              <FaStethoscope className="text-4xl transition-transform group-hover:rotate-12" />
+              <span className="text-lg font-bold">طبيب</span>
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => handleUserTypeChange("patient")}
+              className={`group flex items-center gap-4 px-8 py-4 rounded-2xl transition-all duration-300 min-w-[160px] ${
+                form.userType === "patient"
+                  ? "bg-linear-to-br from-yellow-400 to-red-600 text-white shadow-xl shadow-red-500/30 ring-4 ring-red-400/30 scale-105"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-red-600 dark:text-red-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-2 border-zinc-300 dark:border-zinc-600 hover:border-red-400 hover:scale-105"
+              }`}
+              title="Patient"
+            >
+              <FaBed className="text-4xl transition-transform group-hover:rotate-12" />
+              <span className="text-lg font-bold">مريض</span>
+            </button>
+          </div>
         </div>
 
         {/* Section 4: Form Fields (55% height) - Scrollable */}
         <div className="h-[55%] px-6 py-4 overflow-y-auto space-y-3">
           {/* Name Field */}
           <div>
-            <label className="block text-xs font-medium text-gray-300 mb-2">الاسم الكامل *</label>
+            <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">الاسم الكامل *</label>
             <div className="relative">
-              <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 text-sm" />
+              <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 text-lg" />
               <input
                 type="text"
                 name="name"
@@ -159,16 +172,16 @@ export default function SignUpForm() {
                 value={form.name}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-4 py-3 border-2 border-cyan-400/30 rounded-lg bg-slate-800/50 text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm"
+                className="w-full pl-12 pr-4 py-4 border-2 border-yellow-400/30 dark:border-yellow-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/20 transition-all text-base"
               />
             </div>
           </div>
 
           {/* Email Field */}
           <div>
-            <label className="block text-xs font-medium text-gray-300 mb-2">البريد الإلكتروني *</label>
+            <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">البريد الإلكتروني *</label>
             <div className="relative">
-              <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400 text-sm" />
+              <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600 dark:text-red-400 text-lg" />
               <input
                 type="email"
                 name="email"
@@ -176,7 +189,7 @@ export default function SignUpForm() {
                 value={form.email}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-4 py-3 border-2 border-blue-400/30 rounded-lg bg-slate-800/50 text-white placeholder:text-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all text-sm"
+                className="w-full pl-12 pr-4 py-4 border-2 border-red-400/30 dark:border-red-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-red-500 dark:focus:border-red-400 focus:ring-4 focus:ring-red-400/20 transition-all text-base"
               />
             </div>
           </div>
@@ -184,12 +197,12 @@ export default function SignUpForm() {
           {/* Doctor Selection for Patients */}
           {form.userType === "patient" && (
             <div>
-              <label className="block text-xs font-medium text-gray-300 mb-2">الطبيب المعالج *</label>
+              <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">الطبيب المعالج *</label>
               <select
                 name="doctorId"
                 value={form.doctorId}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-purple-400/30 rounded-lg bg-slate-800/50 text-white focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all text-sm"
+                className="w-full px-4 py-4 border-2 border-amber-400/30 dark:border-amber-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 transition-all text-base"
               >
                 <option value="">اختر الطبيب المعالج</option>
                 {doctors.map((doc) => (
@@ -203,9 +216,9 @@ export default function SignUpForm() {
 
           {/* Password Field */}
           <div>
-            <label className="block text-xs font-medium text-gray-300 mb-2">كلمة المرور *</label>
+            <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">كلمة المرور *</label>
             <div className="relative">
-              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 text-sm" />
+              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 text-lg" />
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
@@ -213,23 +226,23 @@ export default function SignUpForm() {
                 value={form.password}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-10 py-3 border-2 border-purple-400/30 rounded-lg bg-slate-800/50 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all text-sm"
+                className="w-full pl-12 pr-24 py-4 border-2 border-yellow-400/30 dark:border-yellow-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/20 transition-all text-base"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-400 hover:text-purple-300 transition-colors text-xs"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors text-sm font-medium px-2"
               >
-                {showPassword ? "إخفاء" : "اظهار"}
+                {showPassword ? "إخفاء" : "إظهار"}
               </button>
             </div>
           </div>
 
           {/* Confirm Password Field */}
           <div>
-            <label className="block text-xs font-medium text-gray-300 mb-2">تأكيد كلمة المرور *</label>
+            <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">تأكيد كلمة المرور *</label>
             <div className="relative">
-              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-400 text-sm" />
+              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600 dark:text-red-400 text-lg" />
               <input
                 type="password"
                 name="confirmPassword"
@@ -237,16 +250,16 @@ export default function SignUpForm() {
                 value={form.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-4 py-3 border-2 border-pink-400/30 rounded-lg bg-slate-800/50 text-white placeholder:text-gray-500 focus:outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20 transition-all text-sm"
+                className="w-full pl-12 pr-4 py-4 border-2 border-red-400/30 dark:border-red-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-red-500 dark:focus:border-red-400 focus:ring-4 focus:ring-red-400/20 transition-all text-base"
               />
             </div>
           </div>
 
           {/* شريط قوة كلمة المرور مع emoji */}
           {form.password && (
-            <div className="bg-slate-800/50 rounded-lg p-2 space-y-2 border border-gray-700">
+            <div className="bg-zinc-100 dark:bg-zinc-800/50 rounded-xl p-4 space-y-3 border-2 border-zinc-300 dark:border-zinc-700">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-gray-300">قوة كلمة المرور:</p>
+                <p className="text-sm font-bold text-zinc-900 dark:text-white">قوة كلمة المرور:</p>
                 <span className="text-lg">
                   {(() => {
                     const checks = [passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length;
@@ -257,7 +270,7 @@ export default function SignUpForm() {
                   })()}
                 </span>
               </div>
-              <div className="w-full h-2 bg-gray-700 rounded overflow-hidden">
+              <div className="w-full h-3 bg-zinc-300 dark:bg-zinc-700 rounded-full overflow-hidden">
                 <div
                   style={{
                     width: `${[passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length * 25}%`,
@@ -265,24 +278,24 @@ export default function SignUpForm() {
                       const checks = [passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length;
                       if (checks <= 1) return "#ef4444";
                       if (checks === 2) return "#eab308";
-                      if (checks === 3) return "#3b82f6";
+                      if (checks === 3) return "#f59e0b";
                       return "#22c55e";
                     })()
                   }}
-                  className="h-2 rounded transition-all duration-300"
+                  className="h-3 rounded-full transition-all duration-300"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-1 text-xs">
-                <span className={passwordChecks.length ? "text-green-400 font-semibold" : "text-gray-500"}>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <span className={passwordChecks.length ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-zinc-500 dark:text-gray-500"}>
                   {passwordChecks.length ? "✔" : "✗"} 8 أحرف
                 </span>
-                <span className={passwordChecks.uppercase ? "text-green-400 font-semibold" : "text-gray-500"}>
+                <span className={passwordChecks.uppercase ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-zinc-500 dark:text-gray-500"}>
                   {passwordChecks.uppercase ? "✔" : "✗"} حرف كبير
                 </span>
-                <span className={passwordChecks.number ? "text-green-400 font-semibold" : "text-gray-500"}>
+                <span className={passwordChecks.number ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-zinc-500 dark:text-gray-500"}>
                   {passwordChecks.number ? "✔" : "✗"} رقم
                 </span>
-                <span className={passwordChecks.symbol ? "text-green-400 font-semibold" : "text-gray-500"}>
+                <span className={passwordChecks.symbol ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-zinc-500 dark:text-gray-500"}>
                   {passwordChecks.symbol ? "✔" : "✗"} رمز خاص
                 </span>
               </div>
@@ -290,18 +303,18 @@ export default function SignUpForm() {
           )}
         </div>
 
-        {/* Section 5: Messages & Submit Button (15% height) */}
-        <div className="h-[15%] px-6 border-t border-cyan-400/10 shrink-0 flex flex-col items-center justify-center gap-1 overflow-hidden">
+        {/* Section 5: Messages & Submit Button */}
+        <div className="border-t border-yellow-400/10 pt-6 space-y-4">
           {/* رسائل الأخطاء والنجاح */}
           {error && (
-            <div className="w-full bg-red-900/30 border border-red-500/50 rounded p-1 text-red-300 text-xs text-center truncate">
+            <div className="w-full bg-red-50 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-500/50 rounded-xl p-3 text-red-700 dark:text-red-300 text-sm text-center font-medium">
               {error}
             </div>
           )}
           {success && (
-            <div className="w-full bg-green-900/30 border border-green-500/50 rounded p-1 text-green-300 text-xs flex items-center justify-center gap-1">
-              <FaCheck className="text-xs shrink-0" />
-              <span className="truncate">{success}</span>
+            <div className="w-full bg-emerald-50 dark:bg-emerald-900/30 border-2 border-emerald-300 dark:border-emerald-500/50 rounded-xl p-3 text-emerald-700 dark:text-emerald-300 text-sm flex items-center justify-center gap-2 font-medium">
+              <FaCheck className="text-base shrink-0" />
+              <span>{success}</span>
             </div>
           )}
 
@@ -309,26 +322,26 @@ export default function SignUpForm() {
           <button
             type="submit"
             disabled={loading || !isPasswordStrong}
-            className="px-6 py-2.5 rounded-lg bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold text-sm shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto mt-3 mb-4"
+            className="w-full px-8 py-4 rounded-xl bg-linear-to-r from-yellow-400 to-red-600 hover:from-yellow-500 hover:to-red-700 text-white font-bold text-lg shadow-xl transition-all hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3"
           >
             {loading ? (
               <>
-                <span className="inline-block w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-                جاري
+                <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                جاري الإنشاء...
               </>
             ) : (
               <>
-                <FaUserPlus className="text-sm" />
-                إنشاء الحساب
+                <FaUserPlus className="text-xl" />
+                إنشاء حساب جديد
               </>
             )}
           </button>
 
           {/* رابط تسجيل الدخول */}
-          <div className="text-center text-gray-400 text-xs whitespace-nowrap">
-            لديك حساب؟{" "}
-            <a href="/login" className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
-              دخول
+          <div className="text-center text-zinc-600 dark:text-gray-400 text-base">
+            لديك حساب بالفعل؟{" "}
+            <a href="/login" className="text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 font-bold transition-colors underline">
+              تسجيل الدخول
             </a>
           </div>
         </div>

@@ -61,28 +61,28 @@ export default function AdminDashboardPage() {
       title: "إدارة المستخدمين",
       description: "عرض وتعديل حسابات المستخدمين",
       icon: "👥",
-      gradient: "from-blue-600 to-blue-500",
+      gradient: "from-yellow-500 to-red-500",
       action: () => router.push("/admin/users")
     },
     {
       title: "إدارة الأطباء",
       description: "إضافة وتعديل بيانات الأطباء",
       icon: "👨‍⚕️",
-      gradient: "from-green-600 to-green-500",
+      gradient: "from-yellow-400 to-orange-500",
       action: () => router.push("/admin/doctors")
     },
     {
       title: "إدارة المرضى",
       description: "عرض ومتابعة سجلات المرضى",
       icon: "🏥",
-      gradient: "from-purple-600 to-purple-500",
+      gradient: "from-red-500 to-red-600",
       action: () => router.push("/admin/patients")
     },
     {
       title: "التحليلات والتقارير",
       description: "عرض الإحصائيات والتقارير",
       icon: "📊",
-      gradient: "from-orange-600 to-orange-500",
+      gradient: "from-yellow-500 to-amber-500",
       action: () => router.push("/admin/analysis")
     }
   ];
