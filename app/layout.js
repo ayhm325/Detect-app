@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: "Detect AI - نظام الكشف الذكي عن الأمراض بالذكاء الاصطناعي",
   description: "نظام متطور للكشف عن الأمراض من خلال تحليل الصور الطبية بالذكاء الاصطناعي. دقة عالية، نتائج فورية، خدمة 24/7",
   keywords: ["ذكاء اصطناعي", "تشخيص طبي", "أشعة سينية", "تحليل طبي", "الالتهاب الرئوي", "صحة"],
@@ -45,16 +46,19 @@ export const metadata = {
     description: "نظام متطور للكشف عن الأمراض بالذكاء الاصطناعي",
     images: ["/twitter-image.jpg"],
   },
-  viewport: {
+};
+
+export function generateViewport() {
+  return {
     width: "device-width",
     initialScale: 1,
     maximumScale: 5,
-  },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fbbf24" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
-  ],
-};
+    themeColor: [
+      { media: "(prefers-color-scheme: light)", color: "#fbbf24" },
+      { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+    ],
+  };
+}
 
 export default function RootLayout({ children }) {
   return (
