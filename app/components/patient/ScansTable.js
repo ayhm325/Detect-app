@@ -1,6 +1,9 @@
 "use client";
+import { formatDate } from "@/app/lib/date";
+import useLocale from "@/hooks/useLocale";
 
 export default function ScansTable({ scans = [], onView, onDownload, onRequestReview }) {
+  const { locale } = useLocale();
   return (
     <section className="rounded-xl border border-gray-200 bg-white/70 backdrop-blur-sm shadow-sm">
       <header className="flex items-center justify-between border-b border-gray-200 p-4">
@@ -31,7 +34,7 @@ export default function ScansTable({ scans = [], onView, onDownload, onRequestRe
                 <tr key={s.id} className="hover:bg-gray-50">
                   <Td className="font-mono">{s.id}</Td>
                   <Td>{typeLabel(s.type)}</Td>
-                  <Td>{formatDate(s.date)}</Td>
+                  <Td>{formatDate(s.date, locale)}</Td>
                   <Td>
                     <StatusBadge status={s.status} />
                   </Td>
@@ -89,14 +92,6 @@ function typeLabel(type) {
   return map[type] || type || "—";
 }
 
-function formatDate(iso) {
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" });
-  } catch {
-    return "—";
-  }
-}
 
 function ActionButton({ children, onClick, variant = "primary" }) {
   const variants = {

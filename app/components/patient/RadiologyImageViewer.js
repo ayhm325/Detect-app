@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 export default function RadiologyImageViewer({ images = [], report }) {
@@ -25,14 +26,17 @@ export default function RadiologyImageViewer({ images = [], report }) {
 
         <div className="relative h-80 w-full overflow-hidden rounded-lg border border-gray-200 bg-black">
           {img ? (
-            <img
+            <Image
               src={img}
               alt="Radiology"
+              fill
+              sizes="(min-width: 1024px) 900px, 100vw"
               style={{
                 transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
                 filter: `brightness(${brightness}%)`,
               }}
-              className="h-full w-full object-contain select-none"
+              className="object-contain select-none"
+              draggable={false}
               onMouseDown={(e) => {
                 const startX = e.clientX;
                 const startY = e.clientY;
@@ -59,7 +63,7 @@ export default function RadiologyImageViewer({ images = [], report }) {
               className={`h-16 w-24 shrink-0 overflow-hidden rounded border ${i === index ? "border-blue-600" : "border-gray-200"}`}
               onClick={() => setIndex(i)}
             >
-              <img src={src} alt={`thumb-${i}`} className="h-full w-full object-cover" />
+              <Image src={src} alt={`thumb-${i}`} width={96} height={64} className="h-full w-full object-cover" />
             </button>
           ))}
         </div>

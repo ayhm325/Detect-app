@@ -1,10 +1,15 @@
 "use client";
 import { useState } from "react";
 import { FaFacebook, FaGoogle, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaShield } from "react-icons/fa6";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
+import { useLocaleContext } from "../hooks/useLocaleContext";
 
 export default function LoginForm() {
+  const locale = useLocale();
+  const t = useTranslations();
+  const { toggleLocale } = useLocaleContext();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,24 +34,25 @@ export default function LoginForm() {
     setTimeout(() => {
       const user = fakeUsers.find((u) => u.email === form.email);
       if (!user) {
-        setError("البريد الإلكتروني غير مسجل");
+        setError(t("auth.login.errors.notFound") || "البريد الإلكتروني غير مسجل");
         setLoading(false);
         return;
       }
       if (user.disabled) {
-        setError("هذا الحساب معطل");
+        setError(t("auth.login.errors.disabled") || "هذا الحساب معطل");
         setLoading(false);
         return;
       }
       if (user.password !== form.password) {
-        setError("كلمة المرور غير صحيحة");
+        setError(t("auth.login.errors.wrongPassword") || "كلمة المرور غير صحيحة");
         setLoading(false);
         return;
       }
       // توجيه حسب نوع المستخدم
-      if (user.type === "doctor") window.location.href = "/doctor/dashboard";
-      else if (user.type === "patient") window.location.href = "/patient/dashboard";
-      else if (user.type === "admin") window.location.href = "/admin/dashboard";
+      const basePath = locale === "ar" ? "/ar" : "/en";
+      if (user.type === "doctor") window.location.href = `${basePath}/doctor/dashboard`;
+      else if (user.type === "patient") window.location.href = `${basePath}/patient/dashboard`;
+      else if (user.type === "admin") window.location.href = `${basePath}/admin/dashboard`;
     }, 1200);
   };
 
@@ -56,14 +62,25 @@ export default function LoginForm() {
       className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl p-8 md:p-12 border border-yellow-100 dark:border-zinc-800 space-y-6"
     >
       {/* العنوان والأيقونة */}
-      <div className="flex flex-col items-center text-center space-y-3">
+      <div className="flex flex-col items-center text-center space-y-3 relative">
+        <div className="absolute top-0 right-0">
+          <button
+            type="button"
+            onClick={toggleLocale}
+            className="flex items-center gap-2 px-3 py-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-colors font-medium text-sm"
+            title={locale === "ar" ? "Switch to English" : "التبديل للعربية"}
+          >
+            <span>🌐</span>
+            <span>{locale === "ar" ? "EN" : "AR"}</span>
+          </button>
+        </div>
         <div className="p-4 bg-gradient-to-br from-yellow-100 to-red-100 dark:from-yellow-900/30 dark:to-red-900/30 rounded-2xl">
           <FaShield className="text-5xl text-yellow-600 dark:text-yellow-400" />
         </div>
         <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-red-600 bg-clip-text text-transparent">
-          تسجيل الدخول
+          {t("auth.login.title") || "تسجيل الدخول"}
         </h1>
-        <p className="text-base text-gray-600 dark:text-gray-400">أدخل بيانات حسابك للمتابعة</p>
+        <p className="text-base text-gray-600 dark:text-gray-400">{t("auth.login.subtitle") || "أدخل بيانات حسابك للمتابعة"}</p>
       </div>
 
       {/* خيارات الدخول الاجتماعي */}
@@ -89,14 +106,14 @@ export default function LoginForm() {
             <div className="w-full border-t border-gray-300 dark:border-zinc-700"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-white dark:bg-zinc-900 text-gray-500 dark:text-gray-400">أو باستخدام البريد الإلكتروني</span>
+            <span className="px-4 bg-white dark:bg-zinc-900 text-gray-500 dark:text-gray-400">{t("auth.login.socialDivider") || "أو باستخدام البريد الإلكتروني"}</span>
           </div>
         </div>
       </div>
 
       {/* حقل البريد الإلكتروني */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">البريد الإلكتروني</label>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{t("auth.login.emailLabel") || "البريد الإلكتروني"}</label>
         <div className="relative">
           <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 text-xl" />
           <input
@@ -113,7 +130,7 @@ export default function LoginForm() {
 
       {/* حقل كلمة المرور */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">كلمة المرور</label>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{t("auth.login.passwordLabel") || "كلمة المرور"}</label>
         <div className="relative">
           <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 text-xl" />
           <input
@@ -152,23 +169,23 @@ export default function LoginForm() {
         {loading ? (
           <span className="flex items-center justify-center gap-2">
             <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            جاري التحقق...
+            {t("auth.login.loading") || "جاري التحقق..."}
           </span>
         ) : (
-          "دخول"
+          t("auth.login.ctaPrimary") || "دخول"
         )}
       </button>
 
       {/* روابط إضافية */}
       <div className="flex flex-col gap-3 text-center text-sm">
-        <a href="#" className="text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 font-semibold transition-colors">
-          هل نسيت كلمة المرور؟
-        </a>
+        <Link href="/forgot-password" className="text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 font-semibold transition-colors">
+          {t("auth.login.forgot") || "هل نسيت كلمة المرور؟"}
+        </Link>
         <div className="text-gray-600 dark:text-gray-400">
-          ليس لديك حساب؟{" "}
-          <a href="/signup" className="text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 font-semibold transition-colors">
-            سجل الآن
-          </a>
+          {t("auth.login.noAccount") || "ليس لديك حساب؟"}{" "}
+          <Link href="/signup" className="text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 font-semibold transition-colors">
+            {t("auth.login.goSignup") || "سجل الآن"}
+          </Link>
         </div>
       </div>
     </form>

@@ -8,15 +8,7 @@ const STORAGE_KEY = "app-theme";
 const ThemeContext = createContext({ theme: "light", setTheme: () => {} });
 
 export function ThemeProvider({ children, defaultTheme = "light" }) {
-  const [theme, setTheme] = useState(defaultTheme);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    
-    // تجاهل أي قيمة محفوظة، اجعل الافتراضي دائماً نهاري
-    window.localStorage.removeItem(STORAGE_KEY);
-    setTheme("light");
-  }, []);
+  const [theme, setTheme] = useState("light");
 
   useEffect(() => {
     const root = document.documentElement;
@@ -34,7 +26,9 @@ export function ThemeProvider({ children, defaultTheme = "light" }) {
     
     try {
       window.localStorage.setItem(STORAGE_KEY, theme);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }, [theme]);
 
   const value = useMemo(() => ({ theme, setTheme }), [theme]);

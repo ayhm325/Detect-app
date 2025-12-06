@@ -1,32 +1,27 @@
 
 "use client";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import translations from "../lib/translations";
+import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 export default function WorkflowSection() {
-  const pathname = usePathname();
-  const currentLocale = pathname.startsWith("/en") ? "en" : "ar";
-  const t = translations[currentLocale];
-  const [flowParticles, setFlowParticles] = useState([]);
-
-  useEffect(() => {
-    // Generate particle animations on client only to avoid SSR randomness
-    setFlowParticles(
+  const t = useTranslations();
+  const workflowCopy = t.raw ? t.raw("content.workflow") : {};
+  const flowParticles = useMemo(
+    () =>
       [...Array(12)].map((_, i) => ({
         id: i,
         left: (i * 8.3 + 5) % 100,
-        top: (i * 12 + 10) % 100,
-        color: i % 3 === 0 ? '#FBBF24' : i % 3 === 1 ? '#F59E0B' : '#EF4444',
-        duration: 8 + Math.random() * 4,
-        delay: Math.random() * 3,
-      }))
-    );
-  }, []);
+        top: (i * 11 + 7) % 100,
+        color: i % 3 === 0 ? "#FBBF24" : i % 3 === 1 ? "#F59E0B" : "#EF4444",
+        duration: 8 + (i % 4) * 1.2,
+        delay: (i % 5) * 0.4,
+      })),
+    []
+  );
 
   return (
-    <section className="relative w-full py-20 sm:py-24 bg-gradient-to-tr from-red-50 via-white to-yellow-50 dark:bg-gradient-to-tr dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 overflow-hidden">
+    <section className="relative w-full py-20 sm:py-24 bg-linear-to-tr from-red-50 via-white to-yellow-50 dark:bg-linear-to-tr dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 overflow-hidden">
       {/* Animated Circuit Board Background */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
         {/* Animated Circuit Lines */}
@@ -119,12 +114,12 @@ export default function WorkflowSection() {
         }} />
 
         {/* Glowing Orbs */}
-        <div className="absolute top-10 left-10 w-[400px] h-[400px] bg-gradient-to-br from-yellow-300/20 via-amber-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute bottom-10 right-10 w-[450px] h-[450px] bg-gradient-to-tl from-red-300/20 via-orange-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+        <div className="absolute top-10 left-10 w-[400px] h-[400px] bg-linear-to-br from-yellow-300/20 via-amber-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-10 right-10 w-[450px] h-[450px] bg-linear-to-tl from-red-300/20 via-orange-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
 
         {/* Scanning Line Effect */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-50" style={{
+          <div className="absolute w-full h-1 bg-linear-to-r from-transparent via-yellow-400 to-transparent opacity-50" style={{
             animation: 'scanLine 8s ease-in-out infinite',
             boxShadow: '0 0 20px rgba(251, 191, 36, 0.8)'
           }} />
@@ -136,17 +131,17 @@ export default function WorkflowSection() {
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4">
             <span className="bg-linear-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">
-              {t.workflowTitle || "كيف يعمل النظام"}
+              {workflowCopy.title || t("content.workflow.title", { defaultValue: "كيف يعمل النظام" })}
             </span>
           </h2>
           <p className="text-lg text-yellow-800/80 dark:text-yellow-200/80 max-w-2xl mx-auto">
-            عملية بسيطة وسريعة للحصول على التشخيص الطبي
+            {workflowCopy.subtitle || t("content.workflow.subtitle", { defaultValue: "عملية بسيطة وسريعة للحصول على التشخيص الطبي" })}
           </p>
         </div>
 
         {/* Workflow Steps */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 relative">
-          {(t.workflow || [
+          {(workflowCopy.steps || [
             { icon: "/icons/ai.svg", title: "1. تحميل الصورة", desc: "قم برفع صورة الأشعة الطبية" },
             { icon: "/icons/xray.svg", title: "2. التحليل الذكي", desc: "الذكاء الاصطناعي يحلل الصورة" },
             { icon: "/icons/result.svg", title: "3. النتيجة الفورية", desc: "احصل على التشخيص الدقيق" },
@@ -216,10 +211,10 @@ export default function WorkflowSection() {
             <div className="text-4xl animate-bounce">⚡</div>
             <div className="text-right">
               <div className="text-lg font-bold text-yellow-800 dark:text-yellow-200">
-                جاهز للبدء؟
+                {t("content.workflow.ctaTitle", { defaultValue: "جاهز للبدء؟" })}
               </div>
               <div className="text-sm text-yellow-700/80 dark:text-yellow-300/80">
-                ابدأ التشخيص الآن ولا تضيع المزيد من الوقت
+                {t("content.workflow.ctaSubtitle", { defaultValue: "ابدأ التشخيص الآن ولا تضيع المزيد من الوقت" })}
               </div>
             </div>
           </div>

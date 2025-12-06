@@ -6,18 +6,23 @@ import { usePathname, useRouter } from "next/navigation";
 export default function PatientSidebar({ open = true, onClose }) {
   const pathname = usePathname();
   const router = useRouter();
+  const locale = pathname?.startsWith("/en") ? "en" : "ar";
+  const basePrefix = locale === "en" ? "/en" : "/ar";
   const items = [
-    { href: "/patient/dashboard", label: "الصفحة الرئيسية", icon: "🏠" },
-    { href: "/patient/appointments", label: "المواعيد", icon: "📅" },
-    { href: "/patient/results", label: "التقارير", icon: "📄" },
-    { href: "/patient/chat", label: "الدردشة", icon: "💬" },
-    { href: "/patient/profile", label: "الحساب", icon: "👤" },
+    { href: `${basePrefix}/patient/dashboard`, label: "الصفحة الرئيسية", icon: "🏠" },
+    { href: `${basePrefix}/patient/appointments`, label: "المواعيد", icon: "📅" },
+    { href: `${basePrefix}/patient/results`, label: "التقارير", icon: "📄" },
+    { href: `${basePrefix}/patient/chat`, label: "الدردشة", icon: "💬" },
+    { href: `${basePrefix}/patient/profile`, label: "الحساب", icon: "👤" },
     { href: "__logout__", label: "تسجيل الخروج", icon: "🚪" },
   ];
   return (
     <>
       {/* شريط جانبي دائم على الشاشات الكبيرة */}
       <aside className="sticky top-4 hidden w-72 shrink-0 rounded-xl border border-gray-200 bg-white/70 p-4 shadow-sm lg:block">
+        <div className="mb-6 flex items-center justify-center">
+          <span className="text-2xl font-bold text-blue-700 tracking-wide whitespace-nowrap">PneumoDetect</span>
+        </div>
         <nav className="space-y-1">
           {items.map((item) => {
             const active = pathname?.startsWith(item.href);
@@ -26,7 +31,7 @@ export default function PatientSidebar({ open = true, onClose }) {
                 <button
                   key="logout"
                   className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-100"
-                  onClick={() => router.push("/")}
+                  onClick={() => router.push(`${basePrefix}/patient/logout`)}
                 >
                   <span aria-hidden>{item.icon}</span>
                   <span>{item.label}</span>
@@ -57,9 +62,8 @@ export default function PatientSidebar({ open = true, onClose }) {
         className={`fixed inset-y-0 right-0 z-50 w-72 rounded-l-xl border border-gray-200 bg-white/90 p-4 shadow-lg transition-transform lg:hidden`}
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
       >
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-base font-semibold text-gray-900">القائمة</div>
-          <button onClick={onClose} className="rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-900 hover:bg-gray-200">إغلاق</button>
+        <div className="mb-6 flex items-center justify-center">
+          <span className="text-2xl font-bold text-blue-700 tracking-wide whitespace-nowrap">PneumoDetect</span>
         </div>
         <nav className="space-y-1">
           {items.map((item) => {
@@ -70,7 +74,7 @@ export default function PatientSidebar({ open = true, onClose }) {
                   key="logout"
                   className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-100"
                   onClick={() => {
-                    router.push("/");
+                    router.push(`${basePrefix}/patient/logout`);
                     onClose?.();
                   }}
                 >

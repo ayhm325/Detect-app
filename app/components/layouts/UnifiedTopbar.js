@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 export default function UnifiedTopbar({
   userName,
   avatarUrl,
@@ -23,7 +25,13 @@ export default function UnifiedTopbar({
         {/* Avatar */}
         <div className="relative h-10 w-10 overflow-hidden rounded-full border border-gray-200 bg-gray-50 dark:border-slate-700 dark:bg-slate-700">
           {avatarUrl ? (
-            <img src={avatarUrl} alt={userName || "avatar"} className="h-full w-full object-cover" />
+            <Image
+              src={avatarUrl}
+              alt={userName || "avatar"}
+              fill
+              sizes="40px"
+              className="object-cover"
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-gray-400 dark:text-gray-500">👤</div>
           )}

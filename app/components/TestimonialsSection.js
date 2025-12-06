@@ -1,47 +1,22 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export default function TestimonialsSection() {
+  const t = useTranslations();
+  const testimonialsCopy = (t.raw ? t.raw("testimonials")?.items : null) || [];
+  const badges = (t.raw ? t.raw("testimonials")?.badges : null) || [];
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const testimonials = [
-    {
-      name: "د. أحمد محمد",
-      role: "استشاري الأشعة",
-      image: "/icons/ai.svg",
-      rating: 5,
-      text: "نظام رائع يساعدني في تشخيص الحالات بدقة عالية. واجهة سهلة الاستخدام وسرعة في النتائج.",
-    },
-    {
-      name: "د. سارة أحمد",
-      role: "طبيبة باطنة",
-      image: "/icons/xray.svg",
-      rating: 5,
-      text: "التقنية المستخدمة متقدمة جداً وتوفر الكثير من الوقت. أنصح به جميع الأطباء.",
-    },
-    {
-      name: "محمد علي",
-      role: "مريض",
-      image: "/icons/result.svg",
-      rating: 5,
-      text: "حصلت على التشخيص بسرعة وبدقة عالية. خدمة ممتازة وفريق دعم متعاون.",
-    },
-    {
-      name: "د. فاطمة حسن",
-      role: "استشارية الجهاز التنفسي",
-      image: "/icons/settings.svg",
-      rating: 5,
-      text: "أفضل منصة للتشخيص بالذكاء الاصطناعي. النتائج دقيقة والتقارير مفصلة.",
-    },
-  ];
-
   const nextTestimonial = () => {
-    setActiveIndex((prev) => (prev + 1) % testimonials.length);
+    if (!testimonialsCopy.length) return;
+    setActiveIndex((prev) => (prev + 1) % testimonialsCopy.length);
   };
 
   const prevTestimonial = () => {
-    setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    if (!testimonialsCopy.length) return;
+    setActiveIndex((prev) => (prev - 1 + testimonialsCopy.length) % testimonialsCopy.length);
   };
 
   return (
@@ -61,11 +36,11 @@ export default function TestimonialsSection() {
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4">
             <span className="bg-linear-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">
-              آراء عملائنا
+              {t("testimonials.title", { defaultValue: "آراء عملائنا" })}
             </span>
           </h2>
           <p className="text-lg text-yellow-800/80 dark:text-yellow-200/80 max-w-2xl mx-auto">
-            اكتشف تجارب المستخدمين الذين وثقوا بنا
+            {t("testimonials.subtitle", { defaultValue: "اكتشف تجارب المستخدمين الذين وثقوا بنا" })}
           </p>
         </div>
 
@@ -84,8 +59,8 @@ export default function TestimonialsSection() {
                 <div className="absolute inset-0 bg-linear-to-br from-yellow-400 to-red-600 rounded-full blur-lg opacity-50" />
                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-white dark:bg-zinc-700 rounded-full flex items-center justify-center shadow-xl">
                   <Image 
-                    src={testimonials[activeIndex].image} 
-                    alt={testimonials[activeIndex].name}
+                    src={(testimonialsCopy[activeIndex] || {}).image || "/icons/ai.svg"}
+                    alt={(testimonialsCopy[activeIndex] || {}).name || "testimonial"}
                     width={48}
                     height={48}
                     className="rounded-full"
@@ -94,14 +69,14 @@ export default function TestimonialsSection() {
               </div>
               <div className="flex-1">
                 <h3 className="text-xl sm:text-2xl font-bold text-yellow-800 dark:text-yellow-200">
-                  {testimonials[activeIndex].name}
+                  {(testimonialsCopy[activeIndex] || {}).name || ""}
                 </h3>
                 <p className="text-yellow-700/80 dark:text-yellow-300/80">
-                  {testimonials[activeIndex].role}
+                  {(testimonialsCopy[activeIndex] || {}).role || ""}
                 </p>
                 {/* Rating Stars */}
                 <div className="flex gap-1 mt-1">
-                  {[...Array(testimonials[activeIndex].rating)].map((_, i) => (
+                  {[...Array((testimonialsCopy[activeIndex] || {}).rating || 0)].map((_, i) => (
                     <svg key={i} className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
@@ -112,7 +87,7 @@ export default function TestimonialsSection() {
 
             {/* Testimonial Text */}
             <p className="text-lg sm:text-xl text-yellow-900/90 dark:text-yellow-100/90 leading-relaxed mb-6 relative z-10">
-              {testimonials[activeIndex].text}
+              {(testimonialsCopy[activeIndex] || {}).text || ""}
             </p>
 
             {/* Navigation Arrows */}
@@ -129,7 +104,7 @@ export default function TestimonialsSection() {
 
               {/* Dots Indicator */}
               <div className="flex gap-2">
-                {testimonials.map((_, i) => (
+                {testimonialsCopy.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveIndex(i)}
@@ -157,7 +132,7 @@ export default function TestimonialsSection() {
 
           {/* Thumbnail Grid Below */}
           <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {testimonials.map((testimonial, i) => (
+            {testimonialsCopy.map((testimonial, i) => (
               <button
                 key={i}
                 onClick={() => setActiveIndex(i)}
@@ -185,12 +160,12 @@ export default function TestimonialsSection() {
 
         {/* Trust Badges */}
         <div className="mt-16 flex flex-wrap items-center justify-center gap-8 opacity-60">
-          {[
+          {(badges.length ? badges : [
             { text: "موثوق من +15K مستخدم", icon: "✓" },
             { text: "99.8% دقة", icon: "★" },
             { text: "24/7 دعم", icon: "♥" },
             { text: "ISO معتمد", icon: "◆" },
-          ].map((badge, i) => (
+          ]).map((badge, i) => (
             <div key={i} className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
               <span className="text-2xl">{badge.icon}</span>
               <span className="font-semibold">{badge.text}</span>

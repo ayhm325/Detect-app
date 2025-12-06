@@ -6,9 +6,16 @@ import { usePathname, useRouter } from "next/navigation";
 export default function UnifiedSidebar({ items = [], onLogout, onClose }) {
   const pathname = usePathname();
   const router = useRouter();
+  const locale = pathname?.startsWith("/en") ? "en" : "ar";
+
+  const buildPath = (targetLocale, path = pathname || "/") => {
+    const clean = path.replace(/^\/(en|ar)/, "");
+    const normalized = clean.startsWith("/") ? clean : `/${clean}`;
+    return `/${targetLocale}${normalized}`;
+  };
 
   const handleLogout = () => {
-    router.push("/login");
+    router.push(buildPath(locale, "/login"));
     onClose?.();
   };
 

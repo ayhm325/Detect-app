@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 export default function AnalysisCompareTool({ leftImage, rightImage, comments }) {
@@ -14,12 +15,26 @@ export default function AnalysisCompareTool({ leftImage, rightImage, comments })
         <div className="relative mx-auto h-80 max-w-3xl overflow-hidden rounded-lg border border-gray-200 bg-black">
           {/* صورة اليسار */}
           {leftImage && (
-            <img src={leftImage} alt="left" className="absolute left-0 top-0 h-full w-full object-contain" />
+            <Image
+              src={leftImage}
+              alt="left"
+              fill
+              sizes="(min-width: 1024px) 700px, 100vw"
+              className="object-contain"
+            />
           )}
           {/* صورة اليمين مع قصّ حسب السلايدر */}
           {rightImage && (
             <div className="absolute left-0 top-0 h-full" style={{ width: `${slider}%` }}>
-              <img src={rightImage} alt="right" className="h-full w-[200%] -translate-x-1/2 object-contain" />
+              <div className="relative h-full w-full">
+                <Image
+                  src={rightImage}
+                  alt="right"
+                  fill
+                  sizes="(min-width: 1024px) 700px, 100vw"
+                  className="object-contain"
+                />
+              </div>
             </div>
           )}
           {/* السلايدر */}

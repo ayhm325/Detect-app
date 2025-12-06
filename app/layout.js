@@ -1,8 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import Image from "next/image";
 import "./globals.css";
-import { ThemeProvider } from "./theme-provider";
-import SkipToContent from "./components/ui/SkipToContent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,41 +58,11 @@ export function generateViewport() {
 }
 
 export default function RootLayout({ children }) {
+  const lang = "ar";
+  const dir = lang === "ar" ? "rtl" : "ltr";
   return (
-    <html lang="ar" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                // force default light and clear any saved preference
-                localStorage.removeItem('app-theme');
-                const theme = 'light';
-                if (theme === 'dark') {
-                  document.documentElement.classList.add('dark');
-                  document.documentElement.classList.remove('light');
-                } else {
-                  document.documentElement.classList.add('light');
-                  document.documentElement.classList.remove('dark');
-                }
-                document.documentElement.setAttribute('data-theme', theme);
-              })();
-            `,
-          }}
-        />
-      </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased relative overflow-x-hidden`}>
-        <ThemeProvider>
-        <SkipToContent />
-        {/* Animated SVG Background */}
-        <div className="fixed inset-0 -z-50 w-full h-full pointer-events-none select-none">
-          <Image src="/animated-bg.svg" alt="Animated Background" fill className="w-full h-full object-cover" draggable="false" priority />
-        </div>
-        <main id="main-content">
-          {children}
-        </main>
-        </ThemeProvider>
-      </body>
+    <html lang={lang} dir={dir}>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body>
     </html>
   );
 }

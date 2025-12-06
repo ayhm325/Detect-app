@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 export default function StatsSection() {
+  const t = useTranslations();
   const [isVisible, setIsVisible] = useState(false);
   const [floaters, setFloaters] = useState([]);
   const sectionRef = useRef(null);
@@ -43,39 +45,11 @@ export default function StatsSection() {
     );
   }, []);
 
-  const stats = [
-    {
-      number: 99.8,
-      suffix: "%",
-      label: "دقة التشخيص",
-      description: "معدل دقة عالي جداً في التشخيص",
-      icon: "🎯",
-      color: "yellow",
-    },
-    {
-      number: 15000,
-      suffix: "+",
-      label: "مستخدم نشط",
-      description: "أطباء ومرضى يثقون بنا",
-      icon: "👥",
-      color: "red",
-    },
-    {
-      number: 75000,
-      suffix: "+",
-      label: "تحليل ناجح",
-      description: "صورة تم تحليلها بنجاح",
-      icon: "📊",
-      color: "yellow",
-    },
-    {
-      number: 24,
-      suffix: "/7",
-      label: "دعم متواصل",
-      description: "خدمة على مدار الساعة",
-      icon: "⏰",
-      color: "red",
-    },
+  const statsCopy = (t.raw ? t.raw("content.stats")?.cards : null) || [
+    { number: 99.8, suffix: "%", label: "دقة التشخيص", description: "معدل دقة عالي جداً في التشخيص", icon: "🎯" },
+    { number: 15000, suffix: "+", label: "مستخدم نشط", description: "أطباء ومرضى يثقون بنا", icon: "👥" },
+    { number: 75000, suffix: "+", label: "تحليل ناجح", description: "صورة تم تحليلها بنجاح", icon: "📊" },
+    { number: 24, suffix: "/7", label: "دعم متواصل", description: "خدمة على مدار الساعة", icon: "⏰" },
   ];
 
   const AnimatedNumber = ({ target, suffix }) => {
@@ -146,16 +120,16 @@ export default function StatsSection() {
         {/* Section Header */}
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4">
-            أرقام تتحدث عن نفسها
+            {t("content.stats.title", { defaultValue: "أرقام تتحدث عن نفسها" })}
           </h2>
           <p className="text-lg text-white/90 max-w-2xl mx-auto">
-            نفخر بإنجازاتنا ونسعى دائماً لتقديم الأفضل
+            {t("content.stats.subtitle", { defaultValue: "نفخر بإنجازاتنا ونسعى دائماً لتقديم الأفضل" })}
           </p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          {stats.map((stat, i) => (
+          {statsCopy.map((stat, i) => (
             <div
               key={i}
               className={`group animate-fadeIn ${isVisible ? 'opacity-100' : 'opacity-0'}`}
@@ -201,13 +175,13 @@ export default function StatsSection() {
         <div className="mt-16 text-center animate-fadeIn" style={{ animationDelay: "0.6s" }}>
           <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl">
             <div className="text-6xl">🚀</div>
-            <div className="text-center sm:text-right">
-              <div className="text-2xl font-black text-white mb-2">
-                انضم إلى آلاف المستخدمين الراضين
-              </div>
-              <div className="text-white/90">
-                ابدأ تجربتك المجانية اليوم ولا تفوت الفرصة
-              </div>
+              <div className="text-center sm:text-right">
+                <div className="text-2xl font-black text-white mb-2">
+                  {t("content.stats.ctaTitle", { defaultValue: "انضم إلى آلاف المستخدمين الراضين" })}
+                </div>
+                <div className="text-white/90">
+                  {t("content.stats.ctaSubtitle", { defaultValue: "ابدأ تجربتك المجانية اليوم ولا تفوت الفرصة" })}
+                </div>
             </div>
           </div>
         </div>

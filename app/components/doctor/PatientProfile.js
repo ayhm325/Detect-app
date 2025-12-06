@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function PatientProfile() {
   // بيانات وهمية لمريض
   const patient = {
@@ -21,7 +23,13 @@ export default function PatientProfile() {
         ))}
       </ul>
       <div className="mb-2 font-semibold">Last X-Ray:</div>
-      <img src={patient.lastXray.url} alt="Last X-Ray" className="w-32 h-32 object-contain mb-2" />
+      <Image
+        src={patient.lastXray.url}
+        alt="Last X-Ray"
+        width={128}
+        height={128}
+        className="w-32 h-32 object-contain mb-2"
+      />
       <div>Result: {patient.lastXray.result} ({patient.lastXray.confidence})</div>
       <button className="mt-4 w-full py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Upload New X-Ray</button>
     </aside>

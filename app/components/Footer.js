@@ -2,14 +2,18 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import translations from "../lib/translations";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function Footer() {
-  const pathname = usePathname();
-  const currentLocale = pathname.startsWith("/en") ? "en" : "ar";
-  const t = translations[currentLocale];
+  const locale = useLocale();
+  const t = useTranslations();
   const year = new Date().getFullYear();
+  const withLocale = (path) => {
+    const base = path.startsWith("/") ? path : `/${path}`;
+    if (base.startsWith("/en") || base.startsWith("/ar")) return base;
+    return `/${locale}${base === "/" ? "" : base}`;
+  };
+  const homeHref = withLocale("/");
 
   return (
     <footer className="relative w-full bg-zinc-900 dark:bg-zinc-950 text-white overflow-hidden">
@@ -34,7 +38,7 @@ export default function Footer() {
         <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
-            <Link href="/ar" className="inline-flex items-center gap-3 group">
+            <Link href={homeHref} className="inline-flex items-center gap-3 group">
               <div className="relative">
                 <div className="absolute inset-0 bg-linear-to-br from-yellow-400 to-red-600 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
                 <div className="relative w-12 h-12 bg-linear-to-br from-yellow-400 to-red-600 rounded-xl flex items-center justify-center">
@@ -42,11 +46,11 @@ export default function Footer() {
                 </div>
               </div>
               <span className="text-2xl font-black bg-linear-to-r from-yellow-400 to-red-600 bg-clip-text text-transparent">
-                {t.brand || "Detect AI"}
+                {t("brand", { defaultValue: "Detect AI" })}
               </span>
             </Link>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              نظام متطور للتشخيص الطبي بالذكاء الاصطناعي. نوفر لك أدق النتائج بأسرع وقت ممكن.
+              {t("footer.description", { defaultValue: "نظام متطور للتشخيص الطبي بالذكاء الاصطناعي. نوفر لك أدق النتائج بأسرع وقت ممكن." })}
             </p>
             <div className="flex gap-3">
               {[
@@ -68,17 +72,17 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-white">روابط سريعة</h3>
+            <h3 className="text-lg font-bold mb-4 text-white">{t("footer.quickLinksHeading", { defaultValue: locale === "en" ? "Quick Links" : "روابط سريعة" })}</h3>
             <ul className="space-y-2">
-              {[
-                { label: t.home || "الرئيسية", href: "/ar" },
-                { label: "من نحن", href: "/about" },
-                { label: "الخدمات", href: "/services" },
-                { label: "المدونة", href: "/blog" },
-              ].map((link, i) => (
+              {(t.raw ? t.raw("footer")?.quickLinks : null || [
+                { label: t("home", { defaultValue: locale === "en" ? "Home" : "الرئيسية" }), href: "/" },
+                { label: locale === "en" ? "About" : "من نحن", href: "/about" },
+                { label: locale === "en" ? "Services" : "الخدمات", href: "/services" },
+                { label: locale === "en" ? "Blog" : "المدونة", href: "/blog" },
+              ]).map((link, i) => (
                 <li key={i}>
                   <Link 
-                    href={link.href}
+                    href={withLocale(link.href)}
                     className="text-zinc-400 hover:text-yellow-400 transition-colors duration-300 text-sm flex items-center gap-2 group"
                   >
                     <span className="w-0 h-0.5 bg-yellow-400 group-hover:w-4 transition-all duration-300" />
@@ -91,17 +95,17 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-white">الدعم</h3>
+            <h3 className="text-lg font-bold mb-4 text-white">{t("footer.supportHeading", { defaultValue: locale === "en" ? "Support" : "الدعم" })}</h3>
             <ul className="space-y-2">
-              {[
-                { label: "الأسئلة الشائعة", href: "/faq" },
-                { label: t.contact || "اتصل بنا", href: "/contact" },
-                { label: t.privacy || "سياسة الخصوصية", href: "/privacy" },
-                { label: t.terms || "الشروط والأحكام", href: "/terms" },
-              ].map((link, i) => (
+              {(t.raw ? t.raw("footer")?.supportLinks : null || [
+                { label: locale === "en" ? "FAQ" : "الأسئلة الشائعة", href: "/faq" },
+                { label: t("contactPage.title", { defaultValue: locale === "en" ? "Contact" : "اتصل بنا" }), href: "/contact" },
+                { label: t("privacyPage.title", { defaultValue: locale === "en" ? "Privacy" : "سياسة الخصوصية" }), href: "/privacy" },
+                { label: t("termsPage.title", { defaultValue: locale === "en" ? "Terms" : "الشروط والأحكام" }), href: "/terms" },
+              ]).map((link, i) => (
                 <li key={i}>
                   <Link 
-                    href={link.href}
+                    href={withLocale(link.href)}
                     className="text-zinc-400 hover:text-red-400 transition-colors duration-300 text-sm flex items-center gap-2 group"
                   >
                     <span className="w-0 h-0.5 bg-red-400 group-hover:w-4 transition-all duration-300" />
@@ -114,12 +118,12 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-white">تواصل معنا</h3>
+            <h3 className="text-lg font-bold mb-4 text-white">{t("footer.contactHeading", { defaultValue: locale === "en" ? "Contact" : "تواصل معنا" })}</h3>
             <ul className="space-y-3 text-sm text-zinc-400">
               <li className="flex items-start gap-3">
                 <span className="text-xl">📧</span>
                 <div>
-                  <div className="text-white font-semibold mb-1">البريد الإلكتروني</div>
+                  <div className="text-white font-semibold mb-1">{t("footer.contact.emailLabel", { defaultValue: "البريد الإلكتروني" })}</div>
                   <a href="mailto:info@detect-ai.com" className="hover:text-yellow-400 transition-colors">
                     info@detect-ai.com
                   </a>
@@ -128,7 +132,7 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <span className="text-xl">📱</span>
                 <div>
-                  <div className="text-white font-semibold mb-1">الهاتف</div>
+                  <div className="text-white font-semibold mb-1">{t("footer.contact.phoneLabel", { defaultValue: "الهاتف" })}</div>
                   <a href="tel:+966123456789" className="hover:text-yellow-400 transition-colors" dir="ltr">
                     +966 12 345 6789
                   </a>
@@ -137,8 +141,8 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <span className="text-xl">📍</span>
                 <div>
-                  <div className="text-white font-semibold mb-1">العنوان</div>
-                  <p>أربد، المملكة الأردنية الهاشمية</p>
+                  <div className="text-white font-semibold mb-1">{t("footer.contact.addressLabel", { defaultValue: "العنوان" })}</div>
+                  <p>{t("footer.contact.address", { defaultValue: "أربد، المملكة الأردنية الهاشمية" })}</p>
                 </div>
               </li>
             </ul>
@@ -149,17 +153,17 @@ export default function Footer() {
         <div className="py-6 border-t border-zinc-800">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
             <div className="flex items-center gap-2">
-              <span>{t.copyright?.(year) || `© ${year} جميع الحقوق محفوظة`}</span>
+              <span>{t("footer.copyright", { defaultValue: `© ${year} جميع الحقوق محفوظة`, year })}</span>
               <span className="hidden sm:inline">•</span>
               <span className="text-yellow-400 font-semibold">PneumoDetect</span>
             </div>
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span>الخدمة متاحة</span>
+                <span>{t("footer.serviceStatus", { defaultValue: "الخدمة متاحة" })}</span>
               </div>
               <div className="text-zinc-400">
-                Made with ❤️ in Saudi Arabia
+                {t("footer.madeIn", { defaultValue: "Made with ❤️ in Irbed" })}
               </div>
             </div>
           </div>

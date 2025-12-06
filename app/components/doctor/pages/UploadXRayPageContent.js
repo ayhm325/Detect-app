@@ -1,13 +1,23 @@
 "use client";
 import React, { useState, useRef } from "react";
+import useLocale from "@/app/hooks/useLocale";
 
-const mockRecentUploads = [
-  { id: 1, patientName: "محمد علي", type: "X-Ray", date: "2025-12-01", status: "مكتمل", notes: "صورة واضحة وجودة عالية" },
-  { id: 2, patientName: "سارة يوسف", type: "CT", date: "2025-11-30", status: "قيد المراجعة", notes: "في انتظار التحليل" },
-  { id: 3, patientName: "أحمد محمود", type: "MRI", date: "2025-11-28", status: "مكتمل", notes: "لم تظهر مشاكل" }
-];
+const mockRecentUploads = {
+  en: [
+    { id: 1, patientName: "Mohammed Ali", type: "X-Ray", date: "2025-12-01", status: "completed", notes: "Clear and high quality image" },
+    { id: 2, patientName: "Sarah Youssef", type: "CT", date: "2025-11-30", status: "reviewing", notes: "Awaiting analysis" },
+    { id: 3, patientName: "Ahmed Mahmoud", type: "MRI", date: "2025-11-28", status: "completed", notes: "No issues found" }
+  ],
+  ar: [
+    { id: 1, patientName: "محمد علي", type: "X-Ray", date: "2025-12-01", status: "completed", notes: "صورة واضحة وجودة عالية" },
+    { id: 2, patientName: "سارة يوسف", type: "CT", date: "2025-11-30", status: "reviewing", notes: "في انتظار التحليل" },
+    { id: 3, patientName: "أحمد محمود", type: "MRI", date: "2025-11-28", status: "completed", notes: "لم تظهر مشاكل" }
+  ]
+};
 
 export default function UploadXRayPageContent() {
+  const { t, locale } = useLocale();
+  const du = t.doctorUploadXRay || {};
   const [files, setFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);
   const [patientName, setPatientName] = useState("");
@@ -45,7 +55,7 @@ export default function UploadXRayPageContent() {
 
   const handleUpload = () => {
     if (!patientName || files.length === 0) {
-      alert("يرجى اختيار المريض والملف");
+      alert(du.toast?.selectPatient || "Please select a patient and file");
       return;
     }
 
@@ -64,7 +74,7 @@ export default function UploadXRayPageContent() {
           setFiles([]);
           setPatientName("");
           setNotes("");
-          alert("تم رفع الملف بنجاح!");
+          alert(du.toast?.uploaded || "Upload completed successfully");
         }, 500);
       } else {
         setProgress(currentProgress);
@@ -78,14 +88,14 @@ export default function UploadXRayPageContent() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">رفع أشعة جديدة</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{du.title || "Upload X-Ray"}</h1>
 
       {/* Upload Form */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-slate-700">
         <div className="space-y-4">
           {/* Patient Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">المريض</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{du.patientName || "Patient Name"}</label>
             <input
               type="text"
               placeholder="اسم المريض أو رقم الملف"
@@ -97,16 +107,16 @@ export default function UploadXRayPageContent() {
 
           {/* Image Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">نوع الأشعة</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{du.imageType || "Image Type"}</label>
             <select
               value={imageType}
               onChange={(e) => setImageType(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="xray">أشعة سينية (X-Ray)</option>
-              <option value="ct">أشعة مقطعية (CT)</option>
-              <option value="mri">أشعة رنين مغناطيسي (MRI)</option>
-              <option value="ultrasound">الموجات فوق الصوتية</option>
+              <option value="xray">{du.types?.xray || "X-Ray"}</option>
+              <option value="ct">{du.types?.ct || "CT Scan"}</option>
+              <option value="mri">{du.types?.mri || "MRI"}</option>
+              <option value="ultrasound">{du.types?.ultrasound || "Ultrasound"}</option>
             </select>
           </div>
 
@@ -133,7 +143,7 @@ export default function UploadXRayPageContent() {
             />
             <div className="space-y-2">
               <div className="text-3xl">📁</div>
-              <p className="text-gray-600 dark:text-gray-300 font-medium">اسحب الملفات هنا أو انقر لاختيار</p>
+              <p className="text-gray-600 dark:text-gray-300 font-medium">{du.dragDrop || "Drag and drop files here"} {du.orText || "or"} {du.selectFiles || "select files"}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">صور JPG, PNG, أو ملفات DICOM</p>
             </div>
           </div>
@@ -166,7 +176,7 @@ export default function UploadXRayPageContent() {
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ملاحظات إضافية</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{du.notes || "Additional Notes"}</label>
             <textarea
               placeholder="أي ملاحظات حول الأشعة؟"
               value={notes}
@@ -182,7 +192,7 @@ export default function UploadXRayPageContent() {
             disabled={uploading || !patientName || files.length === 0}
             className="w-full bg-linear-to-r from-blue-600 to-blue-500 text-white font-medium py-3 rounded-lg hover:from-blue-700 hover:to-blue-600 disabled:from-gray-400 disabled:to-gray-400 transition"
           >
-            {uploading ? `جاري الرفع... ${Math.round(progress)}%` : "رفع الآن"}
+            {uploading ? `${du.uploading || "Uploading..."} ${Math.round(progress)}%` : du.upload || "Upload"}
           </button>
 
           {/* Progress Bar */}
@@ -199,31 +209,31 @@ export default function UploadXRayPageContent() {
 
       {/* Recent Uploads */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-slate-700">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">الرفعات الأخيرة</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{du.recentUploads || "Recent Uploads"}</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-gray-300 dark:border-slate-600">
               <tr>
-                <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">المريض</th>
-                <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">النوع</th>
-                <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">التاريخ</th>
-                <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">الحالة</th>
-                <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">الملاحظات</th>
+                <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">{du.patientName || "Patient"}</th>
+                <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">{du.imageType || "Type"}</th>
+                <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">{du.date || "Date"}</th>
+                <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">{du.status || "Status"}</th>
+                <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">{du.notes || "Notes"}</th>
               </tr>
             </thead>
             <tbody>
-              {mockRecentUploads.map((upload) => (
+              {mockRecentUploads[locale]?.map((upload) => (
                 <tr key={upload.id} className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50">
                   <td className="py-3 px-4 text-gray-900 dark:text-white">{upload.patientName}</td>
                   <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{upload.type}</td>
                   <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{upload.date}</td>
                   <td className="py-3 px-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      upload.status === "مكتمل"
+                      upload.status === "completed"
                         ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                         : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
                     }`}>
-                      {upload.status}
+                      {upload.status === "completed" ? du.statuses?.completed || "Completed" : du.statuses?.reviewing || "Under Review"}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-gray-600 dark:text-gray-400 text-xs">{upload.notes}</td>

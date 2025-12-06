@@ -1,41 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 export default function FuturisticStars() {
-  // Use a single state object to hold both stars and buildings for cleaner state management.
-  const [scene, setScene] = useState({ stars: null, buildings: null });
-
-  useEffect(() => {
-    // --- Generate Star Field ---
-    const newStars = Array.from({ length: 120 }).map(() => ({
-      cx: Math.random() * 1440,
-      cy: Math.random() * 800,
-      r: Math.random() * 1.5 + 0.2,
-      opacity: Math.random() * 0.7 + 0.2,
+  const scene = useMemo(() => {
+    const stars = Array.from({ length: 120 }).map((_, idx) => ({
+      cx: (idx * 73) % 1440,
+      cy: (idx * 211) % 800,
+      r: 0.4 + ((idx % 5) * 0.3),
+      opacity: 0.25 + ((idx % 7) * 0.08),
     }));
 
-    // --- Generate Cityscape ---
-    const newBuildings = Array.from({ length: 8 }).map(() => ({
-      x: Math.random() * 1340 + 50, // Keep buildings within the viewBox with some padding
-      y: 600 + Math.random() * 100, // Base height of the buildings
-      width: 40 + Math.random() * 100,
-      height: 30 + Math.random() * 70,
-      // Use a predefined set of colors for a cohesive cyberpunk palette
-      color: ['#00fff7', '#7f00ff', '#ff00ea'][Math.floor(Math.random() * 3)],
-      opacity: 0.1 + Math.random() * 0.2,
+    const buildings = Array.from({ length: 8 }).map((_, idx) => ({
+      x: 50 + (idx * 150) % 1340,
+      y: 620 + (idx % 4) * 20,
+      width: 60 + (idx % 5) * 12,
+      height: 45 + (idx % 6) * 8,
+      color: ['#00fff7', '#7f00ff', '#ff00ea'][idx % 3],
+      opacity: 0.12 + (idx % 3) * 0.04,
     }));
 
-    // Set the state with both generated arrays
-    setScene({ stars: newStars, buildings: newBuildings });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // This effect runs only once on component mount
-
-  // Wait until both stars and buildings are generated before rendering
-  if (!scene.stars || !scene.buildings) {
-    return null;
-  }
+    return { stars, buildings };
+  }, []);
 
   return (
     // aria-hidden="true" hides this decorative element from screen readers

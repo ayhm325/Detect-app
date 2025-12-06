@@ -1,41 +1,36 @@
 
 "use client";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import translations from "../lib/translations";
+import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 export default function FeaturesSection() {
-  const pathname = usePathname();
-  const currentLocale = pathname.startsWith("/en") ? "en" : "ar";
-  const t = translations[currentLocale];
-  const [particles, setParticles] = useState([]);
-
-  useEffect(() => {
-    // Generate particles on client side only
-    setParticles(
+  const t = useTranslations();
+  const featureCopy = t.raw ? t.raw("features") : {};
+  const particles = useMemo(
+    () =>
       [...Array(8)].map((_, i) => ({
         id: i,
-        width: Math.random() * 6 + 4,
-        height: Math.random() * 6 + 4,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        background: i % 3 === 0 ? 'rgba(251, 191, 36, 0.6)' : i % 3 === 1 ? 'rgba(245, 158, 11, 0.6)' : 'rgba(239, 68, 68, 0.6)',
-        animationDuration: 15 + Math.random() * 10,
-        animationDelay: Math.random() * 5,
-      }))
-    );
-  }, []);
+        width: 4 + (i % 4) * 1.5,
+        height: 4 + ((i + 1) % 4) * 1.2,
+        left: (i * 13 + 7) % 100,
+        top: (i * 17 + 11) % 100,
+        background: i % 3 === 0 ? "rgba(251, 191, 36, 0.6)" : i % 3 === 1 ? "rgba(245, 158, 11, 0.6)" : "rgba(239, 68, 68, 0.6)",
+        animationDuration: 15 + (i % 5) * 1.5,
+        animationDelay: (i % 4) * 0.6,
+      })),
+    []
+  );
 
   return (
-    <section className="relative w-full py-20 sm:py-24 bg-gradient-to-br from-yellow-50 via-amber-50 to-red-50 dark:bg-gradient-to-br dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 overflow-hidden">
+    <section className="relative w-full py-20 sm:py-24 bg-linear-to-br from-yellow-50 via-amber-50 to-red-50 dark:bg-linear-to-br dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 overflow-hidden">
       {/* Holographic Animated Background */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
         {/* Moving Holographic Gradients */}
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-yellow-400/40 via-amber-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '20s' }} />
-          <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-red-400/40 via-orange-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '25s', animationDelay: '2s' }} />
-          <div className="absolute bottom-0 left-1/3 w-[550px] h-[550px] bg-gradient-to-tr from-amber-400/40 via-yellow-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '22s', animationDelay: '4s' }} />
+          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-linear-to-br from-yellow-400/40 via-amber-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '20s' }} />
+          <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-linear-to-bl from-red-400/40 via-orange-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '25s', animationDelay: '2s' }} />
+          <div className="absolute bottom-0 left-1/3 w-[550px] h-[550px] bg-linear-to-tr from-amber-400/40 via-yellow-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '22s', animationDelay: '4s' }} />
         </div>
 
         {/* Holographic Grid Pattern */}
@@ -107,17 +102,17 @@ export default function FeaturesSection() {
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4">
             <span className="bg-linear-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">
-              {t.featuresTitle || "مميزات النظام"}
+              {featureCopy.title || "مميزات النظام"}
             </span>
           </h2>
           <p className="text-lg text-yellow-800/80 dark:text-yellow-200/80 max-w-2xl mx-auto">
-            نوفر لك أفضل التقنيات الحديثة في مجال التشخيص الطبي
+            {featureCopy.subtitle || "نوفر لك أفضل التقنيات الحديثة في مجال التشخيص الطبي"}
           </p>
         </div>
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {(t.features || [
+          {(featureCopy.items || [
             { icon: "/icons/ai.svg", title: "ذكاء اصطناعي متطور", desc: "تقنية AI حديثة لتحليل دقيق" },
             { icon: "/icons/xray.svg", title: "تحليل الأشعة", desc: "فحص شامل للصور الطبية" },
             { icon: "/icons/result.svg", title: "نتائج فورية", desc: "احصل على التشخيص خلال ثوان" },
@@ -165,12 +160,12 @@ export default function FeaturesSection() {
 
         {/* Additional Features List */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn" style={{ animationDelay: "0.4s" }}>
-          {[
+          {(featureCopy.extras || [
             { icon: "🔒", title: "أمان عالي", desc: "حماية كاملة لبياناتك الطبية" },
             { icon: "⚡", title: "سرعة فائقة", desc: "معالجة سريعة للصور والنتائج" },
             { icon: "📊", title: "تقارير مفصلة", desc: "تقارير طبية شاملة ودقيقة" },
             { icon: "🌐", title: "متوفر دائماً", desc: "خدمة 24/7 على مدار الساعة" },
-          ].map((item, i) => (
+          ]).map((item, i) => (
             <div
               key={i}
               className="group flex items-start gap-4 p-6 bg-linear-to-r from-yellow-50 to-red-50 dark:from-zinc-800 dark:to-zinc-800 rounded-2xl border border-yellow-200/50 dark:border-yellow-600/20 hover:shadow-lg transition-all duration-300"

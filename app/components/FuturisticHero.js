@@ -2,9 +2,14 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 const FuturisticStars = dynamic(() => import("./FuturisticStars"), { ssr: false });
 
 export default function FuturisticHero() {
+  const pathname = usePathname();
+  const locale = pathname?.startsWith("/en") ? "en" : "ar";
+  const basePrefix = locale === "en" ? "/en" : "/ar";
   return (
     <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden bg-transparent" style={{background: "linear-gradient(135deg, #0ff 0%, #7f00ff 60%, #000 100%)"}}>
       {/* Neon SVG Gradient Overlay for Sci-Fi Glow */}
@@ -51,7 +56,7 @@ export default function FuturisticHero() {
             Experience next-gen AI technology with immersive, interactive design.
           </p>
           <Link
-            href="/admin/analysis"
+            href={`${basePrefix}/admin/analysis`}
             className="mt-6 px-10 py-4 rounded-2xl bg-linear-to-br from-cyan-400 via-fuchsia-400 to-blue-400 hover:from-blue-500 hover:to-pink-400 shadow-2xl transition text-white text-xl font-extrabold flex items-center gap-4 border-2 border-cyan-300/40 backdrop-blur-2xl animate-glow neon-btn-glow drop-shadow-lg"
           >
             <span className="inline-block text-white">تحليل الأشعة</span>

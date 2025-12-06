@@ -1,28 +1,32 @@
 "use client";
 import { FaUserTie, FaUser, FaArrowRight, FaCheck, FaShield } from "react-icons/fa6";
-import { useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 export default function LoginSide() {
+  const t = useTranslations();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [stats, setStats] = useState({ users: 0, logins: 0, uptime: 0 });
   const [activeFeature, setActiveFeature] = useState(0);
-  const [particles, setParticles] = useState([]);
   const [isClient, setIsClient] = useState(false);
+  const particles = useMemo(
+    () =>
+      [...Array(12)].map((_, i) => ({
+        id: i,
+        x: (i * 13 + 7) % 100,
+        y: (i * 17 + 11) % 100,
+        size: 0.8 + (i % 4) * 0.6,
+        duration: 10 + (i % 6),
+        delay: (i % 5) * 0.5,
+        color: ["yellow", "orange", "red"][i % 3],
+      })),
+    []
+  );
   const containerRef = useRef(null);
 
-  // توليد جزيئات فقط على الكلاينت
+  // Set isClient flag after hydration to prevent hydration mismatch
   useEffect(() => {
     setIsClient(true);
-    const newParticles = Array.from({ length: 12 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 2 + 0.5,
-      duration: Math.random() * 8 + 10,
-      delay: Math.random() * 4,
-      color: ["yellow", "orange", "red"][Math.floor(Math.random() * 3)]
-    }));
-    setParticles(newParticles);
   }, []);
 
   // إحصائيات ديناميكية
@@ -55,29 +59,17 @@ export default function LoginSide() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  const features = [
-    { icon: FaUserTie, label: "تسجيل آمن للأطباء", color: "yellow" },
-    { icon: FaUser, label: "إدارة حسابات المرضى", color: "orange" },
-    { icon: FaShield, label: "حماية البيانات المتقدمة", color: "red" }
-  ];
+  const features = useMemo(() => [
+    { icon: FaUserTie, label: t("auth.login.feature1") || "تسجيل آمن للأطباء", color: "yellow" },
+    { icon: FaUser, label: t("auth.login.feature2") || "إدارة حسابات المرضى", color: "orange" },
+    { icon: FaShield, label: t("auth.login.feature3") || "حماية البيانات المتقدمة", color: "red" }
+  ], [t]);
 
   return (
     <div 
       ref={containerRef}
       className="relative hidden md:flex flex-col items-center justify-center w-full min-h-full p-0 overflow-hidden shadow-lg rounded-none group"
     >
-      {/* إضافة الـ CSS ديناميكي للجزيئات - فقط عند التحميل على الكلاينت */}
-      {isClient && particles.length > 0 && (
-        <style>{particles.map(p => `
-          @keyframes float-${p.id} {
-            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
-            10% { opacity: 0.8; }
-            90% { opacity: 0.8; }
-            100% { transform: translateY(-${p.duration * 8}px) translateX(${Math.sin(p.id) * 40}px); opacity: 0; }
-          }
-        `).join('\n')}</style>
-      )}
-
       {/* الخلفية الرئيسية */}
       <div className="absolute inset-0 z-0 pointer-events-none flex items-stretch justify-stretch">
         <div className="absolute inset-0 w-full h-full bg-linear-to-br from-yellow-600 via-amber-500 to-red-600 z-0" />
@@ -141,8 +133,10 @@ export default function LoginSide() {
               height: `${particle.size}px`,
               backgroundColor: particle.color === "yellow" ? "#fbbf24" : particle.color === "orange" ? "#f97316" : "#dc2626",
               boxShadow: `0 0 ${particle.size * 3}px ${particle.color === "yellow" ? "#fbbf24" : particle.color === "orange" ? "#f97316" : "#dc2626"}`,
-              animation: `float-${particle.id} ${particle.duration}s ease-in-out ${particle.delay}s infinite`,
-              filter: "blur(0.5px)"
+              animation: `floatParticleLogin-${particle.id} ${particle.duration}s ease-in-out ${particle.delay}s infinite`,
+              filter: "blur(0.5px)",
+              "--particle-y-distance": `${particle.duration * 8}px`,
+              "--particle-x-offset": `${Math.sin(particle.id) * 40}px`,
             }}
           />
         ))}
@@ -179,10 +173,10 @@ export default function LoginSide() {
 
         {/* العنوان والوصف */}
         <h2 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg text-yellow-100 text-center animate-[fadeIn_0.8s_ease-in-out]">
-          مرحباً بكم في النظام الذكي
+          {t("auth.login.sideTitle") || "مرحباً بكم في النظام الذكي"}
         </h2>
         <p className="text-lg md:text-xl drop-shadow text-white text-center max-w-xl mb-10 animate-[fadeIn_1s_ease-in-out_0.2s_both]">
-          تسجيل دخول آمن وسريع للوصول إلى خدماتنا الطبية المتقدمة
+          {t("auth.login.sideDescription") || "تسجيل دخول آمن وسريع للوصول إلى خدماتنا الطبية المتقدمة"}
         </p>
 
         {/* المميزات التفاعلية */}
@@ -214,17 +208,17 @@ export default function LoginSide() {
         <div className="grid grid-cols-3 gap-4 w-full max-w-md mb-8">
           <div className="bg-white/20 border border-white/30 rounded-lg p-4 text-center backdrop-blur-sm hover:border-white/50 transition-all hover:shadow-lg hover:shadow-white/20">
             <p className="text-2xl font-bold text-white">{Math.floor(stats.users / 100)}</p>
-            <p className="text-sm text-white/80 mt-2">مستخدم</p>
+            <p className="text-sm text-white/80 mt-2">{t("auth.login.statsUsers") || "مستخدم"}</p>
           </div>
           
           <div className="bg-white/20 border border-white/30 rounded-lg p-4 text-center backdrop-blur-sm hover:border-white/50 transition-all hover:shadow-lg hover:shadow-white/20">
             <p className="text-2xl font-bold text-white">{Math.floor(stats.logins / 100)}</p>
-            <p className="text-sm text-white/80 mt-2">دخول</p>
+            <p className="text-sm text-white/80 mt-2">{t("auth.login.statsLogins") || "دخول"}</p>
           </div>
           
           <div className="bg-white/20 border border-white/30 rounded-lg p-4 text-center backdrop-blur-sm hover:border-white/50 transition-all hover:shadow-lg hover:shadow-white/20">
             <p className="text-2xl font-bold text-white">{stats.uptime.toFixed(2)}%</p>
-            <p className="text-sm text-white/80 mt-2">توفر</p>
+            <p className="text-sm text-white/80 mt-2">{t("auth.login.statsUptime") || "توفر"}</p>
           </div>
         </div>
 
@@ -233,7 +227,7 @@ export default function LoginSide() {
           <div className="absolute -inset-1 bg-linear-to-r from-yellow-300 via-orange-400 to-red-500 rounded-lg blur opacity-40 group-hover/cta:opacity-100 transition duration-300" />
           <button className="relative px-7 py-3 bg-white text-red-600 rounded-lg font-semibold flex items-center gap-3 hover:bg-yellow-50 transition-all hover:scale-105 text-base">
             <FaCheck className="text-sm" />
-            ابدأ الآن
+            {t("auth.login.ctaButton") || "ابدأ الآن"}
             <FaArrowRight className="text-sm" />
           </button>
         </div>

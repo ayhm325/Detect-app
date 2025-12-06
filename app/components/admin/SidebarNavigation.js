@@ -1,4 +1,6 @@
 import Image from "next/image";
+import React from "react";
+import DoctorChangeRequestsSidebarItem from "./sidebar/DoctorChangeRequestsSidebarItem";
 import DashboardSidebarItem from "./sidebar/DashboardSidebarItem";
 import UsersSidebarItem from "./sidebar/UsersSidebarItem";
 import DoctorsSidebarItem from "./sidebar/DoctorsSidebarItem";
@@ -7,26 +9,49 @@ import AnalysisSidebarItem from "./sidebar/AnalysisSidebarItem";
 import ChatSidebarItem from "./sidebar/ChatSidebarItem";
 import SettingsSidebarItem from "./sidebar/SettingsSidebarItem";
 import LogoutSidebarItem from "./sidebar/LogoutSidebarItem";
+import { useTheme } from "@/app/theme-provider";
+import useLocale from "@/app/hooks/useLocale";
 
 export default function SidebarNavigation() {
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
+  const { locale, switchLocale } = useLocale();
   return (
-    <aside className="w-full md:w-64 h-full flex flex-col p-0 shadow-xl relative z-20 bg-linear-to-br from-yellow-50 via-red-50 to-white/80 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 border-r border-zinc-200 dark:border-zinc-800 backdrop-blur-xl">
-      {/* شعار الموقع */}
-      <div className="flex items-center gap-3 px-6 py-7 border-b border-zinc-100 dark:border-zinc-800 mb-2">
-        <Image src="/icons/ai.svg" alt="Logo" width={40} height={40} className="drop-shadow" />
-        <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-yellow-400 via-red-400 to-red-700 select-none">Detect Admin</span>
+    <aside className="w-full md:w-60 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 h-full flex flex-col p-4 gap-2" dir={locale === "ar" ? "rtl" : "ltr"}>
+      {/* شعار PneumoDetect مع أيقونة الرئتين */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="relative flex items-center justify-center w-10 h-10 bg-gradient-to-br from-yellow-400 via-red-400 to-red-600 rounded-full shadow-lg">
+          <span className="text-xl" aria-label="Lung icon">🫁</span>
+        </div>
+        <span className="font-black text-lg bg-gradient-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">PneumoDetect</span>
       </div>
-      <nav className="flex flex-col gap-1 px-2 pb-4">
-        <DashboardSidebarItem />
-        <UsersSidebarItem />
-        <DoctorsSidebarItem />
-        <PatientsSidebarItem />
-        <AnalysisSidebarItem />
-        <ChatSidebarItem />
-        <SettingsSidebarItem />
-        <LogoutSidebarItem />
+      <nav className="flex flex-col gap-2">
+        <DashboardSidebarItem locale={locale} />
+        <UsersSidebarItem locale={locale} />
+        <DoctorsSidebarItem locale={locale} />
+        <PatientsSidebarItem locale={locale} />
+        <DoctorChangeRequestsSidebarItem locale={locale} />
+        <AnalysisSidebarItem locale={locale} />
+        <ChatSidebarItem locale={locale} />
+        <SettingsSidebarItem locale={locale} />
+        <button
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+          className="flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-zinc-700 dark:text-zinc-200 hover:bg-yellow-50 dark:hover:bg-zinc-800 transition group"
+          title={isDark ? "الوضع النهاري" : "الوضع الليلي"}
+        >
+          <span className="text-xl">{isDark ? "☀️" : "🌙"}</span>
+          <span className="text-base font-bold">{isDark ? "الوضع النهاري" : "الوضع الليلي"}</span>
+        </button>
+        <button
+          onClick={switchLocale}
+          className="flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-zinc-700 dark:text-zinc-200 hover:bg-yellow-50 dark:hover:bg-zinc-800 transition group"
+          title={locale === "ar" ? "English" : "العربية"}
+        >
+          <span className="text-xl">🌐</span>
+          <span className="text-base font-bold">{locale === "ar" ? "English" : "العربية"}</span>
+        </button>
+        <LogoutSidebarItem locale={locale} />
       </nav>
-      <div className="mt-auto mb-2 px-6 text-sm font-semibold text-zinc-500 select-none">© {new Date().getFullYear()} Detect</div>
     </aside>
   );
 }

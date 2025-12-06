@@ -1,6 +1,9 @@
 "use client";
+import { formatDateTime } from "@/app/lib/date";
+import useLocale from "@/hooks/useLocale";
 
 export default function UpcomingAppointmentsCard({ appointments = [] }) {
+  const { locale } = useLocale();
   return (
     <section className="rounded-xl border border-gray-200 bg-white/70 shadow-sm">
       <header className="flex items-center justify-between border-b border-gray-200 p-4">
@@ -19,7 +22,7 @@ export default function UpcomingAppointmentsCard({ appointments = [] }) {
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-500">الموعد</div>
-                <div className="text-base font-medium text-gray-900">{formatDateTime(a.datetime)}</div>
+                <div className="text-base font-medium text-gray-900">{formatDateTime(a.datetime, locale)}</div>
                 <StatusBadge status={a.status} />
               </div>
             </li>
@@ -40,11 +43,3 @@ function StatusBadge({ status }) {
   return <span className={`mt-1 inline-flex rounded-md px-2 py-0.5 text-xs ring-1 ring-inset ${className}`}>{label}</span>;
 }
 
-function formatDateTime(iso) {
-  try {
-    const d = new Date(iso);
-    return d.toLocaleString("ar-EG", { dateStyle: "medium", timeStyle: "short" });
-  } catch {
-    return "—";
-  }
-}

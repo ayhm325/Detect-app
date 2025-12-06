@@ -8,9 +8,16 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const locale = pathname?.startsWith("/en") ? "en" : "ar";
+
+  const buildPath = (targetLocale, path = pathname || "/") => {
+    const clean = path.replace(/^\/(en|ar)/, "");
+    const normalized = clean.startsWith("/") ? clean : `/${clean}`;
+    return `/${targetLocale}${normalized}`;
+  };
 
   const handleLogout = () => {
-    router.push("/login");
+    router.push(buildPath(locale, "/login"));
   };
 
   return (
@@ -28,7 +35,7 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
               <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-400 to-purple-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">DX</span>
               </div>
-              <span className="text-white font-bold text-lg hidden lg:inline">Detect</span>
+              <span className="text-white font-bold text-lg hidden lg:inline">PneumoDetect</span>
             </div>
           )}
           <button

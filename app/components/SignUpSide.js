@@ -1,29 +1,33 @@
 
 "use client";
 import { FaUserAstronaut, FaRobot, FaShield, FaArrowRight, FaCheck } from "react-icons/fa6";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 export default function SignUpSide() {
+  const t = useTranslations();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [stats, setStats] = useState({ users: 0, analyses: 0, accuracy: 0 });
   const [activeFeature, setActiveFeature] = useState(0);
-  const [particles, setParticles] = useState([]);
   const [isClient, setIsClient] = useState(false);
+  const particles = useMemo(
+    () =>
+      [...Array(15)].map((_, i) => ({
+        id: i,
+        x: (i * 11 + 9) % 100,
+        y: (i * 15 + 13) % 100,
+        size: 1 + (i % 5) * 0.6,
+        duration: 12 + (i % 6) * 1.5,
+        delay: (i % 7) * 0.4,
+        color: ["yellow", "orange", "red"][i % 3],
+      })),
+    []
+  );
   const containerRef = useRef(null);
 
-  // توليد جزيئات فقط على الكلاينت
+  // Set isClient flag after hydration to prevent hydration mismatch
   useEffect(() => {
     setIsClient(true);
-    const newParticles = Array.from({ length: 15 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      duration: Math.random() * 10 + 15,
-      delay: Math.random() * 5,
-      color: ["cyan", "blue", "pink"][Math.floor(Math.random() * 3)]
-    }));
-    setParticles(newParticles);
   }, []);
 
   // إحصائيات ديناميكية تتحدث كل 3 ثوان
@@ -56,29 +60,17 @@ export default function SignUpSide() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  const features = [
-    { icon: FaRobot, label: "تحليل فوري ودقيق", color: "yellow" },
-    { icon: FaShield, label: "بياناتك بأمان تام", color: "red" },
-    { icon: FaUserAstronaut, label: "واجهة مستقبلية سهلة", color: "orange" }
-  ];
+  const features = useMemo(() => [
+    { icon: FaRobot, label: t("auth.signup.feature1") || "تحليل فوري ودقيق", color: "yellow" },
+    { icon: FaShield, label: t("auth.signup.feature2") || "بياناتك بأمان تام", color: "red" },
+    { icon: FaUserAstronaut, label: t("auth.signup.feature3") || "واجهة مستقبلية سهلة", color: "orange" }
+  ], [t]);
 
   return (
     <div 
       ref={containerRef}
       className="hidden md:flex w-full min-h-full bg-linear-to-br from-yellow-600 via-amber-500 to-red-600 relative overflow-hidden rounded-none p-0 group"
     >
-      {/* إضافة الـ CSS ديناميكي للجزيئات - فقط عند التحميل على الكلاينت */}
-      {isClient && particles.length > 0 && (
-        <style>{particles.map(p => `
-          @keyframes float-${p.id} {
-            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-${p.duration * 10}px) translateX(${Math.sin(p.id) * 50}px); opacity: 0; }
-          }
-        `).join('\n')}</style>
-      )}
-
       {/* Grid Background متحرك */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-10">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" className="animate-[spin_20s_linear_infinite]" style={{ opacity: 0.1 }}>
@@ -103,8 +95,10 @@ export default function SignUpSide() {
             height: `${particle.size}px`,
             backgroundColor: particle.color === "yellow" ? "#fbbf24" : particle.color === "orange" ? "#f97316" : "#dc2626",
             boxShadow: `0 0 ${particle.size * 4}px ${particle.color === "yellow" ? "#fbbf24" : particle.color === "orange" ? "#f97316" : "#dc2626"}`,
-            animation: `float-${particle.id} ${particle.duration}s ease-in-out ${particle.delay}s infinite`,
-            filter: "blur(0.5px)"
+            animation: `floatParticle-${particle.id} ${particle.duration}s ease-in-out ${particle.delay}s infinite`,
+            filter: "blur(0.5px)",
+            "--particle-y-distance": `${particle.duration * 10}px`,
+            "--particle-x-offset": `${Math.sin(particle.id) * 50}px`,
           }}
         />
       ))}
@@ -151,11 +145,11 @@ export default function SignUpSide() {
         {/* العنوان مع تأثير typewriter */}
         <div className="flex flex-col items-center gap-6 flex-1 justify-center">
           <h3 className="text-4xl md:text-5xl font-extrabold text-yellow-100 text-center drop-shadow-neon animate-[fadeIn_0.8s_ease-in-out]">
-            انضم إلى عالم التشخيص الذكي
+            {t("auth.signup.sideTitle") || "انضم إلى عالم التشخيص الذكي"}
           </h3>
           
           <p className="text-white text-center max-w-2xl text-xl md:text-2xl leading-relaxed animate-[fadeIn_1s_ease-in-out_0.2s_both]">
-            أنشئ حسابك واكتشف قوة الذكاء الاصطناعي في كشف الالتهاب الرئوي من صور الأشعة.
+            {t("auth.signup.sideDescription") || "أنشئ حسابك واكتشف قوة الذكاء الاصطناعي في كشف الالتهاب الرئوي من صور الأشعة."}
           </p>
 
           {/* مميزات تفاعلية */}
@@ -188,17 +182,17 @@ export default function SignUpSide() {
         <div className="grid grid-cols-3 gap-4 w-full max-w-md mb-4">
           <div className="bg-white/20 border border-white/30 rounded-lg p-3 text-center backdrop-blur-sm hover:border-white/50 transition-all hover:shadow-lg hover:shadow-white/20">
             <p className="text-2xl font-bold text-white">{Math.floor(stats.users / 100)}</p>
-            <p className="text-xs text-white/80 mt-1">مستخدم نشط</p>
+            <p className="text-xs text-white/80 mt-1">{t("auth.signup.statsActiveUsers") || "مستخدم نشط"}</p>
           </div>
           
           <div className="bg-white/20 border border-white/30 rounded-lg p-3 text-center backdrop-blur-sm hover:border-white/50 transition-all hover:shadow-lg hover:shadow-white/20">
             <p className="text-2xl font-bold text-white">{Math.floor(stats.analyses / 100)}</p>
-            <p className="text-xs text-white/80 mt-1">تحليل</p>
+            <p className="text-xs text-white/80 mt-1">{t("auth.signup.statsAnalyses") || "تحليل"}</p>
           </div>
           
           <div className="bg-white/20 border border-white/30 rounded-lg p-3 text-center backdrop-blur-sm hover:border-white/50 transition-all hover:shadow-lg hover:shadow-white/20">
             <p className="text-2xl font-bold text-white">{stats.accuracy.toFixed(1)}%</p>
-            <p className="text-xs text-white/80 mt-1">دقة</p>
+            <p className="text-xs text-white/80 mt-1">{t("auth.signup.statsAccuracy") || "دقة"}</p>
           </div>
         </div>
 
@@ -207,7 +201,7 @@ export default function SignUpSide() {
           <div className="absolute -inset-1 bg-linear-to-r from-yellow-300 via-orange-400 to-red-500 rounded-lg blur opacity-50 group-hover/cta:opacity-100 transition duration-300" />
           <button className="relative px-6 py-3 bg-white text-red-600 rounded-lg font-semibold flex items-center gap-2 hover:bg-yellow-50 transition-all hover:scale-105">
             <FaCheck className="text-sm" />
-            ابدأ الآن
+            {t("auth.signup.ctaButton") || "ابدأ الآن"}
             <FaArrowRight className="text-sm" />
           </button>
         </div>
