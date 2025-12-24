@@ -1,0 +1,45 @@
+{
+  "title": "لوحة التحكم الطبية",
+  "welcome": "مرحباً بك د.",
+  "stats": {
+    "patients": "إجمالي المرضى",
+    "todayAppointments": "مواعيد اليوم",
+    "pendingScans": "الفحوصات المعلقة",
+    "newMessages": "الرسائل الجديدة",
+    "changeSince": "من الشهر الماضي"
+  },
+  "quickActions": {
+    "viewPatients": "عرض المرضى",
+    "viewPatientsDesc": "إدارة قائمة مرضاك",
+    "medicalImages": "الصور الطبية",
+    "medicalImagesDesc": "مراجعة الأشعة والفحوصات",
+    "appointments": "المواعيد",
+    "appointmentsDesc": "إدارة جدول المواعيد",
+    "chats": "المحادثات",
+    "chatsDesc": "التواصل مع المرضى"
+  },
+  "todayAppointments": {
+    "title": "مواعيد اليوم",
+    "viewAll": "عرض الكل",
+    "types": {
+      "xray": "أشعة",
+      "consult": "استشارة",
+      "followup": "متابعة",
+      "ct": "أشعة مقطعية"
+    },
+    "status": {
+      "confirmed": "مؤكد",
+      "pending": "معلق"
+    }
+  },
+  "pendingScans": {
+    "title": "الفحوصات المعلقة",
+    "priority": {
+      "high": "عالية",
+      "medium": "متوسطة",
+      "low": "منخفضة"
+    },
+    "viewAll": "عرض كل الفحوصات"
+  },
+  "recentActivityTitle": "النشاط الأخير"
+}

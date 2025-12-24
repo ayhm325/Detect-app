@@ -1,0 +1,14 @@
+{
+  "pageTitle": "Upload X-ray",
+  "fileTypes": "Allowed file types: JPG, PNG, DCM",
+  "ready": "Ready",
+  "pending_review": "Pending Review",
+  "filter_all": "All",
+  "errorUnsupportedType": "Unsupported file type",
+  "errorFileSize": "File size too large",
+  "errorFileSizeMax": "Max allowed",
+  "errorNoFile": "No file selected",
+  "uploading": "Uploading...",
+  "uploadSuccess": "Upload successful",
+  "fileSelected": "File selected"
+}

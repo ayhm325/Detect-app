@@ -1,0 +1,18 @@
+{
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Enter your account details to continue",
+      "socialDivider": "Or continue with email",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "passwordShow": "Show",
+      "passwordHide": "Hide",
+      "loading": "Checking...",
+      "ctaPrimary": "Login",
+      "forgot": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "goSignup": "Sign Up"
+    }
+  }
+}

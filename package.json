@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "detect-app",
   "version": "0.1.0",
   "private": true,
@@ -6,25 +7,58 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "jest",
+    "docs": "openapi-generator-cli generate -i openapi.yaml -g html -o docs"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.1",
     "accept-language": "^3.0.20",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
+    "express": "^5.2.1",
     "framer-motion": "^12.23.25",
-    "next": "^16.1.0-canary.15",
-    "next-intl": "^4.5.8",
+    "jsonwebtoken": "^9.0.3",
+    "next": "^16.1.0",
+    "next-intl": "^4.6.1",
     "react": "19.2.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "19.2.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "react-toastify": "^11.0.5",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
+    "swr": "^2.3.8"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.[jt]sx?$": "babel-jest"
+    },
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
   },
   "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "@openapitools/openapi-generator-cli": "^2.25.2",
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4",
+    "@types/react": "19.2.7",
+    "babel-jest": "^30.2.0",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.6",
-    "tailwindcss": "^4"
+    "jest": "^30.2.0",
+    "next-test-api-route-handler": "^5.0.3",
+    "playwright": "^1.57.0",
+    "prisma": "^6.19.1",
+    "supertest": "^7.1.4",
+    "tailwindcss": "^4",
+    "typescript": "5.9.3"
   }
 }

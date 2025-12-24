@@ -1,20 +1,23 @@
-import { Geist, Geist_Mono } from "next/font/google";
+
+
+import { Inter, Roboto_Mono } from "next/font/google";
 import "./globals.css";
+import { ToastProvider } from "./components/ui/ToastProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
 });
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const robotoMono = Roboto_Mono({
+  variable: "--font-roboto-mono",
   subsets: ["latin"],
 });
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: "Detect AI - نظام الكشف الذكي عن الأمراض بالذكاء الاصطناعي",
-  description: "نظام متطور للكشف عن الأمراض من خلال تحليل الصور الطبية بالذكاء الاصطناعي. دقة عالية، نتائج فورية، خدمة 24/7",
+  description:
+    "نظام متطور للكشف عن الأمراض من خلال تحليل الصور الطبية بالذكاء الاصطناعي. دقة عالية، نتائج فورية، خدمة 24/7",
   keywords: ["ذكاء اصطناعي", "تشخيص طبي", "أشعة سينية", "تحليل طبي", "الالتهاب الرئوي", "صحة"],
   authors: [{ name: "Detect AI Team" }],
   creator: "Detect AI",
@@ -45,6 +48,7 @@ export const metadata = {
   },
 };
 
+
 export function generateViewport() {
   return {
     width: "device-width",
@@ -57,12 +61,29 @@ export function generateViewport() {
   };
 }
 
-export default function RootLayout({ children }) {
-  const lang = "ar";
-  const dir = lang === "ar" ? "rtl" : "ltr";
+
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { LocaleProvider } from "./contexts/LocaleContext";
+import { ThemeProvider } from "./theme-provider";
+
+export default async function RootLayout({ children, params }) {
+  const locale = params?.locale || "ar";
+  const dir = locale === "ar" ? "rtl" : "ltr";
+  const messages = (await getMessages()) || {};
   return (
-    <html lang={lang} dir={dir}>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body>
+    <html className={`${inter.variable} ${robotoMono.variable}`} lang={locale} dir={dir} data-scroll-behavior="smooth">
+      <body>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <LocaleProvider>
+            <ThemeProvider>
+                <ToastProvider>
+                  {children}
+                </ToastProvider>
+            </ThemeProvider>
+          </LocaleProvider>
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }

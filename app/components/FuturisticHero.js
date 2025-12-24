@@ -44,7 +44,7 @@ export default function FuturisticHero() {
       </div>
       {/* Holographic Interface Overlay */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 z-10">
-        <div className="w-[420px] h-[220px] rounded-3xl border-2 border-cyan-400/60 bg-linear-to-br from-cyan-400/10 via-fuchsia-400/10 to-blue-400/10 shadow-2xl backdrop-blur-2xl flex flex-col items-center justify-center relative text-white">
+          <div className="w-105 h-55 rounded-3xl border-2 border-cyan-400/60 bg-linear-to-br from-cyan-400/10 via-fuchsia-400/10 to-blue-400/10 shadow-2xl backdrop-blur-2xl flex flex-col items-center justify-center relative text-white">
           <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-32 h-2 rounded-full bg-cyan-400/40 blur-md animate-pulse" />
           <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-32 h-2 rounded-full bg-fuchsia-400/40 blur-md animate-pulse" />
           <div className="absolute left-4 top-4 w-6 h-6 rounded-full bg-cyan-400/30 blur-lg animate-pulse" />

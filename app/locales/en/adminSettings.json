@@ -1,0 +1,70 @@
+{
+  "breadcrumbs": {
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "header": {
+    "title": "System Settings",
+    "subtitle": "Manage system, notifications, and permissions"
+  },
+  "tabs": {
+    "system": "System",
+    "notifications": "Notifications",
+    "permissions": "Permissions",
+    "security": "Security"
+  },
+  "system": {
+    "hospitalInfo": {
+      "title": "Hospital Information",
+      "name": "Hospital Name",
+      "license": "License Number",
+      "emailPlaceholder": "Email",
+      "phonePlaceholder": "Phone number"
+    },
+    "config": {
+      "timezoneOptions": [
+        { "value": "Asia/Riyadh", "label": "Asia/Riyadh" },
+        { "value": "Asia/Dubai", "label": "Asia/Dubai" },
+        { "value": "Africa/Cairo", "label": "Africa/Cairo" }
+      ],
+      "languageOptions": [
+        { "value": "ar", "label": "Arabic" },
+        { "value": "en", "label": "English" }
+      ]
+    },
+    "backup": {
+      "options": [
+        { "value": "daily", "label": "Daily" },
+        { "value": "weekly", "label": "Weekly" },
+        { "value": "monthly", "label": "Monthly" }
+      ]
+    },
+    "save": "Save Changes",
+    "saved": "Saved successfully"
+  },
+  "notifications": {
+    "title": "Notification Settings",
+    "email": "Email Notifications",
+    "sms": "SMS Notifications",
+    "push": "App Notifications"
+  },
+  "permissions": {
+    "title": "Manage Permissions",
+    "users": "Users",
+    "roles": "Roles",
+    "edit": "Edit Permissions"
+  },
+  "security": {
+    "title": "Security Settings",
+    "changePassword": "Change Password",
+    "twoFactor": "Enable Two-Factor Authentication"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "messages": {
+    "success": "Settings saved successfully!",
+    "error": "An error occurred while saving. Please try again."
+  }
+}

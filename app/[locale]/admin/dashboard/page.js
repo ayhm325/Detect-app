@@ -1,144 +1,144 @@
 "use client";
-import { useMemo } from "react";
+
+export const headers = () => {
+  return [
+    ["Cache-Control", "no-store"]
+  ];
+};
+
+import AdminDashboardWrapper from "../../../components/AdminDashboardWrapper";
+import { useMemo, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/app/components/ui/Toast";
-import AdminLayout from "../AdminLayout";
+import { useToast, ToastContainer } from "../../../components/ui/ToastProvider";
+import AdminShell from "../AdminShell";
+console.log("DEBUG AdminShell:", AdminShell);
 import { FaUsers, FaUserMd, FaUserInjured, FaXRay, FaArrowUp, FaArrowDown, FaBell, FaChartLine, FaExclamationTriangle, FaCheckCircle, FaClock } from "react-icons/fa";
-import useLocale from "@/app/hooks/useLocale";
+import useLocale from "../../../hooks/useLocale";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { t, locale } = useLocale();
   const basePrefix = locale === "en" ? "/en" : "/ar";
   const ad = t.adminDashboard || {};
-  const { showToast, ToastContainer } = useToast();
 
-  const tr = locale === "en" ? {
-    breadcrumb: "Dashboard",
-    title: "Admin Dashboard",
-    stats: {
-      totalUsers: "Total Users",
-      doctors: "Doctors",
-      patients: "Patients",
-      todayScans: "Today's Scans"
-    },
-    quickActions: {
-      users: { title: "Manage Users", desc: "View and edit user accounts" },
-      doctors: { title: "Manage Doctors", desc: "Add and edit doctor records" },
-      patients: { title: "Manage Patients", desc: "Review patient records" },
-      analysis: { title: "Analytics & Reports", desc: "View stats and reports" }
-    },
-    systemStatus: {
-      serverUptime: "Server uptime",
-      responseTime: "Response time",
-      memoryUsage: "Memory usage",
-      dbSize: "Database size"
-    },
-    toast: {
-      notifications: "Notifications feature coming soon",
-      approvalsComingSoon: "Approvals feature coming soon",
-      approved: "Request approved",
-      rejected: "Request rejected"
-    },
-    notifications: "Notifications",
-    changeSince: "since last month",
-    quickActionsTitle: "Quick Actions",
-    more: "More",
-    systemStatusTitle: "System Status",
-    pendingApprovalsTitle: "Pending Requests",
-    pendingApprovals: {
-      approve: "Approve",
-      reject: "Reject",
-      viewAll: "View all requests"
-    },
-    recentActivityTitle: "Recent Activity"
-  } : {
-    breadcrumb: "لوحة التحكم",
-    title: "لوحة تحكم المدير",
-    stats: {
-      totalUsers: "إجمالي المستخدمين",
-      doctors: "الأطباء",
-      patients: "المرضى",
-      todayScans: "الفحوصات اليوم"
-    },
-    quickActions: {
-      users: { title: "إدارة المستخدمين", desc: "عرض وتعديل حسابات المستخدمين" },
-      doctors: { title: "إدارة الأطباء", desc: "إضافة وتعديل بيانات الأطباء" },
-      patients: { title: "إدارة المرضى", desc: "عرض ومتابعة سجلات المرضى" },
-      analysis: { title: "التحليلات والتقارير", desc: "عرض الإحصائيات والتقارير" }
-    },
-    systemStatus: {
-      serverUptime: "توفر الخادم",
-      responseTime: "وقت الاستجابة",
-      memoryUsage: "استخدام الذاكرة",
-      dbSize: "حجم قاعدة البيانات"
-    },
-    toast: {
-      notifications: "ميزة الإشعارات ستتوفر قريباً",
-      approvalsComingSoon: "ميزة الطلبات ستتوفر قريباً",
-      approved: "تم الموافقة على الطلب",
-      rejected: "تم رفض الطلب"
-    },
-    notifications: "الإشعارات",
-    changeSince: "من الشهر الماضي",
-    quickActionsTitle: "إجراءات سريعة",
-    more: "المزيد",
-    systemStatusTitle: "حالة النظام",
-    pendingApprovalsTitle: "الطلبات المعلقة",
-    pendingApprovals: {
-      approve: "قبول",
-      reject: "رفض",
-      viewAll: "عرض جميع الطلبات"
-    },
-    recentActivityTitle: "النشاط الأخير"
-  };
+  const { showInfo, showSuccess, showError } = useToast();
 
-  const formattedDate = new Date().toLocaleDateString(locale === "en" ? "en-US" : "ar-EG", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  let formattedDate = new Date().toLocaleDateString(locale === "en" ? "en-US" : "ar-EG", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // جلب الإحصائيات الحقيقية من API
+  const [statsData, setStatsData] = useState({ totalUsers: 0, doctors: 0, patients: 0, todayScans: 0, totalScans: 0 });
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(null);
+
+  // Replace Arabic digits with Western digits if locale is Arabic
+  if (locale === "ar") {
+    formattedDate = formattedDate.replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+  }
+
+  useEffect(() => {
+    fetch("/api/admin/dashboard-stats")
+      .then((res) => res.json())
+      .then((data) => {
+        setStatsData(data);
+        setStatsLoading(false);
+      })
+      .catch((err) => {
+        setStatsError("خطأ في جلب الإحصائيات");
+        setStatsLoading(false);
+      });
+  }, []);
 
   const stats = [
-    { title: ad.stats?.totalUsers || tr.stats.totalUsers, value: "156", change: "+12", changePercent: "+8.3%", icon: FaUsers, color: "bg-blue-500", bgLight: "bg-blue-50 dark:bg-blue-900/20", trend: "up" },
-    { title: ad.stats?.doctors || tr.stats.doctors, value: "32", change: "+3", changePercent: "+10.3%", icon: FaUserMd, color: "bg-green-500", bgLight: "bg-green-50 dark:bg-green-900/20", trend: "up" },
-    { title: ad.stats?.patients || tr.stats.patients, value: "124", change: "+9", changePercent: "+7.8%", icon: FaUserInjured, color: "bg-purple-500", bgLight: "bg-purple-50 dark:bg-purple-900/20", trend: "up" },
-    { title: ad.stats?.todayScans || tr.stats.todayScans, value: "28", change: "-5", changePercent: "-15%", icon: FaXRay, color: "bg-orange-500", bgLight: "bg-orange-50 dark:bg-orange-900/20", trend: "down" },
+    { title: ad.stats?.totalUsers || t.adminDashboard?.stats?.totalUsers, value: statsData.totalUsers, change: "", changePercent: "", icon: FaUsers, color: "bg-blue-500", bgLight: "bg-blue-50 dark:bg-blue-900/20", trend: "up" },
+    { title: ad.stats?.doctors || t.adminDashboard?.stats?.doctors, value: statsData.doctors, change: "", changePercent: "", icon: FaUserMd, color: "bg-green-500", bgLight: "bg-green-50 dark:bg-green-900/20", trend: "up" },
+    { title: ad.stats?.patients || t.adminDashboard?.stats?.patients, value: statsData.patients, change: "", changePercent: "", icon: FaUserInjured, color: "bg-purple-500", bgLight: "bg-purple-50 dark:bg-purple-900/20", trend: "up" },
+    { title: ad.stats?.todayScans || t.adminDashboard?.stats?.todayScans, value: statsData.todayScans, change: "", changePercent: "", icon: FaXRay, color: "bg-orange-500", bgLight: "bg-orange-50 dark:bg-orange-900/20", trend: "down" },
+    { title: ad.stats?.totalScansAll || t.adminDashboard?.stats?.totalScansAll, value: statsData.totalScans, change: "", changePercent: "", icon: FaXRay, color: "bg-cyan-500", bgLight: "bg-cyan-50 dark:bg-cyan-900/20", trend: "up" },
   ];
 
   const quickActions = [
-    { title: ad.quickActions?.users?.title || tr.quickActions.users.title, description: ad.quickActions?.users?.desc || tr.quickActions.users.desc, icon: "👥", gradient: "from-yellow-500 to-red-500", action: () => router.push(`${basePrefix}/admin/users`) },
-    { title: ad.quickActions?.doctors?.title || tr.quickActions.doctors.title, description: ad.quickActions?.doctors?.desc || tr.quickActions.doctors.desc, icon: "👨‍⚕️", gradient: "from-yellow-400 to-orange-500", action: () => router.push(`${basePrefix}/admin/doctors`) },
-    { title: ad.quickActions?.patients?.title || tr.quickActions.patients.title, description: ad.quickActions?.patients?.desc || tr.quickActions.patients.desc, icon: "🏥", gradient: "from-red-500 to-red-600", action: () => router.push(`${basePrefix}/admin/patients`) },
-    { title: ad.quickActions?.analysis?.title || tr.quickActions.analysis.title, description: ad.quickActions?.analysis?.desc || tr.quickActions.analysis.desc, icon: "📊", gradient: "from-yellow-500 to-amber-500", action: () => router.push(`${basePrefix}/admin/analysis`) },
+    { title: ad.quickActions?.users?.title || t.adminDashboard?.quickActions?.users?.title, description: ad.quickActions?.users?.desc || t.adminDashboard?.quickActions?.users?.desc, icon: "👥", gradient: "from-yellow-500 to-red-500", action: () => router.push(`${basePrefix}/admin/users`) },
+    { title: ad.quickActions?.doctors?.title || t.adminDashboard?.quickActions?.doctors?.title, description: ad.quickActions?.doctors?.desc || t.adminDashboard?.quickActions?.doctors?.desc, icon: "👨‍⚕️", gradient: "from-yellow-400 to-orange-500", action: () => router.push(`${basePrefix}/admin/doctors`) },
+    { title: ad.quickActions?.patients?.title || t.adminDashboard?.quickActions?.patients?.title, description: ad.quickActions?.patients?.desc || t.adminDashboard?.quickActions?.patients?.desc, icon: "🏥", gradient: "from-red-500 to-red-600", action: () => router.push(`${basePrefix}/admin/patients`) },
+    // analysis quick action removed because page was deleted
   ];
 
+  // معلومات النظام الحقيقية
+  const [systemStatusData, setSystemStatusData] = useState({
+    serverUptime: "-",
+    responseTime: "-",
+    memoryUsage: "-",
+    dbSize: "-"
+  });
+  useEffect(() => {
+    fetch("/api/admin/system-status")
+      .then((res) => res.json())
+      .then((data) => setSystemStatusData(data))
+      .catch(() => {});
+  }, []);
   const systemStatus = [
-    { label: ad.systemStatus?.serverUptime || tr.systemStatus.serverUptime, value: "99.9%", status: "success", icon: FaCheckCircle },
-    { label: ad.systemStatus?.responseTime || tr.systemStatus.responseTime, value: "45ms", status: "success", icon: FaClock },
-    { label: ad.systemStatus?.memoryUsage || tr.systemStatus.memoryUsage, value: "62%", status: "warning", icon: FaExclamationTriangle },
-    { label: ad.systemStatus?.dbSize || tr.systemStatus.dbSize, value: "2.4 GB", status: "success", icon: FaCheckCircle }
+    { label: ad.systemStatus?.serverUptime || t.adminDashboard?.systemStatus?.serverUptime, value: systemStatusData.serverUptime, status: "success", icon: FaCheckCircle },
+    { label: ad.systemStatus?.responseTime || t.adminDashboard?.systemStatus?.responseTime, value: systemStatusData.responseTime, status: "success", icon: FaClock },
+    { label: ad.systemStatus?.memoryUsage || t.adminDashboard?.systemStatus?.memoryUsage, value: systemStatusData.memoryUsage, status: "success", icon: FaCheckCircle },
+    { label: ad.systemStatus?.dbSize || t.adminDashboard?.systemStatus?.dbSize, value: systemStatusData.dbSize, status: "success", icon: FaCheckCircle }
   ];
 
-  const recentActivities = useMemo(() => locale === "en" ? [
-    { id: 1, action: "New user registered: Ahmed Mohammed", time: "5 min ago", icon: "👤", color: "blue" },
-    { id: 2, action: "New analysis uploaded by Dr. Sarah", time: "15 min ago", icon: "🩻", color: "green" },
-    { id: 3, action: "Patient record updated: Fatima Ali", time: "30 min ago", icon: "📝", color: "purple" },
-    { id: 4, action: "New doctor added: Dr. Mohammed Khaled", time: "1 hour ago", icon: "👨‍⚕️", color: "orange" },
-    { id: 5, action: "System backup completed", time: "2 hours ago", icon: "💾", color: "gray" }
-  ] : [
-    { id: 1, action: "تسجيل مستخدم جديد: أحمد محمد", time: "منذ 5 دقائق", icon: "👤", color: "blue" },
-    { id: 2, action: "تحليل جديد تم رفعه من د. سارة", time: "منذ 15 دقيقة", icon: "🩻", color: "green" },
-    { id: 3, action: "تحديث بيانات المريض: فاطمة علي", time: "منذ 30 دقيقة", icon: "📝", color: "purple" },
-    { id: 4, action: "إضافة طبيب جديد: د. محمد خالد", time: "منذ ساعة", icon: "👨‍⚕️", color: "orange" },
-    { id: 5, action: "نسخة احتياطية للنظام مكتملة", time: "منذ ساعتين", icon: "💾", color: "gray" }
-  ], [locale]);
+  // جلب النشاطات الحقيقية من API
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(true);
+  const [activitiesError, setActivitiesError] = useState(null);
 
-  const pendingApprovals = useMemo(() => locale === "en" ? [
-    { id: 1, type: "Doctor registration request", name: "Dr. Omar El-Sayed", time: "1 day ago" },
-    { id: 2, type: "Profile update request", name: "Dr. Laila Youssef", time: "2 days ago" },
-    { id: 3, type: "Additional permissions request", name: "Dr. Ahmed Khaled", time: "3 days ago" }
-  ] : [
-    { id: 1, type: "طلب تسجيل طبيب", name: "د. عمر السيد", time: "منذ يوم" },
-    { id: 2, type: "طلب تحديث بيانات", name: "د. ليلى يوسف", time: "منذ يومين" },
-    { id: 3, type: "طلب صلاحيات إضافية", name: "د. أحمد خالد", time: "منذ 3 أيام" }
-  ], [locale]);
+  useEffect(() => {
+    setActivitiesLoading(true);
+    fetch("/api/admin/recent-activities")
+      .then((res) => res.json())
+      .then((data) => {
+        setRecentActivities(data.activities || []);
+        setActivitiesLoading(false);
+      })
+      .catch(() => {
+        setActivitiesError("خطأ في جلب النشاطات");
+        setActivitiesLoading(false);
+      });
+  }, []);
+
+  // الطلبات المعلقة الحقيقية (الأطباء غير الموافق عليهم)
+  const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [pendingLoading, setPendingLoading] = useState(true);
+  const [pendingError, setPendingError] = useState(null);
+
+  useEffect(() => {
+    const fetchPendingApprovals = async () => {
+      setPendingLoading(true);
+      try {
+        const res = await fetch("/api/admin/doctors");
+        const data = await res.json();
+        if (data.doctors) {
+          // تصفية الأطباء المعلقين فقط
+          const pending = data.doctors
+            .filter((doc) => doc.status === "pending")
+            .map((doc) => ({
+              id: doc.user?.id || doc.userId || doc.id,
+              fullName: doc.user?.fullName || "—",
+              email: doc.user?.email || "—",
+              createdAt: doc.user?.createdAt || null,
+              licenseNumber: doc.licenseNumber,
+              phone: doc.phone
+            }));
+          console.log("[Dashboard] Pending Approvals (frontend):", pending);
+          setPendingApprovals(pending);
+        } else {
+          setPendingApprovals([]);
+        }
+      } catch {
+        setPendingError("خطأ في جلب الطلبات المعلقة");
+      } finally {
+        setPendingLoading(false);
+      }
+    };
+    fetchPendingApprovals();
+  }, []);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -154,21 +154,21 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <AdminLayout breadcrumbs={[tr.breadcrumb]}>
-      <ToastContainer />
+    <AdminShell>
+      {/* ToastContainer is rendered by ToastProvider at the app root. Do not render here. */}
       <div className="p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-              {ad.title || tr.title} 👨‍💼
+              {ad.title || t.adminDashboard?.title} 👨‍💼
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">{formattedDate}</p>
           </div>
           <button
-            onClick={() => showToast(ad.toast?.notificationsComingSoon || tr.toast.notifications, "info")}
+            onClick={() => showToast(ad.toast?.notificationsComingSoon || t.adminDashboard?.toast?.notifications, "info")}
             className="relative p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg hover:shadow-xl transition-shadow"
-            title={ad.notifications || tr.notifications}
+            title={ad.notifications || t.adminDashboard?.notifications}
           >
             <FaBell className="text-xl text-gray-700 dark:text-gray-300" />
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
@@ -177,12 +177,12 @@ export default function AdminDashboardPage() {
           </button>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Stats Row - always in one line, scrollable on small screens */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8 w-full">
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700 hover:shadow-xl transition-shadow"
+              className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700 hover:shadow-xl transition-shadow w-full"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className={`p-3 rounded-lg ${stat.bgLight}`}>
@@ -199,16 +199,14 @@ export default function AdminDashboardPage() {
               <p className="text-3xl font-bold text-gray-900 dark:text-white">
                 {stat.value}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                {stat.change} {ad.stats?.changeSince || tr.changeSince}
-              </p>
+              {/* تم حذف جملة (من الشهر الماضي) */}
             </div>
           ))}
         </div>
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{ad.quickActions?.title || tr.quickActionsTitle}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{ad.quickActions?.title || t.adminDashboard?.quickActionsTitle}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickActions.map((action, index) => (
               <button
@@ -220,7 +218,7 @@ export default function AdminDashboardPage() {
                 <h3 className="text-lg font-bold mb-2">{action.title}</h3>
                 <p className="text-sm opacity-90">{action.description}</p>
                 <div className="mt-4 flex items-center gap-2 opacity-80 group-hover:gap-3 transition-all">
-                  <span className="text-sm">{ad.quickActions?.more || tr.more}</span>
+                  <span className="text-sm">{ad.quickActions?.more || t.adminDashboard?.more}</span>
                   <span className="group-hover:-translate-x-1 transition-transform">{locale === "en" ? "→" : "←"}</span>
                 </div>
               </button>
@@ -232,7 +230,7 @@ export default function AdminDashboardPage() {
           {/* System Status */}
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{ad.systemStatus?.title || tr.systemStatusTitle}</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{ad.systemStatus?.title || t.adminDashboard?.systemStatusTitle}</h2>
               <FaChartLine className="text-2xl text-blue-500" />
             </div>
             <div className="space-y-4">
@@ -256,69 +254,111 @@ export default function AdminDashboardPage() {
           {/* Pending Approvals */}
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{ad.pendingApprovals?.title || tr.pendingApprovalsTitle}</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{ad.pendingApprovals?.title || t.adminDashboard?.pendingApprovalsTitle}</h2>
               <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-3 py-1 rounded-full text-sm font-bold">
-                {pendingApprovals.length}
+                {pendingLoading ? "..." : pendingApprovals.length}
               </span>
             </div>
+            {pendingError && (
+              <div className="text-red-600 dark:text-red-400 mb-4">{pendingError}</div>
+            )}
             <div className="space-y-3">
-              {pendingApprovals.map((approval) => (
-                <div
-                  key={approval.id}
-                  className="p-4 bg-gray-50 dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-700 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="font-bold text-gray-900 dark:text-white">{approval.type}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{approval.name}</p>
+              {pendingLoading ? (
+                <div className="text-gray-500 dark:text-gray-400">جاري التحميل...</div>
+              ) : pendingApprovals.length === 0 ? (
+                <div className="text-gray-500 dark:text-gray-400">لا توجد طلبات معلقة حالياً</div>
+              ) : (
+                <>
+                  {pendingApprovals.map((approval, idx) => (
+                    <div
+                      key={approval.id || idx}
+                      className="p-4 bg-gray-50 dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-700 hover:shadow-md transition-shadow mb-2"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h3 className="font-bold text-gray-900 dark:text-white">{locale === "en" ? "Doctor registration request" : "طلب تسجيل طبيب"}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <b>ID:</b> {approval.id?.toString() || "-"} <br/>
+                            <b>Name:</b> {approval.fullName || "-"} <br/>
+                            <b>Email:</b> {approval.email || "-"} <br/>
+                            <b>License:</b> {approval.licenseNumber || "-"} <br/>
+                            <b>Phone:</b> {approval.phone || "-"} <br/>
+                            <b>Created:</b> {approval.createdAt ? new Date(approval.createdAt).toLocaleString(locale === "en" ? "en-US" : "ar-EG") : "-"}
+                          </p>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{approval.createdAt ? new Date(approval.createdAt).toLocaleDateString(locale === "en" ? "en-US" : "ar-EG") : "-"}</span>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={async () => {
+                            await fetch("/api/admin/doctors", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ id: approval.id, status: "active" })
+                            });
+                            setPendingApprovals((prev) => prev.filter((d) => d.id !== approval.id));
+                            showSuccess(ad.toast?.approved || t.adminDashboard?.toast?.approved);
+                          }}
+                          className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm transition-colors"
+                        >
+                          {ad.pendingApprovals?.approve || tr.pendingApprovals.approve}
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await fetch("/api/admin/doctors", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ id: approval.id, status: "banned" })
+                            });
+                            setPendingApprovals((prev) => prev.filter((d) => d.id !== approval.id));
+                            showError(ad.toast?.rejected || t.adminDashboard?.toast?.rejected);
+                          }}
+                          className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm transition-colors"
+                        >
+                          {ad.pendingApprovals?.reject || tr.pendingApprovals.reject}
+                        </button>
+                      </div>
                     </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{approval.time}</span>
-                  </div>
-                  <div className="flex gap-2 mt-3">
-                    <button
-                      onClick={() => showToast(ad.toast?.approved || tr.toast.approved, "success")}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm transition-colors"
-                    >
-                      {ad.pendingApprovals?.approve || tr.pendingApprovals.approve}
-                    </button>
-                    <button
-                      onClick={() => showToast(ad.toast?.rejected || tr.toast.rejected, "error")}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm transition-colors"
-                    >
-                      {ad.pendingApprovals?.reject || tr.pendingApprovals.reject}
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  ))}
+                </>
+              )}
             </div>
             <button
-              onClick={() => showToast(ad.toast?.approvalsComingSoon || tr.toast.approvalsComingSoon, "info")}
+              onClick={() => router.push(`${basePrefix}/admin/doctors?pending=1`)}
               className="w-full mt-4 text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
             >
-              {ad.pendingApprovals?.viewAll || tr.pendingApprovals.viewAll}
+              {ad.pendingApprovals?.viewAll || t.adminDashboard?.pendingApprovals?.viewAll}
             </button>
           </div>
         </div>
 
         {/* Recent Activities */}
         <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">{ad.recentActivity?.title || tr.recentActivityTitle}</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">{ad.recentActivity?.title || t.adminDashboard?.recentActivityTitle}</h2>
           <div className="space-y-4">
-            {recentActivities.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-slate-900 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <div className="text-3xl">{activity.icon}</div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white">{activity.action}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{activity.time}</p>
+            {activitiesLoading ? (
+              <div className="text-gray-500 dark:text-gray-400">جاري تحميل النشاطات...</div>
+            ) : activitiesError ? (
+              <div className="text-red-600 dark:text-red-400">{activitiesError}</div>
+            ) : recentActivities.length === 0 ? (
+              <div className="text-gray-500 dark:text-gray-400">لا توجد نشاطات حديثة</div>
+            ) : (
+              recentActivities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-slate-900 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <div className="text-3xl">📝</div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900 dark:text-white">{activity.description}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(activity.createdAt).toLocaleString(locale === "en" ? "en-US" : "ar-EG")}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </AdminShell>
   );
 }

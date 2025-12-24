@@ -1,0 +1,18 @@
+{
+  "auth": {
+    "login": {
+      "title": "تسجيل الدخول",
+      "subtitle": "أدخل بيانات حسابك للمتابعة",
+      "socialDivider": "أو تابع عبر البريد الإلكتروني",
+      "emailLabel": "البريد الإلكتروني",
+      "passwordLabel": "كلمة المرور",
+      "passwordShow": "إظهار",
+      "passwordHide": "إخفاء",
+      "loading": "جاري التحقق...",
+      "ctaPrimary": "دخول",
+      "forgot": "نسيت كلمة المرور؟",
+      "noAccount": "ليس لديك حساب؟",
+      "goSignup": "إنشاء حساب"
+    }
+  }
+}

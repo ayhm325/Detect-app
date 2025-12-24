@@ -2,7 +2,7 @@
   "title": "User Management",
   "subtitle": "View and manage all system users",
   "exportButton": "Export",
-  "addButton": "Add User",
+  "addButton": "Add Admin",
   "searchPlaceholder": "Search by name, email, or phone...",
   "filters": {
     "allRoles": "All Roles",
@@ -39,5 +39,50 @@
     "admins": "Admins",
     "doctors": "Doctors",
     "patients": "Patients"
+  },
+  "actions": {
+    "viewDetails": "View Details",
+    "edit": "Edit",
+    "delete": "Delete",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "users": "Users"
+  },
+  "form": {
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status"
+  },
+  "modal": {
+    "deleteTitle": "Confirm Deletion",
+    "deleteMessage": "Are you sure you want to delete user",
+    "deleteWarning": "This action cannot be undone.",
+    "confirmDelete": "Yes, Delete",
+    "cancel": "Cancel",
+    "addTitle": "Add Admin",
+    "editTitle": "Edit User",
+    "detailsTitle": "User Details",
+    "save": "Save",
+    "add": "Add",
+    "saveChanges": "Save Changes"
+  }
+
+  ,"details": {
+    "email": "Email",
+    "phone": "Phone Number",
+    "joinDate": "Join Date",
+    "lastLogin": "Last Login",
+    "doctorInfo": "Doctor Information",
+    "specialty": "Specialty",
+    "license": "License Number",
+    "patientInfo": "Patient Information",
+    "patientId": "Patient ID",
+    "permissions": "Permissions"
   }
 }

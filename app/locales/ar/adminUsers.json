@@ -2,7 +2,7 @@
   "title": "إدارة المستخدمين",
   "subtitle": "عرض وإدارة جميع مستخدمي النظام",
   "exportButton": "تصدير",
-  "addButton": "إضافة مستخدم",
+  "addButton": "إضافة مدير",
   "searchPlaceholder": "ابحث بالاسم أو البريد أو الجوال...",
   "filters": {
     "allRoles": "كل الأدوار",
@@ -43,6 +43,46 @@
   "actions": {
     "viewDetails": "عرض التفاصيل",
     "edit": "تعديل",
-    "delete": "حذف"
+    "delete": "حذف",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
+  },
+  "breadcrumbs": {
+    "home": "الرئيسية",
+    "users": "المستخدمون"
+  },
+  "form": {
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الجوال",
+    "password": "كلمة المرور",
+    "role": "الدور",
+    "status": "الحالة"
+  },
+  "modal": {
+    "deleteTitle": "تأكيد الحذف",
+    "deleteMessage": "هل أنت متأكد أنك تريد حذف المستخدم",
+    "deleteWarning": "هذا الإجراء لا يمكن التراجع عنه.",
+    "confirmDelete": "نعم، احذف",
+    "cancel": "إلغاء",
+    "addTitle": "إضافة مدير",
+    "editTitle": "تعديل المستخدم",
+    "detailsTitle": "تفاصيل المستخدم",
+    "save": "حفظ",
+    "add": "إضافة",
+    "saveChanges": "حفظ التغييرات"
+  }
+
+  ,"details": {
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الجوال",
+    "joinDate": "تاريخ الانضمام",
+    "lastLogin": "آخر تسجيل دخول",
+    "doctorInfo": "معلومات الطبيب",
+    "specialty": "التخصص",
+    "license": "رقم الترخيص",
+    "patientInfo": "معلومات المريض",
+    "patientId": "معرّف المريض",
+    "permissions": "الصلاحيات"
   }
 }

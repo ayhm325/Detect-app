@@ -1,0 +1,26 @@
+{
+  "title": "الإشعارات",
+  "noNotifications": "لا توجد إشعارات حالياً",
+  "markAllAsRead": "تحديد الكل كمقروء",
+  "deleteAll": "حذف جميع الإشعارات",
+  "types": {
+    "appointment": "موعد",
+    "result": "نتيجة",
+    "message": "رسالة",
+    "system": "نظام"
+  },
+  "actions": {
+    "view": "عرض",
+    "delete": "حذف",
+    "markAsRead": "تحديد كمقروء"
+  },
+  "toast": {
+    "allMarkedRead": "تم تحديد جميع الإشعارات كمقروءة",
+    "deleted": "تم حذف الإشعار",
+    "deletedAll": "تم حذف جميع الإشعارات"
+  },
+  "emptyState": {
+    "title": "لا توجد إشعارات",
+    "description": "ستظهر هنا جميع الإشعارات الجديدة عند توفرها."
+  }
+}

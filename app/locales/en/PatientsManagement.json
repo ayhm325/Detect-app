@@ -1,0 +1,105 @@
+{
+  "csvHeader_id": "ID",
+  "csvHeader_name": "Full Name",
+  "csvHeader_gender": "Gender",
+  "csvHeader_birthDate": "Birth Date",
+  "csvHeader_bloodType": "Blood Type",
+  "csvHeader_phone": "Phone",
+  "csvHeader_email": "Email",
+  "csvHeader_status": "Status",
+  "csvHeader_joinDate": "Join Date",
+  "csvHeader_doctor": "Doctor",
+  "headerTitle": "Patient Management",
+  "headerSubtitle": "View and manage all patients in the system",
+  "title": "Patient Management",
+  "subtitle": "View and manage all patients in the system",
+  "addButton": "Add Patient",
+  "exportButton": "Export",
+  "searchPlaceholder": "Search by name, email, or phone...",
+  "filters": {
+    "allStatuses": "All Statuses",
+    "genderAll": "All Genders"
+  },
+  "statuses": {
+    "active": "Active",
+    "suspended": "Suspended",
+    "banned": "Banned"
+  },
+  "table": {
+    "patient": "Patient",
+    "status": "Status",
+    "joinDate": "Join Date",
+    "lastVisit": "Last Visit",
+    "actions": "Actions",
+    "noMatches": "No matching results"
+  },
+  "toast": {
+    "fillFields": "Please fill all fields",
+    "patientAdded": "Patient added successfully",
+      "selectDoctor": "Select Doctor",
+      "medicalId": "Medical ID",
+      "allergiesPlaceholder": "e.g. Milk, Eggs",
+      "chronicPlaceholder": "e.g. Hypertension, Diabetes",
+      "status": "Status",
+    "patientDeleted": "Patient deleted",
+    "exportStarted": "Exporting data..."
+  },
+  "actions": {
+    "viewDetails": "View Details",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "patients": "Patients"
+  },
+  "stats": {
+    "totalPatients": "Total Patients",
+    "activePatients": "Active Patients",
+    "todayVisits": "Today's Visits",
+    "totalReports": "Total Reports"
+  },
+  "genders": {
+    "male": "Male",
+    "female": "Female"
+  },
+  "cards": {
+    "appointments": "Appointments",
+    "reports": "Reports",
+    "lastVisit": "Last Visit",
+    "doctor": "Doctor"
+  },
+  "ageUnit": "Year",
+  "modals": {
+    "addTitle": "Add New Patient",
+    "detailsTitle": "Patient Details",
+    "editTitle": "Edit Patient",
+    "doctor": "Doctor",
+    "selectDoctor": "Select Doctor",
+    "birthDate": "Birth Date",
+    "status": "Status",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "gender": "Gender",
+    "age": "Age",
+    "bloodType": "Blood Type",
+    "joinDate": "Join Date",
+    "allergies": "Allergies",
+    "chronicDiseases": "Chronic Diseases",
+    "medicalAppointments": "Medical Appointments",
+    "medicalReports": "Medical Reports"
+  },
+  "buttons": {
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "save": "Save"
+  }
+  ,
+  "confirmDelete": {
+    "title": "Confirm Suspend Patient",
+    "description": "Are you sure you want to suspend {name}? Suspended patients cannot log in.",
+    "yes": "Yes, Suspend",
+    "no": "Cancel"
+  }
+}

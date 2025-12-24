@@ -1,7 +1,7 @@
 "use client";
 
 import DoctorLayout from "../DoctorLayout";
-import { useToast } from "@/app/components/ui/Toast";
+import { useToast } from "../../../components/ui/Toast";
 import { useState } from "react";
 import {
   FaUser,
@@ -21,116 +21,14 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
-import useLocale from "@/app/hooks/useLocale";
+import useLocale from "../../../hooks/useLocale";
+import { useTranslations } from "next-intl";
 
 export default function DoctorSettingsPage() {
   const { showToast, ToastContainer } = useToast();
-  const { t, locale } = useLocale();
-  const ds = t.doctorSettings || {};
-
-  const labels = locale === "en"
-    ? {
-        title: "Account Settings",
-        subtitle: "Manage your account information and preferences",
-        tabs: {
-          profile: "Personal Info",
-          availability: "Availability",
-          notifications: "Notifications",
-          security: "Security",
-        },
-        profile: {
-          header: "Personal Information",
-          name: "Full Name",
-          specialty: "Specialty",
-          email: "Email",
-          phone: "Phone",
-          license: "License Number",
-          bio: "Professional Bio",
-          save: "Save Changes",
-          toast: { saved: "Profile saved successfully" },
-        },
-        availability: {
-          header: "Working Hours",
-          workDays: "Work Days",
-          startTime: "Start Time",
-          endTime: "End Time",
-          slotDuration: "Appointment Duration (minutes)",
-          maxPatients: "Max Patients Per Day",
-          save: "Save Changes",
-          toast: { saved: "Availability updated successfully" },
-        },
-        notifications: {
-          header: "Notification Settings",
-          email: "Email Notifications",
-          sms: "SMS Notifications",
-          push: "Push Notifications",
-          newAppointment: "New Appointment Alerts",
-          appointmentReminder: "Appointment Reminders",
-          patientMessages: "Patient Messages",
-          systemUpdates: "System Updates",
-          save: "Save Changes",
-          toast: { saved: "Notification settings saved" },
-        },
-        security: {
-          header: "Password & Security",
-          currentPassword: "Current Password",
-          newPassword: "New Password",
-          confirmPassword: "Confirm Password",
-          save: "Update Password",
-          toast: { saved: "Password updated successfully", mismatch: "Passwords do not match" },
-        },
-      }
-    : {
-        title: "إعدادات الحساب",
-        subtitle: "إدارة معلومات حسابك وتفضيلاتك",
-        tabs: {
-          profile: "المعلومات الشخصية",
-          availability: "أوقات العمل",
-          notifications: "الإشعارات",
-          security: "الأمان",
-        },
-        profile: {
-          header: "المعلومات الشخصية",
-          name: "الاسم الكامل",
-          specialty: "التخصص",
-          email: "البريد الإلكتروني",
-          phone: "رقم الهاتف",
-          license: "رقم الترخيص",
-          bio: "السيرة المهنية",
-          save: "حفظ التغييرات",
-          toast: { saved: "تم حفظ الملف الشخصي بنجاح" },
-        },
-        availability: {
-          header: "ساعات العمل",
-          workDays: "أيام العمل",
-          startTime: "وقت البدء",
-          endTime: "وقت الانتهاء",
-          slotDuration: "مدة الموعد (دقائق)",
-          maxPatients: "عدد المرضى في اليوم",
-          save: "حفظ التغييرات",
-          toast: { saved: "تم تحديث التوفر بنجاح" },
-        },
-        notifications: {
-          header: "إعدادات الإشعارات",
-          email: "إشعارات البريد",
-          sms: "إشعارات SMS",
-          push: "إشعارات الدفع",
-          newAppointment: "تنبيهات الموعد الجديد",
-          appointmentReminder: "تذكير بالموعد",
-          patientMessages: "رسائل المرضى",
-          systemUpdates: "تحديثات النظام",
-          save: "حفظ التغييرات",
-          toast: { saved: "تم حفظ إعدادات الإشعارات" },
-        },
-        security: {
-          header: "كلمة السر والأمان",
-          currentPassword: "كلمة السر الحالية",
-          newPassword: "كلمة السر الجديدة",
-          confirmPassword: "تأكيد كلمة السر",
-          save: "تحديث كلمة السر",
-          toast: { saved: "تم تحديث كلمة السر بنجاح", mismatch: "كلمات السر غير متطابقة" },
-        },
-      };
+  const { locale } = useLocale();
+  const t = useTranslations("doctorSettings");
+  // All UI labels should use t("key") directly, e.g. t("title"), t("profile.header"), t("availability.header"), etc.
 
   // Profile Settings (bilingual)
   const profileTemplate = locale === "en" 
@@ -198,16 +96,17 @@ export default function DoctorSettingsPage() {
 
   const [activeTab, setActiveTab] = useState("profile");
 
+
   const handleSaveProfile = () => {
-    showToast(labels.profile.toast.saved, "success");
+    showToast(t("profile.toast.saved"), "success");
   };
 
   const handleSaveAvailability = () => {
-    showToast(labels.availability.toast.saved, "success");
+    showToast(t("availability.toast.saved"), "success");
   };
 
   const handleSaveNotifications = () => {
-    showToast(labels.notifications.toast.saved, "success");
+    showToast(t("notifications.toast.saved"), "success");
   };
 
   const handleChangePassword = () => {
@@ -216,14 +115,14 @@ export default function DoctorSettingsPage() {
       return;
     }
     if (security.newPassword !== security.confirmPassword) {
-      showToast(labels.security.toast.mismatch, "error");
+      showToast(t("security.toast.mismatch"), "error");
       return;
     }
     if (security.newPassword.length < 8) {
       showToast(locale === "en" ? "Password must be at least 8 characters" : "كلمة السر يجب أن تكون 8 أحرف على الأقل", "error");
       return;
     }
-    showToast(labels.security.toast.saved, "success");
+    showToast(t("security.toast.saved"), "success");
     setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
   };
 
@@ -232,10 +131,10 @@ export default function DoctorSettingsPage() {
     : ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
   const tabs = [
-    { id: "profile", label: labels.tabs.profile, icon: FaUser },
-    { id: "availability", label: labels.tabs.availability, icon: FaClock },
-    { id: "notifications", label: labels.tabs.notifications, icon: FaBell },
-    { id: "security", label: labels.tabs.security, icon: FaLock },
+    { id: "profile", label: t("tabs.profile"), icon: FaUser },
+    { id: "availability", label: t("tabs.availability"), icon: FaClock },
+    { id: "notifications", label: t("tabs.notifications"), icon: FaBell },
+    { id: "security", label: t("tabs.security"), icon: FaLock },
   ];
 
   return (
@@ -254,9 +153,9 @@ export default function DoctorSettingsPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
               <FaUserMd className="text-blue-600" />
-              {labels.title}
+              {t("title")}
             </h1>
-            <p className="mt-2 text-gray-600 dark:text-gray-300">{labels.subtitle}</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-300">{t("subtitle")}</p>
           </div>
 
           {/* Tabs Navigation */}
@@ -282,14 +181,14 @@ export default function DoctorSettingsPage() {
             <div className="rounded-xl bg-white p-8 shadow-lg border border-gray-100">
               <div className="mb-6 flex items-center gap-3">
                 <FaUserMd className="text-2xl text-blue-600" />
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{labels.profile.header}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('profile.header')}</h2>
               </div>
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     <FaUser className="inline ml-2" />
-                    {labels.profile.name}
+                    {t('profile.name')}
                   </label>
                   <input
                     type="text"
@@ -302,7 +201,7 @@ export default function DoctorSettingsPage() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     <FaStethoscope className="inline ml-2" />
-                    {labels.profile.specialty}
+                    {t('profile.specialty')}
                   </label>
                   <input
                     type="text"
@@ -315,7 +214,7 @@ export default function DoctorSettingsPage() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     <FaEnvelope className="inline ml-2" />
-                    {labels.profile.email}
+                    {t('profile.email')}
                   </label>
                   <input
                     type="email"
@@ -328,7 +227,7 @@ export default function DoctorSettingsPage() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     <FaPhone className="inline ml-2" />
-                    {labels.profile.phone}
+                    {t('profile.phone')}
                   </label>
                   <input
                     type="tel"
@@ -340,7 +239,7 @@ export default function DoctorSettingsPage() {
 
                 <div className="md:col-span-2">
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {labels.profile.license}
+                    {t('profile.license')}
                   </label>
                   <input
                     type="text"
@@ -351,7 +250,7 @@ export default function DoctorSettingsPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">{labels.profile.bio}</label>
+                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('profile.bio')}</label>
                   <textarea
                     rows={4}
                     value={profile.bio}
@@ -366,7 +265,7 @@ export default function DoctorSettingsPage() {
                 className="mt-6 flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 <FaSave />
-                {labels.profile.save}
+                {t('profile.save')}
               </button>
             </div>
           )}

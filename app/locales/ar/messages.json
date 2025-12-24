@@ -26,15 +26,63 @@
     "lastLogin": "آخر تسجيل دخول",
     "actions": "الإجراءات"
   },
+  "toast": {
+    "fillFields": "يرجى تعبئة جميع الحقول",
+    "userAdded": "تمت إضافة المستخدم بنجاح",
+    "userUpdated": "تم تحديث المستخدم بنجاح",
+    "userDeleted": "تم حذف المستخدم",
+    "exportStarted": "جاري تصدير البيانات...",
+    "notLoggedIn": "لم يتم تسجيل الدخول بعد"
+  },
   "stats": {
     "totalUsers": "إجمالي المستخدمين",
     "admins": "المدراء",
     "doctors": "الأطباء",
     "patients": "المرضى"
   },
-  "actions": {
-    "viewDetails": "عرض التفاصيل",
-    "edit": "تعديل",
-    "delete": "حذف"
+  "signup": {
+    "title": "إنشاء حساب جديد",
+    "subtitle": "انضم إلى منصتنا الطبية المتقدمة",
+    "socialDivider": "أو تابع عبر البريد الإلكتروني",
+    "roleLabel": "اختر نوع الحساب",
+    "doctorRole": "طبيب",
+    "patientRole": "مريض",
+    "nameLabel": "الاسم الكامل",
+    "emailLabel": "البريد الإلكتروني",
+    "doctorPickerLabel": "الطبيب المعالج",
+    "doctorPlaceholder": "اختر طبيبك",
+    "passwordLabel": "كلمة المرور",
+    "confirmPasswordLabel": "تأكيد كلمة المرور",
+    "passwordShow": "إظهار",
+    "passwordHide": "إخفاء",
+    "passwordHint1": "8 أحرف على الأقل",
+    "passwordHint2": "حرف كبير واحد على الأقل",
+    "passwordHint3": "رقم واحد على الأقل",
+    "passwordHint4": "رمز واحد على الأقل",
+    "passwordStrengthLabel": "قوة كلمة المرور:",
+    "termsAgreement": "أوافق على",
+    "privacyPolicy": "سياسة الخصوصية",
+    "termsConditions": "شروط الاستخدام",
+    "and": "و",
+    "feature1": "تحليل سريع ودقيق",
+    "feature2": "بياناتك آمنة تماماً",
+    "feature3": "واجهة مستقبلية سهلة",
+    "sideTitle": "انضم لعالم التشخيص الذكي",
+    "sideDescription": "أنشئ حسابك واكتشف قوة الذكاء الاصطناعي في كشف الالتهاب الرئوي من صور الأشعة.",
+    "statsActiveUsers": "مستخدم نشط",
+    "statsAnalyses": "تحليلات",
+    "statsAccuracy": "الدقة",
+    "ctaButton": "ابدأ الآن",
+    "errors": {
+      "required": "يرجى تعبئة جميع الحقول المطلوبة",
+      "doctorMissing": "يرجى اختيار الطبيب المعالج",
+      "weakPassword": "كلمة المرور لا تحقق جميع الشروط",
+      "mismatch": "كلمتا المرور غير متطابقتين"
+    },
+    "success": "تم إنشاء الحساب بنجاح! سيتم التحويل...",
+    "haveAccount": "لديك حساب بالفعل؟",
+    "loginCta": "تسجيل الدخول",
+    "loading": "جاري الإنشاء...",
+    "submit": "إنشاء الحساب"
   }
 }

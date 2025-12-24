@@ -1,0 +1,88 @@
+{
+  "messageInput": "Type your message...",
+  "actions": {
+    "call": "Call",
+    "video": "Video Call",
+    "more": "More",
+    "attachment": "Attach File",
+    "send": "Send"
+  },
+  "title": "Doctor Chat",
+  "subtitle": "Communicate with your patients directly in real time.",
+  "send": "Send",
+  "placeholder": "Type your message...",
+  "noMessages": "No messages yet.",
+  "loading": "Loading messages...",
+  "error": "Failed to load messages.",
+  "patient": "Patient",
+  "doctor": "Doctor",
+  "online": "Online",
+  "offline": "Offline",
+  "searchPlaceholder": "Search by patient name...",
+  "items": [
+    {
+      "patientName": "Patient 1",
+      "lastMessage": "Hello doctor, I have a question.",
+      "lastMessageTime": "10:30 AM",
+      "unreadCount": 2,
+      "messages": [
+        {
+          "text": "Hello doctor, I have a question.",
+          "time": "10:30 AM"
+        },
+        {
+          "text": "Sure, how can I help you?",
+          "time": "10:31 AM"
+        }
+      ]
+    },
+    {
+      "patientName": "Patient 2",
+      "lastMessage": "Thank you for your help!",
+      "lastMessageTime": "Yesterday",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "text": "Thank you for your help!",
+          "time": "Yesterday"
+        }
+      ]
+    },
+    {
+      "patientName": "Patient 3",
+      "lastMessage": "Can I book an appointment?",
+      "lastMessageTime": "Two days ago",
+      "unreadCount": 1,
+      "messages": [
+        {
+          "text": "Can I book an appointment?",
+          "time": "Two days ago"
+        }
+      ]
+    },
+    {
+      "patientName": "Patient 4",
+      "lastMessage": "I uploaded the X-ray image.",
+      "lastMessageTime": "3 days ago",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "text": "I uploaded the X-ray image.",
+          "time": "3 days ago"
+        }
+      ]
+    },
+    {
+      "patientName": "Patient 5",
+      "lastMessage": "When will I get the results?",
+      "lastMessageTime": "Last week",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "text": "When will I get the results?",
+          "time": "Last week"
+        }
+      ]
+    }
+  ]
+}

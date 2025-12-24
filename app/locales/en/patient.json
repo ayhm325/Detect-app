@@ -1,25 +1,24 @@
 {
-  "layout": {
-    "brand": "PneumoDetect",
-    "nav": {
-      "home": "Home",
-      "appointments": "Appointments",
-      "results": "Reports",
-      "chat": "Chat",
-      "profile": "Account",
-      "logout": "Logout"
-    },
-    "theme": {
-      "light": "Light mode",
-      "dark": "Dark mode"
-    },
-    "localeToggle": {
-      "ar": "العربية",
-      "en": "English"
-    },
-    "version": "Version: 1.0",
-    "status": "Status: Online ✓"
+  "brand": "PneumoDetect",
+  "nav": {
+    "home": "Home",
+    "appointments": "Appointments",
+    "results": "Reports",
+    "chat": "Chat",
+    "profile": "Account",
+    "logout": "Logout"
   },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode"
+  },
+  "localeToggle": {
+    "ar": "العربية",
+    "en": "English"
+  },
+  "version": "Version: 1.0",
+  "status": "Status: Online ✓",
+  "healthScoreValue": "98%",
   "dashboard": {
     "welcome": "Welcome",
     "stats": {
@@ -29,6 +28,7 @@
       "vitalSigns": "Health status"
     },
     "quickActions": {
+      "title": "Quick Actions",
       "bookAppointment": "Book appointment",
       "uploadXray": "Upload X-ray",
       "viewReports": "View reports",
@@ -88,6 +88,7 @@
     "notesLabel": "Notes",
     "past": "Past appointments",
     "noPast": "No past appointments",
+    "new": "New appointment",
     "actions": {
       "confirm": "Confirm",
       "cancel": "Cancel",

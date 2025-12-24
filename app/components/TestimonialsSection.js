@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 export default function TestimonialsSection() {
-  const t = useTranslations();
+  const t = useTranslations("testimonialssection");
   const testimonialsCopy = (t.raw ? t.raw("testimonials")?.items : null) || [];
   const badges = (t.raw ? t.raw("testimonials")?.badges : null) || [];
   const [activeIndex, setActiveIndex] = useState(0);

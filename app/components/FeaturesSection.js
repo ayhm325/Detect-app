@@ -5,8 +5,36 @@ import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 export default function FeaturesSection() {
-  const t = useTranslations();
-  const featureCopy = t.raw ? t.raw("features") : {};
+  const t = useTranslations("features");
+  // ...existing code...
+  // Use t("key") for all feature text, remove any hardcoded text
+  const featureCopy = {
+    title: t("title", { defaultValue: "مميزات النظام" }),
+    subtitle: t("subtitle", { defaultValue: "نوفر لك أفضل التقنيات الحديثة في مجال التشخيص الطبي" }),
+    items: [
+      {
+        icon: "/icons/ai.svg",
+        title: t("item1.title", { defaultValue: "ذكاء اصطناعي متطور" }),
+        desc: t("item1.desc", { defaultValue: "تقنية AI حديثة لتحليل دقيق" }),
+      },
+      {
+        icon: "/icons/xray.svg",
+        title: t("item2.title", { defaultValue: "تحليل الأشعة" }),
+        desc: t("item2.desc", { defaultValue: "فحص شامل للصور الطبية" }),
+      },
+      {
+        icon: "/icons/result.svg",
+        title: t("item3.title", { defaultValue: "نتائج فورية" }),
+        desc: t("item3.desc", { defaultValue: "احصل على التشخيص خلال ثوان" }),
+      },
+    ],
+    extras: [
+      { icon: "🔒", title: t("extra1.title", { defaultValue: "أمان عالي" }), desc: t("extra1.desc", { defaultValue: "حماية كاملة لبياناتك الطبية" }) },
+      { icon: "⚡", title: t("extra2.title", { defaultValue: "سرعة فائقة" }), desc: t("extra2.desc", { defaultValue: "معالجة سريعة للصور والنتائج" }) },
+      { icon: "📊", title: t("extra3.title", { defaultValue: "تقارير مفصلة" }), desc: t("extra3.desc", { defaultValue: "تقارير طبية شاملة ودقيقة" }) },
+      { icon: "🌐", title: t("extra4.title", { defaultValue: "متوفر دائماً" }), desc: t("extra4.desc", { defaultValue: "خدمة 24/7 على مدار الساعة" }) },
+    ],
+  };
   const particles = useMemo(
     () =>
       [...Array(8)].map((_, i) => ({
@@ -28,9 +56,9 @@ export default function FeaturesSection() {
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
         {/* Moving Holographic Gradients */}
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-linear-to-br from-yellow-400/40 via-amber-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '20s' }} />
-          <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-linear-to-bl from-red-400/40 via-orange-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '25s', animationDelay: '2s' }} />
-          <div className="absolute bottom-0 left-1/3 w-[550px] h-[550px] bg-linear-to-tr from-amber-400/40 via-yellow-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '22s', animationDelay: '4s' }} />
+          <div className="absolute top-0 left-0 w-125 h-125 bg-linear-to-br from-yellow-400/40 via-amber-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '20s' }} />
+          <div className="absolute top-1/4 right-0 w-150 h-150 bg-linear-to-bl from-red-400/40 via-orange-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '25s', animationDelay: '2s' }} />
+          <div className="absolute bottom-0 left-1/3 w-137.5 h-137.5 bg-linear-to-tr from-amber-400/40 via-yellow-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '22s', animationDelay: '4s' }} />
         </div>
 
         {/* Holographic Grid Pattern */}

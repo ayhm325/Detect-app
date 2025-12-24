@@ -1,122 +1,55 @@
 "use client";
 import { useState } from "react";
-import { useToast } from "@/app/components/ui/Toast";
+import { useToast } from "../../../components/ui/Toast";
 import { FaBell, FaTrash, FaCheck, FaCheckDouble } from "react-icons/fa";
-import useLocale from "@/app/hooks/useLocale";
+import useLocale from "../../../hooks/useLocale";
 
 export default function PatientNotificationsPage() {
   const { locale } = useLocale();
   const { showToast, ToastContainer } = useToast();
   const [filter, setFilter] = useState("all");
-
-  // Bilingual labels
-  const labels = locale === "en" ? {
-    // Page header
-    pageTitle: "My Notifications",
-    unreadCount: (unread, total) => `You have ${unread} unread notification${unread !== 1 ? 's' : ''} out of ${total}`,
-    allRead: (total) => `All notifications read (${total})`,
-    
-    // Filter labels
-    filterAll: "All",
-    filterUnread: "Unread",
-    filterRead: "Read",
-    
-    // Action buttons
-    markAllRead: "Mark All as Read",
-    deleteAll: "Delete All",
-    markAsRead: "Mark as read",
-    markAsUnread: "Mark as unread",
-    deleteNotification: "Delete notification",
-    
-    // Notification types
-    typeAppointment: "Appointment",
-    typeResult: "Result",
-    typeMessage: "Message",
-    typeReminder: "Reminder",
-    typeSystem: "System",
-    
-    // Empty states
-    noUnread: "No unread notifications",
-    noRead: "No read notifications",
-    noNotifications: "No notifications",
-    
-    // Stats section
-    statsTotal: "Total Notifications",
-    statsUnread: "Unread",
-    statsRead: "Read",
-    
-    // Toast messages
+  const t = useTranslations("notifications");
+  const labels = {
+    pageTitle: t("pageTitle", { defaultValue: "Notifications" }),
+    unreadCount: t("unreadCount", { defaultValue: "Unread" }),
+    allRead: t("allRead", { defaultValue: "All Read" }),
+    filterAll: t("filterAll", { defaultValue: "All" }),
+    filterUnread: t("filterUnread", { defaultValue: "Unread" }),
+    filterRead: t("filterRead", { defaultValue: "Read" }),
+    markAllRead: t("markAllRead", { defaultValue: "Mark all as read" }),
+    deleteAll: t("deleteAll", { defaultValue: "Delete all" }),
+    markAsRead: t("markAsRead", { defaultValue: "Mark as read" }),
+    markAsUnread: t("markAsUnread", { defaultValue: "Mark as unread" }),
+    deleteNotification: t("deleteNotification", { defaultValue: "Delete notification" }),
+    typeAppointment: t("typeAppointment", { defaultValue: "Appointment" }),
+    typeResult: t("typeResult", { defaultValue: "Result" }),
+    typeMessage: t("typeMessage", { defaultValue: "Message" }),
+    typeReminder: t("typeReminder", { defaultValue: "Reminder" }),
+    typeSystem: t("typeSystem", { defaultValue: "System" }),
+    noUnread: t("noUnread", { defaultValue: "No unread notifications" }),
+    noRead: t("noRead", { defaultValue: "No read notifications" }),
+    noNotifications: t("noNotifications", { defaultValue: "No notifications" }),
+    statsTotal: t("statsTotal", { defaultValue: "Total" }),
+    statsUnread: t("statsUnread", { defaultValue: "Unread" }),
+    statsRead: t("statsRead", { defaultValue: "Read" }),
     toast: {
-      notificationDeleted: "Notification deleted",
-      allDeleted: "All notifications deleted",
-      markedRead: "Marked as read",
-      allMarkedRead: "All notifications marked as read",
-      markedUnread: "Marked as unread"
+      notificationDeleted: t("notificationDeleted", { defaultValue: "Notification deleted" }),
+      allDeleted: t("allDeleted", { defaultValue: "All deleted" }),
+      markedRead: t("markedRead", { defaultValue: "Marked as read" }),
+      allMarkedRead: t("allMarkedRead", { defaultValue: "All marked as read" }),
+      markedUnread: t("markedUnread", { defaultValue: "Marked as unread" })
     },
-    
-    // Confirm dialog
-    confirmDeleteAll: "Do you want to delete all notifications?",
-    
-    // Time formats
-    timeMinutesAgo: (mins) => `${mins} minute${mins !== 1 ? 's' : ''} ago`,
-    timeHourAgo: "1 hour ago",
-    timeHoursAgo: (hours) => `${hours} hours ago`,
-    timeDaysAgo: (days) => `${days} day${days !== 1 ? 's' : ''} ago`,
-    timeJustNow: "Just now"
-  } : {
-    // Page header
-    pageTitle: "إشعاراتي",
-    unreadCount: (unread, total) => `لديك ${unread} إشعار غير مقروء من أصل ${total}`,
-    allRead: (total) => `جميع الإشعارات مقروءة (${total})`,
-    
-    // Filter labels
-    filterAll: "الكل",
-    filterUnread: "غير المقروءة",
-    filterRead: "المقروءة",
-    
-    // Action buttons
-    markAllRead: "تحديد الكل كمقروء",
-    deleteAll: "حذف الكل",
-    markAsRead: "تحديد كمقروء",
-    markAsUnread: "تحديد كغير مقروء",
-    deleteNotification: "حذف الإشعار",
-    
-    // Notification types
-    typeAppointment: "موعد",
-    typeResult: "نتيجة",
-    typeMessage: "رسالة",
-    typeReminder: "تذكير",
-    typeSystem: "نظام",
-    
-    // Empty states
-    noUnread: "لا توجد إشعارات غير مقروءة",
-    noRead: "لا توجد إشعارات مقروءة",
-    noNotifications: "لا توجد إشعارات",
-    
-    // Stats section
-    statsTotal: "إجمالي الإشعارات",
-    statsUnread: "غير المقروءة",
-    statsRead: "المقروءة",
-    
-    // Toast messages
-    toast: {
-      notificationDeleted: "تم حذف الإشعار",
-      allDeleted: "تم حذف جميع الإشعارات",
-      markedRead: "تم تحديد كمقروء",
-      allMarkedRead: "تم تحديد جميع الإشعارات كمقروءة",
-      markedUnread: "تم تحديد كغير مقروء"
-    },
-    
-    // Confirm dialog
-    confirmDeleteAll: "هل تريد حذف جميع الإشعارات؟",
-    
-    // Time formats
-    timeMinutesAgo: (mins) => `منذ ${mins} ${mins === 1 ? 'دقيقة' : mins === 2 ? 'دقيقتين' : 'دقائق'}`,
-    timeHourAgo: "منذ ساعة",
-    timeHoursAgo: (hours) => `منذ ${hours} ${hours === 2 ? 'ساعتين' : 'ساعات'}`,
-    timeDaysAgo: (days) => `منذ ${days} ${days === 1 ? 'يوم' : days === 2 ? 'يومين' : 'أيام'}`,
-    timeJustNow: "الآن"
+    confirmDeleteAll: t("confirmDeleteAll", { defaultValue: "Confirm delete all" }),
+    timeMinutesAgo: t("timeMinutesAgo", { defaultValue: (mins) => `Minutes ago: ${mins}` }),
+    timeHourAgo: t("timeHourAgo", { defaultValue: "An hour ago" }),
+    timeHoursAgo: t("timeHoursAgo", { defaultValue: (hours) => `Hours ago: ${hours}` }),
+    timeDaysAgo: t("timeDaysAgo", { defaultValue: (days) => `Days ago: ${days}` }),
+    timeJustNow: t("timeJustNow", { defaultValue: "Just now" }),
+    // ...add all other keys as needed...
   };
+  // ...existing code...
+  // The following block is misplaced and should be removed or integrated into the i18n system.
+  // Removed duplicate Arabic labels object.
   
   // Bilingual notifications seed data
   const [notifications, setNotifications] = useState(

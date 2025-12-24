@@ -12,8 +12,9 @@ export default function useLocale() {
   const router = useRouter();
 
   const buildPath = useCallback(
-    (targetLocale, path = pathname) => {
-      const cleanPath = path.replace(/^\/(en|ar)/, "");
+    (targetLocale, path) => {
+      const effectivePath = path ?? pathname;
+      const cleanPath = effectivePath.replace(/^\/(en|ar)/, "");
       const normalized = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
       return `/${targetLocale}${normalized}`;
     },
@@ -23,7 +24,7 @@ export default function useLocale() {
   const switchLocale = useCallback(() => {
     const nextLocale = locale === "en" ? "ar" : "en";
     router.replace(buildPath(nextLocale));
-  }, [locale, pathname, router, buildPath]);
+  }, [locale, router, buildPath]);
 
   return {
     locale,

@@ -1,0 +1,29 @@
+{
+  "title": "About Our Platform",
+  "description": "We provide advanced AI solutions for medical diagnostics.",
+  "visionTitle": "Our Vision",
+  "visionDesc": "To revolutionize healthcare with smart AI technologies.",
+  "missionTitle": "Our Mission",
+  "missionDesc": "Deliver accurate, fast, and safe medical diagnostics to everyone.",
+  "valuesTitle": "Our Core Values",
+  "techTitle": "Our Technology Stack",
+  "techDesc": "We leverage modern frameworks and AI tools to achieve high accuracy.",
+  "statsTitle": "Key Stats",
+  "backToHome": "Back to Home",
+  "valuesList": [
+    { "title": "Integrity", "desc": "We act with honesty and strong moral principles." },
+    { "title": "Innovation", "desc": "We constantly seek new and better ways to serve our users." },
+    { "title": "Excellence", "desc": "We strive for the highest quality in everything we do." }
+  ],
+  "stats": [
+    { "num": "1200", "label": "Users" },
+    { "num": "35", "label": "Projects" },
+    { "num": "99%", "label": "Accuracy" }
+  ],
+  "techList": [
+    "React",
+    "Next.js",
+    "Tailwind CSS",
+    "TensorFlow"
+  ]
+}

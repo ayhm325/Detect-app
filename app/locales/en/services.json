@@ -1,0 +1,18 @@
+{
+  "title": "Our Services",
+  "description": "Discover the range of AI-powered medical services we offer.",
+  "list": [
+    {
+      "name": "X-ray Analysis",
+      "desc": "Advanced AI analysis for X-ray images."
+    },
+    {
+      "name": "CT Scan Diagnostics",
+      "desc": "Accurate diagnostics for CT scans using deep learning."
+    },
+    {
+      "name": "Medical Reports",
+      "desc": "Detailed and easy-to-understand medical reports."
+    }
+  ]
+}

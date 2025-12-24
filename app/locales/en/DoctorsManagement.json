@@ -1,0 +1,111 @@
+{
+  "buttons": {
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel"
+  },
+  "noPendingRequests": "No pending requests.",
+  "showAllRequests": "Show All Requests",
+  "showPendingRequests": "Show Pending Requests Only",
+  "headerTitle": "Doctors Management",
+  "headerSubtitle": "View and manage all doctors in the system",
+  "addButton": "Add Doctor",
+  "exportButton": "Export",
+  "filters": {
+    "searchPlaceholder": "Search by name, email, or phone...",
+    "specialtyAll": "All Specialties",
+    "statusAll": "All Statuses",
+    "genderAll": "All Genders"
+  },
+  "statuses": {
+    "active": "Active",
+    "suspended": "Suspended",
+    "banned": "Banned",
+    "pending": "Pending Approval"
+  },
+  "table": {
+    "doctor": "Doctor",
+    "status": "Status",
+    "joinDate": "Join Date",
+    "lastVisit": "Last Visit",
+    "actions": "Actions",
+    "noMatches": "No matching results"
+  },
+  "toast": {
+    "fillFields": "Please fill all fields",
+    "doctorAdded": "Doctor added successfully",
+    "doctorUpdated": "Doctor updated successfully",
+    "doctorDeleted": "Doctor deleted",
+    "deleteFailed": "Failed to delete doctor",
+    "exportStarted": "Exporting data..."
+  },
+  "actions": {
+    "viewDetails": "View Details",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "doctors": "Doctors"
+  },
+  "pendingRequestsTitle": "Pending Requests",
+  "stats": {
+    "totalDoctors": "Total Doctors",
+    "totalPatients": "Total Patients",
+    "totalAdmins": "Total Admins",
+    "activeDoctors": "Active Doctors",
+    "todayVisits": "Today's Visits",
+    "totalReports": "Total Reports"
+  },
+  "genders": {
+    "male": "Male",
+    "female": "Female"
+  },
+  "cards": {
+    "appointments": "Appointments",
+    "reports": "Reports",
+    "lastVisit": "Last Visit"
+  },
+  "ageUnit": "years",
+  "confirmDelete": {
+    "title": "Confirm Doctor Deletion",
+    "description": "Are you sure you want to delete doctor {name}? This action cannot be undone.",
+    "yes": "Yes, Delete",
+    "no": "Cancel"
+  },
+  "modals": {
+    "editTitle": "Edit Doctor Details",
+    "addTitle": "Add New Doctor",
+    "fullName": "Full Name",
+    "email": "Email",
+    "licenseNumber": "License Number",
+    "phone": "Phone Number",
+    "specialty": "Specialty",
+    "experience": "Experience (years)",
+    "status": "Status"
+  },
+  "sampleNames": [
+    "Dr. Mohammed Salem Ali",
+    "Dr. Layla Hassan Mahmoud",
+    "Dr. Sami Youssef Ibrahim",
+    "Dr. Fatima Ahmed Mohamed",
+    "Dr. Omar Khalid El-Sayed",
+    "Dr. Nour Mahmoud Ali"
+  ],
+  "sampleQualifications": [
+    ["MBBS", "Master of Radiology", "Board Certificate"],
+    ["MBBS", "Master of Pulmonology"],
+    ["MBBS", "Master of Surgery", "American Board Certificate"],
+    ["MBBS", "Master of Gynecology"],
+    ["MBBS", "Master of Cardiology", "Board Certificate"],
+    ["MBBS", "Master of Internal Medicine"]
+  ],
+  "specialties": {
+    "radiology": "Radiology",
+    "pulmonology": "Pulmonology",
+    "orthopedics": "Orthopedics",
+    "gynecology": "Gynecology",
+    "cardiology": "Cardiology",
+    "internal": "Internal Medicine",
+    "general": "General Medicine"
+  }
+}

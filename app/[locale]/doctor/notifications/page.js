@@ -1,75 +1,87 @@
 "use client";
 import { useState, useMemo } from "react";
 import DoctorLayout from "../DoctorLayout";
-import { useToast } from "@/app/components/ui/Toast";
+import { useToast } from "../../../components/ui/Toast";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { FaBell, FaTrash, FaCheck, FaCheckDouble, FaFilter } from "react-icons/fa";
-import useLocale from "@/app/hooks/useLocale";
+import useLocale from "../../../hooks/useLocale";
 
 export default function NotificationsPage() {
   const { t, locale } = useLocale();
-  // Tabs, stats, and button labels (bilingual)
-  const filterLabels = locale === "ar"
-    ? { all: "الكل", unread: "غير المقروءة", read: "المقروءة" }
-    : { all: "All", unread: "Unread", read: "Read" };
-  const unreadText = locale === "ar" ? "غير المقروءة" : "unread";
-  const markAllReadText = locale === "ar" ? "تحديد الكل كمقروء" : "Mark All as Read";
-  const deleteAllText = locale === "ar" ? "حذف الكل" : "Delete All";
-  const markAsReadText = locale === "ar" ? "تحديد كمقروء" : "Mark as Read";
-  const markAsUnreadText = locale === "ar" ? "تحديد كغير مقروء" : "Mark as Unread";
-  const deleteText = locale === "ar" ? "حذف" : "Delete";
-  const noNotificationsText = locale === "ar" ? "لا توجد إشعارات" : "No notifications";
-  const toastDeleted = locale === "ar" ? "تم حذف الإشعار" : "Notification deleted";
-  const toastAllDeleted = locale === "ar" ? "تم حذف جميع الإشعارات" : "All notifications deleted";
-  const toastMarkedRead = locale === "ar" ? "تم تحديد كمقروء" : "Marked as read";
-  const toastAllMarkedRead = locale === "ar" ? "تم تحديد الجميع كمقروء" : "All marked as read";
-  const toastConfirmDeleteAll = locale === "ar" ? "هل تريد حذف جميع الإشعارات؟" : "Delete all notifications?";
-  const { showToast, ToastContainer } = useToast();
-  const dn = t.doctorNotifications || {};
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
+
   const [filter, setFilter] = useState("all");
+  const [notifications, setNotifications] = useState([
+    {
+      id: "1",
+      title: locale === "ar" ? "تم حجز موعد" : "Appointment booked",
+      message: locale === "ar" ? "لديك موعد جديد مع المريض أحمد" : "You have a new appointment with patient Ahmed",
+      time: locale === "ar" ? "اليوم 09:00" : "Today 09:00",
+      type: "appointment",
+      read: false,
+    },
+    {
+      id: "2",
+      title: locale === "ar" ? "نتيجة جديدة" : "New result",
+      message: locale === "ar" ? "تم رفع نتيجة مختبر" : "Lab result uploaded",
+      time: locale === "ar" ? "أمس 14:20" : "Yesterday 14:20",
+      type: "result",
+      read: false,
+    },
+    {
+      id: "3",
+      title: locale === "ar" ? "رسالة جديدة" : "New message",
+      message: locale === "ar" ? "رسالة من المريض" : "Message from patient",
+      time: locale === "ar" ? "قبل 3 أيام" : "3 days ago",
+      type: "message",
+      read: true,
+    },
+  ]);
 
-  // نوع الإشعار (بالعربية/إنجليزية)
-  const typeLabels = locale === "ar"
-    ? { appointment: "موعد", result: "نتيجة", message: "رسالة", system: "نظام" }
-    : { appointment: "Appointment", result: "Result", message: "Message", system: "System" };
-  
-  const notificationsTemplate = useMemo(
-    () =>
-      locale === "en"
-        ? [
-            { id: 1, title: "New Patient Appointment", message: "Mohammed Ali wants to book an appointment with you tomorrow", time: "5 minutes ago", read: false, type: "appointment" },
-            { id: 2, title: "New Test Result", message: "A new test result has been added for patient Sarah Mohammed", time: "15 minutes ago", read: false, type: "result" },
-            { id: 3, title: "Message from Patient", message: "Mohammed is asking about the medication he should take", time: "30 minutes ago", read: true, type: "message" },
-            { id: 4, title: "System Update", message: "System updated successfully, please reload the page", time: "1 hour ago", read: true, type: "system" },
-            { id: 5, title: "Upcoming Appointment", message: "You have an appointment with Khaled Youssef in 1 hour", time: "2 hours ago", read: false, type: "appointment" }
-          ]
-        : [
-            { id: 1, title: "موعد جديد مع المريض", message: "محمد علي يريد حجز موعد معك غداً", time: "منذ 5 دقائق", read: false, type: "appointment" },
-            { id: 2, title: "نتيجة فحص جديدة", message: "تم إضافة نتيجة فحص جديدة للمريض سارة محمد", time: "منذ 15 دقيقة", read: false, type: "result" },
-            { id: 3, title: "رسالة من مريض", message: "محمد يسأل عن الدواء المفروض تناوله", time: "منذ 30 دقيقة", read: true, type: "message" },
-            { id: 4, title: "تحديث في النظام", message: "تم تحديث النظام بنجاح، يرجى إعادة تحميل الصفحة", time: "منذ ساعة", read: true, type: "system" },
-            { id: 5, title: "موعد قادم", message: "لديك موعد مع خالد يوسف في خلال ساعة", time: "منذ 2 ساعة", read: false, type: "appointment" }
-          ],
-    [locale]
-  );
+  const filterLabels = {
+    all: locale === "ar" ? "الكل" : "All",
+    unread: locale === "ar" ? "غير مقروءة" : "Unread",
+    read: locale === "ar" ? "مقروءة" : "Read",
+  };
 
-  const [notifications, setNotifications] = useState(notificationsTemplate);
+  const unreadText = locale === "ar" ? "غير مقروءة" : "unread";
+  const deleteAllText = locale === "ar" ? "حذف الكل" : "Delete all";
+  const deleteText = locale === "ar" ? "حذف" : "Delete";
+  const markAllReadText = locale === "ar" ? "تحديد الكل كمقروء" : "Mark all read";
+  const markAsReadText = locale === "ar" ? "تحديد كمقروء" : "Mark as read";
+  const markAsUnreadText = locale === "ar" ? "تحديد كغير مقروء" : "Mark as unread";
+  const toastDeleted = locale === "ar" ? "تم الحذف" : "Deleted";
+  const toastAllDeleted = locale === "ar" ? "تم حذف الكل" : "All deleted";
+  const toastMarkedRead = locale === "ar" ? "تم التحديد كمقروء" : "Marked read";
+  const toastAllMarkedRead = locale === "ar" ? "تم تحديد الكل كمقروء" : "All marked read";
+  const toastConfirmDeleteAll = locale === "ar" ? "هل أنت متأكد أنك تريد حذف كل الإشعارات؟" : "Are you sure you want to delete all notifications?";
+  const noNotificationsText = locale === "ar" ? "لا توجد إشعارات" : "No notifications";
 
-  // فلترة الإشعارات
-  const filteredNotifications = notifications.filter(notif => {
-    if (filter === "unread") return !notif.read;
-    if (filter === "read") return notif.read;
-    return true;
-  });
+  const typeLabels =
+    locale === "ar"
+      ? { appointment: "موعد", result: "نتيجة", message: "رسالة", system: "نظام" }
+      : { appointment: "Appointment", result: "Result", message: "Message", system: "System" };
+
+  const filteredNotifications = useMemo(() => {
+    if (filter === "all") return notifications;
+    if (filter === "unread") return notifications.filter((n) => !n.read);
+    return notifications.filter((n) => n.read);
+  }, [notifications, filter]);
+  // ...existing code...
+  // Remove all locale-based label objects and arrays
+  // Use t("key") for all UI text and notification data
+  // For example: t("filter.all"), t("filter.unread"), t("filter.read"), t("button.markAllRead"), t("button.deleteAll"), t("items.0.title"), t("items.0.message"), t("items.0.time"), t("items.0.type")
 
   const handleDelete = (id) => {
     setNotifications(notifications.filter(n => n.id !== id));
-    showToast(toastDeleted, "info");
+    showInfo(toastDeleted);
   };
 
   const handleDeleteAll = () => {
     if (window.confirm(toastConfirmDeleteAll)) {
       setNotifications([]);
-      showToast(toastAllDeleted, "success");
+      showSuccess(toastAllDeleted);
     }
   };
 
@@ -77,12 +89,12 @@ export default function NotificationsPage() {
     setNotifications(notifications.map(n => 
       n.id === id ? { ...n, read: true } : n
     ));
-    showToast(toastMarkedRead, "info");
+    showInfo(toastMarkedRead);
   };
 
   const handleMarkAllAsRead = () => {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
-    showToast(toastAllMarkedRead, "success");
+    showSuccess(toastAllMarkedRead);
   };
 
   // تحديد كغير مقروء

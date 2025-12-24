@@ -1,0 +1,24 @@
+{
+  "name": "Name",
+  "specialty": "Specialty",
+  "license": "License Number",
+  "phone": "Phone",
+  "email": "Email",
+  "status": "Status",
+  "actions": "Actions",
+  "edit": "Edit",
+  "delete": "Delete",
+  "view": "View",
+  "noData": "No data available",
+  "addDoctor": "Add Doctor",
+  "add": "Add Doctor",
+  "details": "Details",
+  "approve": "Approve",
+  "reject": "Reject",
+  "statusLabels": {
+    "pending": "Pending",
+    "verified": "Verified",
+    "rejected": "Rejected"
+  },
+  "pendingRequestsTitle": "Pending Requests"
+}

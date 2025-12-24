@@ -1,0 +1,32 @@
+{
+  "contactPage": {
+    "title": "تواصل معنا",
+    "description": "نحن هنا لمساعدتك. تواصل معنا لأي استفسارات أو اقتراحات.",
+    "form": {
+      "name": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "subject": "الموضوع",
+      "subjectPlaceholder": "اختر الموضوع",
+      "options": {
+        "general": "استفسار عام",
+        "technical": "دعم تقني",
+        "business": "استفسار تجاري",
+        "feedback": "ملاحظات واقتراحات"
+      },
+      "message": "الرسالة",
+      "messagePlaceholder": "اكتب رسالتك هنا...",
+      "submit": "إرسال الرسالة"
+    },
+    "info": {
+      "emailTitle": "البريد الإلكتروني",
+      "emails": ["support@detect-ai.com", "info@detect-ai.com"],
+      "phoneTitle": "الهاتف",
+      "phones": ["+966 50 123 4567", "+966 50 765 4321"],
+      "addressTitle": "العنوان",
+      "addressLines": ["الرياض، المملكة العربية السعودية", "حي السليمانية، طريق الملك فهد"],
+      "hoursTitle": "ساعات العمل",
+      "hours": ["الأحد - الخميس: 9:00 ص - 6:00 م", "الجمعة - السبت: مغلق"]
+    }
+  }
+}

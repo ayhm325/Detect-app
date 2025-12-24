@@ -1,5 +1,5 @@
 import Input from "@/app/components/ui/Input";
-import Button from "@/app/components/ui/Button";
+import Button from "./Button";
 
 export default function TableToolbar({
   search,

@@ -1,0 +1,9 @@
+{
+  "dashboard": "Dashboard",
+  "patients": "Patients",
+  "uploadXray": "Upload X-Ray",
+  "chat": "Chat",
+  "results": "Results History",
+  "settings": "Settings",
+  "logout": "Logout"
+}

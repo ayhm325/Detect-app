@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 
 export default function StatsSection() {
-  const t = useTranslations();
+  const t = useTranslations('content');
   const [isVisible, setIsVisible] = useState(false);
   const [floaters, setFloaters] = useState([]);
   const sectionRef = useRef(null);

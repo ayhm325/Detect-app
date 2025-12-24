@@ -1,0 +1,65 @@
+{
+  "status": {
+    "completed": "Completed",
+    "pending": "Under review",
+    "urgent": "Urgent"
+  },
+  "statuses": {
+    "completed": "Completed",
+    "pending": "Under review",
+    "urgent": "Urgent"
+  },
+  "patientName": "Patient Name",
+  "patientId": "Patient ID",
+  "type": "Scan Type",
+  "bodyPart": "Body Part",
+  "date": "Date",
+  "time": "Time",
+  "aiSummary": "AI Summary",
+  "thumbnail": "/images/default-thumbnail.jpg",
+  "text": "Text",
+  "scan1PatientName": "Patient 1",
+  "scan1PatientId": "ID001",
+  "scan1Type": "X-Ray",
+  "scan1BodyPart": "Chest",
+  "scan1Date": "2025-12-19",
+  "scan1Time": "10:00",
+  "scan1Status": "Completed",
+  "scan1AiSummary": "No issues detected",
+  "scan1Thumbnail": "/images/scan1.jpg",
+  "scan1Finding1Type": "Normal",
+  "scan1Finding1Text": "No masses detected",
+  "scan1Finding2Type": "Normal",
+  "scan1Finding2Text": "No tumors detected",
+  "title": "Scan Results",
+  "subtitle": "Here you can review all patient and medical scan results.",
+  "stats": {
+    "total": "Total scans",
+    "completed": "Completed",
+    "pending": "Under review",
+    "today": "Today"
+  },
+  "searchPlaceholder": "Search by patient name or scan type...",
+  "filters": {
+    "allTypes": "All types",
+    "allStatuses": "All statuses"
+  },
+  "actions": {
+    "view": "View details",
+    "download": "Download report",
+    "print": "Print",
+    "close": "Close"
+  },
+  "viewer": {
+    "aiAnalysis": "AI Analysis",
+    "findings": "Findings",
+    "emptyState": "No results for this scan."
+  },
+  "statusLabel": "Status",
+  "toast": {
+    "viewingScan": "Viewing scan...",
+    "downloadStart": "Download started...",
+    "printStart": "Preparing print...",
+    "shareCopied": "Link copied to clipboard!"
+  }
+}

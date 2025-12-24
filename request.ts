@@ -2,7 +2,15 @@ import { getRequestConfig } from 'next-intl/server';
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const locales = ['en', 'ar'];
-  const locale = requestLocale && locales.includes(requestLocale) ? requestLocale : 'en';
+  // إذا كان requestLocale عبارة عن Promise، انتظر نتيجته
+  let resolvedLocale: string | undefined;
+  if (typeof requestLocale === 'object' && typeof requestLocale.then === 'function') {
+    const awaited = await requestLocale;
+    resolvedLocale = typeof awaited === 'string' ? awaited : undefined;
+  } else {
+    resolvedLocale = typeof requestLocale === 'string' ? requestLocale : undefined;
+  }
+  const locale: string = resolvedLocale && locales.includes(resolvedLocale) ? resolvedLocale : 'en';
 
   try {
     const messages = (await import(`./app/locales/${locale}/common.json`)).default;

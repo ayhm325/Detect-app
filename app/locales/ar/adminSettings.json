@@ -1,0 +1,70 @@
+{
+  "breadcrumbs": {
+    "home": "الرئيسية",
+    "settings": "الإعدادات"
+  },
+  "header": {
+    "title": "إعدادات النظام",
+    "subtitle": "إدارة النظام، الإشعارات، والصلاحيات"
+  },
+  "tabs": {
+    "system": "النظام",
+    "notifications": "الإشعارات",
+    "permissions": "الصلاحيات",
+    "security": "الأمان"
+  },
+  "system": {
+    "hospitalInfo": {
+      "title": "معلومات المستشفى",
+      "name": "اسم المستشفى",
+      "license": "رقم الترخيص",
+      "emailPlaceholder": "البريد الإلكتروني",
+      "phonePlaceholder": "رقم الهاتف"
+    },
+    "config": {
+      "timezoneOptions": [
+        { "value": "Asia/Riyadh", "label": "آسيا/الرياض" },
+        { "value": "Asia/Dubai", "label": "آسيا/دبي" },
+        { "value": "Africa/Cairo", "label": "أفريقيا/القاهرة" }
+      ],
+      "languageOptions": [
+        { "value": "ar", "label": "العربية" },
+        { "value": "en", "label": "الإنجليزية" }
+      ]
+    },
+    "backup": {
+      "options": [
+        { "value": "daily", "label": "يومي" },
+        { "value": "weekly", "label": "أسبوعي" },
+        { "value": "monthly", "label": "شهري" }
+      ]
+    },
+    "save": "حفظ التغييرات",
+    "saved": "تم الحفظ بنجاح"
+  },
+  "notifications": {
+    "title": "إعدادات الإشعارات",
+    "email": "إشعارات البريد الإلكتروني",
+    "sms": "إشعارات الرسائل النصية",
+    "push": "إشعارات التطبيق"
+  },
+  "permissions": {
+    "title": "إدارة الصلاحيات",
+    "users": "المستخدمون",
+    "roles": "الأدوار",
+    "edit": "تعديل الصلاحيات"
+  },
+  "security": {
+    "title": "إعدادات الأمان",
+    "changePassword": "تغيير كلمة المرور",
+    "twoFactor": "تفعيل التحقق بخطوتين"
+  },
+  "actions": {
+    "save": "حفظ",
+    "cancel": "إلغاء"
+  },
+  "messages": {
+    "success": "تم حفظ الإعدادات بنجاح!",
+    "error": "حدث خطأ أثناء الحفظ. حاول مرة أخرى."
+  }
+}

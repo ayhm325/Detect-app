@@ -1,0 +1,39 @@
+{
+  "title": "Admin Dashboard",
+  "stats": {
+    "totalUsers": "Total Users",
+    "doctors": "Doctors",
+    "patients": "Patients",
+    "todayScans": "Today's Scans",
+    "totalScansAll": "Total Scans"
+  },
+  "quickActionsTitle": "Quick Actions",
+  "quickActions": {
+    "users": { "title": "Users", "desc": "Manage all users" },
+    "doctors": { "title": "Doctors", "desc": "Manage doctors" },
+    "patients": { "title": "Patients", "desc": "Manage patients" },
+    "analysis": { "title": "Analytics", "desc": "View reports and statistics" },
+    "more": "More"
+  },
+  "more": "More",
+  "systemStatusTitle": "System Status",
+  "systemStatus": {
+    "serverUptime": "Server Uptime",
+    "responseTime": "Response Time",
+    "memoryUsage": "Memory Usage",
+    "dbSize": "Database Size"
+  },
+  "pendingApprovalsTitle": "Pending Approvals",
+  "pendingApprovals": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "viewAll": "View All"
+  },
+  "recentActivityTitle": "Recent Activity",
+  "notifications": "Notifications",
+  "toast": {
+    "notifications": "Notifications coming soon",
+    "approved": "Approved successfully",
+    "rejected": "Rejected successfully"
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import DoctorLayout from "../DoctorLayout";
-import { useToast } from "@/app/components/ui/Toast";
+import { useToast } from "../../../components/ui/Toast";
 import { useEffect, useMemo, useState } from "react";
 import {
   FaCalendarAlt,
@@ -19,196 +19,86 @@ import {
   FaEdit,
   FaTrash,
 } from "react-icons/fa";
-import useLocale from "@/app/hooks/useLocale";
+import useLocale from "../../../hooks/useLocale";
+import { useTranslations } from "next-intl";
 
 export default function DoctorAppointmentsPage() {
   const { showToast, ToastContainer } = useToast();
-  const { t, locale } = useLocale();
-  const ta = t.doctorAppointments || {};
+  const { locale } = useLocale();
+  const t = useTranslations("doctorAppointments");
 
-  const tr = locale === "en"
-    ? {
-        title: "Appointments",
-        subtitle: "Manage and schedule medical appointments",
-        addButton: "New appointment",
-        toast: {
-          addSoon: "New appointment coming soon",
-          confirm: "Appointment confirmed",
-          cancel: "Appointment cancelled",
-          delete: "Appointment deleted",
-        },
-        stats: { total: "Total", confirmed: "Confirmed", pending: "Pending", cancelled: "Cancelled" },
-        searchPlaceholder: "Search patient or visit reason...",
-        filters: { all: "All appointments", confirmed: "Confirmed", pending: "Pending", cancelled: "Cancelled" },
-        emptyState: "No appointments",
-        types: { online: "Online", clinic: "Clinic" },
-        reasonLabel: "Reason:",
-        actions: { confirm: "Confirm", cancel: "Cancel", delete: "Delete" },
-        statuses: { confirmed: "Confirmed", pending: "Pending", cancelled: "Cancelled" },
-      }
-    : {
-        title: "المواعيد",
-        subtitle: "إدارة وجدولة المواعيد الطبية",
-        addButton: "موعد جديد",
-        toast: {
-          addSoon: "ميزة إضافة موعد جديد قريباً",
-          confirm: "تم تأكيد الموعد",
-          cancel: "تم إلغاء الموعد",
-          delete: "تم حذف الموعد",
-        },
-        stats: { total: "الإجمالي", confirmed: "مؤكد", pending: "قيد الانتظار", cancelled: "ملغي" },
-        searchPlaceholder: "ابحث عن مريض أو سبب الزيارة...",
-        filters: { all: "جميع المواعيد", confirmed: "مؤكد", pending: "قيد الانتظار", cancelled: "ملغي" },
-        emptyState: "لا توجد مواعيد",
-        types: { online: "عن بُعد", clinic: "عيادة" },
-        reasonLabel: "السبب:",
-        actions: { confirm: "تأكيد", cancel: "إلغاء", delete: "حذف" },
-        statuses: { confirmed: "مؤكد", pending: "قيد الانتظار", cancelled: "ملغي" },
-      };
-
-  const labels = {
-    ...tr,
-    ...ta,
-    toast: { ...tr.toast, ...(ta.toast || {}) },
-    stats: { ...tr.stats, ...(ta.stats || {}) },
-    filters: { ...tr.filters, ...(ta.filters || {}) },
-    types: { ...tr.types, ...(ta.types || {}) },
-    actions: { ...tr.actions, ...(ta.actions || {}) },
-    statuses: { ...tr.statuses, ...(ta.statuses || {}) },
-  };
+  // ...existing code...
+  // Replace all labels.X with t("key")
+  // For example: t("title"), t("subtitle"), t("addButton"), t("toast.addSoon"), t("stats.total"), t("filters.all"), t("types.online"), t("actions.confirm"), t("statuses.confirmed")
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("list"); // list or calendar
   const [showAddModal, setShowAddModal] = useState(false);
 
   const appointmentTemplates = useMemo(
-    () =>
-      locale === "en"
-        ? [
-            {
-              id: 1,
-              patientName: "Mohammed Ahmed",
-              date: "2025-12-04",
-              time: "09:00 AM",
-              type: "clinic",
-              status: "confirmed",
-              phone: "+966 50 123 4567",
-              reason: "Chest X-ray review",
-            },
-            {
-              id: 2,
-              patientName: "Fatima Ali",
-              date: "2025-12-04",
-              time: "10:30 AM",
-              type: "online",
-              status: "confirmed",
-              phone: "+966 55 234 5678",
-              reason: "Medical consultation",
-            },
-            {
-              id: 3,
-              patientName: "Ahmed Khaled",
-              date: "2025-12-04",
-              time: "11:00 AM",
-              type: "clinic",
-              status: "pending",
-              phone: "+966 54 345 6789",
-              reason: "MRI follow-up",
-            },
-            {
-              id: 4,
-              patientName: "Sarah Mahmoud",
-              date: "2025-12-04",
-              time: "02:00 PM",
-              type: "clinic",
-              status: "confirmed",
-              phone: "+966 56 456 7890",
-              reason: "CT scan review",
-            },
-            {
-              id: 5,
-              patientName: "Omar Hassan",
-              date: "2025-12-05",
-              time: "09:30 AM",
-              type: "online",
-              status: "pending",
-              phone: "+966 53 567 8901",
-              reason: "Discuss imaging results",
-            },
-            {
-              id: 6,
-              patientName: "Laila Youssef",
-              date: "2025-12-05",
-              time: "01:00 PM",
-              type: "clinic",
-              status: "cancelled",
-              phone: "+966 52 678 9012",
-              reason: "Shoulder X-ray",
-            },
-          ]
-        : [
-            {
-              id: 1,
-              patientName: "محمد أحمد",
-              date: "2025-12-04",
-              time: "09:00 ص",
-              type: "clinic",
-              status: "confirmed",
-              phone: "+966 50 123 4567",
-              reason: "فحص أشعة الصدر",
-            },
-            {
-              id: 2,
-              patientName: "فاطمة علي",
-              date: "2025-12-04",
-              time: "10:30 ص",
-              type: "online",
-              status: "confirmed",
-              phone: "+966 55 234 5678",
-              reason: "استشارة طبية",
-            },
-            {
-              id: 3,
-              patientName: "أحمد خالد",
-              date: "2025-12-04",
-              time: "11:00 ص",
-              type: "clinic",
-              status: "pending",
-              phone: "+966 54 345 6789",
-              reason: "متابعة نتائج MRI",
-            },
-            {
-              id: 4,
-              patientName: "سارة محمود",
-              date: "2025-12-04",
-              time: "02:00 م",
-              type: "clinic",
-              status: "confirmed",
-              phone: "+966 56 456 7890",
-              reason: "فحص CT Scan",
-            },
-            {
-              id: 5,
-              patientName: "عمر حسن",
-              date: "2025-12-05",
-              time: "09:30 ص",
-              type: "online",
-              status: "pending",
-              phone: "+966 53 567 8901",
-              reason: "استشارة عن نتائج الأشعة",
-            },
-            {
-              id: 6,
-              patientName: "ليلى يوسف",
-              date: "2025-12-05",
-              time: "01:00 م",
-              type: "clinic",
-              status: "cancelled",
-              phone: "+966 52 678 9012",
-              reason: "فحص أشعة الكتف",
-            },
-          ],
-    [locale]
+    () => [
+      {
+        id: 1,
+        patientName: t("items.0.patientName"),
+        date: t("items.0.date"),
+        time: t("appointments.1.time"),
+        type: t("appointments.1.type"),
+        status: t("appointments.1.status"),
+        phone: t("appointments.1.phone"),
+        reason: t("appointments.1.reason")
+      },
+      {
+        id: 2,
+        patientName: t("appointments.2.patientName"),
+        date: t("appointments.2.date"),
+        time: t("appointments.2.time"),
+        type: t("appointments.2.type"),
+        status: t("appointments.2.status"),
+        phone: t("appointments.2.phone"),
+        reason: t("appointments.2.reason")
+      },
+      {
+        id: 3,
+        patientName: t("appointments.3.patientName"),
+        date: t("appointments.3.date"),
+        time: t("appointments.3.time"),
+        type: t("appointments.3.type"),
+        status: t("appointments.3.status"),
+        phone: t("appointments.3.phone"),
+        reason: t("appointments.3.reason")
+      },
+      {
+        id: 4,
+        patientName: t("appointments.4.patientName"),
+        date: t("appointments.4.date"),
+        time: t("appointments.4.time"),
+        type: t("appointments.4.type"),
+        status: t("appointments.4.status"),
+        phone: t("appointments.4.phone"),
+        reason: t("appointments.4.reason")
+      },
+      {
+        id: 5,
+        patientName: t("appointments.5.patientName"),
+        date: t("appointments.5.date"),
+        time: t("appointments.5.time"),
+        type: t("appointments.5.type"),
+        status: t("appointments.5.status"),
+        phone: t("appointments.5.phone"),
+        reason: t("appointments.5.reason")
+      },
+      {
+        id: 6,
+        patientName: t("appointments.6.patientName"),
+        date: t("appointments.6.date"),
+        time: t("appointments.6.time"),
+        type: t("appointments.6.type"),
+        status: t("appointments.6.status"),
+        phone: t("appointments.6.phone"),
+        reason: t("appointments.6.reason")
+      }
+    ],
+    [t]
   );
 
   const [appointments, setAppointments] = useState(appointmentTemplates);
@@ -241,26 +131,26 @@ export default function DoctorAppointmentsPage() {
     setAppointments(
       appointments.map((apt) => (apt.id === id ? { ...apt, status: "confirmed" } : apt))
     );
-    showToast(labels.toast.confirm, "success");
+          showToast(t("toast.confirm"), "success");
   };
 
   const handleCancel = (id) => {
     setAppointments(
       appointments.map((apt) => (apt.id === id ? { ...apt, status: "cancelled" } : apt))
     );
-    showToast(labels.toast.cancel, "info");
+          showToast(t("toast.cancel"), "info");
   };
 
   const handleDelete = (id) => {
     setAppointments(appointments.filter((apt) => apt.id !== id));
-    showToast(labels.toast.delete, "success");
+          showToast(t("toast.delete"), "success");
   };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      confirmed: { label: labels.statuses.confirmed, color: "bg-green-100 text-green-700 border-green-200" },
-      pending: { label: labels.statuses.pending, color: "bg-orange-100 text-orange-700 border-orange-200" },
-      cancelled: { label: labels.statuses.cancelled, color: "bg-red-100 text-red-700 border-red-200" },
+            confirmed: { label: t("statuses.confirmed"), color: "bg-green-100 text-green-700 border-green-200" },
+            pending: { label: t("statuses.pending"), color: "bg-orange-100 text-orange-700 border-orange-200" },
+            cancelled: { label: t("statuses.cancelled"), color: "bg-red-100 text-red-700 border-red-200" },
     };
     const config = statusConfig[status] || statusConfig.pending;
     return (
@@ -292,20 +182,20 @@ export default function DoctorAppointmentsPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                 <FaCalendarAlt className="text-blue-600" />
-                  {labels.title}
+                      {t("title")}
               </h1>
-                <p className="mt-2 text-gray-600">{labels.subtitle}</p>
+                <p className="mt-2 text-gray-600">{t("subtitle")}</p>
             </div>
 
             <button
               onClick={() => {
                 setShowAddModal(true);
-                  showToast(labels.toast.addSoon, "info");
+                      showToast(t("toast.addSoon"), "info");
               }}
               className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <FaPlus />
-                {labels.addButton}
+                    {t("addButton")}
             </button>
           </div>
 
@@ -314,7 +204,7 @@ export default function DoctorAppointmentsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{labels.stats.total}</p>
+                        <p className="text-sm text-gray-600">{t("stats.total")}</p>
                   <p className="mt-1 text-3xl font-bold text-gray-900">{stats.total}</p>
                 </div>
                 <FaCalendarAlt className="text-3xl text-blue-600" />
@@ -324,7 +214,7 @@ export default function DoctorAppointmentsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{labels.stats.confirmed}</p>
+                        <p className="text-sm text-gray-600">{t("stats.confirmed")}</p>
                   <p className="mt-1 text-3xl font-bold text-green-600">{stats.confirmed}</p>
                 </div>
                 <FaCheckCircle className="text-3xl text-green-600" />
@@ -334,7 +224,7 @@ export default function DoctorAppointmentsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{labels.stats.pending}</p>
+                        <p className="text-sm text-gray-600">{t("stats.pending")}</p>
                   <p className="mt-1 text-3xl font-bold text-orange-600">{stats.pending}</p>
                 </div>
                 <FaHourglassHalf className="text-3xl text-orange-600" />
@@ -344,7 +234,7 @@ export default function DoctorAppointmentsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{labels.stats.cancelled}</p>
+                        <p className="text-sm text-gray-600">{t("stats.cancelled")}</p>
                   <p className="mt-1 text-3xl font-bold text-red-600">{stats.cancelled}</p>
                 </div>
                 <FaTimesCircle className="text-3xl text-red-600" />
@@ -356,12 +246,12 @@ export default function DoctorAppointmentsPage() {
           <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
             <div className="flex flex-wrap items-center gap-4">
               {/* Search */}
-              <div className="flex-1 min-w-[250px]">
+              <div className="flex-1 min-w-62.5">
                 <div className="relative">
                   <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
-                    placeholder={labels.searchPlaceholder}
+                          placeholder={t("searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-10 pl-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -377,10 +267,10 @@ export default function DoctorAppointmentsPage() {
                   onChange={(e) => setFilter(e.target.value)}
                   className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 >
-                  <option value="all">{labels.filters.all}</option>
-                  <option value="confirmed">{labels.filters.confirmed}</option>
-                  <option value="pending">{labels.filters.pending}</option>
-                  <option value="cancelled">{labels.filters.cancelled}</option>
+                        <option value="all">{t("filters.all")}</option>
+                        <option value="confirmed">{t("filters.confirmed")}</option>
+                        <option value="pending">{t("filters.pending")}</option>
+                        <option value="cancelled">{t("filters.cancelled")}</option>
                 </select>
               </div>
             </div>
@@ -391,7 +281,7 @@ export default function DoctorAppointmentsPage() {
             {filteredAppointments.length === 0 ? (
               <div className="rounded-xl bg-white p-12 text-center shadow-lg border border-gray-100">
                 <FaCalendarAlt className="mx-auto mb-4 text-5xl text-gray-300" />
-                <p className="text-lg text-gray-600">{labels.emptyState}</p>
+                      <p className="text-lg text-gray-600">{t("emptyState")}</p>
               </div>
             ) : (
               filteredAppointments.map((apt) => (
@@ -440,7 +330,7 @@ export default function DoctorAppointmentsPage() {
                             ) : (
                               <FaMapMarkerAlt className="text-red-600" />
                             )}
-                            {apt.type === "online" ? labels.types.online : labels.types.clinic}
+                                  {apt.type === "online" ? t("types.online") : t("types.clinic")}
                           </div>
                         </div>
 
@@ -450,7 +340,7 @@ export default function DoctorAppointmentsPage() {
                         </div>
 
                         <p className="text-sm text-gray-700">
-                          <span className="font-medium">{labels.reasonLabel}</span> {apt.reason}
+                          <span className="font-medium">{t("reasonLabel")}</span> {apt.reason}
                         </p>
                       </div>
                     </div>
@@ -463,7 +353,7 @@ export default function DoctorAppointmentsPage() {
                           className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-green-700"
                         >
                           <FaCheckCircle />
-                          {labels.actions.confirm}
+                                {t("actions.confirm")}
                         </button>
                       )}
                       {apt.status !== "cancelled" && (
@@ -472,7 +362,7 @@ export default function DoctorAppointmentsPage() {
                           className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-orange-700"
                         >
                           <FaTimesCircle />
-                          {labels.actions.cancel}
+                                {t("actions.cancel")}
                         </button>
                       )}
                       <button
@@ -480,7 +370,7 @@ export default function DoctorAppointmentsPage() {
                         className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-red-700"
                       >
                         <FaTrash />
-                        {labels.actions.delete}
+                              {t("actions.delete")}
                       </button>
                     </div>
                   </div>

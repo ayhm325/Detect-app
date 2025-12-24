@@ -1,0 +1,19 @@
+{
+  "title": "Terms and Conditions",
+  "description": "These terms and conditions govern your use of our website and services.",
+  "lastUpdated": "Last updated",
+  "sections": [
+    {
+      "heading": "Acceptance of Terms",
+      "content": "By using our services, you agree to these terms."
+    },
+    {
+      "heading": "User Responsibilities",
+      "content": "You are responsible for your use of the service and any content you provide."
+    },
+    {
+      "heading": "Changes to Terms",
+      "content": "We may update these terms from time to time."
+    }
+  ]
+}

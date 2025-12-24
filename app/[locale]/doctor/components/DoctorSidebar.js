@@ -11,15 +11,17 @@ export default function DoctorSidebar({ active }) {
   const locale = pathname?.startsWith('/en') ? 'en' : 'ar';
   const basePrefix = locale === 'en' ? '/en' : '/ar';
 
+  const { useTranslations } = require('next-intl');
+  const t = useTranslations('doctorSidebar');
   const navItems = [
-    { label: 'الصفحة الرئيسية', icon: <FaHome />, href: `${basePrefix}/doctor/dashboard` },
-    { label: 'المرضى', icon: <FaUserInjured />, href: `${basePrefix}/doctor/patients` },
-    { label: 'الصور الطبية', icon: <FaXRay />, href: `${basePrefix}/doctor/results` },
-    { label: 'المحادثات', icon: <FaComments />, href: `${basePrefix}/doctor/chat` },
-    { label: 'المواعيد', icon: <FaCalendarAlt />, href: `${basePrefix}/doctor/appointments` },
-    { label: 'التحليلات', icon: <FaChartBar />, href: `${basePrefix}/doctor/analytics` },
-    { label: 'الإشعارات', icon: <FaBell />, href: `${basePrefix}/doctor/notifications` },
-    { label: 'الإعدادات', icon: <FaCog />, href: `${basePrefix}/doctor/settings` },
+    { label: t('dashboard'), icon: <FaHome />, href: `${basePrefix}/doctor/dashboard` },
+    { label: t('patients'), icon: <FaUserInjured />, href: `${basePrefix}/doctor/patients` },
+    { label: t('results'), icon: <FaXRay />, href: `${basePrefix}/doctor/results` },
+    { label: t('chat'), icon: <FaComments />, href: `${basePrefix}/doctor/chat` },
+    { label: t('appointments'), icon: <FaCalendarAlt />, href: `${basePrefix}/doctor/appointments` },
+    { label: t('analytics'), icon: <FaChartBar />, href: `${basePrefix}/doctor/analytics` },
+    { label: t('notifications'), icon: <FaBell />, href: `${basePrefix}/doctor/notifications` },
+    { label: t('settings'), icon: <FaCog />, href: `${basePrefix}/doctor/settings` },
   ];
 
   return (

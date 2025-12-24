@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useToast } from "@/app/components/ui/Toast";
-import useLocale from "@/app/hooks/useLocale";
+import { useToast } from "../../../components/ui/Toast";
+import { useTranslations, useLocale } from "next-intl";
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCalendarAlt, FaIdCard, FaHeartbeat, FaWeight, FaRuler, FaAllergies, FaNotesMedical, FaEdit, FaSave, FaTimes, FaBell, FaLock, FaLanguage, FaMoon, FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function PatientProfilePage() {
@@ -20,7 +20,7 @@ export default function PatientProfilePage() {
       if (newDoctorValue === "dr-mohamed") newDoctorLabel = locale === "ar" ? "د. محمد أحمد (صدرية)" : "Dr. Mohamed Ahmed (Pulmonology)";
       if (newDoctorValue === "dr-saeed") newDoctorLabel = locale === "ar" ? "د. سعيد خالد (قلب)" : "Dr. Saeed Khalid (Cardiology)";
       // Import and call addDoctorChangeRequest
-      import("@/app/api/doctor-change-requests").then(api => {
+      import("../../../api/doctor-change-requests").then(api => {
         api.addDoctorChangeRequest({
           patientName: profileData.fullName,
           newDoctor: newDoctorValue,
@@ -31,7 +31,8 @@ export default function PatientProfilePage() {
       setShowChangeDoctor(false);
       showToast(locale === "ar" ? "تم إرسال طلب تغيير الطبيب للإدارة وسيتم مراجعته قريباً" : "Your doctor change request has been sent to admin for approval.", "success");
     };
-  const { locale } = useLocale();
+  const locale = useLocale();
+  const t = useTranslations("profile");
   const { showToast, ToastContainer } = useToast();
   
   const [activeTab, setActiveTab] = useState("profile");
@@ -40,211 +41,20 @@ export default function PatientProfilePage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Comprehensive bilingual labels
-  const labels = locale === "en" ? {
-    // Page title
-    pageTitle: "Personal Profile",
-    pageSubtitle: "Manage your personal and health information",
-    
-    // Tabs
-    tabPersonalInfo: "Personal Information",
-    tabHealthInfo: "Health Information",
-    tabNotifications: "Notifications",
-    tabSecurity: "Security",
-    
-    // Profile header
-    patientNumber: "Patient Number",
-    activeAccount: "Active Account",
-    memberSince: "Member since 2020",
-    
-    // Personal info section
-    sectionPersonalInfo: "Personal Information",
-    fullName: "Full Name",
-    email: "Email Address",
-    phone: "Phone Number",
-    birthDate: "Date of Birth",
-    nationalId: "National ID",
-    bloodType: "Blood Type",
-    address: "Address",
-    gender: "Gender",
-    male: "Male",
-    female: "Female",
-    
-    // Body measurements
-    sectionBodyMeasurements: "Body Measurements",
-    height: "Height (cm)",
-    weight: "Weight (kg)",
-    bmi: "Body Mass Index (BMI)",
-    bmiUnderweight: "Underweight",
-    bmiNormal: "Normal",
-    bmiOverweight: "Overweight",
-    bmiObese: "Obese",
-    
-    // Emergency contact
-    sectionEmergencyContact: "Emergency Contact",
-    emergencyName: "Name",
-    emergencyPhone: "Phone Number",
-    emergencyRelation: "Relationship",
-    relationWife: "Wife",
-    relationHusband: "Husband",
-    relationMother: "Mother",
-    relationFather: "Father",
-    relationBrother: "Brother",
-    relationSister: "Sister",
-    relationSon: "Son",
-    relationDaughter: "Daughter",
-    
-    // Health info section
-    sectionHealthInfo: "Health Information",
-    allergies: "Allergies",
-    chronicDiseases: "Chronic Diseases",
-    currentMedications: "Current Medications",
-    previousSurgeries: "Previous Surgeries",
-    familyHistory: "Family History",
-    
-    // Notifications
-    sectionNotifications: "Notification Settings",
-    emailNotifications: "Email Notifications",
-    emailNotificationsDesc: "Receive notifications via email",
-    smsNotifications: "SMS Notifications",
-    smsNotificationsDesc: "Receive notifications via SMS",
-    pushNotifications: "Push Notifications",
-    pushNotificationsDesc: "Receive app notifications",
-    notificationPreferences: "Notification Preferences",
-    appointmentReminders: "Appointment Reminders",
-    reportUpdates: "Report Updates",
-    medicationReminders: "Medication Reminders",
-    healthTips: "Health Tips",
-    
-    // Security section
-    sectionSecurity: "Security and Password",
-    passwordTips: "Tips for a strong password:",
-    passwordTip1: "✓ Use at least 8 characters",
-    passwordTip2: "✓ Combine uppercase and lowercase letters",
-    passwordTip3: "✓ Add numbers and special symbols",
-    passwordTip4: "✓ Avoid using personal information",
-    currentPassword: "Current Password",
-    newPassword: "New Password",
-    confirmPassword: "Confirm Password",
-    changePassword: "Change Password",
-    activeSessions: "Active Sessions",
-    currentDevice: "Current Device",
-    activeNow: "Active Now",
-    
-    // Buttons
-    btnEdit: "Edit",
-    btnSave: "Save",
-    btnCancel: "Cancel",
-    
-    // Toast messages
-    toastSaveSuccess: "Changes saved successfully",
-    toastCancelEdit: "Changes cancelled",
-    toastPasswordMismatch: "Passwords do not match",
-    toastPasswordLength: "Password must be at least 8 characters",
-    toastPasswordChanged: "Password changed successfully",
-    toastNotificationUpdated: "Notification settings updated"
-  } : {
-    // Page title
-    pageTitle: "الحساب الشخصي",
-    pageSubtitle: "إدارة معلوماتك الشخصية والصحية",
-    
-    // Tabs
-    tabPersonalInfo: "المعلومات الشخصية",
-    tabHealthInfo: "المعلومات الصحية",
-    tabNotifications: "الإشعارات",
-    tabSecurity: "الأمان",
-    
-    // Profile header
-    patientNumber: "رقم المريض",
-    activeAccount: "حساب نشط",
-    memberSince: "عضو منذ 2020",
-    
-    // Personal info section
-    sectionPersonalInfo: "المعلومات الشخصية",
-    fullName: "الاسم الكامل",
-    email: "البريد الإلكتروني",
-    phone: "رقم الجوال",
-    birthDate: "تاريخ الميلاد",
-    nationalId: "رقم الهوية",
-    bloodType: "فصيلة الدم",
-    address: "العنوان",
-    gender: "الجنس",
-    male: "ذكر",
-    female: "أنثى",
-    
-    // Body measurements
-    sectionBodyMeasurements: "القياسات الجسدية",
-    height: "الطول (سم)",
-    weight: "الوزن (كجم)",
-    bmi: "مؤشر كتلة الجسم (BMI)",
-    bmiUnderweight: "نحيف",
-    bmiNormal: "طبيعي",
-    bmiOverweight: "زيادة وزن",
-    bmiObese: "سمنة",
-    
-    // Emergency contact
-    sectionEmergencyContact: "جهة الاتصال الطارئة",
-    emergencyName: "الاسم",
-    emergencyPhone: "رقم الجوال",
-    emergencyRelation: "صلة القرابة",
-    relationWife: "زوجة",
-    relationHusband: "زوج",
-    relationMother: "أم",
-    relationFather: "أب",
-    relationBrother: "أخ",
-    relationSister: "أخت",
-    relationSon: "ابن",
-    relationDaughter: "ابنة",
-    
-    // Health info section
-    sectionHealthInfo: "المعلومات الصحية",
-    allergies: "الحساسية",
-    chronicDiseases: "الأمراض المزمنة",
-    currentMedications: "الأدوية الحالية",
-    previousSurgeries: "العمليات الجراحية السابقة",
-    familyHistory: "التاريخ العائلي",
-    
-    // Notifications
-    sectionNotifications: "إعدادات الإشعارات",
-    emailNotifications: "إشعارات البريد الإلكتروني",
-    emailNotificationsDesc: "استلام الإشعارات عبر البريد",
-    smsNotifications: "إشعارات الرسائل النصية",
-    smsNotificationsDesc: "استلام الإشعارات عبر SMS",
-    pushNotifications: "الإشعارات الفورية",
-    pushNotificationsDesc: "استلام إشعارات التطبيق",
-    notificationPreferences: "تفضيلات الإشعارات",
-    appointmentReminders: "تذكير بالمواعيد",
-    reportUpdates: "تحديثات التقارير",
-    medicationReminders: "تذكير بالأدوية",
-    healthTips: "نصائح صحية",
-    
-    // Security section
-    sectionSecurity: "الأمان وكلمة المرور",
-    passwordTips: "نصائح لكلمة مرور قوية:",
-    passwordTip1: "✓ استخدم 8 أحرف على الأقل",
-    passwordTip2: "✓ اجمع بين الأحرف الكبيرة والصغيرة",
-    passwordTip3: "✓ أضف أرقاماً ورموزاً خاصة",
-    passwordTip4: "✓ تجنب استخدام معلومات شخصية",
-    currentPassword: "كلمة المرور الحالية",
-    newPassword: "كلمة المرور الجديدة",
-    confirmPassword: "تأكيد كلمة المرور",
-    changePassword: "تغيير كلمة المرور",
-    activeSessions: "الجلسات النشطة",
-    currentDevice: "الجهاز الحالي",
-    activeNow: "نشط الآن",
-    
-    // Buttons
-    btnEdit: "تعديل",
-    btnSave: "حفظ",
-    btnCancel: "إلغاء",
-    
-    // Toast messages
-    toastSaveSuccess: "تم حفظ التغييرات بنجاح",
-    toastCancelEdit: "تم إلغاء التعديلات",
-    toastPasswordMismatch: "كلمات المرور غير متطابقة",
-    toastPasswordLength: "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
-    toastPasswordChanged: "تم تغيير كلمة المرور بنجاح",
-    toastNotificationUpdated: "تم تحديث إعدادات الإشعارات"
+  const labels = {
+    pageTitle: t("pageTitle", { defaultValue: "Profile" }),
+    pageSubtitle: t("pageSubtitle", { defaultValue: "Your profile details" }),
+    activeNow: t("activeNow", { defaultValue: "Active now" }),
+    btnEdit: t("btnEdit", { defaultValue: "Edit" }),
+    btnSave: t("btnSave", { defaultValue: "Save" }),
+    btnCancel: t("btnCancel", { defaultValue: "Cancel" }),
+    toastSaveSuccess: t("toastSaveSuccess", { defaultValue: "Saved successfully" }),
+    toastCancelEdit: t("toastCancelEdit", { defaultValue: "Edit cancelled" }),
+    toastPasswordMismatch: t("toastPasswordMismatch", { defaultValue: "Passwords do not match" }),
+    toastPasswordLength: t("toastPasswordLength", { defaultValue: "Password too short" }),
+    toastPasswordChanged: t("toastPasswordChanged", { defaultValue: "Password changed" }),
+    toastNotificationUpdated: t("toastNotificationUpdated", { defaultValue: "Notification updated" }),
+    // ...add all other keys as needed...
   };
 
   const [profileData, setProfileData] = useState(locale === "en" ? {

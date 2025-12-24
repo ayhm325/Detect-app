@@ -1,13 +1,17 @@
 "use client";
-import { useToast } from "@/app/components/ui/Toast";
+
 import { useState, useRef } from "react";
 import Image from "next/image";
-import HoloButton from "@/app/components/ui/HoloButton";
-import GlassCard from "@/app/components/ui/GlassCard";
-import useLocale from "@/app/hooks/useLocale";
+import HoloButton from "../../../components/ui/HoloButton";
+import GlassCard from "../../../components/ui/GlassCard";
+import useLocale from "../../../hooks/useLocale";
+import { useTranslations } from "next-intl";
+import { useToast } from "../../../components/ui/Toast";
+import StatusBadge from "../../../components/ui/StatusBadge";
 
-export default function UploadXRayPage() {
+export default function Page() {
   const { locale } = useLocale();
+  const t = useTranslations("uploadXray");
   const { showToast, ToastContainer } = useToast();
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -16,59 +20,14 @@ export default function UploadXRayPage() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [recent, setRecent] = useState([
-    { id: "U1", name: "xray-shoulder.png", size: "1.2MB", status: locale === "ar" ? "جاهز" : "ready" },
-    { id: "U2", name: "ct-chest-2025-12.dcm", size: "5.8MB", status: locale === "ar" ? "بانتظار المراجعة" : "pending_review" },
+    { id: "U1", name: "xray-shoulder.png", size: "1.2MB", status: t("ready") },
+    { id: "U2", name: "ct-chest-2025-12.dcm", size: "5.8MB", status: t("pending_review", { defaultValue: "Pending Review" }) },
   ]);
   const inputRef = useRef(null);
   const [successMsg, setSuccessMsg] = useState("");
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState(locale === "ar" ? "الكل" : "all");
-
-  const labels = {
-    pageTitle: locale === "ar" ? "رفع صور الأشعة" : "Upload X-Ray Images",
-    fileTypes: locale === "ar" ? "PNG • JPG • DICOM • حد" : "PNG • JPG • DICOM • Max",
-    mb: "MB",
-    uploadCard: {
-      title: locale === "ar" ? "رفع ملف الأشعة" : "Upload X-Ray File",
-      selectFile: locale === "ar" ? "اختَر الملف أو اسحب وأفلت هنا" : "Choose File or Drag & Drop Here",
-      preview: locale === "ar" ? "معاينة" : "Preview",
-      notesLabel: locale === "ar" ? "ملاحظات للطبيب (اختياري)" : "Notes for Doctor (Optional)",
-      notesPlaceholder: locale === "ar" ? "اكتب أي تفاصيل مهمة عن الحالة" : "Write any important details about the condition",
-    },
-    buttons: {
-      upload: locale === "ar" ? "رفع" : "Upload",
-      uploading: locale === "ar" ? "جاري الرفع..." : "Uploading...",
-      cancel: locale === "ar" ? "إلغاء" : "Cancel",
-    },
-    progress: {
-      label: locale === "ar" ? "نسبة التقدم:" : "Progress:",
-    },
-    recentFiles: {
-      title: locale === "ar" ? "الملفات المرفوعة حديثاً" : "Recently Uploaded Files",
-      searchPlaceholder: locale === "ar" ? "ابحث بالاسم..." : "Search by name...",
-      size: locale === "ar" ? "الحجم:" : "Size:",
-      noFiles: locale === "ar" ? "لا توجد ملفات بعد" : "No files yet",
-    },
-    filter: {
-      all: locale === "ar" ? "الكل" : "All",
-      ready: locale === "ar" ? "جاهز" : "Ready",
-      pending: locale === "ar" ? "بانتظار المراجعة" : "Pending Review",
-    },
-    status: {
-      ready: locale === "ar" ? "جاهز" : "Ready",
-      pending_review: locale === "ar" ? "بانتظار المراجعة" : "Pending Review",
-    },
-    toast: {
-      fileSelected: locale === "ar" ? "تم تحديد الملف:" : "File selected:",
-      uploading: locale === "ar" ? "جاري رفع الملف..." : "Uploading file...",
-      uploadSuccess: locale === "ar" ? "تم رفع الملف بنجاح وإرساله للمراجعة" : "File uploaded successfully and sent for review",
-      errorNoFile: locale === "ar" ? "يرجى اختيار ملف أولاً" : "Please select a file first",
-      errorUnsupportedType: locale === "ar" ? "نوع الملف غير مدعوم. الصيغ المسموحة: PNG, JPG, DICOM" : "Unsupported file type. Allowed formats: PNG, JPG, DICOM",
-      errorFileSize: locale === "ar" ? "الحجم كبير" : "File size too large",
-      errorFileSizeMax: locale === "ar" ? "الحد الأقصى" : "Maximum",
-    },
-  };
-
+  const [statusFilter, setStatusFilter] = useState(t("filter_all", { defaultValue: "All" }));
+  const MB = "MB";
   const MAX_MB = 20;
   const allowedExt = ["png", "jpg", "jpeg", "dcm"];
 
@@ -79,14 +38,14 @@ export default function UploadXRayPage() {
     const ext = f.name.split(".").pop()?.toLowerCase();
     const sizeMB = f.size / (1024 * 1024);
     if (!ext || !allowedExt.includes(ext)) {
-      const errorMsg = labels.toast.errorUnsupportedType;
+      const errorMsg = t("errorUnsupportedType", { defaultValue: "Unsupported file type" });
       setError(errorMsg);
       showToast(errorMsg, "error");
       clearSelection();
       return;
     }
     if (sizeMB > MAX_MB) {
-      const errorMsg = `${labels.toast.errorFileSize} (${sizeMB.toFixed(1)}${labels.mb}). ${labels.toast.errorFileSizeMax} ${MAX_MB}${labels.mb}`;
+      const errorMsg = `${t("errorFileSize", { defaultValue: "File size too large" })} (${sizeMB.toFixed(1)}${MB}). ${t("errorFileSizeMax", { defaultValue: "Max allowed" })} ${MAX_MB}${MB}`;
       setError(errorMsg);
       showToast(errorMsg, "error");
       clearSelection();
@@ -99,7 +58,7 @@ export default function UploadXRayPage() {
     } else {
       setPreviewUrl(null);
     }
-    showToast(`${labels.toast.fileSelected} ${f.name}`, "success");
+    showToast(`${t("fileSelected", { defaultValue: "File selected" })} ${f.name}`, "success");
   }
 
   function clearSelection() {
@@ -124,7 +83,7 @@ export default function UploadXRayPage() {
 
   function mockUpload() {
     if (!file) {
-      const errorMsg = labels.toast.errorNoFile;
+      const errorMsg = t("errorNoFile", { defaultValue: "No file selected" });
       setError(errorMsg);
       showToast(errorMsg, "error");
       return;
@@ -132,7 +91,7 @@ export default function UploadXRayPage() {
     setError("");
     setUploading(true);
     setProgress(0);
-    showToast(labels.toast.uploading, "info");
+    showToast(t("uploading", { defaultValue: "Uploading..." }), "info");
     const start = Date.now();
     const timer = setInterval(() => {
       const elapsed = Date.now() - start;
@@ -141,12 +100,12 @@ export default function UploadXRayPage() {
       if (pct >= 100) {
         clearInterval(timer);
         setUploading(false);
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(1) + labels.mb;
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1) + MB;
         setRecent((r) => [
-          { id: `U${Date.now()}`, name: file.name, size: sizeMB, status: locale === "ar" ? "بانتظار المراجعة" : "pending_review" },
+          { id: `U${Date.now()}`, name: file.name, size: sizeMB, status: t("pending_review", { defaultValue: "Pending Review" }) },
           ...r,
         ]);
-        const successMsg = labels.toast.uploadSuccess;
+        const successMsg = t("uploadSuccess", { defaultValue: "Upload successful" });
         setSuccessMsg(successMsg);
         showToast(successMsg, "success");
         clearSelection();
@@ -161,11 +120,79 @@ export default function UploadXRayPage() {
       <ToastContainer />
       <section className="space-y-6">
         <header className="flex items-center justify-between">
-          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">{labels.pageTitle}</h1>
-          <span className="text-sm text-gray-500 dark:text-gray-400">{labels.fileTypes} {MAX_MB}{labels.mb}</span>
+          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">{t("pageTitle", { defaultValue: "Upload X-ray" })}</h1>
+          <span className="text-sm text-gray-500 dark:text-gray-400">{t("fileTypes", { defaultValue: "Allowed file types" })} {MAX_MB}{MB}</span>
+        </header>
+        {/* ...existing code... */}
+      </section>
+    </>
+  );
+}
+
+  function clearSelection() {
+    setFile(null);
+    setPreviewUrl(null);
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const f = e.dataTransfer?.files?.[0];
+    if (!f) return;
+    const fakeEvent = { target: { files: [f] } };
+    onSelect(fakeEvent);
+  }
+
+  function onDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function mockUpload() {
+    if (!file) {
+      const errorMsg = t("errorNoFile", { defaultValue: "No file selected" });
+      setError(errorMsg);
+      showToast(errorMsg, "error");
+      return;
+    }
+    setError("");
+    setUploading(true);
+    setProgress(0);
+    showToast(t("uploading", { defaultValue: "Uploading..." }), "info");
+    const start = Date.now();
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min(100, Math.round((elapsed / 1500) * 100));
+      setProgress(pct);
+      if (pct >= 100) {
+        clearInterval(timer);
+        setUploading(false);
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1) + MB;
+        setRecent((r) => [
+          { id: `U${Date.now()}`, name: file.name, size: sizeMB, status: t("pending_review", { defaultValue: "Pending Review" }) },
+          ...r,
+        ]);
+        const successMsg = t("uploadSuccess", { defaultValue: "Upload successful" });
+        setSuccessMsg(successMsg);
+        showToast(successMsg, "success");
+        clearSelection();
+        setNotes("");
+        setTimeout(() => setSuccessMsg(""), 2500);
+      }
+    }, 100);
+  }
+
+  return (
+    <>
+      <ToastContainer />
+      <section className="space-y-6">
+        <header className="flex items-center justify-between">
+          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">{t("pageTitle", { defaultValue: "Upload X-ray" })}</h1>
+          <span className="text-sm text-gray-500 dark:text-gray-400">{t("fileTypes", { defaultValue: "Allowed file types" })} {MAX_MB}{MB}</span>
         </header>
 
-        <GlassCard title={labels.uploadCard.title}>
+        <GlassCard title={t("uploadCard_title", { defaultValue: "Upload File" })}> 
           <div className="space-y-4">
             {successMsg && (
               <div className="rounded-lg bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 px-3 py-2 text-sm text-green-700 dark:text-green-300">{successMsg}</div>
@@ -175,7 +202,7 @@ export default function UploadXRayPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{labels.uploadCard.selectFile}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t("selectFile", { defaultValue: "Select file" })}</label>
               <div
                 onDrop={onDrop}
                 onDragOver={onDragOver}
@@ -191,27 +218,27 @@ export default function UploadXRayPage() {
               </div>
               {previewUrl && (
                 <div className="mt-3 relative h-64 w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                  <Image src={previewUrl} alt={labels.uploadCard.preview} fill className="object-contain" />
+                  <Image src={previewUrl} alt={t("preview", { defaultValue: "Preview" }) } fill className="object-contain" />
                 </div>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{labels.uploadCard.notesLabel}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t("notesLabel", { defaultValue: "Notes" })}</label>
               <textarea
                 rows={3}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                placeholder={labels.uploadCard.notesPlaceholder}
+                placeholder={t("notesPlaceholder", { defaultValue: "Add notes" })}
               />
             </div>
 
             <div className="flex items-center gap-3">
               <HoloButton onClick={mockUpload} disabled={uploading || !file}>
-                {uploading ? labels.buttons.uploading : labels.buttons.upload}
+                {uploading ? t("uploading", { defaultValue: "Uploading..." }) : t("upload", { defaultValue: "Upload" })}
               </HoloButton>
-              <HoloButton variant="outline" onClick={clearSelection}>{labels.buttons.cancel}</HoloButton>
+              <HoloButton variant="outline" onClick={clearSelection}>{t("cancel", { defaultValue: "Cancel" })}</HoloButton>
             </div>
 
             {uploading && (
@@ -219,19 +246,19 @@ export default function UploadXRayPage() {
                 <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
                   <div className="h-2 rounded-full bg-blue-600 dark:bg-blue-500" style={{ width: `${progress}%` }} />
                 </div>
-                <div className="mt-1 text-xs text-gray-600 dark:text-gray-400">{labels.progress.label} {progress}%</div>
+                <div className="mt-1 text-xs text-gray-600 dark:text-gray-400">{t("progressLabel", { defaultValue: "Progress" })} {progress}%</div>
               </div>
             )}
           </div>
         </GlassCard>
 
-        <GlassCard title={labels.recentFiles.title}>
+        <GlassCard title={t("recentFiles_title", { defaultValue: "Recent Files" })}> 
           <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{labels.recentFiles.title}</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("recentFiles_title", { defaultValue: "Recent Files" })}</h2>
             <div className="flex items-center gap-3">
               <input
                 type="text"
-                placeholder={labels.recentFiles.searchPlaceholder}
+                placeholder={t("searchPlaceholder", { defaultValue: "Search files" })}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="w-48 md:w-64 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
@@ -241,45 +268,30 @@ export default function UploadXRayPage() {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               >
-                <option value={locale === "ar" ? "الكل" : "all"}>{labels.filter.all}</option>
-                <option value={locale === "ar" ? "جاهز" : "ready"}>{labels.filter.ready}</option>
-                <option value={locale === "ar" ? "بانتظار المراجعة" : "pending_review"}>{labels.filter.pending}</option>
+                <option value={t("filter_all", { defaultValue: "All" })}>{t("filter_all", { defaultValue: "All" })}</option>
+                <option value={t("filter_ready", { defaultValue: "Ready" })}>{t("filter_ready", { defaultValue: "Ready" })}</option>
+                <option value={t("filter_pending", { defaultValue: "Pending" })}>{t("filter_pending", { defaultValue: "Pending" })}</option>
               </select>
             </div>
           </div>
           <ul className="divide-y divide-gray-100 dark:divide-gray-700">
             {recent
-              .filter((f) => (statusFilter === (locale === "ar" ? "الكل" : "all") ? true : f.status === statusFilter))
+              .filter((f) => (statusFilter === t("filter_all", { defaultValue: "All" }) ? true : f.status === statusFilter))
               .filter((f) => (query ? f.name.toLowerCase().includes(query.toLowerCase()) : true))
               .map((f) => (
               <li key={f.id} className="flex items-center justify-between py-3">
                 <div>
                   <div className="text-sm font-medium text-gray-900 dark:text-white">{f.name}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{labels.recentFiles.size} {f.size}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{t("size", { defaultValue: "Size" })} {f.size}</div>
                 </div>
-                <StatusBadge status={f.status} labels={labels} />
+                <StatusBadge status={f.status} t={t} />
               </li>
             ))}
-            {recent.length === 0 && <li className="py-3 text-sm text-gray-500 dark:text-gray-400">{labels.recentFiles.noFiles}</li>}
+            {recent.length === 0 && <li className="py-3 text-sm text-gray-500 dark:text-gray-400">{t("noFiles", { defaultValue: "No files found" })}</li>}
           </ul>
         </GlassCard>
       </section>
     </>
   );
-}
 
-function StatusBadge({ status, labels }) {
-  const isReady = status === "جاهز" || status === "ready";
-  const isPending = status === "بانتظار المراجعة" || status === "pending_review";
-  
-  const style =
-    isReady
-      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700"
-      : isPending
-      ? "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-700"
-      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600";
-  
-  const displayText = isReady ? labels.status.ready : isPending ? labels.status.pending_review : status;
-  
-  return <span className={`text-xs rounded-full border px-2 py-1 ${style}`}>{displayText}</span>;
-}
+// ...existing code...

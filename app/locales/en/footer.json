@@ -1,0 +1,44 @@
+{
+  "description": "An advanced medical AI platform for fast and accurate diagnosis.",
+  "quickLinksHeading": "Quick Links",
+  "supportHeading": "Support",
+  "contactHeading": "Contact Us",
+  "quickLinks": [
+    { "label": "Home", "href": "/" },
+    { "label": "About", "href": "/about" },
+    { "label": "Services", "href": "/services" },
+    { "label": "Blog", "href": "/blog" }
+  ],
+  "supportLinks": [
+    { "label": "FAQ", "href": "/faq" },
+    { "label": "Contact", "href": "/contact" },
+    { "label": "Privacy Policy", "href": "/privacy" },
+    { "label": "Terms & Conditions", "href": "/terms" }
+  ],
+  "contact": {
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
+    "addressLabel": "Address",
+    "address": "Irbid, Jordan"
+  },
+  "serviceStatus": "Service Available",
+  "madeIn": "Made with ❤️ in Irbid",
+  "copyright": "© {year} All rights reserved",
+  "home": "Home",
+  "contactPage": { "title": "Contact" },
+  "privacyPage": { "title": "Privacy" },
+  "termsPage": { "title": "Terms" },
+  "brand": "PneumoDetect",
+  "footer": {
+    "description": "An advanced medical AI platform for fast and accurate diagnosis. We provide you with the most accurate results as quickly as possible.",
+    "contact": {
+      "emailLabel": "Email",
+      "phoneLabel": "Phone",
+      "addressLabel": "Address",
+      "address": "Irbid, Jordan"
+    },
+    "copyright": "© {year} All rights reserved",
+    "serviceStatus": "Service Available",
+    "madeIn": "Made with ❤️ in Irbed"
+  }
+}

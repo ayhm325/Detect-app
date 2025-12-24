@@ -1,3 +1,5 @@
+
+import LanguageToggle from "../../../components/ui/LanguageToggle";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 
@@ -14,17 +16,19 @@ export async function generateMetadata() {
   };
 }
 
-export default async function ContactPage() {
-  const headerList = headers();
-  const rawPath = headerList.get("x-forwarded-uri") || headerList.get("referer") || "/";
-  const locale = rawPath.startsWith("/en") ? "en" : "ar";
+export default async function ContactPage(props) {
+  const params = props.params ? (typeof props.params.then === 'function' ? await props.params : props.params) : {};
+  const locale = params?.locale || "ar";
   const dir = locale === "ar" ? "rtl" : "ltr";
-  const content = (await import(`../locales/${locale}/content.json`)).default.content;
-  const t = content.contactPage;
+  const t = (await import(`../../locales/${locale}/contact.json`)).default.contactPage;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-yellow-50 via-white to-red-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 py-20" dir={dir} lang={locale}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Language toggle at the very top */}
+        <div className="flex justify-end mb-8">
+          <LanguageToggle currentLocale={locale} />
+        </div>
         {/* Header */}
         <div className="text-center mb-16 animate-fadeIn">
           <h1 className="text-5xl font-bold mb-4">
@@ -35,6 +39,16 @@ export default async function ContactPage() {
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             {t.description || "نحن هنا لمساعدتك. تواصل معنا لأي استفسارات أو اقتراحات"}
           </p>
+        </div>
+
+        {/* Back to Home Button */}
+        <div className="mt-10 text-center">
+          <a
+            href={locale === "ar" ? "/ar" : "/en"}
+            className="inline-block px-8 py-4 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition-colors shadow-lg"
+          >
+            {locale === "ar" ? "عودة إلى الرئيسية" : "Back to Home"}
+          </a>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">

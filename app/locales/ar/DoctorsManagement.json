@@ -1,0 +1,112 @@
+{
+  "buttons": {
+    "save": "حفظ",
+    "saveChanges": "حفظ التغييرات",
+    "cancel": "إلغاء"
+  },
+  "noPendingRequests": "لا توجد طلبات معلقة حالياً",
+  "showAllRequests": "عرض جميع الطلبات",
+  "showPendingRequests": "عرض الطلبات المعلقة فقط",
+  "headerTitle": "إدارة الأطباء",
+  "headerSubtitle": "عرض وإدارة جميع الأطباء في النظام",
+  "addButton": "إضافة طبيب",
+  "exportButton": "تصدير",
+  "filters": {
+    "searchPlaceholder": "ابحث بالاسم أو البريد أو الجوال...",
+    "specialtyAll": "كل التخصصات",
+    "statusAll": "كل الحالات",
+    "genderAll": "كل الأنواع"
+  },
+  "statuses": {
+    "active": "نشط",
+    "suspended": "معلق",
+    "banned": "محظور",
+    "pending": "معلق بانتظار الموافقة"
+  },
+  "table": {
+    "doctor": "الطبيب",
+    "status": "الحالة",
+    "joinDate": "تاريخ الانضمام",
+    "lastVisit": "آخر زيارة",
+    "actions": "الإجراءات",
+    "noMatches": "لا توجد نتائج مطابقة"
+  },
+  "toast": {
+    "fillFields": "يرجى تعبئة جميع الحقول",
+    "doctorAdded": "تمت إضافة الطبيب بنجاح",
+    "doctorUpdated": "تم تحديث بيانات الطبيب",
+    "doctorDeleted": "تم حذف الطبيب",
+    "deleteFailed": "فشل حذف الطبيب",
+    "exportStarted": "جاري تصدير البيانات..."
+  },
+  "actions": {
+    "viewDetails": "عرض التفاصيل",
+    "edit": "تعديل",
+    "delete": "حذف"
+  },
+  "breadcrumbs": {
+    "home": "الرئيسية",
+    "doctors": "الأطباء"
+  },
+  "pendingRequestsTitle": "الطلبات المعلقة",
+  "stats": {
+    "totalDoctors": "إجمالي الأطباء",
+    "totalPatients": "إجمالي المرضى",
+    "totalAdmins": "إجمالي المدراء",
+    "activeDoctors": "الأطباء النشطون",
+    "todayVisits": "زيارات اليوم",
+    "totalReports": "إجمالي التقارير"
+  },
+  "genders": {
+    "male": "ذكر",
+    "female": "أنثى"
+  },
+  "cards": {
+    "appointments": "المواعيد",
+    "reports": "التقارير",
+    "lastVisit": "آخر زيارة"
+  },
+  "ageUnit": "سنة",
+  "confirmDelete": {
+    "title": "تأكيد حذف الطبيب",
+    "description": "هل أنت متأكد أنك تريد حذف الطبيب {name}؟ لا يمكن التراجع عن هذا الإجراء.",
+    "yes": "نعم، احذف",
+    "no": "إلغاء"
+  },
+  "modals": {
+    "editTitle": "تعديل بيانات الطبيب",
+    "addTitle": "إضافة طبيب جديد",
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "licenseNumber": "رقم الترخيص",
+    "phone": "رقم الجوال",
+    "specialty": "التخصص",
+    "experience": "سنوات الخبرة",
+    "status": "الحالة"
+  },
+  "sampleNames": [
+    "د. محمد سالم علي",
+    "د. ليلى حسن محمود",
+    "د. سامي يوسف إبراهيم",
+    "د. فاطمة أحمد محمد",
+    "د. عمر خالد السيد",
+    "د. نور محمود علي"
+  ],
+  "sampleQualifications": [
+    ["بكالوريوس طب", "ماجستير الأشعة", "شهادة البورد"],
+    ["بكالوريوس طب", "ماجستير الصدرية"],
+    ["بكالوريوس طب", "ماجستير الجراحة", "شهادة البورد الأمريكي"],
+    ["بكالوريوس طب", "ماجستير النساء والتوليد"],
+    ["بكالوريوس طب", "ماجستير القلب", "شهادة البورد"],
+    ["بكالوريوس طب", "ماجستير الأمراض الباطنية"]
+  ],
+  "specialties": {
+    "radiology": "الأشعة",
+    "pulmonology": "الصدرية",
+    "orthopedics": "العظام",
+    "gynecology": "النساء والتوليد",
+    "cardiology": "القلب",
+    "internal": "الباطنية",
+    "general": "الطب العام"
+  }
+}

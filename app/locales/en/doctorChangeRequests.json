@@ -1,0 +1,17 @@
+{
+  "title": "Doctor Change Requests",
+  "description": "Manage requests for doctor changes.",
+  "table": {
+    "doctorName": "Doctor Name",
+    "requestType": "Request Type",
+    "status": "Status",
+    "date": "Date",
+    "actions": "Actions"
+  },
+  "noRequests": "No doctor change requests found.",
+  "approve": "Approve",
+  "reject": "Reject",
+  "pending": "Pending",
+  "approved": "Approved",
+  "rejected": "Rejected"
+}

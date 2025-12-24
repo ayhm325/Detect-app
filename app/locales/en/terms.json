@@ -1,0 +1,44 @@
+{
+  "title": "Terms & Conditions",
+  "lastUpdate": "Last updated",
+  "acceptance": {
+    "title": "Acceptance",
+    "content": "By using our service, you agree to these terms."
+  },
+  "serviceDescription": {
+    "title": "Service Description",
+    "intro": "Our platform provides AI-powered medical diagnostics."
+  },
+  "registration": {
+    "title": "Registration",
+    "intro": "You must provide accurate information when registering."
+  },
+  "serviceUsage": {
+    "title": "Service Usage",
+    "allowed": {
+      "title": "Allowed",
+      "content": "You may use the service for lawful purposes."
+    },
+    "prohibited": {
+      "title": "Prohibited",
+      "content": "You may not misuse the service."
+    }
+  },
+  "medicalDisclaimer": {
+    "title": "Medical Disclaimer",
+    "content": "Our service does not replace professional medical advice."
+  },
+  "limitation": {
+    "title": "Limitation",
+    "content": "We are not liable for any damages arising from use."
+  },
+  "changes": {
+    "title": "Changes",
+    "content": "We may update these terms at any time."
+  },
+  "contact": {
+    "title": "Contact",
+    "content": "Contact us for any questions about these terms."
+  },
+  "backToHome": "Back to Home"
+}

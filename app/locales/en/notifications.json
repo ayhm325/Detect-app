@@ -1,0 +1,26 @@
+{
+  "title": "Notifications",
+  "noNotifications": "No notifications at the moment",
+  "markAllAsRead": "Mark all as read",
+  "deleteAll": "Delete all notifications",
+  "types": {
+    "appointment": "Appointment",
+    "result": "Result",
+    "message": "Message",
+    "system": "System"
+  },
+  "actions": {
+    "view": "View",
+    "delete": "Delete",
+    "markAsRead": "Mark as read"
+  },
+  "toast": {
+    "allMarkedRead": "All notifications marked as read",
+    "deleted": "Notification deleted",
+    "deletedAll": "All notifications deleted"
+  },
+  "emptyState": {
+    "title": "No notifications",
+    "description": "All your new notifications will appear here when available."
+  }
+}

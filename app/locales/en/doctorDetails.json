@@ -1,0 +1,20 @@
+{
+  "details": "Details",
+  "name": "Name",
+  "email": "Email",
+  "specialty": "Specialty",
+  "license": "License Number",
+  "phone": "Phone",
+  "status": "Status",
+  "approve": "Approve",
+  "reject": "Reject",
+  "close": "Close",
+  "statusLabels": {
+    "pending": "Pending",
+    "verified": "Verified",
+    "rejected": "Rejected",
+    "active": "Active",
+    "suspended": "Suspended",
+    "banned": "Banned"
+  }
+}

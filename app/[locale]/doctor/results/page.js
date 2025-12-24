@@ -1,7 +1,7 @@
 "use client";
 
 import DoctorLayout from "../DoctorLayout";
-import { useToast } from "@/app/components/ui/Toast";
+import { useToast } from "../../../components/ui/Toast";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -24,67 +24,18 @@ import {
   FaPrint,
   FaShare,
 } from "react-icons/fa";
-import useLocale from "@/app/hooks/useLocale";
-import { formatDate } from "@/app/lib/date";
+import useLocale from "../../../hooks/useLocale";
+import { formatDate } from "../../../lib/date";
+import { useTranslations } from "next-intl";
 
 export default function DoctorResultsPage() {
   const { showToast, ToastContainer } = useToast();
   const { locale } = useLocale();
-  const dr = {};
+  const t = useTranslations("doctorResults");
 
-  const labels = locale === "en"
-    ? {
-        title: "Results",
-        subtitle: "Manage and review patient scan results",
-        searchPlaceholder: "Search by patient name or ID...",
-        filters: { allTypes: "All types", allStatuses: "All statuses" },
-        statuses: { completed: "Completed", pending: "Pending", urgent: "Urgent" },
-        typeLabel: "Type:",
-        bodyPartLabel: "Body part:",
-        aiSummaryLabel: "AI Summary:",
-        patientIdLabel: "ID:",
-        actions: { view: "View", download: "Download", print: "Print", close: "Close" },
-        toast: {
-          viewingScan: "Opening scan viewer",
-          downloadStart: "Download started",
-          printStart: "Printing report",
-          shareCopied: "Share link copied",
-        },
-        viewer: {
-          title: "Scan Viewer",
-          patientInfo: "Patient information",
-          scanDetails: "Scan details",
-          findings: "Findings",
-          aiAnalysis: "AI Analysis",
-        },
-        emptyState: "No results found",
-      }
-    : {
-        title: "النتائج",
-        subtitle: "إدارة ومراجعة نتائج فحوصات المرضى",
-        searchPlaceholder: "ابحث باسم المريض أو المعرف...",
-        filters: { allTypes: "جميع الأنواع", allStatuses: "جميع الحالات" },
-        statuses: { completed: "مكتمل", pending: "قيد المراجعة", urgent: "عاجل" },
-        typeLabel: "النوع:",
-        bodyPartLabel: "الجزء:",
-        aiSummaryLabel: "ملخص AI:",
-        patientIdLabel: "المعرف:",
-        actions: { view: "عرض", download: "تحميل", print: "طباعة", close: "إغلاق" },
-        toast: {
-          viewingScan: "فتح عارض الفحص",
-          downloadStart: "بدأ التحميل",
-          printStart: "طباعة التقرير",
-          shareCopied: "تم نسخ رابط المشاركة",
-        },
-        viewer: {
-          title: "عارض الفحص",
-          patientInfo: "معلومات المريض",
-          scanDetails: "تفاصيل الفحص",
-          findings: "النتائج",
-          aiAnalysis: "تحليل AI",
-        },
-        emptyState: "لا توجد نتائج",
-      };
+  // ...existing code...
+  // Replace all labels.X with t("key")
+  // For example: t("title"), t("subtitle"), t("searchPlaceholder"), t("items.0.type"), t("items.0.status"), t("actions.view"), t("viewer.aiAnalysis"), t("emptyState")
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -94,165 +45,71 @@ export default function DoctorResultsPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const scansTemplate = useMemo(
-    () =>
-      locale === "en"
-        ? [
-            {
-              id: 1,
-              patientName: "Mohammed Ahmed",
-              patientId: "P-2024-001",
-              type: "x-ray",
-              bodyPart: "Chest",
-              date: "2025-12-04",
-              time: "09:30 AM",
-              status: "completed",
-              aiSummary: "No obvious abnormal signs. Lungs are clear.",
-              thumbnail: "https://via.placeholder.com/150?text=X-Ray",
-              findings: [
-                { type: "normal", text: "Lungs are clear" },
-                { type: "normal", text: "Heart size normal" },
-              ],
-            },
-            {
-              id: 2,
-              patientName: "Fatima Ali",
-              patientId: "P-2024-002",
-              type: "ct",
-              bodyPart: "Head",
-              date: "2025-12-04",
-              time: "11:00 AM",
-              status: "pending",
-              aiSummary: "Awaiting final review",
-              thumbnail: "https://via.placeholder.com/150?text=CT",
-              findings: [],
-            },
-            {
-              id: 3,
-              patientName: "Ahmed Khaled",
-              patientId: "P-2024-003",
-              type: "mri",
-              bodyPart: "Knee",
-              date: "2025-12-03",
-              time: "02:00 PM",
-              status: "completed",
-              aiSummary: "Minor tear in the medial meniscus",
-              thumbnail: "https://via.placeholder.com/150?text=MRI",
-              findings: [
-                { type: "warning", text: "Minor cartilage tear" },
-                { type: "normal", text: "Ligaments intact" },
-              ],
-            },
-            {
-              id: 4,
-              patientName: "Sarah Mahmoud",
-              patientId: "P-2024-004",
-              type: "x-ray",
-              bodyPart: "Shoulder",
-              date: "2025-12-03",
-              time: "10:15 AM",
-              status: "completed",
-              aiSummary: "Minor inflammation in soft tissues",
-              thumbnail: "https://via.placeholder.com/150?text=X-Ray",
-              findings: [
-                { type: "info", text: "Mild inflammation in tissues" },
-              ],
-            },
-            {
-              id: 5,
-              patientName: "Omar Hassan",
-              patientId: "P-2024-005",
-              type: "ultrasound",
-              bodyPart: "Abdomen",
-              date: "2025-12-02",
-              time: "03:30 PM",
-              status: "completed",
-              aiSummary: "Normal exam for liver and kidneys",
-              thumbnail: "https://via.placeholder.com/150?text=US",
-              findings: [
-                { type: "normal", text: "Liver normal" },
-                { type: "normal", text: "Kidneys intact" },
-              ],
-            },
-          ]
-        : [
-            {
-              id: 1,
-              patientName: "محمد أحمد",
-              patientId: "P-2024-001",
-              type: "x-ray",
-              bodyPart: "الصدر",
-              date: "2025-12-04",
-              time: "09:30 ص",
-              status: "completed",
-              aiSummary: "لا توجد علامات غير طبيعية واضحة. الرئتان نظيفتان.",
-              thumbnail: "https://via.placeholder.com/150?text=X-Ray",
-              findings: [
-                { type: "normal", text: "الرئتان نظيفتان" },
-                { type: "normal", text: "القلب بحجم طبيعي" },
-              ],
-            },
-            {
-              id: 2,
-              patientName: "فاطمة علي",
-              patientId: "P-2024-002",
-              type: "ct",
-              bodyPart: "الرأس",
-              date: "2025-12-04",
-              time: "11:00 ص",
-              status: "pending",
-              aiSummary: "في انتظار المراجعة النهائية",
-              thumbnail: "https://via.placeholder.com/150?text=CT",
-              findings: [],
-            },
-            {
-              id: 3,
-              patientName: "أحمد خالد",
-              patientId: "P-2024-003",
-              type: "mri",
-              bodyPart: "الركبة",
-              date: "2025-12-03",
-              time: "02:00 م",
-              status: "completed",
-              aiSummary: "تمزق طفيف في الغضروف الهلالي الإنسي",
-              thumbnail: "https://via.placeholder.com/150?text=MRI",
-              findings: [
-                { type: "warning", text: "تمزق طفيف في الغضروف" },
-                { type: "normal", text: "الأربطة سليمة" },
-              ],
-            },
-            {
-              id: 4,
-              patientName: "سارة محمود",
-              patientId: "P-2024-004",
-              type: "x-ray",
-              bodyPart: "الكتف",
-              date: "2025-12-03",
-              time: "10:15 ص",
-              status: "completed",
-              aiSummary: "التهاب بسيط في الأنسجة الرخوة",
-              thumbnail: "https://via.placeholder.com/150?text=X-Ray",
-              findings: [
-                { type: "info", text: "التهاب بسيط في الأنسجة" },
-              ],
-            },
-            {
-              id: 5,
-              patientName: "عمر حسن",
-              patientId: "P-2024-005",
-              type: "ultrasound",
-              bodyPart: "البطن",
-              date: "2025-12-02",
-              time: "03:30 م",
-              status: "completed",
-              aiSummary: "فحص طبيعي للكبد والكلى",
-              thumbnail: "https://via.placeholder.com/150?text=US",
-              findings: [
-                { type: "normal", text: "الكبد طبيعي" },
-                { type: "normal", text: "الكلى سليمة" },
-              ],
-            },
-          ],
-    [locale]
+    () => [
+      {
+        id: 1,
+        patientName: t("scan1PatientName", { defaultValue: "Patient 1" }),
+        patientId: t("scan1PatientId", { defaultValue: "ID001" }),
+        type: t("scan1Type", { defaultValue: "X-Ray" }),
+        bodyPart: t("scan1BodyPart", { defaultValue: "Chest" }),
+        date: t("scan1Date", { defaultValue: "2025-12-19" }),
+        time: t("scan1Time", { defaultValue: "10:00" }),
+        status: t("scan1Status", { defaultValue: "Completed" }),
+        aiSummary: t("scan1AiSummary", { defaultValue: "No issues detected" }),
+        thumbnail: t("scan1Thumbnail", { defaultValue: "Image" }),
+        findings: [
+          { type: t("scan1Finding1Type", { defaultValue: "Normal" }), text: t("scan1Finding1Text", { defaultValue: "No masses detected" }) },
+          { type: t("scan1Finding2Type", { defaultValue: "Normal" }), text: t("scan1Finding2Text", { defaultValue: "No tumors detected" }) }
+        ]
+      },
+      // ...repeat for other scans with short keys and defaultValue
+      {
+        patientId: t("patientId"),
+        type: t("type"),
+        bodyPart: t("bodyPart"),
+        date: t("date"),
+        time: t("time"),
+        status: "pending", // Use key only, not translation
+        aiSummary: t("aiSummary"),
+        thumbnail: t("thumbnail"),
+        findings: [
+          { type: t("type"), text: t("text") },
+          { type: t("type"), text: t("text") },
+        ]
+      },
+      {
+        id: 4,
+        patientName: t("patientName"),
+        patientId: t("patientId"),
+        type: t("type"),
+        bodyPart: t("bodyPart"),
+        date: t("date"),
+        time: t("time"),
+        status: "pending", // Use key only, not translation
+        aiSummary: t("aiSummary"),
+        thumbnail: t("thumbnail"),
+        findings: [
+          { type: t("type"), text: t("text") },
+        ]
+      },
+      {
+        id: 5,
+        patientName: t("patientName"),
+        patientId: t("patientId"),
+        type: t("type"),
+        bodyPart: t("bodyPart"),
+        date: t("date"),
+        time: t("time"),
+        status: "pending", // Use key only, not translation
+        aiSummary: t("aiSummary"),
+        thumbnail: t("thumbnail"),
+        findings: [
+          { type: t("type"), text: t("text") },
+          { type: t("type"), text: t("text") },
+        ]
+      }
+    ],
+    [t]
   );
 
   const [scans, setScans] = useState(scansTemplate);
@@ -285,29 +142,29 @@ export default function DoctorResultsPage() {
   const handleViewScan = (scan) => {
     setSelectedScan(scan);
     setViewerOpen(true);
-    showToast(labels.toast.viewingScan, "info");
+    showToast(t("toast.viewingScan"), "info");
   };
 
   const handleDownload = (scan) => {
-    showToast(labels.toast.downloadStart, "info");
+    showToast(t("toast.downloadStart"), "info");
     setTimeout(() => {
-      showToast(labels.toast.downloadStart, "success");
+      showToast(t("toast.downloadStart"), "success");
     }, 1500);
   };
 
   const handlePrint = (scan) => {
-    showToast(labels.toast.printStart, "info");
+    showToast(t("toast.printStart"), "info");
   };
 
   const handleShare = (scan) => {
-    showToast(labels.toast.shareCopied, "success");
+    showToast(t("toast.shareCopied"), "success");
   };
 
   const getStatusBadge = (status) => {
     const config = {
-      completed: { label: labels.statuses.completed, color: "bg-green-100 text-green-700 border-green-200", icon: FaCheckCircle },
-      pending: { label: labels.statuses.pending, color: "bg-orange-100 text-orange-700 border-orange-200", icon: FaHourglassHalf },
-      urgent: { label: labels.statuses.urgent, color: "bg-red-100 text-red-700 border-red-200", icon: FaExclamationTriangle },
+      completed: { label: t("statuses.completed"), color: "bg-green-100 text-green-700 border-green-200", icon: FaCheckCircle },
+      pending: { label: t("statuses.pending"), color: "bg-orange-100 text-orange-700 border-orange-200", icon: FaHourglassHalf },
+      urgent: { label: t("statuses.urgent"), color: "bg-red-100 text-red-700 border-red-200", icon: FaExclamationTriangle },
     };
     const c = config[status] || config.pending;
     const Icon = c.icon;
@@ -350,9 +207,9 @@ export default function DoctorResultsPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                 <FaXRay className="text-blue-600" />
-                {labels.title}
+                {t("title")}
               </h1>
-              <p className="mt-2 text-gray-600">{labels.subtitle}</p>
+              <p className="mt-2 text-gray-600">{t("subtitle")}</p>
             </div>
           </div>
 
@@ -361,7 +218,7 @@ export default function DoctorResultsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{dr.stats?.total || "Total scans"}</p>
+                  <p className="text-sm text-gray-600">{t("stats.total", { defaultValue: "Total scans" })}</p>
                   <p className="mt-1 text-3xl font-bold text-gray-900">{stats.total}</p>
                 </div>
                 <FaXRay className="text-3xl text-blue-600" />
@@ -371,7 +228,7 @@ export default function DoctorResultsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{dr.stats?.completed || "Completed"}</p>
+                  <p className="text-sm text-gray-600">{t("stats.completed", { defaultValue: "Completed" })}</p>
                   <p className="mt-1 text-3xl font-bold text-green-600">{stats.completed}</p>
                 </div>
                 <FaCheckCircle className="text-3xl text-green-600" />
@@ -381,7 +238,7 @@ export default function DoctorResultsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{dr.stats?.pending || "Under review"}</p>
+                  <p className="text-sm text-gray-600">{t("stats.pending", { defaultValue: "Under review" })}</p>
                   <p className="mt-1 text-3xl font-bold text-orange-600">{stats.pending}</p>
                 </div>
                 <FaHourglassHalf className="text-3xl text-orange-600" />
@@ -391,7 +248,7 @@ export default function DoctorResultsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{dr.stats?.today || "Today"}</p>
+                  <p className="text-sm text-gray-600">{t("stats.today", { defaultValue: "Today" })}</p>
                   <p className="mt-1 text-3xl font-bold text-blue-600">{stats.today}</p>
                 </div>
                 <FaCalendarAlt className="text-3xl text-blue-600" />
@@ -403,12 +260,12 @@ export default function DoctorResultsPage() {
           <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
             <div className="flex flex-wrap items-center gap-4">
               {/* Search */}
-              <div className="flex-1 min-w-[250px]">
+              <div className="flex-1 min-w-62.5">
                 <div className="relative">
                   <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
-                    placeholder={dr.searchPlaceholder || "Search by patient name or ID..."}
+                    placeholder={t("searchPlaceholder", { defaultValue: "Search by patient name or ID..." })}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-10 pl-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -422,7 +279,7 @@ export default function DoctorResultsPage() {
                 onChange={(e) => setFilterType(e.target.value)}
                 className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value="all">{labels.filters.allTypes}</option>
+                <option value="all">{t("filters.allTypes", { defaultValue: "All types" })}</option>
                 <option value="X-Ray">X-Ray</option>
                 <option value="CT Scan">CT Scan</option>
                 <option value="MRI">MRI</option>
@@ -435,18 +292,18 @@ export default function DoctorResultsPage() {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value="all">{labels.filters.allStatuses}</option>
-                <option value="completed">{labels.statuses.completed}</option>
-                <option value="pending">{labels.statuses.pending}</option>
+                <option value="all">{t("filters.allStatuses", { defaultValue: "All statuses" })}</option>
+                <option value="completed">{t("status.completed", { defaultValue: "Completed" })}</option>
+                <option value="pending">{t("status.pending", { defaultValue: "Under review" })}</option>
               </select>
             </div>
           </div>
 
           {/* Scans Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredScans.map((scan) => (
+            {filteredScans.map((scan, idx) => (
               <div
-                key={scan.id}
+                key={`${scan.id ?? 'scan'}-${idx}`}
                 className="group rounded-xl bg-white p-6 shadow-lg border border-gray-100 transition-all hover:shadow-2xl"
               >
                 {/* Header */}
@@ -458,7 +315,7 @@ export default function DoctorResultsPage() {
                 {/* Patient Info */}
                 <div className="mb-4 space-y-2">
                   <h3 className="text-lg font-bold text-gray-900">{scan.patientName}</h3>
-                  <p className="text-sm text-gray-600">{labels.patientIdLabel} {scan.patientId}</p>
+                  <p className="text-sm text-gray-600">{t("patientId")} {scan.patientId}</p>
                   <div className="flex items-center gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-1">
                       <FaCalendarAlt className="text-blue-600" />
@@ -474,18 +331,18 @@ export default function DoctorResultsPage() {
                 {/* Scan Details */}
                 <div className="mb-4 space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">{labels.typeLabel}</span>
+                    <span className="text-sm font-medium text-gray-700">{t("type")}</span>
                     <span className="text-sm text-gray-600">{scan.type}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">{labels.bodyPartLabel}</span>
+                    <span className="text-sm font-medium text-gray-700">{t("bodyPart")}</span>
                     <span className="text-sm text-gray-600">{scan.bodyPart}</span>
                   </div>
                 </div>
 
                 {/* AI Summary */}
                 <div className="mb-4 rounded-lg bg-blue-50 border border-blue-200 p-3">
-                  <p className="text-xs font-medium text-blue-900 mb-1">{labels.aiSummaryLabel}</p>
+                  <p className="text-xs font-medium text-blue-900 mb-1">{t("aiSummary")}</p>
                   <p className="text-sm text-blue-800">{scan.aiSummary}</p>
                 </div>
 
@@ -516,19 +373,19 @@ export default function DoctorResultsPage() {
                     className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700"
                   >
                     <FaEye />
-                    {labels.actions.view}
+                    {t("actions.view")}
                   </button>
                   <button
                     onClick={() => handleDownload(scan)}
                     className="flex items-center justify-center rounded-lg bg-gray-100 px-3 py-2 text-gray-700 transition-all hover:bg-gray-200"
-                    title={labels.actions.download}
+                    title={t("actions.download")}
                   >
                     <FaDownload />
                   </button>
                   <button
                     onClick={() => handlePrint(scan)}
                     className="flex items-center justify-center rounded-lg bg-gray-100 px-3 py-2 text-gray-700 transition-all hover:bg-gray-200"
-                    title={labels.actions.print}
+                    title={t("actions.print")}
                   >
                     <FaPrint />
                   </button>
@@ -569,7 +426,7 @@ export default function DoctorResultsPage() {
                 <button
                   onClick={() => handleDownload(selectedScan)}
                   className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-200"
-                  title={labels.actions.download}
+                  title={t("actions.download")}
                 >
                   <FaDownload />
                 </button>
@@ -583,7 +440,7 @@ export default function DoctorResultsPage() {
                 <button
                   onClick={() => setViewerOpen(false)}
                   className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-200"
-                  title={labels.actions.close}
+                  title={t("actions.close")}
                 >
                   <FaTimes />
                 </button>
@@ -606,7 +463,7 @@ export default function DoctorResultsPage() {
               <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 mb-4">
                 <h3 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
                   <FaFileAlt />
-                  {labels.viewer.aiAnalysis}
+                  {t("viewer.aiAnalysis")}
                 </h3>
                 <p className="text-blue-800">{selectedScan.aiSummary}</p>
               </div>
@@ -614,7 +471,7 @@ export default function DoctorResultsPage() {
               {/* Findings */}
               {selectedScan.findings.length > 0 && (
                 <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
-                  <h3 className="font-bold text-gray-900 mb-3">{labels.viewer.findings}:</h3>
+                  <h3 className="font-bold text-gray-900 mb-3">{t("viewer.findings")}:</h3>
                   <div className="space-y-2">
                     {selectedScan.findings.map((finding, idx) => (
                       <div

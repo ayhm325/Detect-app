@@ -1,0 +1,44 @@
+{
+  "description": "منصة ذكاء طبي متقدمة للتشخيص السريع والدقيق.",
+  "quickLinksHeading": "روابط سريعة",
+  "supportHeading": "الدعم",
+  "contactHeading": "تواصل معنا",
+  "quickLinks": [
+    { "label": "الرئيسية", "href": "/" },
+    { "label": "من نحن", "href": "/about" },
+    { "label": "الخدمات", "href": "/services" },
+    { "label": "المدونة", "href": "/blog" }
+  ],
+  "supportLinks": [
+    { "label": "الأسئلة الشائعة", "href": "/faq" },
+    { "label": "اتصل بنا", "href": "/contact" },
+    { "label": "سياسة الخصوصية", "href": "/privacy" },
+    { "label": "الشروط والأحكام", "href": "/terms" }
+  ],
+  "contact": {
+    "emailLabel": "البريد الإلكتروني",
+    "phoneLabel": "الهاتف",
+    "addressLabel": "العنوان",
+    "address": "إربد، الأردن"
+  },
+  "serviceStatus": "الخدمة متاحة",
+  "madeIn": "صنع بحب ❤️ في إربد",
+  "copyright": "© {year} جميع الحقوق محفوظة",
+  "home": "الرئيسية",
+  "contactPage": { "title": "اتصل بنا" },
+  "privacyPage": { "title": "سياسة الخصوصية" },
+  "termsPage": { "title": "الشروط والأحكام" },
+  "brand": "PneumoDetect",
+  "footer": {
+    "description": "منصة ذكاء طبي متقدمة للتشخيص السريع والدقيق. نوفر لك أدق النتائج بأسرع وقت ممكن.",
+    "contact": {
+      "emailLabel": "البريد الإلكتروني",
+      "phoneLabel": "الهاتف",
+      "addressLabel": "العنوان",
+      "address": "إربد، الأردن"
+    },
+    "copyright": "© {year} جميع الحقوق محفوظة",
+    "serviceStatus": "الخدمة متاحة",
+    "madeIn": "صنع بحب ❤️ في إربد"
+  }
+}

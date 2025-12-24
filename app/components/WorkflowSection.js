@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 export default function WorkflowSection() {
-  const t = useTranslations();
+  const t = useTranslations("workflowsection");
   const workflowCopy = t.raw ? t.raw("content.workflow") : {};
   const flowParticles = useMemo(
     () =>
@@ -114,8 +114,8 @@ export default function WorkflowSection() {
         }} />
 
         {/* Glowing Orbs */}
-        <div className="absolute top-10 left-10 w-[400px] h-[400px] bg-linear-to-br from-yellow-300/20 via-amber-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute bottom-10 right-10 w-[450px] h-[450px] bg-linear-to-tl from-red-300/20 via-orange-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+        <div className="absolute top-10 left-10 w-100 h-100 bg-linear-to-br from-yellow-300/20 via-amber-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-10 right-10 w-112.5 h-112.5 bg-linear-to-tl from-red-300/20 via-orange-300/10 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
 
         {/* Scanning Line Effect */}
         <div className="absolute inset-0 overflow-hidden">

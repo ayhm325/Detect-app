@@ -1,0 +1,32 @@
+{
+  "contactPage": {
+    "title": "Contact Us",
+    "description": "We are here to help. Reach out for any questions or suggestions.",
+    "form": {
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "subject": "Subject",
+      "subjectPlaceholder": "Select subject",
+      "options": {
+        "general": "General Inquiry",
+        "technical": "Technical Support",
+        "business": "Business Inquiry",
+        "feedback": "Feedback & Suggestions"
+      },
+      "message": "Message",
+      "messagePlaceholder": "Type your message here...",
+      "submit": "Send Message"
+    },
+    "info": {
+      "emailTitle": "Email",
+      "emails": ["support@detect-ai.com", "info@detect-ai.com"],
+      "phoneTitle": "Phone",
+      "phones": ["+966 50 123 4567", "+966 50 765 4321"],
+      "addressTitle": "Address",
+      "addressLines": ["Riyadh, Saudi Arabia", "Sulaimaniah District, King Fahd Road"],
+      "hoursTitle": "Working Hours",
+      "hours": ["Sun - Thu: 9:00 AM - 6:00 PM", "Fri - Sat: Closed"]
+    }
+  }
+}

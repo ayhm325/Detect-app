@@ -8,13 +8,15 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 export default function HeroSection() {
-  const t = useTranslations();
+  const t = useTranslations("hero");
   const locale = useLocale();
-  const heroStats = (t.raw ? t.raw("content.hero.stats") : null) || [
-    { number: "99.5%", label: "دقة التشخيص" },
-    { number: "+10K", label: "مستخدم نشط" },
-    { number: "+50K", label: "تحليل ناجح" },
-    { number: "24/7", label: "دعم متواصل" },
+  // ...existing code...
+  // Use t("key") for all hero text and stats, remove any hardcoded text
+  const heroStats = [
+    { number: "99%", label: t("stats1", { defaultValue: "تشخيصات دقيقة" }) },
+    { number: "50+", label: t("stats2", { defaultValue: "دعم متعدد اللغات" }) },
+    { number: "100K+", label: t("stats3", { defaultValue: "أمان عالي" }) },
+    { number: "24/7", label: t("stats4", { defaultValue: "دعم فني مستمر" }) },
   ];
   const [showWaves, setShowWaves] = useState(false);
   const [particles, setParticles] = useState([]);

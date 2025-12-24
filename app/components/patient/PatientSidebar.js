@@ -2,19 +2,22 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { withLocale } from "../../i18n/routing";
 
 export default function PatientSidebar({ open = true, onClose }) {
   const pathname = usePathname();
   const router = useRouter();
-  const locale = pathname?.startsWith("/en") ? "en" : "ar";
-  const basePrefix = locale === "en" ? "/en" : "/ar";
+  const t = useTranslations("patientSidebar");
+  // ...existing code...
+  // Use t("key") for all navigation labels
   const items = [
-    { href: `${basePrefix}/patient/dashboard`, label: "الصفحة الرئيسية", icon: "🏠" },
-    { href: `${basePrefix}/patient/appointments`, label: "المواعيد", icon: "📅" },
-    { href: `${basePrefix}/patient/results`, label: "التقارير", icon: "📄" },
-    { href: `${basePrefix}/patient/chat`, label: "الدردشة", icon: "💬" },
-    { href: `${basePrefix}/patient/profile`, label: "الحساب", icon: "👤" },
-    { href: "__logout__", label: "تسجيل الخروج", icon: "🚪" },
+    { href: withLocale("/patient/dashboard"), label: t("dashboard"), icon: "🏠" },
+    { href: withLocale("/patient/appointments"), label: t("appointments"), icon: "📅" },
+    { href: withLocale("/patient/results"), label: t("results"), icon: "📄" },
+    { href: withLocale("/patient/chat"), label: t("chat"), icon: "💬" },
+    { href: withLocale("/patient/profile"), label: t("profile"), icon: "👤" },
+    { href: "__logout__", label: t("logout"), icon: "🚪" },
   ];
   return (
     <>
@@ -31,7 +34,7 @@ export default function PatientSidebar({ open = true, onClose }) {
                 <button
                   key="logout"
                   className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-100"
-                  onClick={() => router.push(`${basePrefix}/patient/logout`)}
+                  onClick={() => router.push(withLocale("/patient/logout"))}
                 >
                   <span aria-hidden>{item.icon}</span>
                   <span>{item.label}</span>

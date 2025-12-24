@@ -1,0 +1,10 @@
+{
+  "title": "Add/Edit Doctor",
+  "nameLabel": "Name",
+  "specialtyLabel": "Specialty",
+  "emailLabel": "Email",
+  "phoneLabel": "Phone",
+  "statusLabel": "Status",
+  "submit": "Save",
+  "cancel": "Cancel"
+}

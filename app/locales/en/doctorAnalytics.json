@@ -1,0 +1,10 @@
+{
+  "title": "Doctor Analytics",
+  "subtitle": "View and analyze your medical statistics",
+  "patients": "Patients",
+  "appointments": "Appointments",
+  "scans": "Scans",
+  "reports": "Reports",
+  "chartTitle": "Monthly Overview",
+  "noData": "No data available"
+}

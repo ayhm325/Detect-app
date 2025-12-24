@@ -1,14 +1,22 @@
 "use client";
+// Helper to prefix locale to path
+function withLocale(locale, path) {
+  if (!path.startsWith("/")) path = "/" + path;
+  if (locale === "ar" || locale === "en") {
+    return `/${locale}${path}`;
+  }
+  return path;
+}
 
-import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaCheck, FaStethoscope, FaBed, FaGoogle, FaFacebook, FaEye, FaEyeSlash, FaPhone } from "react-icons/fa6";
-import { Link } from "@/i18n/routing";
-import { useMemo, useState } from "react";
+import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaCheck, FaStethoscope, FaBed, FaGoogle, FaFacebook, FaEye, FaEyeSlash, FaPhone, FaHouse } from "react-icons/fa6";
+import Link from "next/link";
+import { useMemo, useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useLocaleContext } from "../hooks/useLocaleContext";
 
-export default function SignUpForm() {
+function SignUpForm() {
   const locale = useLocale();
-  const t = useTranslations();
+  const t = useTranslations("signup");
   const { toggleLocale } = useLocaleContext();
   const dir = locale === "ar" ? "rtl" : "ltr";
   const [form, setForm] = useState({
@@ -26,31 +34,57 @@ export default function SignUpForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const doctors = useMemo(
-    () =>
-      locale === "en"
-        ? [
-            { id: "1", name: "Dr. Ahmed Ali", specialty: "Pulmonology", rating: 4.8 },
-            { id: "2", name: "Dr. Sarah Youssef", specialty: "Respiratory Medicine", rating: 4.5 },
-            { id: "3", name: "Dr. Khaled Mansour", specialty: "Internal Medicine", rating: 4.2 },
-          ]
-        : [
-            { id: "1", name: "د. أحمد علي", specialty: "أمراض الصدرية", rating: 4.8 },
-            { id: "2", name: "د. سارة يوسف", specialty: "الرئة والجهاز التنفسي", rating: 4.5 },
-            { id: "3", name: "د. خالد منصور", specialty: "الطب الباطني", rating: 4.2 },
-          ],
-    [locale]
-  );
+  // جلب الأطباء الحقيقيين من API
+  const [doctors, setDoctors] = useState([]);
+  const [doctorsLoading, setDoctorsLoading] = useState(false);
+  const [doctorsError, setDoctorsError] = useState("");
+
+  useEffect(() => {
+    if (form.userType !== "patient") return;
+    const fetchDoctors = async () => {
+      setDoctorsLoading(true);
+      setDoctorsError("");
+      try {
+        const res = await fetch("/api/admin/doctors");
+        const data = await res.json();
+        if (data.doctors) {
+          // Some API responses include activation on the nested `user` object
+          // while others put it on the doctor record. Accept either form.
+          setDoctors(
+            data.doctors
+              .filter((doc) => (
+                // allow doctor if either top-level or nested user is active and not deleted
+                (doc.isActive === true || doc.status === "active" || (doc.user && doc.user.isActive === true))
+                && (doc.isDeleted !== true) && !(doc.user && doc.user.isDeleted === true)
+              ))
+              .map((doc) => ({
+                id: doc.userId || doc.id || (doc.user && doc.user.id) || "",
+                name: doc.user?.fullName || doc.fullName || doc.name || "",
+                specialty: Array.isArray(doc.specialties) && doc.specialties.length > 0 ? doc.specialties.map(s => s.specialty?.name).join(", ") : "",
+                email: doc.user?.email || doc.email || ""
+              }))
+          );
+        } else {
+          setDoctors([]);
+        }
+        setDoctorsLoading(false);
+      } catch {
+        setDoctorsError(locale === "ar" ? "تعذر تحميل الأطباء" : "Failed to load doctors");
+        setDoctorsLoading(false);
+      }
+    };
+    fetchDoctors();
+  }, [form.userType, locale]);
 
   const passwordHints = [
-    t("auth.signup.passwordHint1") || "8 أحرف على الأقل",
-    t("auth.signup.passwordHint2") || "حرف كبير واحد",
-    t("auth.signup.passwordHint3") || "رقم واحد",
-    t("auth.signup.passwordHint4") || "رمز خاص"
+    t("signup.passwordHint1") || "8 أحرف على الأقل",
+    t("signup.passwordHint2") || "حرف كبير واحد",
+    t("signup.passwordHint3") || "رقم واحد",
+    t("signup.passwordHint4") || "رمز خاص"
   ];
-  const passwordStrengthLabel = t("auth.signup.passwordStrengthLabel") || (locale === "en" ? "Password strength:" : "قوة كلمة المرور:");
-  const haveAccountText = t("auth.signup.haveAccount") || (locale === "en" ? "Already have an account?" : "لديك حساب بالفعل؟");
-  const loginText = t("auth.signup.loginCta") || "تسجيل الدخول";
+  const passwordStrengthLabel = t("signup.passwordStrengthLabel") || (locale === "en" ? "Password strength:" : "قوة كلمة المرور:");
+  const haveAccountText = t("signup.haveAccount") || (locale === "en" ? "Already have an account?" : "لديك حساب بالفعل؟");
+  const loginText = t("signup.loginCta") || "تسجيل الدخول";
 
   const passwordChecks = {
     length: form.password.length >= 8,
@@ -58,8 +92,6 @@ export default function SignUpForm() {
     number: /[0-9]/.test(form.password),
     symbol: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(form.password),
   };
-
-  const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -73,12 +105,11 @@ export default function SignUpForm() {
     setSuccess("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
     // التحقق من الحقول
     if (!form.name.trim() || !form.email.trim() || !form.password || !form.confirmPassword) {
-      setError(t("auth.signup.errors.required") || "يرجى تعبئة جميع الحقول المطلوبة");
+      setError(t("signup.errors.required") || "يرجى تعبئة جميع الحقول المطلوبة");
       return;
     }
     if (form.userType === "doctor" && (!form.licenseNumber.trim() || !form.phone.trim())) {
@@ -86,366 +117,435 @@ export default function SignUpForm() {
       return;
     }
     if (form.userType === "patient" && !form.doctorId) {
-      setError(t("auth.signup.errors.doctorMissing") || "يرجى اختيار الطبيب المعالج");
+      setError(t("signup.errors.doctorMissing") || "يرجى اختيار الطبيب المعالج");
       return;
     }
+    const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
     if (!isPasswordStrong) {
-      setError(t("auth.signup.errors.weakPassword") || "كلمة المرور لا تستوفي جميع المتطلبات");
+      setError(t("signup.errors.weakPassword") || "كلمة المرور لا تستوفي جميع المتطلبات");
       return;
     }
     if (form.password !== form.confirmPassword) {
-      setError(t("auth.signup.errors.mismatch") || "كلمتا المرور غير متطابقتين");
+      setError(t("signup.errors.mismatch") || "كلمتا المرور غير متطابقتين");
       return;
     }
-
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError("");
+    setSuccess("");
+    try {
+      let apiUrl, payload;
       if (form.userType === "doctor") {
-        setSuccess(locale === "en"
-          ? "Your registration is pending admin approval. You will be notified when approved."
-          : "تم استلام طلبك كطبيب وسيتم مراجعته من الإدارة. سيتم إشعارك عند الموافقة.");
+        apiUrl = "/api/doctor";
+        payload = {
+          email: form.email,
+          password: form.password,
+          fullName: form.name,
+          licenseNumber: form.licenseNumber,
+          phone: form.phone,
+        };
       } else {
-        setSuccess(t("auth.signup.success") || "تم إنشاء الحساب بنجاح! يتم إعادة التوجيه...");
-        setTimeout(() => {
-          window.location.href = locale === "ar" ? "/ar/login" : "/en/login";
-        }, 2000);
+        // patient API is localized under /[locale]/api/patient
+        apiUrl = withLocale(locale, "/api/patient");
+        payload = {
+          email: form.email,
+          password: form.password,
+          fullName: form.name,
+          role: form.userType,
+          doctorId: form.doctorId,
+        };
       }
-    }, 1500);
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      setLoading(false);
+      if (!res.ok) {
+        setError(data.error || "حدث خطأ أثناء التسجيل");
+        return;
+      }
+      setSuccess(t("signup.success") || "تم إنشاء الحساب بنجاح! يتم إعادة التوجيه...");
+      setTimeout(() => {
+        window.location.href = locale === "ar" ? "/ar/login" : "/en/login";
+      }, 2000);
+    } catch (err) {
+      setLoading(false);
+      setError("حدث خطأ في الاتصال بالخادم");
+    }
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-y-auto" dir={dir} lang={locale}>
-      {/* خلفية متحركة */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute left-1/2 top-1/4 w-96 h-96 bg-yellow-400 opacity-5 rounded-full blur-3xl" />
-        <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-red-500 opacity-5 rounded-full blur-3xl" />
+    <div className="min-h-screen flex items-center justify-center p-4" dir={dir} lang={locale}>
+      {/* خلفية متدرجة بالوردي والبنفسجي */}
+      <div className="fixed inset-0 z-0">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: 'url(/icons/bluesignup.jpg)' }}
+        />
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="relative z-10 flex flex-col w-full h-full max-w-none bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl backdrop-blur-xl border border-yellow-400/20 dark:border-yellow-400/10 p-8"
-      >
-        {/* Section 1: Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex flex-col items-center gap-4 flex-1">
-            <div className="inline-block p-4 bg-linear-to-br from-yellow-400 to-red-600 rounded-full shadow-xl">
-              <FaUserPlus className="text-4xl text-white" />
-            </div>
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">{t("auth.signup.title") || "إنشاء حساب جديد"}</h2>
-              <p className="text-zinc-600 dark:text-gray-400 text-base">{t("auth.signup.subtitle") || "انضم لمنصتنا الطبية المتقدمة"}</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={toggleLocale}
-            className="flex items-center gap-2 px-3 py-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-colors font-medium text-sm"
-            title={locale === "ar" ? "Switch to English" : "التبديل للعربية"}
-          >
-            <span>🌐</span>
-            <span>{locale === "ar" ? "EN" : "AR"}</span>
-          </button>
-        </div>
-
-        {/* Section 2: Social Login */}
-        <div className="mb-6 pb-6 border-b border-yellow-400/10">
-          <div className="flex items-center justify-center gap-4">
-            <button type="button" className="flex-1 max-w-40 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-blue-400/30 flex items-center justify-center gap-2 font-medium" title="Facebook">
-              <FaFacebook className="text-xl" />
-              <span className="text-sm">Facebook</span>
-            </button>
-            <button type="button" className="flex-1 max-w-40 h-12 rounded-xl bg-red-500 hover:bg-red-600 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-red-400/30 flex items-center justify-center gap-2 font-medium" title="Google">
-              <FaGoogle className="text-xl" />
-              <span className="text-sm">Google</span>
-            </button>
-          </div>
-          <div className="flex items-center justify-center gap-3 mt-4">
-            <div className="h-px bg-zinc-300 dark:bg-zinc-700 flex-1"></div>
-            <span className="text-zinc-600 dark:text-gray-400 text-sm font-medium">{t("auth.signup.socialDivider") || "أو التسجيل بالبريد"}</span>
-            <div className="h-px bg-zinc-300 dark:bg-zinc-700 flex-1"></div>
-          </div>
-        </div>
-
-        {/* Section 3: Role Selection */}
-        <div className="mb-8">
-          <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-4 text-center">{t("auth.signup.roleLabel") || "اختر نوع الحساب"}</label>
-          <div className="flex items-center justify-center gap-6">
-            <button
-              type="button"
-              onClick={() => handleUserTypeChange("doctor")}
-              className={`group flex items-center gap-4 px-8 py-4 rounded-2xl transition-all duration-300 min-w-40 ${
-                form.userType === "doctor"
-                  ? "bg-linear-to-br from-yellow-400 to-red-600 text-white shadow-xl shadow-yellow-500/30 ring-4 ring-yellow-400/30 scale-105"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-yellow-600 dark:text-yellow-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-2 border-zinc-300 dark:border-zinc-600 hover:border-yellow-400 hover:scale-105"
-              }`}
-              title="Doctor"
-            >
-              <FaStethoscope className="text-4xl transition-transform group-hover:rotate-12" />
-              <span className="text-lg font-bold">{t("auth.signup.doctorRole") || "طبيب"}</span>
-            </button>
-            
-            <button
-              type="button"
-              onClick={() => handleUserTypeChange("patient")}
-              className={`group flex items-center gap-4 px-8 py-4 rounded-2xl transition-all duration-300 min-w-40 ${
-                form.userType === "patient"
-                  ? "bg-linear-to-br from-yellow-400 to-red-600 text-white shadow-xl shadow-red-500/30 ring-4 ring-red-400/30 scale-105"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-red-600 dark:text-red-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-2 border-zinc-300 dark:border-zinc-600 hover:border-red-400 hover:scale-105"
-              }`}
-              title="Patient"
-            >
-              <FaBed className="text-4xl transition-transform group-hover:rotate-12" />
-              <span className="text-lg font-bold">{t("auth.signup.patientRole") || "مريض"}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Section 4: Form Fields (55% height) - Scrollable */}
-        <div className="h-[55%] px-6 py-4 overflow-y-auto space-y-3">
-
-          {/* Name Field */}
-          <div>
-            <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">{t("auth.signup.nameLabel") || "الاسم الكامل"} *</label>
-            <div className="relative">
-              <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 text-lg" />
-              <input
-                type="text"
-                name="name"
-                placeholder={locale === "en" ? "John Doe" : "أحمد محمد"}
-                value={form.name}
-                onChange={handleChange}
-                required
-                className="w-full pl-12 pr-4 py-4 border-2 border-yellow-400/30 dark:border-yellow-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/20 transition-all text-base"
-              />
-            </div>
-          </div>
-
-          {/* Doctor License Number & Phone (only for doctors) */}
-          {form.userType === "doctor" && (
-            <>
-              <div>
-                <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">{locale === "en" ? "Medical License Number" : "رقم الترخيص الطبي"} *</label>
-                <div className="relative">
-                  <FaStethoscope className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 text-lg" />
-                  <input
-                    type="text"
-                    name="licenseNumber"
-                    placeholder={locale === "en" ? "e.g. 123456" : "مثال: 123456"}
-                    value={form.licenseNumber}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-12 pr-4 py-4 border-2 border-yellow-400/30 dark:border-yellow-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/20 transition-all text-base"
-                  />
-                </div>
+      {/* الفورم المحصور في المنتصف */}
+      <div className="relative z-10 w-full max-w-md">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full glass-morph bg-white/20 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 p-8 max-h-[90vh] overflow-y-auto"
+        >
+          {/* Section 1: Header */}
+          <div className="mb-8 flex items-center justify-between gap-2">
+            <div className="flex flex-col items-center gap-4 flex-1">
+              <div className="inline-block p-4 rounded-full glass-morph bg-white/30 shadow-xl">
+                <FaUserPlus className="text-4xl text-white" />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">{locale === "en" ? "Phone Number" : "رقم الجوال"} *</label>
-                <div className="relative">
-                  <FaPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 text-lg" />
-                  <input
-                    type="tel"
-                    name="phone"
-                    placeholder={locale === "en" ? "+9665xxxxxxx" : "05xxxxxxxx"}
-                    value={form.phone}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-12 pr-4 py-4 border-2 border-yellow-400/30 dark:border-yellow-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/20 transition-all text-base"
-                  />
-                </div>
+              <div className="text-center">
+                <h2 className="text-3xl font-bold text-white mb-1">{t("signup.title") || "سجل معنا"}</h2>
+                <p className="text-white/90 text-base">{t("signup.subtitle") || "انضم إلى مجتمعنا"}</p>
               </div>
-            </>
-          )}
-
-          {/* Email Field */}
-          <div>
-            <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">{t("auth.signup.emailLabel") || "البريد الإلكتروني"} *</label>
-            <div className="relative">
-              <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600 dark:text-red-400 text-lg" />
-              <input
-                type="email"
-                name="email"
-                placeholder="example@email.com"
-                value={form.email}
-                onChange={handleChange}
-                required
-                className="w-full pl-12 pr-4 py-4 border-2 border-red-400/30 dark:border-red-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-red-500 dark:focus:border-red-400 focus:ring-4 focus:ring-red-400/20 transition-all text-base"
-              />
             </div>
-          </div>
-
-          {/* Doctor Selection for Patients */}
-          {form.userType === "patient" && (
-            <div>
-              <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">{t("auth.signup.doctorPickerLabel") || "الطبيب المعالج"} *</label>
-              <select
-                name="doctorId"
-                value={form.doctorId}
-                onChange={handleChange}
-                className="w-full px-4 py-4 border-2 border-amber-400/30 dark:border-amber-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 transition-all text-base"
+            <div className="flex items-center gap-2">
+              <Link
+                href={locale === "en" ? "/en" : "/ar"}
+                className="w-10 h-10 flex items-center justify-center rounded-full glass-morph bg-white/30 text-white hover:bg-white/40 shadow-md border border-white/40 transition-all focus:outline-none focus:ring-2 focus:ring-white/40"
+                title={locale === "ar" ? "العودة للرئيسية" : "Back to home"}
+                aria-label={locale === "ar" ? "العودة للرئيسية" : "Back to home"}
+                onClick={e => {
+                  const homePath = locale === "en" ? "/en" : "/ar";
+                  const current = window.location.pathname;
+                  if (current === homePath) {
+                    e.preventDefault();
+                    return;
+                  }
+                  if (
+                    current === `${homePath}/${locale}` ||
+                    current.startsWith(`${homePath}/`)
+                  ) {
+                    e.preventDefault();
+                    window.location.href = homePath;
+                  }
+                }}
               >
-                <option value="">{t("auth.signup.doctorPlaceholder") || "اختر الطبيب المعالج"}</option>
-                {doctors.map((doc) => (
-                  <option key={doc.id} value={doc.id}>
-                    {doc.name} - {doc.specialty}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Password Field */}
-          <div>
-            <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">{t("auth.signup.passwordLabel") || "كلمة المرور"} *</label>
-            <div className="relative">
-              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 text-lg" />
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
-                required
-                className="w-full pl-12 pr-24 py-4 border-2 border-yellow-400/30 dark:border-yellow-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-yellow-500 dark:focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/20 transition-all text-base"
-              />
+                <FaHouse className="text-xl" />
+              </Link>
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors"
-                title={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                onClick={toggleLocale}
+                className="flex items-center gap-2 px-3 py-2 rounded-full glass-morph bg-white/30 text-white hover:bg-white/40 transition-colors font-medium text-sm"
+                title={locale === "ar" ? "Switch to English" : "التبديل للعربية"}
               >
-                {showPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+                <span>🌐</span>
+                <span>{locale === "ar" ? "EN" : "AR"}</span>
               </button>
             </div>
           </div>
 
-          {/* Confirm Password Field */}
-          <div>
-            <label className="block text-sm font-semibold text-zinc-900 dark:text-white mb-3">{t("auth.signup.confirmPasswordLabel") || "تأكيد كلمة المرور"} *</label>
-            <div className="relative">
-              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600 dark:text-red-400 text-lg" />
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="••••••••"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                required
-                className="w-full pl-12 pr-4 py-4 border-2 border-red-400/30 dark:border-red-400/20 rounded-xl bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-red-500 dark:focus:border-red-400 focus:ring-4 focus:ring-red-400/20 transition-all text-base"
-              />
+          {/* Section 2: Social Login */}
+          <div className="mb-6 pb-6 border-b border-white/20">
+            <div className="flex items-center justify-center gap-4">
+              <button type="button" className="flex-1 max-w-40 h-12 rounded-xl glass-morph bg-white/20 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-white/30 flex items-center justify-center gap-2 font-medium border border-white/40" title="Facebook">
+                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 shadow">
+                  <FaFacebook className="text-lg text-white" />
+                </span>
+                <span className="text-sm">Facebook</span>
+              </button>
+              <button type="button" className="flex-1 max-w-40 h-12 rounded-xl glass-morph bg-white/20 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-white/30 flex items-center justify-center gap-2 font-medium border border-white/40" title="Google">
+                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 shadow">
+                  <FaGoogle className="text-lg text-white" />
+                </span>
+                <span className="text-sm">Google</span>
+              </button>
+            </div>
+            <div className="flex items-center justify-center gap-3 mt-4">
+              <div className="h-px bg-white/30 flex-1"></div>
+              <span className="text-white/90 text-sm font-medium">{t("signup.socialDivider") || "أو التسجيل بالبريد"}</span>
+              <div className="h-px bg-white/30 flex-1"></div>
             </div>
           </div>
 
-          {/* شريط قوة كلمة المرور مع emoji */}
-          {form.password && (
-            <div className="bg-zinc-100 dark:bg-zinc-800/50 rounded-xl p-4 space-y-3 border-2 border-zinc-300 dark:border-zinc-700">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-zinc-900 dark:text-white">{passwordStrengthLabel}</p>
-                <span className="text-lg">
-                  {(() => {
-                    const checks = [passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length;
-                    if (checks <= 1) return "😞";
-                    if (checks === 2) return "😐";
-                    if (checks === 3) return "🙂";
-                    return "😍";
-                  })()}
+          {/* Section 3: Role Selection */}
+          <div className="mb-8">
+            <label className="block text-sm font-semibold text-white mb-4 text-center">{t("signup.roleLabel") || "اختر نوع الحساب"}</label>
+            <div className="flex items-center justify-center gap-6">
+              <button
+                type="button"
+                onClick={() => handleUserTypeChange("doctor")}
+                className={`group flex items-center justify-center p-0 rounded-full transition-all duration-300 w-16 h-16 ${
+                  form.userType === "doctor"
+                    ? "ring-4 ring-white/60 scale-110 shadow-xl"
+                    : "ring-2 ring-white/30 hover:ring-white/40 hover:scale-105"
+                }`}
+                title="Doctor"
+              >
+                <span className="w-14 h-14 flex items-center justify-center rounded-full glass-morph bg-white/30 shadow-md">
+                  <FaStethoscope className="text-3xl text-white transition-transform group-hover:rotate-12" />
                 </span>
-              </div>
-              <div className="w-full h-3 bg-zinc-300 dark:bg-zinc-700 rounded-full overflow-hidden">
-                <div
-                  style={{
-                    width: `${[passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length * 25}%`,
-                    backgroundColor: (() => {
-                      const checks = [passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length;
-                      if (checks <= 1) return "#ef4444";
-                      if (checks === 2) return "#eab308";
-                      if (checks === 3) return "#f59e0b";
-                      return "#22c55e";
-                    })()
-                  }}
-                  className="h-3 rounded-full transition-all duration-300"
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUserTypeChange("patient")}
+                className={`group flex items-center justify-center p-0 rounded-full transition-all duration-300 w-16 h-16 ${
+                  form.userType === "patient"
+                    ? "ring-4 ring-white/60 scale-110 shadow-xl"
+                    : "ring-2 ring-white/30 hover:ring-white/40 hover:scale-105"
+                }`}
+                title="Patient"
+              >
+                <span className="w-14 h-14 flex items-center justify-center rounded-full glass-morph bg-white/30 shadow-md">
+                  <FaBed className="text-3xl text-white transition-transform group-hover:rotate-12" />
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Section 4: Form Fields */}
+          <div className="space-y-3">
+            {/* Name Field */}
+            <div>
+              <label className="block text-sm font-semibold text-white mb-3">{t("signup.nameLabel") || "الاسم الكامل"} *</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-white/30">
+                  <FaUser className="text-white text-lg" />
+                </span>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder={locale === "en" ? "John Doe" : "أحمد محمد"}
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-12 pr-4 py-4 border-2 border-white/30 rounded-xl glass-morph bg-white/20 text-white placeholder:text-white/60 focus:outline-none focus:border-white/50 focus:ring-4 focus:ring-white/20 transition-all text-base"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <span className={passwordChecks.length ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-zinc-500 dark:text-gray-500"}>
-                  {passwordChecks.length ? "✔" : "✗"} {passwordHints[0] || "8 أحرف"}
-                </span>
-                <span className={passwordChecks.uppercase ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-zinc-500 dark:text-gray-500"}>
-                  {passwordChecks.uppercase ? "✔" : "✗"} {passwordHints[1] || "حرف كبير"}
-                </span>
-                <span className={passwordChecks.number ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-zinc-500 dark:text-gray-500"}>
-                  {passwordChecks.number ? "✔" : "✗"} {passwordHints[2] || "رقم"}
-                </span>
-                <span className={passwordChecks.symbol ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-zinc-500 dark:text-gray-500"}>
-                  {passwordChecks.symbol ? "✔" : "✗"} {passwordHints[3] || "رمز خاص"}
-                </span>
-              </div>
             </div>
-          )}
-        </div>
-
-        {/* Section 5: Messages & Submit Button */}
-        <div className="border-t border-yellow-400/10 pt-6 space-y-4">
-          {/* رسائل الأخطاء والنجاح */}
-          {error && (
-            <div className="w-full bg-red-50 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-500/50 rounded-xl p-3 text-red-700 dark:text-red-300 text-sm text-center font-medium">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="w-full bg-emerald-50 dark:bg-emerald-900/30 border-2 border-emerald-300 dark:border-emerald-500/50 rounded-xl p-3 text-emerald-700 dark:text-emerald-300 text-sm flex items-center justify-center gap-2 font-medium">
-              <FaCheck className="text-base shrink-0" />
-              <span>{success}</span>
-            </div>
-          )}
-
-          {/* زر الإنشاء */}
-          <button
-            type="submit"
-            disabled={loading || !isPasswordStrong}
-            className="w-full px-8 py-4 rounded-xl bg-linear-to-r from-yellow-400 to-red-600 hover:from-yellow-500 hover:to-red-700 text-white font-bold text-lg shadow-xl transition-all hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3"
-          >
-            {loading ? (
+            {/* Doctor License Number & Phone (only for doctors) */}
+            {form.userType === "doctor" && (
               <>
-                <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {t("auth.signup.loading") || "جاري الإنشاء..."}
-              </>
-            ) : (
-              <>
-                <FaUserPlus className="text-xl" />
-                {t("auth.signup.submit") || "إنشاء حساب جديد"}
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-3">{locale === "en" ? "Medical License Number" : "رقم الترخيص الطبي"} *</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-white/30">
+                      <FaStethoscope className="text-white text-lg" />
+                    </span>
+                    <input
+                      type="text"
+                      name="licenseNumber"
+                      placeholder={locale === "en" ? "e.g. 123456" : "مثال: 123456"}
+                      value={form.licenseNumber}
+                      onChange={handleChange}
+                      required
+                      className="w-full pl-12 pr-4 py-4 border-2 border-white/30 rounded-xl glass-morph bg-white/20 text-white placeholder:text-white/60 focus:outline-none focus:border-white/50 focus:ring-4 focus:ring-white/20 transition-all text-base"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-3">{locale === "en" ? "Phone Number" : "رقم الجوال"} *</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-white/30">
+                      <FaPhone className="text-white text-lg" />
+                    </span>
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder={locale === "en" ? "+9665xxxxxxx" : "05xxxxxxxx"}
+                      value={form.phone}
+                      onChange={handleChange}
+                      required
+                      className="w-full pl-12 pr-4 py-4 border-2 border-white/30 rounded-xl glass-morph bg-white/20 text-white placeholder:text-white/60 focus:outline-none focus:border-white/50 focus:ring-4 focus:ring-white/20 transition-all text-base"
+                    />
+                  </div>
+                </div>
               </>
             )}
-          </button>
-
-          {/* رابط تسجيل الدخول */}
-          <div className="text-center text-zinc-600 dark:text-gray-400 text-base">
-            {haveAccountText}{" "}
-            <Link href="/login" className="text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 font-bold transition-colors underline">
-              {loginText}
-            </Link>
+            {/* Email Field */}
+            <div>
+              <label className="block text-sm font-semibold text-white mb-3">{t("signup.emailLabel") || "البريد الإلكتروني"} *</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-white/30">
+                  <FaEnvelope className="text-white text-lg" />
+                </span>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="example@email.com"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-12 pr-4 py-4 border-2 border-white/30 rounded-xl glass-morph bg-white/20 text-white placeholder:text-white/60 focus:outline-none focus:border-white/50 focus:ring-4 focus:ring-white/20 transition-all text-base"
+                />
+              </div>
+            </div>
+            {/* Doctor Selection for Patients */}
+            {form.userType === "patient" && (
+              <div>
+                <label className="block text-sm font-semibold text-white mb-3">{t("signup.doctorPickerLabel") || "الطبيب المعالج"} *</label>
+                {doctorsLoading ? (
+                  <div className="text-white">{locale === "ar" ? "جاري تحميل الأطباء..." : "Loading doctors..."}</div>
+                ) : doctorsError ? (
+                  <div className="text-red-400">{doctorsError}</div>
+                ) : (
+                  <select
+                    name="doctorId"
+                    value={form.doctorId}
+                    onChange={handleChange}
+                    className="w-full px-4 py-4 border-2 border-white/30 rounded-xl glass-morph bg-white/20 text-white focus:outline-none focus:border-white/50 focus:ring-4 focus:ring-white/20 transition-all text-base"
+                  >
+                    <option value="" className="text-gray-800">{t("signup.doctorPlaceholder") || "اختر الطبيب المعالج"}</option>
+                    {doctors.map((doc) => (
+                      <option key={doc.id} value={doc.id} className="text-gray-800">
+                        {doc.name}{doc.specialty ? ` - ${doc.specialty}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
+            {/* Password Field */}
+            <div>
+              <label className="block text-sm font-semibold text-white mb-3">{t("signup.passwordLabel") || "كلمة المرور"} *</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-white/30">
+                  <FaLock className="text-white text-lg" />
+                </span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-12 pr-24 py-4 border-2 border-white/30 rounded-xl glass-morph bg-white/20 text-white placeholder:text-white/60 focus:outline-none focus:border-white/50 focus:ring-4 focus:ring-white/20 transition-all text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-yellow-300 hover:text-yellow-200 transition-colors"
+                  title={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                >
+                  {showPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+                </button>
+              </div>
+            </div>
+            {/* Confirm Password Field */}
+            <div>
+              <label className="block text-sm font-semibold text-white mb-3">{t("signup.confirmPasswordLabel") || "تأكيد كلمة المرور"} *</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-white/30">
+                  <FaLock className="text-white text-lg" />
+                </span>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="••••••••"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-12 pr-4 py-4 border-2 border-white/30 rounded-xl glass-morph bg-white/20 text-white placeholder:text-white/60 focus:outline-none focus:border-white/50 focus:ring-4 focus:ring-white/20 transition-all text-base"
+                />
+              </div>
+            </div>
+            {/* شريط قوة كلمة المرور مع emoji */}
+            {form.password && (
+              <div className="bg-white/20 backdrop-blur rounded-xl p-4 space-y-3 border-2 border-white/30">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-bold text-white">{passwordStrengthLabel}</p>
+                  <span className="text-lg">
+                    {(() => {
+                      const checks = [passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length;
+                      if (checks <= 1) return "😞";
+                      if (checks === 2) return "😐";
+                      if (checks === 3) return "🙂";
+                      return "😍";
+                    })()}
+                  </span>
+                </div>
+                <div className="w-full h-3 bg-white/30 rounded-full overflow-hidden">
+                  <div
+                    style={{
+                      width: `${[passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length * 25}%`,
+                      backgroundColor: (() => {
+                        const checks = [passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length;
+                        if (checks <= 1) return "#ef4444";
+                        if (checks === 2) return "#eab308";
+                        if (checks === 3) return "#f59e0b";
+                        return "#22c55e";
+                      })()
+                    }}
+                    className="h-3 rounded-full transition-all duration-300"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <span className={passwordChecks.length ? "text-emerald-300 font-bold" : "text-white/60"}>
+                    {passwordChecks.length ? "✔" : "✗"} {passwordHints[0] || "8 أحرف"}
+                  </span>
+                  <span className={passwordChecks.uppercase ? "text-emerald-300 font-bold" : "text-white/60"}>
+                    {passwordChecks.uppercase ? "✔" : "✗"} {passwordHints[1] || "حرف كبير"}
+                  </span>
+                  <span className={passwordChecks.number ? "text-emerald-300 font-bold" : "text-white/60"}>
+                    {passwordChecks.number ? "✔" : "✗"} {passwordHints[2] || "رقم"}
+                  </span>
+                  <span className={passwordChecks.symbol ? "text-emerald-300 font-bold" : "text-white/60"}>
+                    {passwordChecks.symbol ? "✔" : "✗"} {passwordHints[3] || "رمز خاص"}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* روابط الخصوصية والشروط */}
-          <div className="text-center text-zinc-600 dark:text-gray-400 text-sm mt-4">
-            <p>
-              {t("auth.signup.termsAgreement") || "أوافق على"}{" "}
-              <Link href="/privacy" className="text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 font-bold transition-colors underline">
-                {t("auth.signup.privacyPolicy") || "سياسة الخصوصية"}
+          {/* Section 5: Messages & Submit Button */}
+          <div className="border-t border-white/20 pt-6 space-y-4 mt-6">
+            {/* رسائل الأخطاء والنجاح */}
+            {error && (
+              <div className="w-full bg-red-500/20 backdrop-blur border-2 border-red-400/50 rounded-xl p-3 text-white text-sm text-center font-medium">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="w-full bg-green-500/20 backdrop-blur border-2 border-green-400/50 rounded-xl p-3 text-white text-sm flex items-center justify-center gap-2 font-medium">
+                <FaCheck className="text-base shrink-0" />
+                <span>{success}</span>
+              </div>
+            )}
+            {/* زر الإنشاء */}
+            <button
+              type="submit"
+              disabled={loading || !Object.values(passwordChecks).every(Boolean)}
+              className="w-full px-8 py-4 rounded-xl glass-morph bg-white/20 text-white font-bold text-lg shadow-xl transition-all hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3 border-2 border-white/30"
+            >
+              {loading ? (
+                <>
+                  <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  {t("signup.loading") || "جاري الإنشاء..."}
+                </>
+              ) : (
+                <>
+                  <FaUserPlus className="text-xl" />
+                  {t("signup.submit") || "إنشاء حساب جديد"}
+                </>
+              )}
+            </button>
+            {/* رابط تسجيل الدخول */}
+            <div className="text-center text-white/80 text-base">
+              {haveAccountText}{" "}
+              <Link href={withLocale(locale, "/login")} className="text-white hover:text-yellow-200 font-bold transition-colors underline">
+                {loginText}
               </Link>
-              {" "}{t("auth.signup.and") || "و"}{" "}
-              <Link href="/terms" className="text-yellow-600 dark:text-yellow-400 hover:text-red-600 dark:hover:text-red-400 font-bold transition-colors underline">
-                {t("auth.signup.termsConditions") || "شروط الاستخدام"}
-              </Link>
-            </p>
+            </div>
+            {/* روابط الخصوصية والشروط */}
+            <div className="text-center text-white/80 text-sm mt-4">
+              <p>
+                {t("signup.termsAgreement") || "أوافق على"} {" "}
+                <Link href={withLocale(locale, "/privacy")} className="text-yellow-200 hover:text-yellow-100 font-bold transition-colors underline">
+                  {t("signup.privacyPolicy") || "سياسة الخصوصية"}
+                </Link>
+                {" "}{t("signup.and") || "و"}{" "}
+                <Link href={withLocale(locale, "/terms")} className="text-yellow-200 hover:text-yellow-100 font-bold transition-colors underline">
+                  {t("signup.termsConditions") || "شروط الاستخدام"}
+                </Link>
+              </p>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
 
-
-
-
-
+export default SignUpForm;

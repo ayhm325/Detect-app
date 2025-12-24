@@ -1,0 +1,45 @@
+{
+  "title": "Medical Dashboard",
+  "welcome": "Welcome Dr.",
+  "stats": {
+    "patients": "Total patients",
+    "todayAppointments": "Today's appointments",
+    "pendingScans": "Pending scans",
+    "newMessages": "New messages",
+    "changeSince": "since last month"
+  },
+  "quickActions": {
+    "viewPatients": "View patients",
+    "viewPatientsDesc": "Manage your patient list",
+    "medicalImages": "Medical images",
+    "medicalImagesDesc": "Review radiology exams",
+    "appointments": "Appointments",
+    "appointmentsDesc": "Manage schedule",
+    "chats": "Chats",
+    "chatsDesc": "Communicate with patients"
+  },
+  "todayAppointments": {
+    "title": "Today's appointments",
+    "viewAll": "View All",
+    "types": {
+      "xray": "X-ray",
+      "consult": "Consultation",
+      "followup": "Follow-up",
+      "ct": "CT Scan"
+    },
+    "status": {
+      "confirmed": "Confirmed",
+      "pending": "Pending"
+    }
+  },
+  "pendingScans": {
+    "title": "Pending scans",
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "viewAll": "View all scans"
+  },
+  "recentActivityTitle": "Recent activity"
+}

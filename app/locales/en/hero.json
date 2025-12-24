@@ -1,0 +1,15 @@
+{
+  "content": {
+    "hero": {
+      "title": "Welcome to Detect AI",
+      "subtitle": "Smart Disease Detection System",
+      "desc": "A modern platform for highly accurate medical image analysis, providing doctors and patients with fast answers and keeping your data secure.",
+      "primaryCta": "Get Started Free",
+      "secondaryCta": "Sign In"
+    }
+  },
+  "stats1": "99%",
+  "stats2": "50+",
+  "stats3": "100K+",
+  "stats4": "24/7"
+}

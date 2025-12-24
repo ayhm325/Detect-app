@@ -1,0 +1,27 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "patients": "Patients",
+    "doctors": "Doctors",
+    "doctorChangeRequests": "Doctor Requests",
+    "analytics": "Analytics",
+    "chat": "Chat",
+    "appointments": "Appointments",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "ui": {
+    "collapseOpen": "Expand sidebar",
+    "collapseClose": "Collapse sidebar",
+    "themeLight": "Light mode",
+    "themeDark": "Dark mode",
+    "switchTo": "English",
+    "switchToEn": "Arabic",
+    "switchToAr": "Arabic"
+  },
+  "footer": {
+    "version": "Version 1.0.0",
+    "operational": "All systems operational"
+  }
+}

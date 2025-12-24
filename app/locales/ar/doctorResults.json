@@ -1,0 +1,65 @@
+{
+  "status": {
+    "completed": "مكتمل",
+    "pending": "قيد المراجعة",
+    "urgent": "عاجل"
+  },
+  "statuses": {
+    "completed": "مكتمل",
+    "pending": "قيد المراجعة",
+    "urgent": "عاجل"
+  },
+  "patientName": "اسم المريض",
+  "patientId": "معرف المريض",
+  "type": "نوع الفحص",
+  "bodyPart": "جزء الجسم",
+  "date": "التاريخ",
+  "time": "الوقت",
+  "aiSummary": "ملخص الذكاء الاصطناعي",
+  "thumbnail": "صورة مصغرة",
+  "text": "النص",
+  "scan1PatientName": "المريض 1",
+  "scan1PatientId": "ID001",
+  "scan1Type": "أشعة",
+  "scan1BodyPart": "صدر",
+  "scan1Date": "2025-12-19",
+  "scan1Time": "10:00",
+  "scan1Status": "مكتمل",
+  "scan1AiSummary": "لا توجد مشاكل",
+  "scan1Thumbnail": "/images/scan1.jpg",
+  "scan1Finding1Type": "طبيعي",
+  "scan1Finding1Text": "لا توجد كتل",
+  "scan1Finding2Type": "طبيعي",
+  "scan1Finding2Text": "لا توجد أورام",
+  "title": "نتائج الفحوصات",
+  "subtitle": "هنا يمكنك مراجعة جميع نتائج المرضى والفحوصات الطبية.",
+  "stats": {
+    "total": "إجمالي الفحوصات",
+    "completed": "مكتملة",
+    "pending": "قيد المراجعة",
+    "today": "اليوم"
+  },
+  "searchPlaceholder": "ابحث باسم المريض أو نوع الفحص...",
+  "filters": {
+    "allTypes": "كل الأنواع",
+    "allStatuses": "كل الحالات"
+  },
+  "actions": {
+    "view": "عرض التفاصيل",
+    "download": "تحميل التقرير",
+    "print": "طباعة",
+    "close": "إغلاق"
+  },
+  "viewer": {
+    "aiAnalysis": "تحليل الذكاء الاصطناعي",
+    "findings": "النتائج",
+    "emptyState": "لا توجد نتائج لهذا الفحص."
+  },
+  "statusLabel": "الحالة",
+  "toast": {
+    "viewingScan": "جاري عرض الفحص...",
+    "downloadStart": "جاري بدء التحميل...",
+    "printStart": "جاري تجهيز الطباعة...",
+    "shareCopied": "تم نسخ الرابط!"
+  }
+}

@@ -1,6 +1,6 @@
 
 import DoctorLayout from "../DoctorLayout";
-import UploadXRayPageContent from "@/app/components/doctor/pages/UploadXRayPageContent";
+import UploadXRayPageContent from "../../../components/doctor/pages/UploadXRayPageContent";
 
 export default function UploadXRayPage() {
   return (

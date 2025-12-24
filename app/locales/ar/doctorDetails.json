@@ -1,0 +1,20 @@
+{
+  "details": "التفاصيل",
+  "name": "الاسم",
+  "email": "البريد الإلكتروني",
+  "specialty": "التخصص",
+  "license": "رقم الترخيص",
+  "phone": "الهاتف",
+  "status": "الحالة",
+  "approve": "موافقة",
+  "reject": "رفض",
+  "close": "إغلاق",
+  "statusLabels": {
+    "pending": "قيد الانتظار",
+    "verified": "تم التحقق",
+    "rejected": "مرفوض",
+    "active": "نشط",
+    "suspended": "معلق",
+    "banned": "محظور"
+  }
+}

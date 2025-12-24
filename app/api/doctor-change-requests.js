@@ -1,14 +1,13 @@
-// Simple in-memory mock API for doctor change requests (frontend only)
-let requests = [];
 
-export function addDoctorChangeRequest(request) {
-  requests.push({ ...request, id: Date.now(), status: "pending" });
-}
+import { NextResponse } from 'next/server';
+import { getPendingDoctors } from '../../lib/getPendingDoctors.js';
 
-export function getDoctorChangeRequests() {
-  return requests;
-}
-
-export function updateDoctorChangeRequestStatus(id, status) {
-  requests = requests.map(r => r.id === id ? { ...r, status } : r);
+// GET /api/doctor-change-requests
+export async function GET() {
+  try {
+    const doctors = await getPendingDoctors();
+    return NextResponse.json({ success: true, doctors });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
 }

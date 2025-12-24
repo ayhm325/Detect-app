@@ -1,11 +1,40 @@
 {
-  "brand": "PneumoDetect",
-  "navTagline": "Advanced Medical AI",
-  "home": "الرئيسية",
-  "login": "تسجيل الدخول",
-  "signup": "إنشاء حساب",
-  "langSwitch": "English",
-  "langSwitchAria": "تبديل اللغة إلى الإنجليزية",
+  "footer": {
+    "quickLinksHeading": "روابط سريعة",
+    "supportHeading": "الدعم",
+    "contactHeading": "تواصل معنا",
+    "description": "منصة ذكاء طبي متقدمة تقدم تشخيصاً سريعاً ودقيقاً.",
+    "quickLinks": [
+      { "label": "الرئيسية", "href": "/" },
+      { "label": "من نحن", "href": "/about" },
+      { "label": "الخدمات", "href": "/services" },
+      { "label": "المدونة", "href": "/blog" }
+    ],
+    "supportLinks": [
+      { "label": "الأسئلة الشائعة", "href": "/faq" },
+      { "label": "اتصل بنا", "href": "/contact" },
+      { "label": "سياسة الخصوصية", "href": "/privacy" },
+      { "label": "الشروط والأحكام", "href": "/terms" }
+    ],
+    "contact": {
+      "emailLabel": "البريد الإلكتروني",
+      "phoneLabel": "الهاتف",
+      "addressLabel": "العنوان",
+      "address": "إربد، الأردن"
+    },
+    "serviceStatus": "الخدمة متاحة",
+    "madeIn": "صنع بحب ❤️ في اربد",
+    "copyright": "© {year} جميع الحقوق محفوظة"
+  },
+  "navbar": {
+    "brand": "ديتيكت إيه آي",
+    "navTagline": "ذكاء اصطناعي طبي متقدم",
+    "langSwitch": "EN",
+    "langSwitchAria": "تبديل اللغة",
+    "home": "الرئيسية",
+    "about": "من نحن",
+    "services": "الخدمات"
+  },
   "hero": {
     "title": "الكشف الذكي عن الأمراض بالذكاء الاصطناعي",
     "subtitle": "تقنيات طبية متقدمة للحصول على نتائج فورية",
@@ -28,24 +57,28 @@
       { "icon": "🌐", "title": "متوفر دائماً", "desc": "خدمة سحابية 24/7 مع مراقبة." }
     ]
   },
-  "workflow": {
-    "title": "كيف يعمل النظام",
-    "subtitle": "من الرفع إلى النتيجة في ثوانٍ",
-    "steps": [
-      { "icon": "/icons/ai.svg", "title": "1. رفع الأشعة", "desc": "قم برفع صورتك الطبية بأمان." },
-      { "icon": "/icons/xray.svg", "title": "2. تحليل نموذج الذكاء الاصطناعي", "desc": "النموذج يحلل بدقة عالية." },
-      { "icon": "/icons/result.svg", "title": "3. عرض النتيجة فوراً", "desc": "احصل على تقرير التشخيص مباشرة." }
-    ]
-  },
-  "stats": {
-    "title": "أرقام تهمك",
-    "subtitle": "نهتم بالسرعة والموثوقية والدقة",
-    "cards": [
-      { "number": 99.8, "suffix": "%", "label": "دقة التشخيص", "description": "دقة عالية جداً في الاكتشاف", "icon": "🎯" },
-      { "number": 15000, "suffix": "+", "label": "مستخدم نشط", "description": "أطباء ومرضى يثقون بنا", "icon": "👥" },
-      { "number": 75000, "suffix": "+", "label": "تحليل ناجح", "description": "صور تم تحليلها بعناية", "icon": "📊" },
-      { "number": 24, "suffix": "/7", "label": "دعم مباشر", "description": "متوفرون على مدار الساعة", "icon": "⏰" }
-    ]
+  "content": {
+    "workflow": {
+      "title": "كيف يعمل النظام",
+      "subtitle": "من الرفع إلى النتيجة في ثوانٍ",
+      "steps": [
+        { "icon": "/icons/ai.svg", "title": "1. رفع الأشعة", "desc": "قم برفع صورتك الطبية بأمان." },
+        { "icon": "/icons/xray.svg", "title": "2. تحليل نموذج الذكاء الاصطناعي", "desc": "النموذج يحلل بدقة عالية." },
+        { "icon": "/icons/result.svg", "title": "3. عرض النتيجة فوراً", "desc": "احصل على تقرير التشخيص مباشرة." }
+      ],
+      "ctaTitle": "جاهز للبدء؟",
+      "ctaSubtitle": "ابدأ التشخيص الآن ولا تضيع المزيد من الوقت"
+    },
+    "stats": {
+      "title": "أرقام تهمك",
+      "subtitle": "نهتم بالسرعة والموثوقية والدقة",
+      "cards": [
+        { "number": 99.8, "suffix": "%", "label": "دقة التشخيص", "description": "دقة عالية جداً في الاكتشاف", "icon": "🎯" },
+        { "number": 15000, "suffix": "+", "label": "مستخدم نشط", "description": "أطباء ومرضى يثقون بنا", "icon": "👥" },
+        { "number": 75000, "suffix": "+", "label": "تحليل ناجح", "description": "صور تم تحليلها بعناية", "icon": "📊" },
+        { "number": 24, "suffix": "/7", "label": "دعم مباشر", "description": "متوفرون على مدار الساعة", "icon": "⏰" }
+      ]
+    }
   },
   "testimonials": {
     "title": "ماذا يقول مستخدمونا",
@@ -63,19 +96,30 @@
       { "text": "معتمد ISO", "icon": "◆" }
     ]
   },
-  "footer": {
-    "quickLinksHeading": "روابط سريعة",
-    "supportHeading": "الدعم",
-    "contactHeading": "تواصل معنا",
-    "description": "منصة ذكاء طبي متقدمة تقدم تشخيصاً سريعاً ودقيقاً.",
-    "quickLinks": [
-      { "label": "الرئيسية", "href": "/" },
-      { "label": "من نحن", "href": "/about" },
-      { "label": "الخدمات", "href": "/services" },
-      { "label": "المدونة", "href": "/blog" }
-    ],
-    "supportLinks": [
-      { "label": "الأسئلة الشائعة", "href": "/faq" },
+  "brand": "PneumoDetect",
+  "home": "الرئيسية",
+  "login": "تسجيل الدخول",
+  "signup": "إنشاء حساب",
+  "langSwitch": "English",
+  "langSwitchAria": "تبديل اللغة إلى الإنجليزية",
+  "contactPage": { "title": "اتصل بنا" },
+  "privacyPage": { "title": "سياسة الخصوصية" },
+  "termsPage": { "title": "الشروط والأحكام" },
+  "layout": {
+    "version": "الإصدار: 1.0",
+    "status": "متصل ✓"
+  },
+  "notFound": {
+    "title": "404 - الصفحة غير موجودة",
+    "subtitle": "عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها إلى موقع آخر.",
+    "popularPages": "الصفحات الشائعة:",
+    "home": "الرئيسية",
+    "login": "تسجيل الدخول",
+    "signup": "إنشاء حساب",
+    "contact": "تواصل معنا",
+    "backHome": "العودة للرئيسية"
+  }
+}
       { "label": "اتصل بنا", "href": "/contact" },
       { "label": "سياسة الخصوصية", "href": "/privacy" },
       { "label": "الشروط والأحكام", "href": "/terms" }

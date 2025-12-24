@@ -1,0 +1,24 @@
+{
+  "name": "الاسم",
+  "specialty": "التخصص",
+  "license": "رقم الترخيص",
+  "phone": "رقم الجوال",
+  "email": "البريد الإلكتروني",
+  "status": "الحالة",
+  "actions": "الإجراءات",
+  "edit": "تعديل",
+  "delete": "حذف",
+  "view": "عرض",
+  "noData": "لا توجد بيانات",
+  "addDoctor": "إضافة طبيب",
+  "add": "إضافة طبيب",
+  "details": "تفاصيل",
+  "approve": "قبول",
+  "reject": "رفض",
+  "statusLabels": {
+    "pending": "قيد المراجعة",
+    "verified": "موثق",
+    "rejected": "مرفوض"
+  },
+  "pendingRequestsTitle": "الطلبات المعلقة"
+}

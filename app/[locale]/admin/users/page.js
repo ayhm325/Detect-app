@@ -1,284 +1,82 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import AdminLayout from "../AdminLayout";
-import { useToast } from "@/app/components/ui/Toast";
-import useLocale from "@/app/hooks/useLocale";
-import { useMessages } from "next-intl";
+import { useToast } from "../../../components/ui/Toast";
+import useLocale from "../../../hooks/useLocale";
+import { useTranslations } from "next-intl";
 import { 
-  FaUsers, FaUserShield, FaUserMd, FaUserInjured, FaSearch, FaPlus, FaEdit, FaTrash, FaEye, FaDownload, FaTimes, FaSave, FaEnvelope, FaPhone, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaClock 
+  FaUsers, FaUserShield, FaUserMd, FaUserInjured, FaSearch, FaPlus, FaTrash, FaEye, FaEyeSlash, FaDownload, FaTimes, FaSave, FaEnvelope, FaPhone, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaClock 
 } from "react-icons/fa";
 
 export default function UsersPage() {
   const { showToast, ToastContainer } = useToast();
   const { locale } = useLocale();
-  const messages = useMessages();
-  // دالة ترجمة تبحث في messages الجذر مباشرة
-  function t(key, fallback = '') {
-    // إذا كان المفتاح يحتوي على نقطة، ابحث بشكل هرمي، وإلا ابحث مباشرة
-    let value;
-    if (key.includes('.')) {
-      value = key.split('.').reduce((obj, k) => (obj && obj[k] !== undefined ? obj[k] : undefined), messages);
-    } else {
-      value = messages[key];
-    }
-    if (value === undefined || value === null || value === '') {
-      return fallback ? fallback : `ترجمة ناقصة: ${key}`;
-    }
-    return value;
-  }
+  const t = useTranslations("adminUsers");
   
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState([]);
 
-  const usersTemplate = useMemo(() => locale === "en" ? [
-    {
-      id: 1,
-      name: "Ahmed Mohammed Ali",
-      email: "ahmed.ali@example.com",
-      phone: "0501234567",
-      role: "admin",
-      roleDisplay: "Admin",
-      status: "active",
-      statusDisplay: "Active",
-      joinDate: "2023-01-15",
-      lastLogin: "2025-12-04 10:30",
-      permissions: ["View", "Edit", "Delete"],
-      avatar: "👨‍💼"
-    },
-    {
-      id: 2,
-      name: "Dr. Sarah Ahmed",
-      email: "sara.ahmed@example.com",
-      phone: "0509876543",
-      role: "doctor",
-      roleDisplay: "Doctor",
-      status: "active",
-      statusDisplay: "Active",
-      joinDate: "2023-03-20",
-      lastLogin: "2025-12-04 09:15",
-      specialty: "Radiologist",
-      license: "MED-12345",
-      avatar: "👩‍⚕️"
-    },
-    {
-      id: 3,
-      name: "Mohammed Khaled",
-      email: "mohamed.k@example.com",
-      phone: "0551234567",
-      role: "patient",
-      roleDisplay: "Patient",
-      status: "active",
-      statusDisplay: "Active",
-      joinDate: "2024-05-10",
-      lastLogin: "2025-12-03 18:45",
-      patientId: "PAT-001",
-      avatar: "👤"
-    },
-    {
-      id: 4,
-      name: "Fatima Hassan",
-      email: "fatima.h@example.com",
-      phone: "0567890123",
-      role: "admin",
-      roleDisplay: "Admin",
-      status: "suspended",
-      statusDisplay: "Suspended",
-      joinDate: "2023-07-12",
-      lastLogin: "2025-11-30 14:20",
-      permissions: ["View", "Edit"],
-      avatar: "👩‍💼"
-    },
-    {
-      id: 5,
-      name: "Dr. Mohammed Ali",
-      email: "mohamed.ali@example.com",
-      phone: "0523456789",
-      role: "doctor",
-      roleDisplay: "Doctor",
-      status: "active",
-      statusDisplay: "Active",
-      joinDate: "2023-09-05",
-      lastLogin: "2025-12-04 08:00",
-      specialty: "Orthopedic Surgeon",
-      license: "MED-67890",
-      avatar: "👨‍⚕️"
-    },
-    {
-      id: 6,
-      name: "Layla Youssef",
-      email: "layla.y@example.com",
-      phone: "0534567890",
-      role: "patient",
-      roleDisplay: "Patient",
-      status: "active",
-      statusDisplay: "Active",
-      joinDate: "2024-02-18",
-      lastLogin: "2025-12-04 11:00",
-      patientId: "PAT-002",
-      avatar: "👤"
-    },
-    {
-      id: 7,
-      name: "Omar El-Sayed",
-      email: "omar.s@example.com",
-      phone: "0545678901",
-      role: "admin",
-      roleDisplay: "Admin",
-      status: "active",
-      statusDisplay: "Active",
-      joinDate: "2023-11-22",
-      lastLogin: "2025-12-04 07:30",
-      permissions: ["View"],
-      avatar: "👨‍💼"
-    },
-    {
-      id: 8,
-      name: "Dr. Fatima Ali",
-      email: "fatima.ali@example.com",
-      phone: "0556789012",
-      role: "doctor",
-      roleDisplay: "Doctor",
-      status: "suspended",
-      statusDisplay: "Suspended",
-      joinDate: "2024-01-08",
-      lastLogin: "2025-11-28 16:45",
-      specialty: "General Practitioner",
-      license: "MED-54321",
-      avatar: "👩‍⚕️"
-    }
-  ] : [
-    {
-      id: 1,
-      name: "أحمد محمد علي",
-      email: "ahmed.ali@example.com",
-      phone: "0501234567",
-      role: "admin",
-      roleDisplay: "مدير",
-      status: "active",
-      statusDisplay: "نشط",
-      joinDate: "2023-01-15",
-      lastLogin: "2025-12-04 10:30",
-      permissions: ["عرض", "تعديل", "حذف"],
-      avatar: "👨‍💼"
-    },
-    {
-      id: 2,
-      name: "د. سارة أحمد",
-      email: "sara.ahmed@example.com",
-      phone: "0509876543",
-      role: "doctor",
-      roleDisplay: "طبيب",
-      status: "active",
-      statusDisplay: "نشط",
-      joinDate: "2023-03-20",
-      lastLogin: "2025-12-04 09:15",
-      specialty: "أخصائي أشعة",
-      license: "MED-12345",
-      avatar: "👩‍⚕️"
-    },
-    {
-      id: 3,
-      name: "محمد خالد",
-      email: "mohamed.k@example.com",
-      phone: "0551234567",
-      role: "patient",
-      roleDisplay: "مريض",
-      status: "active",
-      statusDisplay: "نشط",
-      joinDate: "2024-05-10",
-      lastLogin: "2025-12-03 18:45",
-      patientId: "PAT-001",
-      avatar: "👤"
-    },
-    {
-      id: 4,
-      name: "فاطمة حسن",
-      email: "fatima.h@example.com",
-      phone: "0567890123",
-      role: "admin",
-      roleDisplay: "مدير",
-      status: "suspended",
-      statusDisplay: "معلق",
-      joinDate: "2023-07-12",
-      lastLogin: "2025-11-30 14:20",
-      permissions: ["عرض", "تعديل"],
-      avatar: "👩‍💼"
-    },
-    {
-      id: 5,
-      name: "د. محمد علي",
-      email: "mohamed.ali@example.com",
-      phone: "0523456789",
-      role: "doctor",
-      roleDisplay: "طبيب",
-      status: "active",
-      statusDisplay: "نشط",
-      joinDate: "2023-09-05",
-      lastLogin: "2025-12-04 08:00",
-      specialty: "جراح عظام",
-      license: "MED-67890",
-      avatar: "👨‍⚕️"
-    },
-    {
-      id: 6,
-      name: "ليلى يوسف",
-      email: "layla.y@example.com",
-      phone: "0534567890",
-      role: "patient",
-      roleDisplay: "مريض",
-      status: "active",
-      statusDisplay: "نشط",
-      joinDate: "2024-02-18",
-      lastLogin: "2025-12-04 11:00",
-      patientId: "PAT-002",
-      avatar: "👤"
-    },
-    {
-      id: 7,
-      name: "عمر السيد",
-      email: "omar.s@example.com",
-      phone: "0545678901",
-      role: "admin",
-      roleDisplay: "مدير",
-      status: "active",
-      statusDisplay: "نشط",
-      joinDate: "2023-11-22",
-      lastLogin: "2025-12-04 07:30",
-      permissions: ["عرض"],
-      avatar: "👨‍💼"
-    },
-    {
-      id: 8,
-      name: "د. فاطمة علي",
-      email: "fatima.ali@example.com",
-      phone: "0556789012",
-      role: "doctor",
-      roleDisplay: "طبيب",
-      status: "suspended",
-      statusDisplay: "معلق",
-      joinDate: "2024-01-08",
-      lastLogin: "2025-11-28 16:45",
-      specialty: "طب عام",
-      license: "MED-54321",
-      avatar: "👩‍⚕️"
-    }
-  ], [locale]);
+  useEffect(() => {
+    let mounted = true;
+    async function loadUsers() {
+      try {
+        const res = await fetch('/api/admin/users');
+        if (!res.ok) throw new Error('Failed to fetch users');
+        const data = await res.json();
 
-  const [users, setUsers] = useState(usersTemplate);
+        const mapped = data.map(u => {
+          const role = u.role;
+          const phone = (u.doctor && u.doctor.phone) || (u.patient && u.patient.phone) || '';
+          const status = role === 'admin' ? (u.isActive ? 'active' : 'suspended') : (role === 'doctor' ? (u.doctor?.status || 'pending') : (u.patient?.status || 'active'));
+          const roleDisplay = role;
+          const statusDisplay = status;
+          const joinDate = u.patient?.joinDate ? new Date(u.patient.joinDate).toISOString().split('T')[0] : (u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '');
+          const lastLogin = u.updatedAt ? new Date(u.updatedAt).toISOString().replace('T', ' ').substring(0, 16) : '';
+
+          return {
+            id: u.id,
+            name: u.fullName || u.name,
+            email: u.email,
+            phone,
+            role,
+            roleDisplay,
+            status,
+            statusDisplay,
+            joinDate,
+            lastLogin,
+            avatar: role === 'admin' ? '👨‍💼' : role === 'doctor' ? '👨‍⚕️' : '👤',
+            specialty: u.doctor?.specialty,
+            license: u.doctor?.licenseNumber,
+            patientId: u.patient?.id,
+            permissions: [],
+          };
+        });
+
+        if (mounted) setUsers(mapped);
+      } catch (err) {
+        console.error('Failed to load users:', err);
+      }
+    }
+
+    loadUsers();
+    return () => { mounted = false; };
+  }, [locale]);
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
-    role: locale === "en" ? "patient" : "مريض",
-    status: locale === "en" ? "active" : "نشط"
+    password: "",
+    role: "admin",
+    status: "active"
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   // Filter users based on search and filters
   const filteredUsers = useMemo(() => {
@@ -354,7 +152,53 @@ export default function UsersPage() {
 
   // Handler functions
   const handleExport = () => {
-    showToast("Export functionality would be implemented here", "info");
+    try {
+      if (!users || users.length === 0) {
+        showToast(t('toast.notLoggedIn') || 'No users to export', 'info');
+        return;
+      }
+
+      const headers = ['id','name','email','phone','role','status','joinDate','lastLogin','specialty','license','patientId'];
+
+      const escapeCell = (val) => {
+        if (val === null || val === undefined) return '';
+        const s = String(val);
+        if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+          return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+      };
+
+      const rows = users.map(u => [
+        u.id,
+        u.name,
+        u.email,
+        u.phone || '',
+        u.role || '',
+        u.status || '',
+        u.joinDate || '',
+        u.lastLogin || '',
+        u.specialty || '',
+        u.license || '',
+        u.patientId || ''
+      ].map(escapeCell).join(','));
+
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const date = new Date().toISOString().slice(0,10);
+      a.download = `users-export-${date}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast(t('toast.exportStarted') || 'Export started', 'success');
+    } catch (err) {
+      console.error('Export failed', err);
+      showToast('Export failed', 'error');
+    }
   };
 
   const handleAddUser = () => {
@@ -363,18 +207,15 @@ export default function UsersPage() {
       id: users.length + 1,
       name: formData.name,
       email: formData.email,
-      phone: formData.phone,
-      role: formData.role,
-      roleDisplay: formData.role === "admin" ? (locale === "en" ? "Admin" : "مدير") : 
-                  formData.role === "doctor" ? (locale === "en" ? "Doctor" : "طبيب") : 
-                  (locale === "en" ? "Patient" : "مريض"),
+      role: "admin",
+      roleDisplay: t('roles.admin'),
       status: formData.status,
-      statusDisplay: formData.status === "active" ? (locale === "en" ? "Active" : "نشط") : 
-                    formData.status === "suspended" ? (locale === "en" ? "Suspended" : "معلق") : 
-                    (locale === "en" ? "Banned" : "محظور"),
+      statusDisplay: t(`statuses.${formData.status}`),
       joinDate: new Date().toISOString().split('T')[0],
       lastLogin: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      avatar: formData.role === "admin" ? "👨‍💼" : formData.role === "doctor" ? "👨‍⚕️" : "👤"
+      phone: "",
+      password: formData.password || 'changeme',
+      avatar: "👨‍💼"
     };
     
     setUsers([...users, newUser]);
@@ -382,51 +223,52 @@ export default function UsersPage() {
     setFormData({
       name: "",
       email: "",
-      phone: "",
-      role: locale === "en" ? "patient" : "مريض",
-      status: locale === "en" ? "active" : "نشط"
+      password: "",
+      role: "admin",
+      status: "active"
     });
     showToast("User added successfully", "success");
-  };
+    // Create admin via API
+    (async () => {
+      try {
+        const res = await fetch('/api/admin/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password, status: formData.status })
+        });
 
-  const openEditModal = (user) => {
-    setSelectedUser(user);
-    setFormData({
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      status: user.status
-    });
-    setShowEditModal(true);
-  };
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(err.error || 'Failed to create admin', 'error');
+          return;
+        }
 
-  const handleEditUser = () => {
-    // In a real app, this would update the user in a database
-    const updatedUsers = users.map(user => 
-      user.id === selectedUser.id 
-        ? {
-            ...user,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            role: formData.role,
-            roleDisplay: formData.role === "admin" ? (locale === "en" ? "Admin" : "مدير") : 
-                        formData.role === "doctor" ? (locale === "en" ? "Doctor" : "طبيب") : 
-                        (locale === "en" ? "Patient" : "مريض"),
-            status: formData.status,
-            statusDisplay: formData.status === "active" ? (locale === "en" ? "Active" : "نشط") : 
-                          formData.status === "suspended" ? (locale === "en" ? "Suspended" : "معلق") : 
-                          (locale === "en" ? "Banned" : "محظور"),
-            avatar: formData.role === "admin" ? "👨‍💼" : formData.role === "doctor" ? "👨‍⚕️" : "👤"
-          }
-        : user
-    );
-    
-    setUsers(updatedUsers);
-    setShowEditModal(false);
-    setSelectedUser(null);
-    showToast("User updated successfully", "success");
+        const created = await res.json();
+
+        const uiUser = {
+          id: created.id,
+          name: created.fullName || formData.name,
+          email: created.email,
+          phone: '',
+          role: created.role || 'admin',
+          roleDisplay: t(`roles.${created.role || 'admin'}`),
+          status: created.isActive ? 'active' : 'suspended',
+          statusDisplay: t(`statuses.${created.isActive ? 'active' : 'suspended'}`),
+          joinDate: created.createdAt ? new Date(created.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          lastLogin: created.updatedAt ? new Date(created.updatedAt).toISOString().replace('T', ' ').substring(0, 16) : new Date().toISOString().replace('T', ' ').substring(0, 16),
+          avatar: '👨‍💼',
+          permissions: []
+        };
+
+        setUsers(prev => [uiUser, ...prev]);
+        setShowAddModal(false);
+        setFormData({ name: '', email: '', password: '', role: 'admin', status: 'active' });
+        showToast('Admin created', 'success');
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to create admin', 'error');
+      }
+    })();
   };
 
   const openDetailsModal = (user) => {
@@ -450,7 +292,7 @@ export default function UsersPage() {
 
   return (
     <>
-      <AdminLayout breadcrumbs={locale === "en" ? [t('breadcrumbs.home', 'Home'), t('breadcrumbs.users', 'Users')] : [t('breadcrumbs.home', 'الرئيسية'), t('breadcrumbs.users', 'المستخدمين')] }>
+      <AdminLayout breadcrumbs={[t('breadcrumbs.home'), t('breadcrumbs.users')] }>
         <ToastContainer />
         <div className="p-6">
           {/* Header */}
@@ -476,7 +318,6 @@ export default function UsersPage() {
               </button>
             </div>
           </div>
-
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {stats.map((stat, index) => (
@@ -561,14 +402,14 @@ export default function UsersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs border ${getRoleColor(user.role)}`}>
-                          {user.roleDisplay}
-                        </span>
+                          <span className={`px-3 py-1 rounded-full text-xs border ${getRoleColor(user.role)}`}>
+                            {t(`roles.${user.role}`)}
+                          </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs border ${getStatusColor(user.status)}`}>
-                          {user.statusDisplay}
-                        </span>
+                          <span className={`px-3 py-1 rounded-full text-xs border ${getStatusColor(user.status)}`}>
+                            {t(`statuses.${user.status}`)}
+                          </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{user.joinDate}</td>
                       <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{user.lastLogin}</td>
@@ -581,13 +422,7 @@ export default function UsersPage() {
                           >
                             <FaEye />
                           </button>
-                          <button
-                            onClick={() => openEditModal(user)}
-                            className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                            title={t('actions.edit', 'Edit')}
-                          >
-                            <FaEdit />
-                          </button>
+                          {/* Edit button removed as requested */}
                           <button
                             onClick={() => openDeleteModal(user)}
                             className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -604,7 +439,7 @@ export default function UsersPage() {
             </div>
           </div>
 
-          {/* Add User Modal */}
+          {/* Add Admin Modal */}
           {showAddModal && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6">
@@ -640,44 +475,47 @@ export default function UsersPage() {
                       className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.phone', 'Phone Number')}</label>
+
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.password', 'Password')}</label>
                     <input
-                      type="tel"
-                      id="add-user-phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white"
+                      type={showPassword ? 'text' : 'password'}
+                      id="add-user-password"
+                      name="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="w-full pl-10 px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.role', 'Role')}</label>
-                    <select
-                      id="add-user-role"
-                      name="role"
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white"
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-300 p-1"
+                      title={showPassword ? t('actions.hidePassword', 'Hide password') : t('actions.showPassword', 'Show password')}
                     >
-                      <option value="patient">{t('roles.patient')}</option>
-                      <option value="doctor">{t('roles.doctor')}</option>
-                      <option value="admin">{t('roles.admin')}</option>
-                    </select>
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.status', 'Status')}</label>
-                    <select
-                      id="add-user-status"
-                      name="status"
-                      value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white"
-                    >
-                      <option value="active">{t('statuses.active')}</option>
-                      <option value="suspended">{t('statuses.suspended')}</option>
-                      <option value="banned">{t('statuses.banned')}</option>
-                    </select>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, status: 'active' })}
+                        className={`flex-1 px-4 py-3 rounded-lg transition-colors font-medium ${formData.status === 'active' ? 'bg-green-600 text-white' : 'bg-gray-100 dark:bg-slate-900 text-gray-900 dark:text-white border border-gray-300 dark:border-slate-600'}`}
+                        aria-pressed={formData.status === 'active'}
+                      >
+                        {t('statuses.active')}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, status: 'banned' })}
+                        className={`flex-1 px-4 py-3 rounded-lg transition-colors font-medium ${formData.status === 'banned' ? 'bg-red-600 text-white' : 'bg-gray-100 dark:bg-slate-900 text-gray-900 dark:text-white border border-gray-300 dark:border-slate-600'}`}
+                        aria-pressed={formData.status === 'banned'}
+                      >
+                        {t('statuses.banned')}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-3 mt-6">
@@ -686,7 +524,7 @@ export default function UsersPage() {
                     className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors"
                   >
                     <FaSave />
-                    <span>{t('modal.save', 'Save')}</span>
+                    <span>{t('modal.add', 'Add')}</span>
                   </button>
                   <button
                     onClick={() => setShowAddModal(false)}
@@ -699,90 +537,7 @@ export default function UsersPage() {
             </div>
           )}
 
-          {/* Edit User Modal */}
-          {showEditModal && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('modal.editTitle', 'Edit User')}</h3>
-                  <button
-                    onClick={() => setShowEditModal(false)}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
-                  >
-                    <FaTimes className="text-gray-600 dark:text-gray-400" />
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.fullName', 'Full Name')}</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.email', 'Email')}</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.phone', 'Phone Number')}</label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.role', 'Role')}</label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white"
-                    >
-                      <option value="patient">{t('roles.patient')}</option>
-                      <option value="doctor">{t('roles.doctor')}</option>
-                      <option value="admin">{t('roles.admin')}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.status', 'Status')}</label>
-                    <select
-                      value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white"
-                    >
-                      <option value="active">{t('statuses.active')}</option>
-                      <option value="suspended">{t('statuses.suspended')}</option>
-                      <option value="banned">{t('statuses.banned')}</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="flex gap-3 mt-6">
-                  <button
-                    onClick={handleEditUser}
-                    className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition-colors"
-                  >
-                    <FaSave />
-                    <span>{t('modal.saveChanges', 'Save Changes')}</span>
-                  </button>
-                  <button
-                    onClick={() => setShowEditModal(false)}
-                    className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors"
-                  >
-                    {t('modal.cancel', 'Cancel')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+       
 
           {/* Details Modal */}
           {showDetailsModal && selectedUser && (
@@ -804,10 +559,10 @@ export default function UsersPage() {
                     <h4 className="text-2xl font-bold text-gray-900 dark:text-white">{selectedUser.name}</h4>
                     <div className="flex gap-2 mt-2">
                       <span className={`px-3 py-1 rounded-full text-xs border ${getRoleColor(selectedUser.role)}`}>
-                        {selectedUser.roleDisplay}
+                        {t(`roles.${selectedUser.role}`)}
                       </span>
                       <span className={`px-3 py-1 rounded-full text-xs border ${getStatusColor(selectedUser.status)}`}>
-                        {selectedUser.statusDisplay}
+                        {t(`statuses.${selectedUser.status}`)}
                       </span>
                     </div>
                   </div>

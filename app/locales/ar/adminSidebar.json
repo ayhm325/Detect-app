@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمون",
+    "patients": "المرضى",
+    "doctors": "الأطباء",
+    "doctorChangeRequests": "طلبات الأطباء",
+    "analytics": "الإحصائيات",
+    "chat": "الدردشة",
+    "appointments": "المواعيد",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج"
+  },
+  "ui": {
+    "collapseOpen": "توسيع الشريط",
+    "collapseClose": "إخفاء الشريط",
+    "themeLight": "الوضع النهاري",
+    "themeDark": "الوضع الليلي",
+    "switchTo": "English",
+    "switchToEn": "العربية"
+  },
+  "footer": {
+    "version": "الإصدار 1.0.0",
+    "operational": "كل الأنظمة تعمل"
+  }
+}

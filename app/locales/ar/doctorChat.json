@@ -1,0 +1,88 @@
+{
+  "messageInput": "اكتب رسالتك...",
+  "actions": {
+    "call": "اتصال",
+    "video": "مكالمة فيديو",
+    "more": "المزيد",
+    "attachment": "إرفاق ملف",
+    "send": "إرسال"
+  },
+  "title": "دردشة الطبيب",
+  "subtitle": "تواصل مع مرضاك مباشرة في الوقت الحقيقي.",
+  "send": "إرسال",
+  "placeholder": "اكتب رسالتك...",
+  "noMessages": "لا توجد رسائل بعد.",
+  "loading": "جاري تحميل الرسائل...",
+  "error": "فشل في تحميل الرسائل.",
+  "patient": "المريض",
+  "doctor": "الطبيب",
+  "online": "متصل",
+  "offline": "غير متصل",
+  "searchPlaceholder": "ابحث باسم المريض...",
+  "items": [
+    {
+      "patientName": "المريض 1",
+      "lastMessage": "مرحبًا دكتور، لدي سؤال.",
+      "lastMessageTime": "10:30 ص",
+      "unreadCount": 2,
+      "messages": [
+        {
+          "text": "مرحبًا دكتور، لدي سؤال.",
+          "time": "10:30 ص"
+        },
+        {
+          "text": "تفضل، كيف يمكنني مساعدتك؟",
+          "time": "10:31 ص"
+        }
+      ]
+    },
+    {
+      "patientName": "المريض 2",
+      "lastMessage": "شكرًا لمساعدتك!",
+      "lastMessageTime": "أمس",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "text": "شكرًا لمساعدتك!",
+          "time": "أمس"
+        }
+      ]
+    },
+    {
+      "patientName": "المريض 3",
+      "lastMessage": "هل يمكنني حجز موعد؟",
+      "lastMessageTime": "منذ يومين",
+      "unreadCount": 1,
+      "messages": [
+        {
+          "text": "هل يمكنني حجز موعد؟",
+          "time": "منذ يومين"
+        }
+      ]
+    },
+    {
+      "patientName": "المريض 4",
+      "lastMessage": "قمت برفع صورة الأشعة.",
+      "lastMessageTime": "منذ 3 أيام",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "text": "قمت برفع صورة الأشعة.",
+          "time": "منذ 3 أيام"
+        }
+      ]
+    },
+    {
+      "patientName": "المريض 5",
+      "lastMessage": "متى سأحصل على النتائج؟",
+      "lastMessageTime": "الأسبوع الماضي",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "text": "متى سأحصل على النتائج؟",
+          "time": "الأسبوع الماضي"
+        }
+      ]
+    }
+  ]
+}

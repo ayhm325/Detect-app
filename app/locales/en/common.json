@@ -1,73 +1,9 @@
 {
-  "brand": "PneumoDetect",
-  "navTagline": "Advanced Medical AI",
-  "home": "Home",
-  "login": "Login",
-  "signup": "Sign Up",
-  "langSwitch": "عربي",
-  "langSwitchAria": "Switch language to Arabic",
-  "hero": {
-    "title": "AI-Powered Disease Detection",
-    "subtitle": "Advanced medical intelligence for instant insights",
-    "desc": "A modern platform that analyzes medical images with high accuracy, gives doctors and patients fast answers, and keeps your data safe.",
-    "primaryCta": "Start for free",
-    "secondaryCta": "Login"
-  },
-  "features": {
-    "title": "System Features",
-    "subtitle": "We bring the best diagnostic technology to your workflow",
-    "items": [
-      { "icon": "/icons/ai.svg", "title": "Instant Image Analysis", "desc": "Fast, precise results right after you upload." },
-      { "icon": "/icons/xray.svg", "title": "Medical-Grade Accuracy", "desc": "Built on the latest medical AI research." },
-      { "icon": "/icons/result.svg", "title": "For Doctors & Patients", "desc": "Simple experience with organized history." }
-    ],
-    "extras": [
-      { "icon": "🔒", "title": "High security", "desc": "Your medical data stays protected." },
-      { "icon": "⚡", "title": "Super fast", "desc": "Optimized processing and delivery." },
-      { "icon": "📊", "title": "Detailed reports", "desc": "Clear, comprehensive medical summaries." },
-      { "icon": "🌐", "title": "Always available", "desc": "24/7 cloud service with monitoring." }
-    ]
-  },
-  "workflow": {
-    "title": "How it works",
-    "subtitle": "From upload to insight in seconds",
-    "steps": [
-      { "icon": "/icons/ai.svg", "title": "1. Upload the X-ray", "desc": "Submit your medical image securely." },
-      { "icon": "/icons/xray.svg", "title": "2. AI model analysis", "desc": "Our AI analyzes with high accuracy." },
-      { "icon": "/icons/result.svg", "title": "3. Instant result view", "desc": "See your diagnostic report immediately." }
-    ]
-  },
-  "stats": {
-    "title": "Numbers that matter",
-    "subtitle": "We focus on speed, trust, and accuracy",
-    "cards": [
-      { "number": 99.8, "suffix": "%", "label": "Diagnosis accuracy", "description": "Extremely high detection precision", "icon": "🎯" },
-      { "number": 15000, "suffix": "+", "label": "Active users", "description": "Doctors and patients trust us", "icon": "👥" },
-      { "number": 75000, "suffix": "+", "label": "Successful analyses", "description": "Images processed with care", "icon": "📊" },
-      { "number": 24, "suffix": "/7", "label": "Live support", "description": "Around-the-clock availability", "icon": "⏰" }
-    ]
-  },
-  "testimonials": {
-    "title": "What our users say",
-    "subtitle": "Real experiences from clinicians and patients",
-    "items": [
-      { "name": "Dr. Ahmed Mohamed", "role": "Radiology consultant", "image": "/icons/ai.svg", "rating": 5, "text": "A great system that helps me diagnose with high precision. Easy UI and fast results." },
-      { "name": "Dr. Sarah Ahmed", "role": "Internal medicine physician", "image": "/icons/xray.svg", "rating": 5, "text": "Cutting-edge tech that saves time. I recommend it to all doctors." },
-      { "name": "Mohammed Ali", "role": "Patient", "image": "/icons/result.svg", "rating": 5, "text": "I received a quick and accurate diagnosis. Excellent service and helpful team." },
-      { "name": "Dr. Fatima Hassan", "role": "Respiratory consultant", "image": "/icons/settings.svg", "rating": 5, "text": "The best AI diagnostic platform. Precise results and detailed reports." }
-    ],
-    "badges": [
-      { "text": "Trusted by 15K+ users", "icon": "✓" },
-      { "text": "99.8% accuracy", "icon": "★" },
-      { "text": "24/7 support", "icon": "♥" },
-      { "text": "ISO certified", "icon": "◆" }
-    ]
-  },
   "footer": {
     "quickLinksHeading": "Quick Links",
     "supportHeading": "Support",
-    "contactHeading": "Contact",
-    "description": "An advanced medical AI platform delivering fast, accurate diagnostics.",
+    "contactHeading": "Contact Us",
+    "description": "An advanced medical AI platform for fast and accurate diagnosis.",
     "quickLinks": [
       { "label": "Home", "href": "/" },
       { "label": "About", "href": "/about" },
@@ -86,22 +22,125 @@
       "addressLabel": "Address",
       "address": "Irbid, Jordan"
     },
-    "serviceStatus": "Service is online",
-    "madeIn": "Made with ❤️ in IRBED",
+    "serviceStatus": "Service Available",
+    "madeIn": "Made with ❤️ in Irbid",
     "copyright": "© {year} All rights reserved"
   },
-  "layout": {
-    "version": "Version: 1.0",
-    "status": "Connected ✓"
-  },
-  "notFound": {
-    "title": "404 - Page Not Found",
-    "subtitle": "Sorry, the page you are looking for does not exist or has been moved.",
-    "popularPages": "Popular Pages:",
+  "navbar": {
+    "brand": "Detect AI",
+    "navTagline": "Advanced Medical AI",
+    "langSwitch": "AR",
+    "langSwitchAria": "Switch language",
     "home": "Home",
-    "login": "Login",
-    "signup": "Sign Up",
-    "contact": "Contact Us",
-    "backHome": "Back to Home"
+    "about": "About",
+    "services": "Services"
+  },
+  "hero": {
+    "title": "Welcome to Detect AI",
+    "subtitle": "Smart Disease Detection System",
+    "desc": "A modern platform for highly accurate medical image analysis, providing doctors and patients with fast answers and keeping your data secure.",
+    "primaryCta": "Get Started Free",
+    "secondaryCta": "Sign In"
+  },
+  "features": {
+    "title": "System Features",
+    "subtitle": "We offer the best diagnostic technologies for your convenience",
+    "items": [
+      { "icon": "/icons/ai.svg", "title": "Instant Image Analysis", "desc": "Fast and accurate results upon upload." },
+      { "icon": "/icons/xray.svg", "title": "High Medical Accuracy", "desc": "Based on the latest medical AI research." },
+      { "icon": "/icons/result.svg", "title": "For Doctors and Patients", "desc": "Easy experience with organized records." }
+    ],
+    "extras": [
+      { "icon": "🔒", "title": "High Security", "desc": "Your medical data stays protected." },
+      { "icon": "⚡", "title": "Super Fast", "desc": "Optimized processing and delivery." },
+      { "icon": "📊", "title": "Detailed Reports", "desc": "Clear and comprehensive medical summaries." },
+      { "icon": "🌐", "title": "Always Available", "desc": "24/7 cloud service with monitoring." }
+    ]
+  },
+  "content": {
+    "workflow": {
+      "title": "How the System Works",
+      "subtitle": "From upload to result in seconds",
+      "steps": [
+        { "icon": "/icons/ai.svg", "title": "1. Upload X-ray", "desc": "Upload your medical image securely." },
+        { "icon": "/icons/xray.svg", "title": "2. AI Model Analysis", "desc": "The model analyzes with high accuracy." },
+        { "icon": "/icons/result.svg", "title": "3. Instant Result Display", "desc": "Get your diagnosis report immediately." }
+      ],
+      "ctaTitle": "Ready to start?",
+      "ctaSubtitle": "Start diagnosis now and don't waste more time"
+    },
+    "stats": {
+      "title": "Key Numbers",
+      "subtitle": "We care about speed, reliability, and accuracy",
+      "cards": [
+        { "number": 99.8, "suffix": "%", "label": "Diagnosis Accuracy", "description": "Very high accuracy in detection", "icon": "🎯" },
+        { "number": 15000, "suffix": "+", "label": "Active Users", "description": "Doctors and patients trust us", "icon": "👥" },
+        { "number": 75000, "suffix": "+", "label": "Successful Analyses", "description": "Images analyzed with care", "icon": "📊" },
+        { "number": 24, "suffix": "/7", "label": "Direct Support", "description": "Available around the clock", "icon": "⏰" }
+      ]
+    }
+  },
+  "testimonials": {
+    "title": "What Our Users Say",
+    "subtitle": "Real experiences from doctors and patients",
+    "items": [
+      { "name": "Dr. Ahmed Mohamed", "role": "Radiology Consultant", "image": "/icons/ai.svg", "rating": 5, "text": "Excellent system that helps me diagnose with high accuracy. Easy interface and fast results." },
+      { "name": "Dr. Sarah Ahmed", "role": "Internal Medicine Doctor", "image": "/icons/xray.svg", "rating": 5, "text": "Advanced technology that saves time. I recommend it to all doctors." },
+      { "name": "Mohamed Ali", "role": "Patient", "image": "/icons/result.svg", "rating": 5, "text": "I got a quick and accurate diagnosis. Excellent service and helpful team." },
+      { "name": "Dr. Fatima Hassan", "role": "Pulmonology Consultant", "image": "/icons/settings.svg", "rating": 5, "text": "Best AI diagnostic platform. Accurate results and detailed reports." }
+    ],
+    "badges": [
+      { "text": "Trusted by 15K+ users", "icon": "✓" },
+      { "text": "99.8% Accuracy", "icon": "★" },
+      { "text": "24/7 Support", "icon": "♥" },
+      { "text": "ISO Certified", "icon": "◆" }
+    ]
+  },
+  "brand": "PneumoDetect",
+  "home": "Home",
+  "signup": {
+    "title": "Create a new account",
+    "subtitle": "Join our advanced medical platform",
+    "socialDivider": "or continue with email",
+    "roleLabel": "Choose account type",
+    "doctorRole": "Doctor",
+    "patientRole": "Patient",
+    "nameLabel": "Full name",
+    "emailLabel": "Email",
+    "doctorPickerLabel": "Attending doctor",
+    "doctorPlaceholder": "Select your doctor",
+    "passwordLabel": "Password",
+    "confirmPasswordLabel": "Confirm password",
+    "passwordShow": "Show",
+    "passwordHide": "Hide",
+    "passwordHint1": "At least 8 characters",
+    "passwordHint2": "One uppercase letter",
+    "passwordHint3": "One number",
+    "passwordHint4": "One symbol",
+    "passwordStrengthLabel": "Password strength:",
+    "termsAgreement": "I agree to",
+    "privacyPolicy": "Privacy Policy",
+    "termsConditions": "Terms of Service",
+    "and": "and",
+    "feature1": "Fast and accurate analysis",
+    "feature2": "Your data is completely safe",
+    "feature3": "Easy futuristic interface",
+    "sideTitle": "Join the smart diagnosis world",
+    "sideDescription": "Create your account and discover the power of AI in detecting pneumonia from X-ray images.",
+    "statsActiveUsers": "Active user",
+    "statsAnalyses": "Analyses",
+    "statsAccuracy": "Accuracy",
+    "ctaButton": "Start now",
+    "errors": {
+      "required": "Please fill all required fields",
+      "doctorMissing": "Please choose your attending doctor",
+      "weakPassword": "Password does not meet all requirements",
+      "mismatch": "Passwords do not match"
+    },
+    "success": "Account created successfully! Redirecting...",
+    "haveAccount": "Already have an account?",
+    "loginCta": "Login",
+    "loading": "Creating...",
+    "submit": "Create account"
   }
 }

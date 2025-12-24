@@ -1,8 +1,8 @@
-import Hero from "@/app/components/ui/Hero";
-import GlassCard from "@/app/components/ui/GlassCard";
-import HoloButton from "@/app/components/ui/HoloButton";
-import ScanCard from "@/app/components/ui/ScanCard";
-import NeonBadge from "@/app/components/ui/NeonBadge";
+import Hero from "../../components/ui/Hero";
+import GlassCard from "../../components/ui/GlassCard";
+import HoloButton from "../../components/ui/HoloButton";
+import ScanCard from "../../components/ui/ScanCard";
+import NeonBadge from "../../components/ui/NeonBadge";
 
 export default function HoloDemoPage() {
   return (

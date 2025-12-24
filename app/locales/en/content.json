@@ -116,27 +116,31 @@
       }
     },
     "about": {
-      "title": "About Us",
-      "description": "A team of AI and medical experts building innovative health solutions.",
-      "visionTitle": "Vision",
-      "visionDesc": "Lead globally in AI-powered early disease detection to save lives and improve care.",
-      "missionTitle": "Mission",
-      "missionDesc": "Deliver fast, accurate AI diagnostics while protecting privacy and security.",
-      "valuesTitle": "Our Values",
-      "values": [
-        { "title": "Precision & Quality", "desc": "We commit to the highest diagnostic standards." },
-        { "title": "Privacy & Security", "desc": "Patient data protection is our top priority." },
-        { "title": "Continuous Innovation", "desc": "We improve our models relentlessly." }
+      "title": "About Our Platform",
+      "description": "We provide advanced AI solutions for medical diagnostics.",
+      "visionTitle": "Our Vision",
+      "visionDesc": "To revolutionize healthcare with smart AI technologies.",
+      "missionTitle": "Our Mission",
+      "missionDesc": "Deliver accurate, fast, and safe medical diagnostics to everyone.",
+      "valuesTitle": "Our Core Values",
+      "valuesList": [
+        { "title": "Integrity", "desc": "We act with honesty and strong moral principles." },
+        { "title": "Innovation", "desc": "We constantly seek new and better ways to serve our users." },
+        { "title": "Excellence", "desc": "We strive for the highest quality in everything we do." }
       ],
       "stats": [
-        { "num": "50+", "label": "Specialists" },
-        { "num": "10K+", "label": "Happy patients" },
-        { "num": "98%", "label": "Accuracy" },
-        { "num": "24/7", "label": "Always on" }
+        { "num": "1200", "label": "Users" },
+        { "num": "35", "label": "Projects" },
+        { "num": "99%", "label": "Accuracy" }
       ],
-      "techTitle": "Our Technology",
-      "techDesc": "State-of-the-art deep learning and neural networks trained on millions of trusted medical images.",
-      "techList": ["Deep learning", "Neural networks", "Image processing"]
+      "techTitle": "Our Technology Stack",
+      "techDesc": "We leverage modern frameworks and AI tools to achieve high accuracy.",
+      "techList": [
+        "React",
+        "Next.js",
+        "Tailwind CSS",
+        "TensorFlow"
+      ]
     }
   }
 }

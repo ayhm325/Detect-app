@@ -1,0 +1,39 @@
+{
+  "title": "لوحة تحكم الأدمن",
+  "stats": {
+    "totalUsers": "إجمالي المستخدمين",
+    "doctors": "عدد الأطباء",
+    "patients": "عدد المرضى",
+    "todayScans": "فحوصات اليوم",
+    "totalScansAll": "إجمالي الفحوصات"
+  },
+  "quickActionsTitle": "إجراءات سريعة",
+  "quickActions": {
+    "users": { "title": "المستخدمون", "desc": "إدارة جميع المستخدمين" },
+    "doctors": { "title": "الأطباء", "desc": "إدارة الأطباء" },
+    "patients": { "title": "المرضى", "desc": "إدارة المرضى" },
+    "analysis": { "title": "التحليلات", "desc": "عرض التقارير والإحصائيات" },
+    "more": "المزيد"
+  },
+  "more": "المزيد",
+  "systemStatusTitle": "حالة النظام",
+  "systemStatus": {
+    "serverUptime": "مدة تشغيل الخادم",
+    "responseTime": "زمن الاستجابة",
+    "memoryUsage": "استهلاك الذاكرة",
+    "dbSize": "حجم قاعدة البيانات"
+  },
+  "pendingApprovalsTitle": "طلبات الموافقة المعلقة",
+  "pendingApprovals": {
+    "approve": "قبول",
+    "reject": "رفض",
+    "viewAll": "عرض الكل"
+  },
+  "recentActivityTitle": "النشاطات الأخيرة",
+  "notifications": "الإشعارات",
+  "toast": {
+    "notifications": "الإشعارات قادمة قريباً",
+    "approved": "تمت الموافقة بنجاح",
+    "rejected": "تم الرفض بنجاح"
+  }
+}

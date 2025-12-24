@@ -1,0 +1,132 @@
+  {
+    "ageSuffix": "years",
+    "genderSuffix": "",
+    "filters": {
+      "all": "All",
+      "stable": "Stable",
+      "critical": "Critical",
+      "recovering": "Recovering"
+    },
+    "title": "My Patients",
+    "subtitle": "List of your registered patients",
+    "searchPlaceholder": "Search for a patient",
+    "addButton": "Add Patient",
+    "stats": {
+      "total": "Total Patients",
+      "stable": "Stable",
+      "critical": "Critical",
+      "recovering": "Recovering"
+    },
+    "statuses": {
+      "stable": "Stable",
+      "critical": "Critical",
+      "recovering": "Recovering"
+    },
+    "toast": {
+      "addSoon": "Add patient coming soon",
+      "viewDetails": "Viewing details for",
+      "chat": "Start chat with",
+      "call": "Calling"
+    },
+    "labels": {
+      "lastVisit": "Last Visit",
+      "nextAppointment": "Next Appointment",
+      "diagnosis": "Diagnosis",
+      "bloodType": "Blood Type",
+      "scans": "Scans Count",
+      "chronic": "Chronic Conditions",
+      "phone": "Phone",
+      "email": "Email",
+      "status": "Status"
+    },
+    "sections": {
+      "contact": "Contact Info",
+      "medical": "Medical Info",
+      "diagnosis": "Diagnosis",
+      "appointments": "Appointments",
+      "stats": "Statistics"
+    },
+    "actions": {
+      "view": "View Details",
+      "chat": "Chat",
+      "call": "Call"
+    },
+    "emptyState": "No patients match your search or filters.",
+    "items": [
+      {
+        "name": "Ahmad Ali",
+        "age": "35",
+        "gender": "Male",
+        "phone": "0501234567",
+        "email": "ahmad@example.com",
+        "status": "Stable",
+        "lastVisit": "2025-12-01",
+        "nextAppointment": "2026-01-10",
+        "diagnosis": "Common Cold",
+        "scansCount": "2",
+        "avatar": "ahmad.jpg",
+        "bloodType": "A+",
+        "conditions": "Diabetes"
+      },
+      {
+        "name": "Sara Mohammed",
+        "age": "28",
+        "gender": "Female",
+        "phone": "0509876543",
+        "email": "sara@example.com",
+        "status": "Critical",
+        "lastVisit": "2025-11-20",
+        "nextAppointment": "2026-01-15",
+        "diagnosis": "Allergy",
+        "scansCount": "1",
+        "avatar": "sara.jpg",
+        "bloodType": "B-",
+        "conditions": "Asthma"
+      },
+      {
+        "name": "Khaled Youssef",
+        "age": "42",
+        "gender": "Male",
+        "phone": "0505555555",
+        "email": "khaled@example.com",
+        "status": "Recovering",
+        "lastVisit": "2025-12-10",
+        "nextAppointment": "2026-02-01",
+        "diagnosis": "Hypertension",
+        "scansCount": "3",
+        "avatar": "khaled.jpg",
+        "bloodType": "O+",
+        "conditions": "Hypertension"
+      },
+      {
+        "name": "Mona Salem",
+        "age": "31",
+        "gender": "Female",
+        "phone": "0502223333",
+        "email": "mona@example.com",
+        "status": "Stable",
+        "lastVisit": "2025-12-15",
+        "nextAppointment": "2026-01-20",
+        "diagnosis": "Anemia",
+        "scansCount": "2",
+        "avatar": "mona.jpg",
+        "bloodType": "AB+",
+        "conditions": "Anemia"
+      },
+      {
+        "name": "Saeed Omar",
+        "age": "50",
+        "gender": "Male",
+        "phone": "0504446666",
+        "email": "saeed@example.com",
+        "status": "Critical",
+        "lastVisit": "2025-12-18",
+        "nextAppointment": "2026-02-10",
+        "diagnosis": "Heart Disease",
+        "scansCount": "4",
+        "avatar": "saeed.jpg",
+        "bloodType": "A-",
+        "conditions": "Heart Disease"
+      }
+    ]
+  }

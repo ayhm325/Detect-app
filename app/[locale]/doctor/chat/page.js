@@ -1,8 +1,12 @@
 "use client";
 
 import DoctorLayout from "../DoctorLayout";
-import { useToast } from "@/app/components/ui/Toast";
-import { useEffect, useMemo, useState } from "react";
+import { useToast } from "../../../components/ui/Toast";
+import { useEffect, useMemo, useState, useRef } from "react";
+import useSocket from "../../../components/chat/useSocket.client";
+import ChatActionsPopover from "../../../components/chat/ChatActionsPopover.client";
+import { useRouter } from "next/navigation";
+import useLocale from "../../../hooks/useLocale";
 import {
   FaComments,
   FaSearch,
@@ -19,138 +23,186 @@ import {
   FaCheck,
   FaCheckDouble,
 } from "react-icons/fa";
-import useLocale from "@/app/hooks/useLocale";
+import { useTranslations } from "next-intl";
 
-export default function DoctorChatPage() {
+export default function Page() {
   const { showToast, ToastContainer } = useToast();
-  const { t, locale } = useLocale();
-  const dc = t.doctorChat || {};
+  const t = useTranslations("doctorChat");
+  const safeT = (key, fallback) => {
+    try {
+      return t(key);
+    } catch (e) {
+      return fallback;
+    }
+  };
+  // Note: use direct fallback strings for toast messages to avoid missing-translation errors
+  const router = useRouter();
+  const { locale } = useLocale();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedChat, setSelectedChat] = useState(1);
+  const [selectedChat, setSelectedChat] = useState(null);
   const [messageInput, setMessageInput] = useState("");
 
-  const conversationsTemplate = useMemo(
-    () =>
-      locale === "en"
-        ? [
-            {
-              id: 1,
-              patientName: "Mohammed Ahmed",
-              lastMessage: "Thank you doctor for your follow-up",
-              lastMessageTime: "10:30 AM",
-              unreadCount: 2,
-              online: true,
-              avatar: "👨",
-            },
-            {
-              id: 2,
-              patientName: "Fatima Ali",
-              lastMessage: "When is the next appointment?",
-              lastMessageTime: "Yesterday",
-              unreadCount: 0,
-              online: false,
-              avatar: "👩",
-            },
-            {
-              id: 3,
-              patientName: "Ahmed Khaled",
-              lastMessage: "Results received",
-              lastMessageTime: "Yesterday",
-              unreadCount: 1,
-              online: true,
-              avatar: "👨",
-            },
-            {
-              id: 4,
-              patientName: "Sarah Mahmoud",
-              lastMessage: "Can I reschedule the appointment?",
-              lastMessageTime: "Wednesday",
-              unreadCount: 0,
-              online: false,
-              avatar: "👩",
-            },
-            {
-              id: 5,
-              patientName: "Omar Hassan",
-              lastMessage: "Results are excellent, thank God",
-              lastMessageTime: "Tuesday",
-              unreadCount: 0,
-              online: false,
-              avatar: "👨",
-            },
-          ]
-        : [
-            {
-              id: 1,
-              patientName: "محمد أحمد",
-              lastMessage: "شكراً دكتور على المتابعة",
-              lastMessageTime: "10:30 ص",
-              unreadCount: 2,
-              online: true,
-              avatar: "👨",
-            },
-            {
-              id: 2,
-              patientName: "فاطمة علي",
-              lastMessage: "متى موعد الفحص القادم؟",
-              lastMessageTime: "أمس",
-              unreadCount: 0,
-              online: false,
-              avatar: "👩",
-            },
-            {
-              id: 3,
-              patientName: "أحمد خالد",
-              lastMessage: "تم استلام النتائج",
-              lastMessageTime: "أمس",
-              unreadCount: 1,
-              online: true,
-              avatar: "👨",
-            },
-            {
-              id: 4,
-              patientName: "سارة محمود",
-              lastMessage: "هل يمكن تغيير الموعد؟",
-              lastMessageTime: "الأربعاء",
-              unreadCount: 0,
-              online: false,
-              avatar: "👩",
-            },
-            {
-              id: 5,
-              patientName: "عمر حسن",
-              lastMessage: "النتائج ممتازة والحمد لله",
-              lastMessageTime: "الثلاثاء",
-              unreadCount: 0,
-              online: false,
-              avatar: "👨",
-            },
-          ],
-    [locale]
-  );
+  const [conversations, setConversations] = useState([]);
+  const [messagesMap, setMessagesMap] = useState({}); // chatId -> messages[]
+  const [loadingChats, setLoadingChats] = useState(true);
+  const socket = useSocket();
+  const typingTimeoutRef = useRef(null);
+  const [socketMismatch, setSocketMismatch] = useState(false);
 
-  const [conversations, setConversations] = useState(conversationsTemplate);
-  const [messages, setMessages] = useState({
-    1: [
-      { id: 1, sender: "patient", text: "السلام عليكم يا دكتور", time: "10:15 AM", status: "read" },
-      { id: 2, sender: "doctor", text: "وعليكم السلام، كيفك أنت؟", time: "10:16 AM", status: "read" },
-    ],
-    2: [
-      { id: 1, sender: "patient", text: "متى موعدي التالي؟", time: "Yesterday", status: "read" },
-    ],
-    3: [
-      { id: 1, sender: "patient", text: "شكراً على الرعاية", time: "Yesterday", status: "read" },
-    ],
-    4: [
-      { id: 1, sender: "patient", text: "السلام عليكم", time: "Wednesday", status: "read" },
-    ],
-    5: [
-      { id: 1, sender: "patient", text: "شكراً يا دكتور", time: "Tuesday", status: "read" },
-    ],
-  });
+  useEffect(() => {
+    let mounted = true;
+    async function loadChats() {
+      try {
+        const res = await fetch("/api/chat/doctor", { credentials: "include" });
+        if (res.status === 403) {
+          showToast("ليس لديك إذن لعرض هذه الصفحة — جاري إعادة التوجيه.", "error");
+          // redirect patients to their chat page
+          router.push(`/${locale}/patient/chat`);
+          return;
+        }
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.error || "خطأ في جلب المحادثات", "error");
+          return;
+        }
+        const convs = (data.chats || []).map((c) => ({
+          id: c.id,
+          patientName: c.patient?.fullName || "مريض",
+          lastMessage: c.messages?.[0]?.text || "",
+          lastMessageTime: c.messages?.[0]?.createdAt ? new Date(c.messages[0].createdAt).toLocaleTimeString() : "",
+          unreadCount: 0,
+          online: false,
+          avatar: "👨",
+        }));
+        if (!mounted) return;
+        setConversations(convs);
+        if (convs.length && !selectedChat) setSelectedChat(convs[0].id);
+        } catch (e) {
+        console.error(e);
+        showToast("خطأ في جلب المحادثات", "error");
+      } finally {
+        if (mounted) setLoadingChats(false);
+      }
+    }
+    loadChats();
+    return () => (mounted = false);
+  }, [t]);
+
+    // replace polling with Socket.io real-time updates when available
+    useEffect(() => {
+      if (!selectedChat) return;
+      let mounted = true;
+      let cleanupFns = [];
+
+      (async () => {
+        // load messages once
+        try {
+          const res = await fetch(`/api/chat/${selectedChat}/messages`, { credentials: "include" });
+          const data = await res.json();
+          if (!res.ok) {
+            showToast(data.error || "خطأ في جلب الرسائل", "error");
+            return;
+          }
+          if (!mounted) return;
+          const mapped = (data.messages || []).map((msg) => ({ ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : "" }));
+          setMessagesMap((prev) => ({ ...prev, [selectedChat]: mapped }));
+        } catch (e) {
+          console.error(e);
+          showToast("خطأ في الاتصال", "error");
+        }
+
+        // connect socket and join room (validate socket identity matches HTTP identity)
+        try {
+          const s = socket.connect();
+          if (s) {
+            // ask socket who it is (server debug helper)
+            const whoamiPromise = new Promise((resolve) => {
+              const handler = (m) => {
+                try { s.off('me', handler); } catch (e) {}
+                resolve(m);
+              };
+              s.on('me', handler);
+              try { s.emit('whoami'); } catch (e) { resolve({ error: 'emit_failed' }); }
+              // timeout fallback
+              setTimeout(() => { try { s.off('me', handler); } catch (e) {} ; resolve({ error: 'timeout' }); }, 2000);
+            });
+
+            // also get HTTP identity from server
+            let httpIdentity = null;
+            try {
+              const r = await fetch('/api/auth/whoami', { credentials: 'include' });
+              if (r.ok) httpIdentity = await r.json();
+            } catch (e) {
+              // ignore - we'll treat as mismatch
+              console.warn('whoami fetch failed', e);
+            }
+
+            const socketIdentity = await whoamiPromise;
+            const socketIdMatch = socketIdentity && socketIdentity.id && httpIdentity && httpIdentity.id && socketIdentity.id === httpIdentity.id;
+            if (!socketIdMatch) {
+              setSocketMismatch(true);
+              showToast('Socket identity does not match the logged-in user. Re-login or use same account.', 'error');
+            } else {
+              setSocketMismatch(false);
+              socket.join(selectedChat);
+            }
+          }
+
+          // message handler
+          const offMsg = socket.onMessage((msg) => {
+            if (!msg) return;
+            setMessagesMap((prev) => {
+              const prevList = prev[selectedChat] || [];
+              // avoid duplicates
+              const ids = new Set(prevList.map((m) => m.id));
+              if (ids.has(msg.id)) return prev;
+              const next = [...prevList, { ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : msg.time || '' }];
+              return { ...prev, [selectedChat]: next };
+            });
+          });
+          cleanupFns.push(offMsg);
+
+          const offTyping = socket.onTyping((t) => {
+            // show typing indicator per user (simplified)
+            // You can implement UI state to reflect typing users
+          });
+          cleanupFns.push(offTyping);
+
+          const offPres = socket.onPresence((p) => {
+            // update presence for participant
+            setConversations((cs) => cs.map((c) => (c.id === selectedChat ? { ...c, online: p.online } : c)));
+          });
+          cleanupFns.push(offPres);
+        } catch (e) {
+          // socket connect errors are non-fatal
+          console.warn('socket connect error', e);
+        }
+      })().catch((e) => console.warn('socket effect error', e));
+
+      return () => {
+        mounted = false;
+        cleanupFns.forEach((fn) => fn && fn());
+        // leave socket room
+        try { socket.leave(selectedChat); } catch (e) {}
+      };
+    }, [selectedChat]);
 
   const currentChat = conversations.find((c) => c.id === selectedChat);
-  const currentMessages = messages[selectedChat] || [];
+  const currentMessages = messagesMap[selectedChat] || [];
+
+  const messagesContainerRef = useRef(null);
+
+  // auto-scroll to bottom when messages change
+  useEffect(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    // scroll to bottom smoothly
+    try {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    } catch (e) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [currentMessages.length, selectedChat]);
 
   const filteredConversations = conversations.filter((conv) =>
     conv.patientName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -158,36 +210,100 @@ export default function DoctorChatPage() {
 
   const handleSendMessage = () => {
     if (!messageInput.trim()) {
-      showToast(dc.toast?.messageEmpty || "Please enter a message first", "error");
+      showToast("الرسالة فارغة", "error");
       return;
     }
-
-    const newMessage = {
-      id: currentMessages.length + 1,
-      sender: "doctor",
-      text: messageInput,
-      time: new Date().toLocaleTimeString(locale === "ar" ? "ar-EG" : "en-US", { hour: "2-digit", minute: "2-digit" }),
-      status: "sent",
-    };
-
-    setMessages({
-      ...messages,
-      [selectedChat]: [...currentMessages, newMessage],
-    });
+    // optimistic UI + send via socket if available
+    const tempId = `tmp-${Date.now()}`;
+    const tempMsg = { id: tempId, chatId: selectedChat, sender: "doctor", text: messageInput, status: "sent", time: new Date().toLocaleTimeString() };
+    setMessagesMap((m) => ({ ...m, [selectedChat]: [...(m[selectedChat] || []), tempMsg] }));
+    setConversations((cs) => cs.map((c) => (c.id === selectedChat ? { ...c, lastMessage: messageInput } : c)));
+    const textToSend = messageInput;
     setMessageInput("");
-    showToast(dc.toast?.messageSent || "Message sent", "success");
+
+    if (socket && socket.connected) {
+      socket.sendMessage({ chatId: selectedChat, text: textToSend }, (res) => {
+        if (res && res.ok && res.message) {
+          // replace temp message with authoritative message
+          setMessagesMap((m) => {
+            const list = (m[selectedChat] || []).filter((x) => x.id !== tempId);
+            return { ...m, [selectedChat]: [...list, { ...res.message, time: res.message.createdAt ? new Date(res.message.createdAt).toLocaleTimeString() : "" }] };
+          });
+        } else {
+          // remove temp message on error
+          setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).filter((x) => x.id !== tempId) }));
+          showToast((res && res.error) || "خطأ عند إرسال الرسالة", "error");
+        }
+      });
+    } else {
+      // fallback to HTTP POST
+      (async () => {
+        try {
+          const res = await fetch(`/api/chat/${selectedChat}/messages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ text: textToSend }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            showToast(data.error || "خطأ عند إرسال الرسالة", "error");
+            setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).filter((x) => x.id !== tempId) }));
+            return;
+          }
+          // replace temp message by fetching authoritative list
+          const res2 = await fetch(`/api/chat/${selectedChat}/messages`, { credentials: "include" });
+          const refreshed = await res2.json();
+          if (res2.ok) {
+            const mapped = (refreshed.messages || []).map((msg) => ({ ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : "" }));
+            setMessagesMap((m) => ({ ...m, [selectedChat]: mapped }));
+          }
+          showToast("تم إرسال الرسالة", "success");
+        } catch (e) {
+          console.error(e);
+          showToast("خطأ في الاتصال", "error");
+          setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).filter((x) => x.id !== tempId) }));
+        }
+      })();
+    }
   };
 
   const handleAttachment = () => {
-    showToast(dc.toast?.attachmentSoon || "Attachment feature coming soon", "info");
+    showToast("سأضيف الدعم قريبًا", "info");
   };
 
   const handleVoiceCall = () => {
-    showToast(dc.toast?.voiceCallStart || "Starting voice call...", "info");
+    showToast("بدء مكالمة صوتية", "info");
   };
 
   const handleVideoCall = () => {
-    showToast(dc.toast?.videoCallStart || "Starting video call...", "info");
+    showToast("بدء مكالمة فيديو", "info");
+  };
+
+  const deleteSelectedChat = async () => {
+    if (!selectedChat) return;
+    try {
+      const res = await fetch(`/api/chat/${selectedChat}`, { method: "DELETE", credentials: "include" });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || "خطأ عند حذف المحادثة", "error");
+        return;
+      }
+      setConversations((cs) => cs.filter((c) => c.id !== selectedChat));
+      setMessagesMap((m) => {
+        const copy = { ...m };
+        delete copy[selectedChat];
+        return copy;
+      });
+      setSelectedChat((prev) => {
+        const remaining = conversations.filter((c) => c.id !== prev);
+        return remaining.length ? remaining[0].id : null;
+      });
+      showToast(t("deletedToast") || "تم حذف المحادثة", "success");
+    } catch (e) {
+      console.error(e);
+      showToast("خطأ في الاتصال", "error");
+    }
   };
 
   return (
@@ -200,14 +316,62 @@ export default function DoctorChatPage() {
         [&_span.text-gray-900]:dark:text-white [&_span.text-gray-600]:dark:text-gray-300
         [&_input.bg-white]:dark:bg-zinc-900 [&_input.border-gray-300]:dark:border-zinc-700 [&_input.text-gray-900]:dark:text-gray-100`}
       >
+        {socketMismatch && (
+          <div className="mb-4 rounded-lg border-l-4 border-red-600 bg-red-50 p-3 text-sm text-red-800">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <strong>جلسة Socket غير متطابقة</strong>
+                <div className="mt-1">هوية الاتصال بـSocket لا تتطابق مع المستخدم المسجّل. الرجاء إعادة تسجيل الدخول أو المحاولة مرة أخرى.</div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="rounded bg-white px-3 py-1 text-sm font-medium text-red-700 border border-red-200"
+                  onClick={async () => {
+                    try {
+                      // attempt quick recheck
+                      const s = socket.connect();
+                      if (!s) return;
+                      const who = await new Promise((resolve) => {
+                        const h = (m) => { try { s.off('me', h); } catch(e){}; resolve(m); };
+                        s.on('me', h);
+                        try { s.emit('whoami'); } catch (e) { resolve({ error: 'emit_failed' }); }
+                        setTimeout(() => { try { s.off('me', h); } catch(e){}; resolve({ error: 'timeout' }); }, 2000);
+                      });
+                      const r = await fetch('/api/auth/whoami', { credentials: 'include' });
+                      const http = r.ok ? await r.json() : null;
+                      if (who && who.id && http && http.id && who.id === http.id) {
+                        showToast('تمت المصادقة بنجاح عبر Socket', 'success');
+                        setSocketMismatch(false);
+                        socket.join(selectedChat);
+                      } else {
+                        showToast('ما زالت الهوية غير متطابقة', 'error');
+                      }
+                    } catch (e) {
+                      console.warn(e);
+                      showToast('فشل في إعادة المحاولة', 'error');
+                    }
+                  }}
+                >
+                  إعادة المحاولة
+                </button>
+                <button
+                  className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white"
+                  onClick={() => router.push(`/${locale}/login`)}
+                >
+                  إعادة تسجيل الدخول
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="mx-auto h-full max-w-7xl">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <FaComments className="text-blue-600" />
-            {dc.title || "Messages"}
+            {t("title")}
           </h1>
-          <p className="mt-2 text-gray-600">{dc.subtitle || "Connect with your patients"}</p>
+          <p className="mt-2 text-gray-600">{t("subtitle")}</p>
         </div>          {/* Chat Container */}
           <div className="flex h-[calc(100%-120px)] gap-6 overflow-hidden">
             {/* Left Sidebar - Conversations List */}
@@ -218,7 +382,7 @@ export default function DoctorChatPage() {
                   <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
-                    placeholder={dc.searchPlaceholder || "Search patient..."}
+                    placeholder={t("searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pr-10 pl-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -288,7 +452,7 @@ export default function DoctorChatPage() {
                       <div>
                         <h3 className="font-bold text-gray-900">{currentChat.patientName}</h3>
                         <p className="text-sm text-gray-600">
-                          {currentChat.online ? dc.online || "Online" : dc.offline || "Offline"}
+                          {currentChat.online ? t("online") : t("offline")}
                         </p>
                       </div>
                     </div>
@@ -298,28 +462,34 @@ export default function DoctorChatPage() {
                       <button
                         onClick={handleVoiceCall}
                         className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-100 hover:text-blue-600"
-                        title={dc.actions?.call || "Voice call"}
+                        title={t("actions.call")}
                       >
                         <FaPhone className="text-lg" />
                       </button>
                       <button
                         onClick={handleVideoCall}
                         className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-100 hover:text-blue-600"
-                        title={dc.actions?.video || "Video call"}
+                        title={t("actions.video")}
                       >
                         <FaVideo className="text-lg" />
                       </button>
-                      <button
-                        className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-100"
-                        title="المزيد"
-                      >
-                        <FaEllipsisV />
-                      </button>
+                      <ChatActionsPopover
+                        onDelete={deleteSelectedChat}
+                        confirmText={
+                          locale === "ar"
+                            ? "هل تريد حذف المحادثة؟"
+                            : locale === "en"
+                            ? "Delete conversation?"
+                            : safeT("confirmDelete", "Delete conversation?")
+                        }
+                        confirmYes={locale === "ar" ? "حذف" : locale === "en" ? "Delete" : safeT("yes", "Delete")}
+                        confirmNo={locale === "ar" ? "إلغاء" : locale === "en" ? "Cancel" : safeT("no", "Cancel")}
+                      />
                     </div>
                   </div>
 
                   {/* Messages Area */}
-                  <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
+                  <div ref={messagesContainerRef} className="flex-1 overflow-y-auto bg-gray-50 p-6">
                     <div className="space-y-4">
                       {currentMessages.map((msg) => (
                         <div
@@ -360,16 +530,28 @@ export default function DoctorChatPage() {
                       <button
                         onClick={handleAttachment}
                         className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-100 hover:text-blue-600"
-                        title={dc.actions?.attachment || "Attach file"}
+                        title={t("actions.attachment")}
                       >
                         <FaPaperclip className="text-xl" />
                       </button>
 
                       <input
                         type="text"
-                        placeholder={dc.messageInput || "Type your message here..."}
+                        placeholder={t("messageInput")}
                         value={messageInput}
-                        onChange={(e) => setMessageInput(e.target.value)}
+                        onChange={(e) => {
+                          setMessageInput(e.target.value);
+                          // typing indicator
+                          try {
+                            if (socket && socket.connected && selectedChat) {
+                              socket.sendTyping(selectedChat, true);
+                              if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                              typingTimeoutRef.current = setTimeout(() => {
+                                try { socket.sendTyping(selectedChat, false); } catch (e) {}
+                              }, 1500);
+                            }
+                          } catch (e) {}
+                        }}
                         onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                         className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                       />
@@ -377,7 +559,7 @@ export default function DoctorChatPage() {
                       <button
                         onClick={handleSendMessage}
                         className="rounded-lg bg-blue-600 p-3 text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        title={dc.actions?.send || "Send"}
+                        title={t("actions.send")}
                       >
                         <FaPaperPlane />
                       </button>
@@ -388,7 +570,7 @@ export default function DoctorChatPage() {
                 <div className="flex h-full items-center justify-center">
                   <div className="text-center">
                     <FaComments className="mx-auto mb-4 text-6xl text-gray-300" />
-                    <p className="text-lg text-gray-600">اختر محادثة لبدء المراسلة</p>
+                    <p className="text-lg text-gray-600">اختر محادثة لبدء الدردشة</p>
                   </div>
                 </div>
               )}

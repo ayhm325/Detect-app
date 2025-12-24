@@ -1,25 +1,24 @@
 {
-  "layout": {
-    "brand": "PneumoDetect",
-    "nav": {
-      "home": "الصفحة الرئيسية",
-      "appointments": "المواعيد",
-      "results": "التقارير",
-      "chat": "الدردشة",
-      "profile": "الحساب",
-      "logout": "تسجيل الخروج"
-    },
-    "theme": {
-      "light": "الوضع النهاري",
-      "dark": "الوضع الليلي"
-    },
-    "localeToggle": {
-      "ar": "العربية",
-      "en": "English"
-    },
-    "version": "الإصدار: 1.0",
-    "status": "الحالة: متصل ✓"
+  "brand": "PneumoDetect",
+  "nav": {
+    "home": "الصفحة الرئيسية",
+    "appointments": "المواعيد",
+    "results": "التقارير",
+    "chat": "الدردشة",
+    "profile": "الحساب",
+    "logout": "تسجيل الخروج"
   },
+  "theme": {
+    "light": "الوضع النهاري",
+    "dark": "الوضع الليلي"
+  },
+  "localeToggle": {
+    "ar": "العربية",
+    "en": "English"
+  },
+  "version": "الإصدار: 1.0",
+  "status": "الحالة: متصل ✓",
+  "healthScoreValue": "98%",
   "dashboard": {
     "welcome": "مرحباً",
     "stats": {
@@ -29,6 +28,7 @@
       "vitalSigns": "الحالة الصحية"
     },
     "quickActions": {
+      "title": "إجراءات سريعة",
       "bookAppointment": "حجز موعد",
       "uploadXray": "رفع أشعة",
       "viewReports": "عرض التقارير",
@@ -88,6 +88,7 @@
     "notesLabel": "ملاحظات",
     "past": "المواعيد السابقة",
     "noPast": "لا توجد مواعيد سابقة",
+    "new": "موعد جديد",
     "actions": {
       "confirm": "تأكيد",
       "cancel": "إلغاء",

@@ -1,0 +1,104 @@
+{
+  "headerTitle": "إدارة المرضى",
+  "headerSubtitle": "عرض وإدارة جميع المرضى في النظام",
+  "title": "إدارة المرضى",
+  "subtitle": "عرض وإدارة جميع المرضى في النظام",
+  "addButton": "إضافة مريض",
+  "exportButton": "تصدير",
+  "searchPlaceholder": "ابحث بالاسم أو البريد أو الجوال...",
+  "filters": {
+    "allStatuses": "كل الحالات",
+    "genderAll": "كل الأنواع"
+  },
+  "statuses": {
+    "active": "نشط",
+    "suspended": "معلق",
+    "banned": "محظور"
+  },
+  "table": {
+    "patient": "المريض",
+    "status": "الحالة",
+    "joinDate": "تاريخ الانضمام",
+    "lastVisit": "آخر زيارة",
+    "actions": "الإجراءات",
+    "noMatches": "لا توجد نتائج مطابقة"
+  },
+  "toast": {
+    "fillFields": "يرجى تعبئة جميع الحقول",
+    "patientAdded": "تمت إضافة المريض بنجاح",
+    "patientUpdated": "تم تحديث بيانات المريض",
+    "patientDeleted": "تم حذف المريض",
+    "exportStarted": "جاري تصدير البيانات..."
+  },
+  "actions": {
+    "viewDetails": "عرض التفاصيل",
+    "edit": "تعديل",
+    "delete": "حذف"
+  },
+  "breadcrumbs": {
+    "home": "الرئيسية",
+    "patients": "المرضى"
+  },
+  "stats": {
+    "totalPatients": "إجمالي المرضى",
+    "activePatients": "المرضى النشطون",
+    "todayVisits": "زيارات اليوم",
+    "totalReports": "إجمالي التقارير"
+  },
+  "genders": {
+    "male": "ذكر",
+    "female": "أنثى"
+  },
+  "cards": {
+    "appointments": "المواعيد",
+    "reports": "التقارير",
+    "lastVisit": "آخر زيارة",
+    "doctor": "الطبيب"
+  },
+  "ageUnit": "سنة",
+  "modals": {
+    "addTitle": "إضافة مريض جديد",
+    "detailsTitle": "تفاصيل المريض",
+    "editTitle": "تعديل المريض",
+    "doctor": "الطبيب",
+    "birthDate": "تاريخ الميلاد",
+    "selectDoctor": "اختر طبيب",
+    "medicalId": "الرقم الطبي",
+    "allergiesPlaceholder": "مثال: لبن, بيض",
+    "chronicPlaceholder": "مثال: ضغط, سكر",
+    "status": "الحالة",
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "الجوال",
+    "gender": "النوع",
+    "age": "العمر",
+    "bloodType": "فصيلة الدم",
+    "joinDate": "تاريخ الانضمام",
+    "allergies": "الحساسية",
+    "chronicDiseases": "الأمراض المزمنة",
+    "medicalAppointments": "المواعيد الطبية",
+    "medicalReports": "التقارير الطبية"
+  },
+  "buttons": {
+    "saveChanges": "حفظ التغييرات",
+    "cancel": "إلغاء",
+    "save": "حفظ"
+  },
+  "csvHeader_id": "المعرف",
+  "csvHeader_name": "الاسم الكامل",
+  "csvHeader_gender": "الجنس",
+  "csvHeader_birthDate": "تاريخ الميلاد",
+  "csvHeader_bloodType": "فصيلة الدم",
+  "csvHeader_phone": "رقم الجوال",
+  "csvHeader_email": "البريد الإلكتروني",
+  "csvHeader_status": "الحالة",
+  "csvHeader_joinDate": "تاريخ الانضمام",
+  "csvHeader_doctor": "الطبيب"
+  ,
+  "confirmDelete": {
+    "title": "تأكيد تعليق المريض",
+    "description": "هل أنت متأكد أنك تريد تعليق {name}؟ المرضى المعلقون لن يتمكنوا من تسجيل الدخول.",
+    "yes": "نعم، علّق",
+    "no": "إلغاء"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "doctorSettings": {
+    "title": "إعدادات الطبيب",
+    "subtitle": "قم بتحديث معلوماتك وإعدادات حسابك كطبيب هنا.",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "specialty": "التخصص",
+    "clinic": "العيادة",
+    "address": "العنوان",
+    "working_hours": "ساعات العمل",
+    "change_password": "تغيير كلمة المرور",
+    "current_password": "كلمة المرور الحالية",
+    "new_password": "كلمة المرور الجديدة",
+    "confirm_password": "تأكيد كلمة المرور",
+    "save_changes": "حفظ التغييرات",
+    "cancel": "إلغاء",
+    "success_message": "تم تحديث الإعدادات بنجاح.",
+    "error_message": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "update": "تحديث",
+    "language": "اللغة",
+    "notifications": "الإشعارات",
+    "enable_notifications": "تفعيل الإشعارات",
+    "disable_notifications": "تعطيل الإشعارات",
+    "tabs": {
+      "profile": "الملف الشخصي",
+      "availability": "التوفر",
+      "notifications": "الإشعارات",
+      "security": "الأمان"
+    },
+    "profile": {
+      "header": "معلومات الطبيب",
+      "name": "الاسم",
+      "specialty": "التخصص",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "license": "رقم الترخيص الطبي",
+      "bio": "نبذة عن الطبيب",
+      "save": "حفظ"
+    }
+  }
+}

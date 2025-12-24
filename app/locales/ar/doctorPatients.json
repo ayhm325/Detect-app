@@ -1,0 +1,132 @@
+  {
+    "ageSuffix": "سنة",
+    "genderSuffix": "",
+    "filters": {
+      "all": "الكل",
+      "stable": "مستقر",
+      "critical": "حرج",
+      "recovering": "يتعافى"
+    },
+    "title": "مرضاي",
+  "subtitle": "قائمة المرضى المسجلين لديك",
+  "searchPlaceholder": "ابحث عن مريض",
+  "addButton": "إضافة مريض",
+  "stats": {
+    "total": "إجمالي المرضى",
+    "stable": "مستقر",
+    "critical": "حرج",
+    "recovering": "يتعافى"
+  },
+  "statuses": {
+    "stable": "مستقر",
+    "critical": "حرج",
+    "recovering": "يتعافى"
+  },
+  "toast": {
+    "addSoon": "إضافة مريض قريبًا",
+    "viewDetails": "عرض تفاصيل المريض",
+    "chat": "بدء محادثة مع",
+    "call": "الاتصال بـ"
+  },
+  "labels": {
+    "lastVisit": "آخر زيارة",
+    "nextAppointment": "الموعد القادم",
+    "diagnosis": "التشخيص",
+    "bloodType": "فصيلة الدم",
+    "scans": "عدد الفحوصات",
+    "chronic": "أمراض مزمنة",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "status": "الحالة"
+  },
+  "sections": {
+    "contact": "معلومات التواصل",
+    "medical": "معلومات طبية",
+    "diagnosis": "التشخيص",
+    "appointments": "المواعيد",
+    "stats": "إحصائيات"
+  },
+  "actions": {
+    "view": "عرض التفاصيل",
+    "chat": "محادثة",
+    "call": "اتصال"
+  },
+  "emptyState": "لا يوجد مرضى مطابقون للبحث أو الفلاتر.",
+  "items": [
+    {
+      "name": "أحمد علي",
+      "age": "35",
+      "gender": "ذكر",
+      "phone": "0501234567",
+      "email": "ahmad@example.com",
+      "status": "مستقر",
+      "lastVisit": "2025-12-01",
+      "nextAppointment": "2026-01-10",
+      "diagnosis": "نزلة برد",
+      "scansCount": "2",
+      "avatar": "ahmad.jpg",
+      "bloodType": "A+",
+      "conditions": "سكري"
+    },
+    {
+      "name": "سارة محمد",
+      "age": "28",
+      "gender": "أنثى",
+      "phone": "0509876543",
+      "email": "sara@example.com",
+      "status": "حرج",
+      "lastVisit": "2025-11-20",
+      "nextAppointment": "2026-01-15",
+      "diagnosis": "حساسية",
+      "scansCount": "1",
+      "avatar": "sara.jpg",
+      "bloodType": "B-",
+      "conditions": "ربو"
+    },
+    {
+      "name": "خالد يوسف",
+      "age": "42",
+      "gender": "ذكر",
+      "phone": "0505555555",
+      "email": "khaled@example.com",
+      "status": "يتعافى",
+      "lastVisit": "2025-12-10",
+      "nextAppointment": "2026-02-01",
+      "diagnosis": "ضغط دم",
+      "scansCount": "3",
+      "avatar": "khaled.jpg",
+      "bloodType": "O+",
+      "conditions": "ضغط"
+    },
+    {
+      "name": "منى سالم",
+      "age": "31",
+      "gender": "أنثى",
+      "phone": "0502223333",
+      "email": "mona@example.com",
+      "status": "مستقر",
+      "lastVisit": "2025-12-15",
+      "nextAppointment": "2026-01-20",
+      "diagnosis": "أنيميا",
+      "scansCount": "2",
+      "avatar": "mona.jpg",
+      "bloodType": "AB+",
+      "conditions": "أنيميا"
+    },
+    {
+      "name": "سعيد عمر",
+      "age": "50",
+      "gender": "ذكر",
+      "phone": "0504446666",
+      "email": "saeed@example.com",
+      "status": "حرج",
+      "lastVisit": "2025-12-18",
+      "nextAppointment": "2026-02-10",
+      "diagnosis": "قلب",
+      "scansCount": "4",
+      "avatar": "saeed.jpg",
+      "bloodType": "A-",
+      "conditions": "قلب"
+    }
+  ]
+}

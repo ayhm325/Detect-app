@@ -1,0 +1,18 @@
+{
+  "testimonials": {
+    "title": "What Our Users Say",
+    "subtitle": "Real experiences from doctors and patients",
+    "items": [
+      { "name": "Dr. Ahmed Mohamed", "role": "Radiology Consultant", "image": "/icons/ai.svg", "rating": 5, "text": "Excellent system that helps me diagnose with high accuracy. Easy interface and fast results." },
+      { "name": "Dr. Sarah Ahmed", "role": "Internal Medicine Doctor", "image": "/icons/xray.svg", "rating": 5, "text": "Advanced technology that saves time. I recommend it to all doctors." },
+      { "name": "Mohamed Ali", "role": "Patient", "image": "/icons/result.svg", "rating": 5, "text": "I got a quick and accurate diagnosis. Excellent service and helpful team." },
+      { "name": "Dr. Fatima Hassan", "role": "Pulmonology Consultant", "image": "/icons/settings.svg", "rating": 5, "text": "Best AI diagnostic platform. Accurate results and detailed reports." }
+    ],
+    "badges": [
+      { "text": "Trusted by 15K+ users", "icon": "✓" },
+      { "text": "99.8% Accuracy", "icon": "★" },
+      { "text": "24/7 Support", "icon": "♥" },
+      { "text": "ISO Certified", "icon": "◆" }
+    ]
+  }
+}

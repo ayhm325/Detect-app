@@ -1,0 +1,21 @@
+{
+  "title": "Blog",
+  "description": "Articles and tips about AI and digital health.",
+  "posts": [
+    {
+      "title": "The Importance of AI in Modern Medicine",
+      "excerpt": "How is AI changing the future of medical diagnosis and treatment? Discover the latest applications and technologies in this field.",
+      "date": "2025-12-01"
+    },
+    {
+      "title": "A Patient's Guide to Reading X-ray Images",
+      "excerpt": "Simple steps to understand medical imaging reports and how AI makes it easier.",
+      "date": "2025-11-20"
+    },
+    {
+      "title": "Tips for Protecting Your Digital Health",
+      "excerpt": "Learn best practices for keeping your health data safe when using smart medical apps.",
+      "date": "2025-11-10"
+    }
+  ]
+}

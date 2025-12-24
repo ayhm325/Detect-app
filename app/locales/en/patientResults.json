@@ -1,0 +1,61 @@
+{
+  "stats": {
+    "total": "Total Reports",
+    "ready": "Ready",
+    "pending": "Pending",
+    "thisMonth": "This Month"
+  },
+  "status": {
+    "ready": "ready",
+    "pending": "pending"
+  },
+  "title": "Medical Test Results",
+  "subtitle": "Here you can view all your medical test results and reports.",
+  "searchPlaceholder": "Search by report, doctor, or type...",
+  "filters": {
+    "allTypes": "All Types",
+    "allStatuses": "All Statuses"
+  },
+  "types": {
+    "xray": "X-Ray",
+    "ct": "CT Scan",
+    "mri": "MRI",
+    "lab": "Laboratory",
+    "ultrasound": "ECG"
+  },
+  "statuses": {
+    "ready": "Ready",
+    "pending": "Pending"
+  },
+  "emptyState": "No reports match your search or filters.",
+  "actions": {
+    "view": "View"
+  },
+  "toast": {
+    "download": "Report downloaded successfully!",
+    "share": "Report shared!",
+    "print": "Report sent to printer."
+  },
+  "reportLabels": {
+    "doctor": "Doctor:",
+    "facility": "Facility:",
+    "date": "Date:",
+    "aiSummary": "AI Summary",
+    "findings": "Findings",
+    "notes": "Notes"
+  }
+  ,
+  "report1Title": "Chest X-Ray",
+  "report1Type": "X-Ray",
+  "report1TypeIcon": "🩻",
+  "report1Date": "2025-12-19",
+  "report1Time": "10:00 AM",
+  "report1Status": "ready",
+  "report1Doctor": "Dr. Sarah Ahmed",
+  "report1Facility": "Specialized Radiology Center",
+  "report1Priority": "Normal",
+  "report1AiSummary": "Results are normal, no indications of any issues in the lungs or chest.",
+  "report1Findings": "Lungs are clear, heart size is normal, no rib fractures.",
+  "report1Images": "Image",
+  "report1Notes": "Follow-up recommended in 6 months."
+}

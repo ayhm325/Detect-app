@@ -1,7 +1,7 @@
 "use client";
 
 import DoctorLayout from "../DoctorLayout";
-import { useToast } from "@/app/components/ui/Toast";
+import { useToast } from "../../../components/ui/Toast";
 import { useEffect, useMemo, useState } from "react";
 import {
   FaUsers,
@@ -21,272 +21,102 @@ import {
   FaHistory,
   FaHospital,
 } from "react-icons/fa";
-import useLocale from "@/app/hooks/useLocale";
-import { formatDate } from "@/app/lib/date";
+import { useTranslations } from "next-intl";
+import { formatDate } from "../../../lib/date";
 
-export default function DoctorPatientsPage() {
+// You may need to get locale and labels from props or context, adjust as needed
+export default function DoctorPatientsPage({ locale }) {
   const { showToast, ToastContainer } = useToast();
-  const { t, locale } = useLocale();
-  const dp = t.doctorPatients || {};
-
-  const tr = locale === "en"
-    ? {
-        title: "Patients",
-        subtitle: "Manage and follow up patient records",
-        addButton: "Add patient",
-        ageSuffix: "yrs",
-        toast: {
-          addSoon: "New patient coming soon",
-          viewDetails: "Viewing patient",
-          chat: "Starting chat with",
-          call: "Calling",
-        },
-        stats: { total: "Total patients", stable: "Stable", critical: "Critical", recovering: "Recovering" },
-        searchPlaceholder: "Search patient by name, phone, or diagnosis...",
-        filters: { all: "All statuses" },
-        statuses: { stable: "Stable", critical: "Critical", recovering: "Recovering" },
-        labels: {
-          lastVisit: "Last visit:",
-          nextAppointment: "Next appointment:",
-          diagnosis: "Diagnosis:",
-          bloodType: "Blood type:",
-          scans: "Scans:",
-          chronic: "Chronic conditions:",
-          phone: "Phone:",
-          email: "Email:",
-          status: "Status:",
-        },
-        sections: {
-          contact: "Contact information",
-          medical: "Medical information",
-          diagnosis: "Current diagnosis",
-          appointments: "Appointments",
-          stats: "Statistics",
-        },
-        actions: { view: "View", chat: "Chat", call: "Call" },
-        emptyState: "No results",
-      }
-    : {
-        title: "المرضى",
-        subtitle: "إدارة ومتابعة ملفات المرضى",
-        addButton: "إضافة مريض",
-        ageSuffix: "سنة",
-        toast: {
-          addSoon: "ميزة إضافة مريض قريباً",
-          viewDetails: "عرض بيانات المريض",
-          chat: "بدء محادثة مع",
-          call: "الاتصال بـ",
-        },
-        stats: { total: "إجمالي المرضى", stable: "مستقر", critical: "حرج", recovering: "قيد التعافي" },
-        searchPlaceholder: "ابحث عن مريض بالاسم أو الهاتف أو التشخيص...",
-        filters: { all: "جميع الحالات" },
-        statuses: { stable: "مستقر", critical: "حرج", recovering: "قيد التعافي" },
-        labels: {
-          lastVisit: "آخر زيارة:",
-          nextAppointment: "الموعد القادم:",
-          diagnosis: "التشخيص:",
-          bloodType: "فصيلة الدم:",
-          scans: "الفحوصات:",
-          chronic: "حالات مزمنة:",
-          phone: "الهاتف:",
-          email: "البريد:",
-          status: "الحالة:",
-        },
-        sections: {
-          contact: "معلومات الاتصال",
-          medical: "المعلومات الطبية",
-          diagnosis: "التشخيص الحالي",
-          appointments: "المواعيد",
-          stats: "الإحصائيات",
-        },
-        actions: { view: "عرض", chat: "محادثة", call: "اتصال" },
-        emptyState: "لا توجد نتائج",
-      };
-
-  const labels = {
-    ...tr,
-    ...dp,
-    toast: { ...tr.toast, ...(dp.toast || {}) },
-    stats: { ...tr.stats, ...(dp.stats || {}) },
-    filters: { ...tr.filters, ...(dp.filters || {}) },
-    statuses: { ...tr.statuses, ...(dp.statuses || {}) },
-    labels: { ...tr.labels, ...(dp.labels || {}) },
-    sections: { ...tr.sections, ...(dp.sections || {}) },
-    actions: { ...tr.actions, ...(dp.actions || {}) },
-  };
+  const t = useTranslations("doctorPatients");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
 
   const patientsTemplate = useMemo(
-    () =>
-      locale === "en"
-        ? [
-            {
-              id: 1,
-              name: "Mohammed Ahmed Ali",
-              age: 45,
-              gender: "Male",
-              phone: "+966 50 123 4567",
-              email: "mohammed@email.com",
-              status: "stable",
-              lastVisit: "2025-12-04",
-              nextAppointment: "2025-12-15",
-              diagnosis: "Respiratory inflammation",
-              scansCount: 5,
-              avatar: "👨",
-              bloodType: "O+",
-              conditions: ["Hypertension"],
-            },
-            {
-              id: 2,
-              name: "Fatima Ali Hassan",
-              age: 32,
-              gender: "Female",
-              phone: "+966 55 234 5678",
-              email: "fatima@email.com",
-              status: "critical",
-              lastVisit: "2025-12-03",
-              nextAppointment: "2025-12-05",
-              diagnosis: "Meniscus tear",
-              scansCount: 8,
-              avatar: "👩",
-              bloodType: "A+",
-              conditions: ["Type 2 diabetes"],
-            },
-            {
-              id: 3,
-              name: "Ahmed Khaled Mahmoud",
-              age: 28,
-              gender: "Male",
-              phone: "+966 54 345 6789",
-              email: "ahmed@email.com",
-              status: "stable",
-              lastVisit: "2025-12-02",
-              nextAppointment: "2025-12-20",
-              diagnosis: "Shoulder fracture",
-              scansCount: 3,
-              avatar: "👨",
-              bloodType: "B+",
-              conditions: [],
-            },
-            {
-              id: 4,
-              name: "Sarah Mahmoud Yousef",
-              age: 38,
-              gender: "Female",
-              phone: "+966 56 456 7890",
-              email: "sarah@email.com",
-              status: "recovering",
-              lastVisit: "2025-12-01",
-              nextAppointment: "2025-12-10",
-              diagnosis: "Arthritis",
-              scansCount: 12,
-              avatar: "👩",
-              bloodType: "AB+",
-              conditions: ["Asthma allergy"],
-            },
-            {
-              id: 5,
-              name: "Omar Hassan Ibrahim",
-              age: 52,
-              gender: "Male",
-              phone: "+966 53 567 8901",
-              email: "omar@email.com",
-              status: "stable",
-              lastVisit: "2025-11-30",
-              nextAppointment: "2025-12-18",
-              diagnosis: "Routine check",
-              scansCount: 15,
-              avatar: "👨",
-              bloodType: "O-",
-              conditions: ["Heart", "Cholesterol"],
-            },
-          ]
-        : [
-            {
-              id: 1,
-              name: "محمد أحمد علي",
-              age: 45,
-              gender: "ذكر",
-              phone: "+966 50 123 4567",
-              email: "mohammed@email.com",
-              status: "stable",
-              lastVisit: "2025-12-04",
-              nextAppointment: "2025-12-15",
-              diagnosis: "التهاب في الجهاز التنفسي",
-              scansCount: 5,
-              avatar: "👨",
-              bloodType: "O+",
-              conditions: ["ضغط دم مرتفع"],
-            },
-            {
-              id: 2,
-              name: "فاطمة علي حسن",
-              age: 32,
-              gender: "أنثى",
-              phone: "+966 55 234 5678",
-              email: "fatima@email.com",
-              status: "critical",
-              lastVisit: "2025-12-03",
-              nextAppointment: "2025-12-05",
-              diagnosis: "تمزق في الغضروف",
-              scansCount: 8,
-              avatar: "👩",
-              bloodType: "A+",
-              conditions: ["سكري النوع 2"],
-            },
-            {
-              id: 3,
-              name: "أحمد خالد محمود",
-              age: 28,
-              gender: "ذكر",
-              phone: "+966 54 345 6789",
-              email: "ahmed@email.com",
-              status: "stable",
-              lastVisit: "2025-12-02",
-              nextAppointment: "2025-12-20",
-              diagnosis: "كسر في الكتف",
-              scansCount: 3,
-              avatar: "👨",
-              bloodType: "B+",
-              conditions: [],
-            },
-            {
-              id: 4,
-              name: "سارة محمود يوسف",
-              age: 38,
-              gender: "أنثى",
-              phone: "+966 56 456 7890",
-              email: "sarah@email.com",
-              status: "recovering",
-              lastVisit: "2025-12-01",
-              nextAppointment: "2025-12-10",
-              diagnosis: "التهاب المفاصل",
-              scansCount: 12,
-              avatar: "👩",
-              bloodType: "AB+",
-              conditions: ["حساسية الربو"],
-            },
-            {
-              id: 5,
-              name: "عمر حسن إبراهيم",
-              age: 52,
-              gender: "ذكر",
-              phone: "+966 53 567 8901",
-              email: "omar@email.com",
-              status: "stable",
-              lastVisit: "2025-11-30",
-              nextAppointment: "2025-12-18",
-              diagnosis: "فحص دوري",
-              scansCount: 15,
-              avatar: "👨",
-              bloodType: "O-",
-              conditions: ["قلب", "كوليسترول"],
-            },
-          ],
-    [locale]
+    () => [
+      {
+        id: 1,
+              name: t("items.0.name"),
+              age: t("items.0.age"),
+              gender: t("items.0.gender"),
+              phone: t("items.0.phone"),
+              email: t("items.0.email"),
+              status: t("items.0.status"),
+              lastVisit: t("items.0.lastVisit"),
+              nextAppointment: t("items.0.nextAppointment"),
+              diagnosis: t("items.0.diagnosis"),
+              scansCount: t("items.0.scansCount"),
+              avatar: t("items.0.avatar"),
+              bloodType: t("items.0.bloodType"),
+              conditions: t("items.0.conditions", { returnObjects: true }),
+      },
+      {
+        id: 2,
+              name: t("items.1.name"),
+              age: t("items.1.age"),
+              gender: t("items.1.gender"),
+              phone: t("items.1.phone"),
+              email: t("items.1.email"),
+              status: t("items.1.status"),
+              lastVisit: t("items.1.lastVisit"),
+              nextAppointment: t("items.1.nextAppointment"),
+              diagnosis: t("items.1.diagnosis"),
+              scansCount: t("items.1.scansCount"),
+              avatar: t("items.1.avatar"),
+              bloodType: t("items.1.bloodType"),
+              conditions: t("items.1.conditions", { returnObjects: true }),
+      },
+      {
+        id: 3,
+              name: t("items.2.name"),
+              age: t("items.2.age"),
+              gender: t("items.2.gender"),
+              phone: t("items.2.phone"),
+              email: t("items.2.email"),
+              status: t("items.2.status"),
+              lastVisit: t("items.2.lastVisit"),
+              nextAppointment: t("items.2.nextAppointment"),
+              diagnosis: t("items.2.diagnosis"),
+              scansCount: t("items.2.scansCount"),
+              avatar: t("items.2.avatar"),
+              bloodType: t("items.2.bloodType"),
+              conditions: t("items.2.conditions", { returnObjects: true }),
+      },
+      {
+        id: 4,
+              name: t("items.3.name"),
+              age: t("items.3.age"),
+              gender: t("items.3.gender"),
+              phone: t("items.3.phone"),
+              email: t("items.3.email"),
+              status: t("items.3.status"),
+              lastVisit: t("items.3.lastVisit"),
+              nextAppointment: t("items.3.nextAppointment"),
+              diagnosis: t("items.3.diagnosis"),
+              scansCount: t("items.3.scansCount"),
+              avatar: t("items.3.avatar"),
+              bloodType: t("items.3.bloodType"),
+              conditions: t("items.3.conditions", { returnObjects: true }),
+      },
+      {
+        id: 5,
+              name: t("items.4.name"),
+              age: t("items.4.age"),
+              gender: t("items.4.gender"),
+              phone: t("items.4.phone"),
+              email: t("items.4.email"),
+              status: t("items.4.status"),
+              lastVisit: t("items.4.lastVisit"),
+              nextAppointment: t("items.4.nextAppointment"),
+              diagnosis: t("items.4.diagnosis"),
+              scansCount: t("items.4.scansCount"),
+              avatar: t("items.4.avatar"),
+              bloodType: t("items.4.bloodType"),
+              conditions: t("items.4.conditions", { returnObjects: true }),
+      },
+    ],
+    [t]
   );
 
   const [patients, setPatients] = useState(patientsTemplate);
@@ -297,9 +127,9 @@ export default function DoctorPatientsPage() {
 
   const stats = {
     total: patients.length,
-    stable: patients.filter((p) => p.status === "stable").length,
-    critical: patients.filter((p) => p.status === "critical").length,
-    recovering: patients.filter((p) => p.status === "recovering").length,
+    stable: patients.filter((p) => p.status === t("statuses.stable")).length,
+    critical: patients.filter((p) => p.status === t("statuses.critical")).length,
+    recovering: patients.filter((p) => p.status === t("statuses.recovering")).length,
   };
 
   const filteredPatients = patients.filter((patient) => {
@@ -317,32 +147,34 @@ export default function DoctorPatientsPage() {
   const handleViewDetails = (patient) => {
     setSelectedPatient(patient);
     setViewModalOpen(true);
-    showToast(`${labels.toast.viewDetails} ${patient.name}`, "info");
+    showToast(`${t("toast.viewDetails")} ${patient.name}`, "info");
   };
 
   const handleStartChat = (patient) => {
-    showToast(`${labels.toast.chat} ${patient.name}`, "info");
+    showToast(`${t("toast.chat")} ${patient.name}`, "info");
   };
 
   const handleCall = (patient) => {
-    showToast(`${labels.toast.call} ${patient.name}...`, "info");
+    showToast(`${t("toast.call")} ${patient.name}...`, "info");
   };
 
   const getStatusConfig = (status) => {
     const config = {
-      stable: { label: labels.statuses.stable, color: "bg-green-100 text-green-700 border-green-200", icon: FaCheckCircle },
-      critical: { label: labels.statuses.critical, color: "bg-red-100 text-red-700 border-red-200", icon: FaExclamationTriangle },
-      recovering: { label: labels.statuses.recovering, color: "bg-orange-100 text-orange-700 border-orange-200", icon: FaClock },
+      stable: { label: t("statuses.stable"), color: "bg-green-100 text-green-700 border-green-200", icon: FaCheckCircle },
+      critical: { label: t("statuses.critical"), color: "bg-red-100 text-red-700 border-red-200", icon: FaExclamationTriangle },
+      recovering: { label: t("statuses.recovering"), color: "bg-orange-100 text-orange-700 border-orange-200", icon: FaClock },
     };
     return config[status] || config.stable;
   };
 
+
+  // Helper to render status badge
   const getStatusBadge = (status) => {
     const config = getStatusConfig(status);
     const Icon = config.icon;
     return (
       <span className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium ${config.color}`}>
-        <Icon />
+        <Icon className="mr-1" />
         {config.label}
       </span>
     );
@@ -364,17 +196,17 @@ export default function DoctorPatientsPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                 <FaUsers className="text-blue-600" />
-                {labels.title}
+                {t("title")}
               </h1>
-              <p className="mt-2 text-gray-600">{labels.subtitle}</p>
+              <p className="mt-2 text-gray-600">{t("subtitle")}</p>
             </div>
 
             <button
-              onClick={() => showToast(labels.toast.addSoon, "info")}
+              onClick={() => showToast(t("toast.addSoon"), "info")}
               className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <FaUserPlus />
-              {labels.addButton}
+              {t("addButton")}
             </button>
           </div>
 
@@ -383,7 +215,7 @@ export default function DoctorPatientsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{labels.stats.total}</p>
+                  <p className="text-sm text-gray-600">{t("stats.total")}</p>
                   <p className="mt-1 text-3xl font-bold text-gray-900">{stats.total}</p>
                 </div>
                 <FaUsers className="text-3xl text-blue-600" />
@@ -393,7 +225,7 @@ export default function DoctorPatientsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{labels.statuses.stable}</p>
+                  <p className="text-sm text-gray-600">{t("stats.stable")}</p>
                   <p className="mt-1 text-3xl font-bold text-green-600">{stats.stable}</p>
                 </div>
                 <FaCheckCircle className="text-3xl text-green-600" />
@@ -403,7 +235,7 @@ export default function DoctorPatientsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{labels.statuses.critical}</p>
+                  <p className="text-sm text-gray-600">{t("stats.critical")}</p>
                   <p className="mt-1 text-3xl font-bold text-red-600">{stats.critical}</p>
                 </div>
                 <FaExclamationTriangle className="text-3xl text-red-600" />
@@ -413,7 +245,7 @@ export default function DoctorPatientsPage() {
             <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{labels.statuses.recovering}</p>
+                  <p className="text-sm text-gray-600">{t("stats.recovering")}</p>
                   <p className="mt-1 text-3xl font-bold text-orange-600">{stats.recovering}</p>
                 </div>
                 <FaClock className="text-3xl text-orange-600" />
@@ -425,12 +257,12 @@ export default function DoctorPatientsPage() {
           <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
             <div className="flex flex-wrap items-center gap-4">
               {/* Search */}
-              <div className="flex-1 min-w-[250px]">
+              <div className="flex-1 min-w-62.5">
                 <div className="relative">
                   <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
-                    placeholder={labels.searchPlaceholder}
+                    placeholder={t("searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-10 pl-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -446,10 +278,10 @@ export default function DoctorPatientsPage() {
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 >
-                  <option value="all">{labels.filters.all}</option>
-                  <option value="stable">{labels.statuses.stable}</option>
-                  <option value="critical">{labels.statuses.critical}</option>
-                  <option value="recovering">{labels.statuses.recovering}</option>
+                  <option value="all">{t("filters.all")}</option>
+                  <option value="stable">{t("statuses.stable")}</option>
+                  <option value="critical">{t("statuses.critical")}</option>
+                  <option value="recovering">{t("statuses.recovering")}</option>
                 </select>
               </div>
             </div>
@@ -471,7 +303,7 @@ export default function DoctorPatientsPage() {
                     <div>
                       <h3 className="text-lg font-bold text-gray-900">{patient.name}</h3>
                       <p className="text-sm text-gray-600">
-                        {patient.age} {labels.ageSuffix} • {patient.gender}
+                        {patient.age} {t("ageSuffix")} • {patient.gender}
                       </p>
                     </div>
                   </div>
@@ -490,43 +322,43 @@ export default function DoctorPatientsPage() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <FaCalendarAlt className="text-green-600" />
-                    {labels.labels.lastVisit} {formatDate(patient.lastVisit, locale)}
+                    {t("labels.lastVisit")} {formatDate(patient.lastVisit, locale)}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <FaCalendarAlt className="text-orange-600" />
-                    {labels.labels.nextAppointment} {formatDate(patient.nextAppointment, locale)}
+                    {t("labels.nextAppointment")} {formatDate(patient.nextAppointment, locale)}
                   </div>
                 </div>
 
                 {/* Diagnosis */}
                 <div className="mb-4 rounded-lg bg-blue-50 border border-blue-200 p-3">
-                  <p className="text-xs font-medium text-blue-900 mb-1">{labels.labels.diagnosis}</p>
+                  <p className="text-xs font-medium text-blue-900 mb-1">{t("labels.diagnosis")}</p>
                   <p className="text-sm text-blue-800">{patient.diagnosis}</p>
                 </div>
 
                 {/* Medical Info */}
                 <div className="mb-4 flex items-center justify-between text-sm">
                   <div>
-                    <span className="text-gray-600">{labels.labels.bloodType}</span>
+                    <span className="text-gray-600">{t("labels.bloodType")}</span>
                     <span className="ml-2 font-bold text-red-600">{patient.bloodType}</span>
                   </div>
                   <div>
-                    <span className="text-gray-600">{labels.labels.scans}</span>
+                    <span className="text-gray-600">{t("labels.scans")}</span>
                     <span className="ml-2 font-bold text-blue-600">{patient.scansCount}</span>
                   </div>
                 </div>
 
                 {/* Conditions */}
-                {patient.conditions.length > 0 && (
+                {patient.conditions && patient.conditions.length > 0 && (
                   <div className="mb-4">
-                    <p className="text-xs font-medium text-gray-700 mb-1">{labels.labels.chronic}</p>
+                    <p className="text-xs font-medium text-gray-700 mb-1">{t("labels.chronic")}</p>
                     <div className="flex flex-wrap gap-1">
-                      {patient.conditions.map((condition, idx) => (
+                      {patient.conditions.split(/,|،/).map((condition, idx) => (
                         <span
                           key={idx}
                           className="rounded-full bg-orange-100 border border-orange-200 px-2 py-1 text-xs text-orange-700"
                         >
-                          {condition}
+                          {condition.trim()}
                         </span>
                       ))}
                     </div>
@@ -540,19 +372,19 @@ export default function DoctorPatientsPage() {
                     className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700"
                   >
                     <FaEye />
-                    {labels.actions.view}
+                    {t("actions.view")}
                   </button>
                   <button
                     onClick={() => handleStartChat(patient)}
                     className="flex items-center justify-center rounded-lg bg-green-600 px-3 py-2 text-white transition-all hover:bg-green-700"
-                    title={labels.actions.chat}
+                    title={t("actions.chat")}
                   >
                     <FaComments />
                   </button>
                   <button
                     onClick={() => handleCall(patient)}
                     className="flex items-center justify-center rounded-lg bg-purple-600 px-3 py-2 text-white transition-all hover:bg-purple-700"
-                    title={labels.actions.call}
+                    title={t("actions.call")}
                   >
                     <FaPhone />
                   </button>
@@ -564,7 +396,7 @@ export default function DoctorPatientsPage() {
           {filteredPatients.length === 0 && (
             <div className="rounded-xl bg-white p-12 text-center shadow-lg border border-gray-100">
               <FaUsers className="mx-auto mb-4 text-5xl text-gray-300" />
-              <p className="text-lg text-gray-600">{labels.emptyState}</p>
+              <p className="text-lg text-gray-600">{t("emptyState")}</p>
             </div>
           )}
         </div>
@@ -583,7 +415,7 @@ export default function DoctorPatientsPage() {
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">{selectedPatient.name}</h2>
                   <p className="text-gray-600">
-                    {selectedPatient.age} {labels.ageSuffix} • {selectedPatient.gender}
+                    {selectedPatient.age} {t("ageSuffix")} • {selectedPatient.gender}
                   </p>
                 </div>
               </div>
@@ -602,15 +434,15 @@ export default function DoctorPatientsPage() {
                 <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
                   <h3 className="mb-3 font-bold text-gray-900 flex items-center gap-2">
                     <FaPhone className="text-blue-600" />
-                    {labels.sections.contact}
+                    {t("sections.contact")}
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="text-gray-600">{labels.labels.phone}</span>
+                      <span className="text-gray-600">{t("labels.phone")}</span>
                       <span className="mr-2 font-medium">{selectedPatient.phone}</span>
                     </div>
                     <div>
-                      <span className="text-gray-600">{labels.labels.email}</span>
+                      <span className="text-gray-600">{t("labels.email")}</span>
                       <span className="mr-2 font-medium">{selectedPatient.email}</span>
                     </div>
                   </div>
@@ -620,15 +452,15 @@ export default function DoctorPatientsPage() {
                 <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
                   <h3 className="mb-3 font-bold text-gray-900 flex items-center gap-2">
                     <FaHospital className="text-red-600" />
-                    {labels.sections.medical}
+                    {t("sections.medical")}
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="text-gray-600">{labels.labels.bloodType}</span>
+                      <span className="text-gray-600">{t("labels.bloodType")}</span>
                       <span className="mr-2 font-bold text-red-600">{selectedPatient.bloodType}</span>
                     </div>
                     <div>
-                      <span className="text-gray-600">{labels.labels.status}</span>
+                      <span className="text-gray-600">{t("labels.status")}</span>
                       <span className="mr-2">{getStatusBadge(selectedPatient.status)}</span>
                     </div>
                   </div>
@@ -638,7 +470,7 @@ export default function DoctorPatientsPage() {
                 <div className="md:col-span-2 rounded-lg bg-blue-50 border border-blue-200 p-4">
                   <h3 className="mb-2 font-bold text-blue-900 flex items-center gap-2">
                     <FaFileAlt />
-                    {labels.sections.diagnosis}
+                    {t("sections.diagnosis")}
                   </h3>
                   <p className="text-blue-800">{selectedPatient.diagnosis}</p>
                 </div>
@@ -647,17 +479,17 @@ export default function DoctorPatientsPage() {
                 <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
                   <h3 className="mb-3 font-bold text-gray-900 flex items-center gap-2">
                     <FaCalendarAlt className="text-green-600" />
-                    {labels.sections.appointments}
+                    {t("sections.appointments")}
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="text-gray-600">{labels.labels.lastVisit}</span>
+                      <span className="text-gray-600">{t("labels.lastVisit")}</span>
                       <span className="mr-2 font-medium">
                         {formatDate(selectedPatient.lastVisit, locale)}
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-600">{labels.labels.nextAppointment}</span>
+                      <span className="text-gray-600">{t("labels.nextAppointment")}</span>
                       <span className="mr-2 font-medium">
                         {formatDate(selectedPatient.nextAppointment, locale)}
                       </span>
@@ -669,27 +501,27 @@ export default function DoctorPatientsPage() {
                 <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
                   <h3 className="mb-3 font-bold text-gray-900 flex items-center gap-2">
                     <FaHistory className="text-purple-600" />
-                    {labels.sections.stats}
+                    {t("sections.stats")}
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="text-gray-600">{labels.labels.scans}</span>
+                      <span className="text-gray-600">{t("labels.scans")}</span>
                       <span className="mr-2 font-bold text-blue-600">{selectedPatient.scansCount}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Chronic Conditions */}
-                {selectedPatient.conditions.length > 0 && (
+                {selectedPatient.conditions && selectedPatient.conditions.length > 0 && (
                   <div className="md:col-span-2 rounded-lg bg-orange-50 border border-orange-200 p-4">
-                    <h3 className="mb-3 font-bold text-orange-900">{labels.labels.chronic}</h3>
+                    <h3 className="mb-3 font-bold text-orange-900">{t("labels.chronic")}</h3>
                     <div className="flex flex-wrap gap-2">
-                      {selectedPatient.conditions.map((condition, idx) => (
+                      {selectedPatient.conditions.split(/,|،/).map((condition, idx) => (
                         <span
                           key={idx}
                           className="rounded-full bg-orange-100 border border-orange-300 px-3 py-1 text-sm text-orange-800"
                         >
-                          {condition}
+                          {condition.trim()}
                         </span>
                       ))}
                     </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useCallback } from "react";
-import { usePathname, useRouter } from "@/i18n/routing";
+import { createNavigation } from "next-intl/navigation";
+const { useRouter, usePathname } = createNavigation();
 import { useLocale } from "next-intl";
 
 export const LocaleContext = createContext();

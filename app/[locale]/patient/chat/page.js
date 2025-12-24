@@ -1,278 +1,209 @@
 "use client";
 
-import { useState } from "react";
-import { useToast } from "@/app/components/ui/Toast";
+import { useEffect, useState, useRef } from "react";
+import ChatActionsPopover from "../../../components/chat/ChatActionsPopover.client";
+import useSocket from "../../../components/chat/useSocket.client";
+import { useToast } from "../../../components/ui/Toast";
 import { FaSearch, FaUserMd, FaPaperPlane, FaPhone, FaVideo, FaPaperclip, FaEllipsisV, FaCircle, FaCheck, FaCheckDouble } from "react-icons/fa";
-import useLocale from "@/app/hooks/useLocale";
+import useLocale from "../../../hooks/useLocale";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function PatientChatPage() {
   const { locale } = useLocale();
   const { showToast, ToastContainer } = useToast();
+    const router = useRouter();
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedChat, setSelectedChat] = useState(1);
+  const [selectedChat, setSelectedChat] = useState(null);
   const [messageInput, setMessageInput] = useState("");
 
-  const labels = locale === "en" ? {
-    // Page title
-    pageTitle: "Conversations",
-    
-    // Search
-    searchPlaceholder: "Search for doctor...",
-    
-    // Chat list
-    online: "Online now",
-    offline: "Offline",
-    unreadBadge: "unread",
-    
-    // Status indicators
-    typing: "typing...",
-    sent: "Sent",
-    delivered: "Delivered",
-    read: "Read",
-    
-    // Message input
-    messagePlaceholder: "Type your message...",
-    sendButton: "Send",
-    attachButton: "Attach file",
-    pressEnter: "Press Enter to send",
-    
-    // Action buttons
-    voiceCall: "Voice call",
-    videoCall: "Video call",
-    moreOptions: "More options",
-    
-    // Empty state
-    emptyStateTitle: "Select a conversation to start",
-    emptyStateDescription: "Choose a doctor from the list to start chatting",
-    
-    // Toast messages
-    toast: {
-      messageSent: "Message sent",
-      voiceCallSoon: "Voice call coming soon",
-      videoCallSoon: "Video call coming soon",
-      attachFileSoon: "Attach file coming soon"
-    },
-    
-    // Time labels
-    now: "Now",
-    yesterday: "Yesterday",
-    today: "Today"
-  } : {
-    // Page title
-    pageTitle: "المحادثات",
-    
-    // Search
-    searchPlaceholder: "بحث عن طبيب...",
-    
-    // Chat list
-    online: "متصل الآن",
-    offline: "غير متصل",
-    unreadBadge: "غير مقروءة",
-    
-    // Status indicators
-    typing: "يكتب...",
-    sent: "تم الإرسال",
-    delivered: "تم التوصيل",
-    read: "تم القراءة",
-    
-    // Message input
-    messagePlaceholder: "اكتب رسالتك...",
-    sendButton: "إرسال",
-    attachButton: "إرفاق ملف",
-    pressEnter: "اضغط Enter للإرسال",
-    
-    // Action buttons
-    voiceCall: "مكالمة صوتية",
-    videoCall: "مكالمة فيديو",
-    moreOptions: "خيارات إضافية",
-    
-    // Empty state
-    emptyStateTitle: "اختر محادثة للبدء",
-    emptyStateDescription: "حدد طبيباً من القائمة لبدء المحادثة",
-    
-    // Toast messages
-    toast: {
-      messageSent: "تم إرسال الرسالة",
-      voiceCallSoon: "مكالمة صوتية قريباً",
-      videoCallSoon: "مكالمة فيديو قريباً",
-      attachFileSoon: "إرفاق ملف قريباً"
-    },
-    
-    // Time labels
-    now: "الآن",
-    yesterday: "أمس",
-    today: "اليوم"
-  };
+  const [conversations, setConversations] = useState([]);
+  const [messagesMap, setMessagesMap] = useState({});
+  const socket = useSocket();
+  const typingTimeoutRef = useRef(null);
+  const [socketMismatch, setSocketMismatch] = useState(false);
 
-  const [conversations, setConversations] = useState(
-    locale === "en" ? [
-      {
-        id: 1,
-        doctorName: "Dr. Sarah Ahmed",
-        specialty: "Radiology Specialist",
-        avatar: "👩‍⚕️",
-        lastMessage: "I'll review the X-ray results and get back to you soon",
-        lastMessageTime: "10:30 AM",
-        unreadCount: 2,
-        isOnline: true,
-        messages: [
-          { id: 1, sender: "patient", text: "Good morning Doctor, when will the X-ray results be ready?", time: "10:15 AM", status: "read" },
-          { id: 2, sender: "doctor", text: "Good morning, the results will be ready today", time: "10:20 AM" },
-          { id: 3, sender: "patient", text: "Thank you very much, is there anything I should watch out for?", time: "10:25 AM", status: "read" },
-          { id: 4, sender: "doctor", text: "I'll review the X-ray results and get back to you soon", time: "10:30 AM" }
-        ]
-      },
-      {
-        id: 2,
-        doctorName: "Dr. Mohamed Ali",
-        specialty: "Orthopedic Surgeon",
-        avatar: "👨‍⚕️",
-        lastMessage: "You can book an appointment for Thursday",
-        lastMessageTime: "Yesterday",
-        unreadCount: 0,
-        isOnline: false,
-        messages: [
-          { id: 1, sender: "patient", text: "Hello Doctor, I'm feeling pain in my knee", time: "Yesterday 3:00 PM", status: "read" },
-          { id: 2, sender: "doctor", text: "Hello, is the pain constant or does it come and go?", time: "Yesterday 3:15 PM" },
-          { id: 3, sender: "patient", text: "It increases when climbing stairs", time: "Yesterday 3:20 PM", status: "read" },
-          { id: 4, sender: "doctor", text: "You can book an appointment for Thursday", time: "Yesterday 3:30 PM" }
-        ]
-      },
-      {
-        id: 3,
-        doctorName: "Dr. Fatima Hassan",
-        specialty: "General Practitioner",
-        avatar: "👩‍⚕️",
-        lastMessage: "Alright, I'll be waiting for you",
-        lastMessageTime: "Sunday",
-        unreadCount: 0,
-        isOnline: true,
-        messages: [
-          { id: 1, sender: "patient", text: "Doctor, our appointment is tomorrow at 11?", time: "Sunday 5:00 PM", status: "read" },
-          { id: 2, sender: "doctor", text: "Yes, that's correct, at 11 AM", time: "Sunday 5:10 PM" },
-          { id: 3, sender: "patient", text: "Perfect, thank you", time: "Sunday 5:12 PM", status: "read" },
-          { id: 4, sender: "doctor", text: "Alright, I'll be waiting for you", time: "Sunday 5:15 PM" }
-        ]
-      },
-      {
-        id: 4,
-        doctorName: "Dr. Ahmed Khaled",
-        specialty: "Cardiologist",
-        avatar: "👨‍⚕️",
-        lastMessage: "The results are excellent, continue your treatment",
-        lastMessageTime: "Saturday",
-        unreadCount: 0,
-        isOnline: false,
-        messages: [
-          { id: 1, sender: "patient", text: "Doctor, I received my test results", time: "Saturday 2:00 PM", status: "read" },
-          { id: 2, sender: "doctor", text: "Great, let me review them", time: "Saturday 2:30 PM" },
-          { id: 3, sender: "patient", text: "Is everything okay?", time: "Saturday 3:00 PM", status: "read" },
-          { id: 4, sender: "doctor", text: "The results are excellent, continue your treatment", time: "Saturday 3:15 PM" }
-        ]
-      },
-      {
-        id: 5,
-        doctorName: "Dr. Layla Youssef",
-        specialty: "Neurologist",
-        avatar: "👩‍⚕️",
-        lastMessage: "Okay, I'll send you the prescription",
-        lastMessageTime: "Friday",
-        unreadCount: 1,
-        isOnline: true,
-        messages: [
-          { id: 1, sender: "patient", text: "Doctor, the medication has run out", time: "Friday 4:00 PM", status: "read" },
-          { id: 2, sender: "doctor", text: "How much is left in the box?", time: "Friday 4:10 PM" },
-          { id: 3, sender: "patient", text: "Only two pills", time: "Friday 4:12 PM", status: "read" },
-          { id: 4, sender: "doctor", text: "Okay, I'll send you the prescription", time: "Friday 4:20 PM" }
-        ]
+  useEffect(() => {
+    let mounted = true;
+    async function loadChats() {
+      try {
+        const res = await fetch("/api/chat/patient", { credentials: "include" });
+        if (res.status === 403) {
+          showToast("ليس لديك إذن لعرض هذه الصفحة — جاري إعادة التوجيه.", "error");
+          router.push(`/${locale}/doctor/chat`);
+          return;
+        }
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.error || "خطأ في جلب المحادثات", "error");
+          return;
+        }
+        const convs = (data.chats || []).map((c) => ({
+          id: c.id,
+          doctorName: c.doctor?.user?.fullName || "الطبيب",
+          specialty: c.doctor?.user?.specialty || "",
+          avatar: "👩‍⚕️",
+          lastMessage: c.messages?.[0]?.text || "",
+          lastMessageTime: c.messages?.[0]?.createdAt ? new Date(c.messages[0].createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : "",
+          unreadCount: 0,
+          isOnline: false,
+        }));
+        if (!mounted) return;
+        setConversations(convs);
+        if (convs.length) setSelectedChat(convs[0].id);
+      } catch (e) {
+        console.error(e);
+        showToast("خطأ في الاتصال", "error");
       }
-    ] : [
-      {
-        id: 1,
-        doctorName: "د. سارة أحمد",
-        specialty: "أخصائي أشعة",
-        avatar: "👩‍⚕️",
-        lastMessage: "سأراجع نتائج الأشعة وأرد عليك قريباً",
-        lastMessageTime: "10:30 ص",
-        unreadCount: 2,
-        isOnline: true,
-        messages: [
-          { id: 1, sender: "patient", text: "صباح الخير دكتورة، متى ستكون نتائج الأشعة جاهزة؟", time: "10:15 ص", status: "read" },
-          { id: 2, sender: "doctor", text: "صباح النور، النتائج ستكون جاهزة اليوم بإذن الله", time: "10:20 ص" },
-          { id: 3, sender: "patient", text: "شكراً جزيلاً، هل هناك شيء يجب أن أنتبه له؟", time: "10:25 ص", status: "read" },
-          { id: 4, sender: "doctor", text: "سأراجع نتائج الأشعة وأرد عليك قريباً", time: "10:30 ص" }
-        ]
-      },
-      {
-        id: 2,
-        doctorName: "د. محمد علي",
-        specialty: "جراح عظام",
-        avatar: "👨‍⚕️",
-        lastMessage: "يمكنك حجز موعد يوم الخميس",
-        lastMessageTime: "أمس",
-        unreadCount: 0,
-        isOnline: false,
-        messages: [
-          { id: 1, sender: "patient", text: "مرحباً دكتور، أشعر بألم في الركبة", time: "أمس 3:00 م", status: "read" },
-          { id: 2, sender: "doctor", text: "مرحباً، هل الألم مستمر أم يأتي ويذهب؟", time: "أمس 3:15 م" },
-          { id: 3, sender: "patient", text: "يزداد عند صعود السلم", time: "أمس 3:20 م", status: "read" },
-          { id: 4, sender: "doctor", text: "يمكنك حجز موعد يوم الخميس", time: "أمس 3:30 م" }
-        ]
-      },
-      {
-        id: 3,
-        doctorName: "د. فاطمة حسن",
-        specialty: "طب عام",
-        avatar: "👩‍⚕️",
-        lastMessage: "تمام، سأكون بانتظارك",
-        lastMessageTime: "الأحد",
-        unreadCount: 0,
-        isOnline: true,
-        messages: [
-          { id: 1, sender: "patient", text: "دكتورة، موعدنا غداً الساعة 11؟", time: "الأحد 5:00 م", status: "read" },
-          { id: 2, sender: "doctor", text: "نعم صحيح، الساعة 11 صباحاً", time: "الأحد 5:10 م" },
-          { id: 3, sender: "patient", text: "ممتاز، شكراً", time: "الأحد 5:12 م", status: "read" },
-          { id: 4, sender: "doctor", text: "تمام، سأكون بانتظارك", time: "الأحد 5:15 م" }
-        ]
-      },
-      {
-        id: 4,
-        doctorName: "د. أحمد خالد",
-        specialty: "أخصائي قلب",
-        avatar: "👨‍⚕️",
-        lastMessage: "النتائج ممتازة، استمر على العلاج",
-        lastMessageTime: "السبت",
-        unreadCount: 0,
-        isOnline: false,
-        messages: [
-          { id: 1, sender: "patient", text: "دكتور، وصلتني نتائج التحاليل", time: "السبت 2:00 م", status: "read" },
-          { id: 2, sender: "doctor", text: "رائع، دعني أراجعها", time: "السبت 2:30 م" },
-          { id: 3, sender: "patient", text: "هل كل شيء على ما يرام؟", time: "السبت 3:00 م", status: "read" },
-          { id: 4, sender: "doctor", text: "النتائج ممتازة، استمر على العلاج", time: "السبت 3:15 م" }
-        ]
-      },
-      {
-        id: 5,
-        doctorName: "د. ليلى يوسف",
-        specialty: "أخصائي أعصاب",
-        avatar: "👩‍⚕️",
-        lastMessage: "حسناً، سأرسل لك الوصفة",
-        lastMessageTime: "الجمعة",
-        unreadCount: 1,
-        isOnline: true,
-        messages: [
-          { id: 1, sender: "patient", text: "دكتورة، الدواء انتهى", time: "الجمعة 4:00 م", status: "read" },
-          { id: 2, sender: "doctor", text: "كم تبقى من العلبة؟", time: "الجمعة 4:10 م" },
-          { id: 3, sender: "patient", text: "حبتين فقط", time: "الجمعة 4:12 م", status: "read" },
-          { id: 4, sender: "doctor", text: "حسناً، سأرسل لك الوصفة", time: "الجمعة 4:20 م" }
-        ]
+    }
+    loadChats();
+    return () => (mounted = false);
+  }, [locale]);
+
+  useEffect(() => {
+    if (!selectedChat) return;
+    let mounted = true;
+    let cleanupFns = [];
+
+    (async () => {
+      // initial load
+      try {
+        const res = await fetch(`/api/chat/${selectedChat}/messages`, { credentials: "include" });
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.error || "خطأ في جلب الرسائل", "error");
+          return;
+        }
+        if (!mounted) return;
+        const mapped = (data.messages || []).map((msg) => ({ ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : "" }));
+        setMessagesMap((prev) => ({ ...prev, [selectedChat]: mapped }));
+      } catch (e) {
+        console.error(e);
+        showToast("خطأ في الاتصال", "error");
       }
-    ]
-  );
+
+      // connect socket and join room after validating identity
+      try {
+        const s = socket.connect();
+        if (s) {
+          // whoami via socket and HTTP
+          const whoamiPromise = new Promise((resolve) => {
+            const handler = (m) => {
+              try { s.off('me', handler); } catch (e) {}
+              resolve(m);
+            };
+            s.on('me', handler);
+            try { s.emit('whoami'); } catch (e) { resolve({ error: 'emit_failed' }); }
+            setTimeout(() => { try { s.off('me', handler); } catch (e) {} ; resolve({ error: 'timeout' }); }, 2000);
+          });
+
+          let httpIdentity = null;
+          try {
+            const r = await fetch('/api/auth/whoami', { credentials: 'include' });
+            if (r.ok) httpIdentity = await r.json();
+          } catch (e) { console.warn('whoami fetch failed', e); }
+
+          const socketIdentity = await whoamiPromise;
+          const socketIdMatch = socketIdentity && socketIdentity.id && httpIdentity && httpIdentity.id && socketIdentity.id === httpIdentity.id;
+          if (!socketIdMatch) {
+            setSocketMismatch(true);
+            showToast('Socket identity mismatch — please re-login or use same account.', 'error');
+          } else {
+            setSocketMismatch(false);
+            socket.join(selectedChat);
+          }
+        }
+
+        const offMsg = socket.onMessage((msg) => {
+          if (!msg) return;
+          setMessagesMap((prev) => {
+            const prevList = prev[selectedChat] || [];
+            const ids = new Set(prevList.map((m) => m.id));
+            if (ids.has(msg.id)) return prev;
+            const next = [...prevList, { ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : msg.time || '' }];
+            return { ...prev, [selectedChat]: next };
+          });
+        });
+        cleanupFns.push(offMsg);
+
+        const offTyping = socket.onTyping((t) => {
+          // handle typing indicator if needed
+        });
+        cleanupFns.push(offTyping);
+
+        const offPres = socket.onPresence((p) => {
+          setConversations((cs) => cs.map((c) => (c.id === selectedChat ? { ...c, isOnline: p.online } : c)));
+        });
+        cleanupFns.push(offPres);
+      } catch (e) {
+        console.warn('socket connect error', e);
+      }
+    })().catch((e) => console.warn('socket effect error', e));
+
+    return () => {
+      mounted = false;
+      cleanupFns.forEach((fn) => fn && fn());
+      try { socket.leave(selectedChat); } catch (e) {}
+    };
+  }, [selectedChat]);
+
+  // If you want to use translations, keep only one declaration for labels
+  const t = useTranslations("patientChat");
+  const safeT = (key, fallback) => {
+    try {
+      return t(key);
+    } catch (e) {
+      return fallback;
+    }
+  };
+  const labels = {
+    pageTitle: t("pageTitle"),
+    searchPlaceholder: t("searchPlaceholder"),
+    online: t("online"),
+    offline: t("offline"),
+    unreadBadge: t("unreadBadge"),
+    typing: t("typing"),
+    sent: t("sent"),
+    delivered: t("delivered"),
+    read: t("read"),
+    messagePlaceholder: t("messagePlaceholder"),
+    sendButton: t("sendButton"),
+    attachButton: t("attachButton"),
+    pressEnter: t("pressEnter"),
+    voiceCall: t("voiceCall"),
+    videoCall: t("videoCall"),
+    moreOptions: t("moreOptions"),
+    emptyStateTitle: t("emptyStateTitle"),
+    emptyStateDescription: t("emptyStateDescription"),
+    toast: {
+      messageSent: t("messageSent"),
+      voiceCallSoon: t("voiceCallSoon"),
+      videoCallSoon: t("videoCallSoon"),
+      attachFileSoon: t("attachFileSoon")
+    },
+    now: t("now"),
+    yesterday: t("yesterday"),
+    today: t("today"),
+    // ...add all other keys as needed...
+  };
+  
 
   const currentConversation = conversations.find(c => c.id === selectedChat);
-  const currentMessages = currentConversation?.messages || [];
+  const currentMessages = messagesMap[selectedChat] || [];
+
+  const messagesContainerRef = useRef(null);
+
+  // auto-scroll to bottom when messages change
+  useEffect(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    try {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    } catch (e) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [currentMessages.length, selectedChat]);
 
   const filteredConversations = conversations.filter(conv =>
     conv.doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -281,54 +212,54 @@ export default function PatientChatPage() {
 
   const handleSendMessage = () => {
     if (!messageInput.trim()) return;
-
-    const timeFormat = locale === "en" ? 'en-US' : 'ar-EG';
-    const newMessage = {
-      id: currentMessages.length + 1,
-      sender: "patient",
-      text: messageInput,
-      time: new Date().toLocaleTimeString(timeFormat, { hour: '2-digit', minute: '2-digit' }),
-      status: "sent"
-    };
-
-    setConversations(conversations.map(conv => {
-      if (conv.id === selectedChat) {
-        return {
-          ...conv,
-          messages: [...conv.messages, newMessage],
-          lastMessage: messageInput,
-          lastMessageTime: labels.now
-        };
-      }
-      return conv;
-    }));
-
+    // optimistic UI
+    const tempId = `tmp-${Date.now()}`;
+    const tempMsg = { id: tempId, chatId: selectedChat, sender: "patient", text: messageInput, status: "sent", time: new Date().toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") };
+    setMessagesMap((m) => ({ ...m, [selectedChat]: [...(m[selectedChat] || []), tempMsg] }));
+    setConversations((cs) => cs.map(c => c.id === selectedChat ? { ...c, lastMessage: messageInput } : c));
     setMessageInput("");
-    showToast(labels.toast.messageSent, "success");
 
-    // Simulate doctor typing and response
-    setTimeout(() => {
-      const doctorReply = {
-        id: currentMessages.length + 2,
-        sender: "doctor",
-        text: locale === "en" 
-          ? "Thank you for your message, I'll get back to you soon"
-          : "شكراً على رسالتك، سأرد عليك قريباً",
-        time: new Date().toLocaleTimeString(timeFormat, { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setConversations(conversations.map(conv => {
-        if (conv.id === selectedChat) {
-          return {
-            ...conv,
-            messages: [...conv.messages, newMessage, doctorReply],
-            lastMessage: doctorReply.text,
-            lastMessageTime: labels.now
-          };
+    if (socket && socket.connected) {
+      socket.sendMessage({ chatId: selectedChat, text: messageInput }, (res) => {
+        if (res && res.ok && res.message) {
+          setMessagesMap((m) => {
+            const list = (m[selectedChat] || []).filter((x) => x.id !== tempId);
+            return { ...m, [selectedChat]: [...list, { ...res.message, time: res.message.createdAt ? new Date(res.message.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : "" }] };
+          });
+        } else {
+          setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).filter((x) => x.id !== tempId) }));
+          showToast((res && res.error) || "خطأ عند إرسال الرسالة", "error");
         }
-        return conv;
-      }));
-    }, 2000);
+      });
+    } else {
+      (async () => {
+        try {
+          const res = await fetch(`/api/chat/${selectedChat}/messages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ text: messageInput }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            showToast(data.error || "خطأ عند إرسال الرسالة", "error");
+            setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).filter((x) => x.id !== tempId) }));
+            return;
+          }
+          const res2 = await fetch(`/api/chat/${selectedChat}/messages`, { credentials: "include" });
+          const refreshed = await res2.json();
+          if (res2.ok) {
+            const mapped = (refreshed.messages || []).map((msg) => ({ ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : "" }));
+            setMessagesMap((m) => ({ ...m, [selectedChat]: mapped }));
+          }
+          showToast(labels.toast.messageSent, "success");
+        } catch (e) {
+          console.error(e);
+          showToast("خطأ في الاتصال", "error");
+          setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).filter((x) => x.id !== tempId) }));
+        }
+      })();
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -342,6 +273,53 @@ export default function PatientChatPage() {
     <>
       <ToastContainer />
       <div className="h-screen bg-gray-50 dark:bg-slate-950 flex">
+        {socketMismatch && (
+          <div className="absolute top-4 left-1/2 z-50 w-full max-w-3xl -translate-x-1/2 rounded-lg border-l-4 border-red-600 bg-red-50 p-3 text-sm text-red-800">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <strong>جلسة Socket غير متطابقة</strong>
+                <div className="mt-1">هوية الاتصال بـSocket لا تتطابق مع المستخدم الحالي. الرجاء إعادة تسجيل الدخول أو المحاولة مرة أخرى.</div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="rounded bg-white px-3 py-1 text-sm font-medium text-red-700 border border-red-200"
+                  onClick={async () => {
+                    try {
+                      const s = socket.connect();
+                      if (!s) return;
+                      const who = await new Promise((resolve) => {
+                        const h = (m) => { try { s.off('me', h); } catch(e){}; resolve(m); };
+                        s.on('me', h);
+                        try { s.emit('whoami'); } catch (e) { resolve({ error: 'emit_failed' }); }
+                        setTimeout(() => { try { s.off('me', h); } catch(e){}; resolve({ error: 'timeout' }); }, 2000);
+                      });
+                      const r = await fetch('/api/auth/whoami', { credentials: 'include' });
+                      const http = r.ok ? await r.json() : null;
+                      if (who && who.id && http && http.id && who.id === http.id) {
+                        showToast('تمت المصادقة بنجاح عبر Socket', 'success');
+                        setSocketMismatch(false);
+                        socket.join(selectedChat);
+                      } else {
+                        showToast('ما زالت الهوية غير متطابقة', 'error');
+                      }
+                    } catch (e) {
+                      console.warn(e);
+                      showToast('فشل في إعادة المحاولة', 'error');
+                    }
+                  }}
+                >
+                  إعادة المحاولة
+                </button>
+                <button
+                  className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white"
+                  onClick={() => router.push(`/${locale}/login`)}
+                >
+                  إعادة تسجيل الدخول
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Conversations Sidebar */}
         <div className="w-80 bg-white dark:bg-slate-800 border-l border-gray-200 dark:border-slate-700 flex flex-col">
           {/* Search Header */}
@@ -451,14 +429,47 @@ export default function PatientChatPage() {
                   >
                     <FaVideo className="text-gray-600 dark:text-gray-400" />
                   </button>
-                  <button className="p-3 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors">
-                    <FaEllipsisV className="text-gray-600 dark:text-gray-400" />
-                  </button>
+                  <ChatActionsPopover
+                    onDelete={async () => {
+                      if (!selectedChat) return;
+                      try {
+                        const res = await fetch(`/api/chat/${selectedChat}`, { method: "DELETE", credentials: "include" });
+                        const data = await res.json();
+                        if (!res.ok) {
+                          showToast(data.error || "خطأ عند حذف المحادثة", "error");
+                          return;
+                        }
+                        setConversations((cs) => cs.filter((c) => c.id !== selectedChat));
+                        setMessagesMap((m) => {
+                          const copy = { ...m };
+                          delete copy[selectedChat];
+                          return copy;
+                        });
+                        setSelectedChat((prev) => {
+                          const remaining = conversations.filter((c) => c.id !== prev);
+                          return remaining.length ? remaining[0].id : null;
+                        });
+                        showToast(labels.toast.messageSent || "تم حذف المحادثة", "success");
+                      } catch (e) {
+                        console.error(e);
+                        showToast("خطأ في الاتصال", "error");
+                      }
+                    }}
+                    confirmText={
+                      locale === "ar"
+                        ? (labels.toast.confirmDelete || "هل تريد حذف المحادثة؟")
+                        : locale === "en"
+                        ? (labels.toast.confirmDelete || "Delete conversation?")
+                        : safeT("confirmDelete", "Delete conversation?")
+                    }
+                    confirmYes={locale === "ar" ? "حذف" : locale === "en" ? "Delete" : safeT("yes", "Delete")}
+                    confirmNo={locale === "ar" ? "إلغاء" : locale === "en" ? "Cancel" : safeT("no", "Cancel")}
+                  />
                 </div>
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
                 {currentMessages.map((message) => (
                   <div
                     key={message.id}

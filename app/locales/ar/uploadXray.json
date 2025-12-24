@@ -1,0 +1,14 @@
+{
+  "pageTitle": "رفع الأشعة",
+  "fileTypes": "الأنواع المسموحة: JPG, PNG, DCM",
+  "ready": "جاهز",
+  "pending_review": "بانتظار المراجعة",
+  "filter_all": "الكل",
+  "errorUnsupportedType": "نوع ملف غير مدعوم",
+  "errorFileSize": "حجم الملف كبير جداً",
+  "errorFileSizeMax": "الحد الأقصى المسموح",
+  "errorNoFile": "لم يتم اختيار ملف",
+  "uploading": "جاري الرفع...",
+  "uploadSuccess": "تم الرفع بنجاح",
+  "fileSelected": "تم اختيار الملف"
+}

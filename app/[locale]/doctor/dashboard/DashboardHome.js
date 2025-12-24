@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import { useToast } from "@/app/components/ui/Toast";
+import { useToast } from "../../../components/ui/Toast";
 import { useRouter } from "next/navigation";
 import {
   FaUserMd,
@@ -18,9 +18,9 @@ import {
   FaChartLine,
   FaClipboardList,
 } from "react-icons/fa";
-import useLocale from "@/app/hooks/useLocale";
+import useLocale from "../../../hooks/useLocale";
 
-export default function DashboardHome() {
+export default function DashboardHome({ serverData = {} }) {
   const { showToast, ToastContainer } = useToast();
   const router = useRouter();
   const { t, locale } = useLocale();
@@ -114,12 +114,24 @@ export default function DashboardHome() {
     recentActivityTitle: dd.recentActivity?.title || tr.recentActivityTitle,
   };
 
-  const formattedDate = new Date().toLocaleDateString(locale === "en" ? "en-US" : "ar-EG", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const formattedDateRaw = new Date().toLocaleDateString(
+    locale === "en" ? "en-US" : "ar-EG-u-nu-latn",
+    { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+  );
+  const formattedDate = formattedDateRaw ? formattedDateRaw.replace(/\u060C/g, "").trim() : formattedDateRaw;
+
+  // Normalize date/time strings to avoid hydration mismatches between server and client
+  const formatDateTime = (val) => {
+    if (!val) return "";
+    const raw = typeof val === "string" ? val : new Date(val).toLocaleString(locale === 'en' ? 'en-US' : 'ar-EG-u-nu-latn');
+    // Remove Arabic comma (U+060C) and normalize whitespace so server and client match
+    return raw.replace(/\u060C/g, "").replace(/\s+/g, " ").trim();
+  };
 
   const stats = [
     {
       title: labels.stats.patients,
-      value: "156",
+      value: serverData.counts?.patients ?? "156",
       change: "+12",
       changePercent: "+8.3%",
       icon: FaUsers,
@@ -130,7 +142,7 @@ export default function DashboardHome() {
     },
     {
       title: labels.stats.todayAppointments,
-      value: "12",
+      value: serverData.counts?.todayAppointments ?? "12",
       change: "+3",
       changePercent: "+25%",
       icon: FaCalendarAlt,
@@ -141,7 +153,7 @@ export default function DashboardHome() {
     },
     {
       title: labels.stats.pendingScans,
-      value: "8",
+      value: serverData.counts?.pendingScans ?? "8",
       change: "-2",
       changePercent: "-20%",
       icon: FaXRay,
@@ -152,7 +164,7 @@ export default function DashboardHome() {
     },
     {
       title: labels.stats.newMessages,
-      value: "24",
+      value: serverData.counts?.newMessages ?? "24",
       change: "+5",
       changePercent: "+26%",
       icon: FaComments,
@@ -163,7 +175,7 @@ export default function DashboardHome() {
     },
   ];
 
-  const todayAppointments = useMemo(() => locale === "en" ? [
+  const defaultTodayAppointments = useMemo(() => locale === "en" ? [
     { id: 1, time: "09:00 AM", patient: "Mohammed Ahmed", type: "xray", status: "confirmed" },
     { id: 2, time: "10:30 AM", patient: "Fatima Ali", type: "consult", status: "confirmed" },
     { id: 3, time: "11:00 AM", patient: "Ahmed Khaled", type: "followup", status: "pending" },
@@ -175,7 +187,11 @@ export default function DashboardHome() {
     { id: 4, time: "02:00 م", patient: "سارة محمود", type: "ct", status: "confirmed" },
   ], [locale]);
 
-  const recentActivity = useMemo(() => locale === "en" ? [
+  const todayAppointments = (serverData.todayAppointments && serverData.todayAppointments.length)
+    ? serverData.todayAppointments.map((a, i) => ({ id: a.id || i, time: new Date(a.time).toLocaleTimeString(locale === 'en' ? 'en-US' : 'ar-EG-u-nu-latn', { hour: '2-digit', minute: '2-digit' }), patient: a.patient, type: a.type || 'consult', status: a.status || 'confirmed' }))
+    : defaultTodayAppointments;
+
+  const defaultRecentActivity = useMemo(() => locale === "en" ? [
     { id: 1, action: "Reviewed X-ray for Mohammed Ali", time: "10 min ago", icon: FaCheckCircle, color: "text-green-600" },
     { id: 2, action: "New appointment with Fatima Ahmed", time: "25 min ago", icon: FaCalendarAlt, color: "text-blue-600" },
     { id: 3, action: "New message from Ahmed Hassan", time: "45 min ago", icon: FaComments, color: "text-purple-600" },
@@ -186,6 +202,10 @@ export default function DashboardHome() {
     { id: 3, action: "رسالة جديدة من أحمد حسن", time: "منذ 45 دقيقة", icon: FaComments, color: "text-purple-600" },
     { id: 4, action: "تقرير جاهز لسارة خالد", time: "منذ ساعة", icon: FaClipboardList, color: "text-orange-600" },
   ], [locale]);
+
+  const recentActivity = (serverData.recentActivity && serverData.recentActivity.length)
+    ? serverData.recentActivity.map((r, i) => ({ id: r.id || i, action: r.action || r.description || '', time: formatDateTime(r.time), icon: FaClipboardList, color: 'text-orange-600' }))
+    : defaultRecentActivity;
 
   const pendingScans = useMemo(() => locale === "en" ? [
     { id: 1, patient: "Omar Hassan", type: "X-Ray", date: "Today", priority: "high" },
@@ -244,7 +264,7 @@ export default function DashboardHome() {
                 <FaUserMd className="text-blue-600" />
                 {labels.title}
               </h1>
-              <p className="mt-2 text-gray-600 dark:text-gray-300">{labels.welcome} أحمد محمد - {formattedDate}</p>
+              <p className="mt-2 text-gray-600 dark:text-gray-300">{labels.welcome} {serverData.doctor?.user?.fullName || (locale === "en" ? "Ahmed Mohammed" : "أحمد محمد")} - {formattedDate}</p>
             </div>
             <button
               onClick={() => router.push(`${basePrefix}/doctor/notifications`)}
@@ -252,7 +272,7 @@ export default function DashboardHome() {
             >
               <FaBell className="text-xl" />
               <span className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold">
-                5
+                {serverData.counts?.newMessages ?? 0}
               </span>
             </button>
           </div>

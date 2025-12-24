@@ -1,0 +1,122 @@
+{
+  "title": "Doctor Appointments",
+  "subtitle": "Manage your appointments with patients.",
+  "noAppointments": "No appointments at the moment.",
+  "loading": "Loading appointments...",
+  "error": "Failed to load appointments.",
+  "patient": "Patient",
+  "date": "Date",
+  "time": "Time",
+  "status": "Status",
+  "actions": {
+    "view": "View Details",
+    "cancel": "Cancel Appointment",
+    "reschedule": "Reschedule",
+    "delete": "Delete Appointment"
+  },
+  "statusTypes": {
+    "upcoming": "Upcoming",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "searchPlaceholder": "Search by patient name...",
+  "addButton": "Add New Appointment",
+  "stats": {
+    "total": "Total Appointments",
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "cancelled": "Cancelled"
+  },
+  "filters": {
+    "all": "All",
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "cancelled": "Cancelled"
+  },
+  "statuses": {
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "cancelled": "Cancelled"
+  },
+  "types": {
+    "online": "Online",
+    "clinic": "Clinic"
+  },
+  "reasonLabel": "Reason:",
+  "items": [
+    {
+      "patientName": "Mohammed Ahmed",
+      "date": "2025-12-22",
+      "time": "10:00 AM",
+      "type": "Online",
+      "status": "Confirmed",
+      "phone": "0501234567",
+      "reason": "Medical consultation"
+    }
+  ],
+  "appointments": [
+    {
+      "patientName": "Sarah Ali",
+      "date": "2025-12-23",
+      "time": "11:30 AM",
+      "type": "Clinic",
+      "status": "Pending",
+      "phone": "0509876543",
+      "reason": "Follow-up on test results"
+    },
+    {
+      "patientName": "Khaled Youssef",
+      "date": "2025-12-24",
+      "time": "1:00 PM",
+      "type": "Online",
+      "status": "Cancelled",
+      "phone": "0505555555",
+      "reason": "Medication consultation"
+    },
+    {
+      "patientName": "Ahmed Said",
+      "date": "2025-12-25",
+      "time": "9:00 AM",
+      "type": "Clinic",
+      "status": "Confirmed",
+      "phone": "0502223333",
+      "reason": "Routine checkup"
+    },
+    {
+      "patientName": "Laila Mohammed",
+      "date": "2025-12-26",
+      "time": "2:00 PM",
+      "type": "Online",
+      "status": "Pending",
+      "phone": "0504446666",
+      "reason": "Nutrition consultation"
+    },
+    {
+      "patientName": "Salman Aldosari",
+      "date": "2025-12-27",
+      "time": "4:00 PM",
+      "type": "Clinic",
+      "status": "Confirmed",
+      "phone": "0507778888",
+      "reason": "Post-surgery follow-up"
+    },
+    {
+      "patientName": "Noura Al-Otaibi",
+      "date": "2025-12-28",
+      "time": "8:30 AM",
+      "type": "Online",
+      "status": "Pending",
+      "phone": "0509991111",
+      "reason": "Psychological consultation"
+    },
+    {
+      "patientName": "Rashed Al-Mutairi",
+      "date": "2025-12-29",
+      "time": "12:00 PM",
+      "type": "Clinic",
+      "status": "Cancelled",
+      "phone": "0503332222",
+      "reason": "Urgent medical review"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef } from "react";
-import useLocale from "@/app/hooks/useLocale";
+import useLocale from "../../../hooks/useLocale";
 
 const mockRecentUploads = {
   en: [

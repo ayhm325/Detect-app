@@ -1,0 +1,41 @@
+{
+  "doctorSettings": {
+    "title": "Doctor Settings",
+    "subtitle": "Update your information and account settings as a doctor here.",
+    "email": "Email",
+    "phone": "Phone Number",
+    "specialty": "Specialty",
+    "clinic": "Clinic",
+    "address": "Address",
+    "working_hours": "Working Hours",
+    "change_password": "Change Password",
+    "current_password": "Current Password",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "save_changes": "Save Changes",
+    "cancel": "Cancel",
+    "success_message": "Settings updated successfully.",
+    "error_message": "An error occurred. Please try again.",
+    "update": "Update",
+    "language": "Language",
+    "notifications": "Notifications",
+    "enable_notifications": "Enable Notifications",
+    "disable_notifications": "Disable Notifications",
+    "tabs": {
+      "profile": "Profile",
+      "availability": "Availability",
+      "notifications": "Notifications",
+      "security": "Security"
+    },
+    "profile": {
+      "header": "Doctor Information",
+      "name": "Name",
+      "specialty": "Specialty",
+      "email": "Email",
+      "phone": "Phone Number",
+      "license": "Medical License Number",
+      "bio": "Doctor Bio",
+      "save": "Save"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "title": "إضافة/تعديل طبيب",
+  "nameLabel": "الاسم",
+  "specialtyLabel": "التخصص",
+  "emailLabel": "البريد الإلكتروني",
+  "phoneLabel": "الهاتف",
+  "statusLabel": "الحالة",
+  "submit": "حفظ",
+  "cancel": "إلغاء"
+}

@@ -1,0 +1,11 @@
+{
+  "title": "System Features",
+  "subtitle": "We offer the best diagnostic technologies for your convenience",
+  "item1": { "title": "Instant Image Analysis", "desc": "Fast and accurate results upon upload." },
+  "item2": { "title": "High Medical Accuracy", "desc": "Based on the latest medical AI research." },
+  "item3": { "title": "For Doctors and Patients", "desc": "Easy experience with organized records." },
+  "extra1": { "title": "High Security", "desc": "Your medical data stays protected." },
+  "extra2": { "title": "Super Fast", "desc": "Optimized processing and delivery." },
+  "extra3": { "title": "Detailed Reports", "desc": "Clear and comprehensive medical summaries." },
+  "extra4": { "title": "Always Available", "desc": "24/7 cloud service with monitoring." }
+}

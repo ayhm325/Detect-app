@@ -1,0 +1,15 @@
+{
+  "content": {
+    "workflow": {
+      "title": "How the system works",
+      "subtitle": "A simple and fast process to get your medical diagnosis",
+      "steps": [
+        { "icon": "/icons/ai.svg", "title": "1. Upload Image", "desc": "Upload your medical X-ray image" },
+        { "icon": "/icons/xray.svg", "title": "2. Smart Analysis", "desc": "AI analyzes your image" },
+        { "icon": "/icons/result.svg", "title": "3. Instant Result", "desc": "Get your accurate diagnosis" }
+      ],
+      "ctaTitle": "Ready to start?",
+      "ctaSubtitle": "Start your diagnosis now and don't waste more time"
+    }
+  }
+}

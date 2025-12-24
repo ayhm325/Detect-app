@@ -1,0 +1,19 @@
+{
+  "title": "Privacy Policy",
+  "description": "This page explains our privacy practices and how we handle your data.",
+  "lastUpdated": "Last updated",
+  "sections": [
+    {
+      "heading": "Information Collection",
+      "content": "We collect information you provide directly to us when you use our services."
+    },
+    {
+      "heading": "Use of Information",
+      "content": "We use your information to provide, maintain, and improve our services."
+    },
+    {
+      "heading": "Data Security",
+      "content": "We implement security measures to protect your data."
+    }
+  ]
+}
