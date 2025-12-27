@@ -1,14 +1,30 @@
 {
   "title": "Notifications",
+  "pageTitle": "Notifications",
   "noNotifications": "No notifications at the moment",
   "markAllAsRead": "Mark all as read",
   "deleteAll": "Delete all notifications",
+  "pageTitleShort": "Notifications",
+  "unreadCount": "{unread} unread out of {total}",
+  "allRead": "All notifications read ({total})",
+  "filterAll": "All",
+  "filterUnread": "Unread",
+  "filterRead": "Read",
+  "markAllRead": "Mark all as read",
+  "markAsRead": "Mark as read",
+  "markAsUnread": "Mark as unread",
+  "deleteNotification": "Delete notification",
   "types": {
     "appointment": "Appointment",
     "result": "Result",
     "message": "Message",
     "system": "System"
   },
+  "typeAppointment": "Appointment",
+  "typeResult": "Result",
+  "typeMessage": "Message",
+  "typeReminder": "Reminder",
+  "typeSystem": "System",
   "actions": {
     "view": "View",
     "delete": "Delete",
@@ -19,8 +35,25 @@
     "deleted": "Notification deleted",
     "deletedAll": "All notifications deleted"
   },
+  "notificationDeleted": "Notification deleted",
+  "allDeleted": "All notifications deleted",
+  "markedRead": "Marked as read",
+  "markedUnread": "Marked as unread",
+  "allMarkedRead": "All notifications marked as read",
   "emptyState": {
     "title": "No notifications",
     "description": "All your new notifications will appear here when available."
-  }
+  },
+  "noUnread": "No unread notifications",
+  "noRead": "No read notifications",
+  "statsTotal": "Total",
+  "statsUnread": "Unread",
+  "statsRead": "Read",
+  "confirmDeleteAll": "Are you sure you want to delete all notifications?",
+  "timeMinutesAgo": "{mins} minutes ago",
+  "timeHourAgo": "An hour ago",
+  "timeHoursAgo": "{hours} hours ago",
+  "timeDaysAgo": "{days} days ago",
+  "timeJustNow": "Just now"
+
 }

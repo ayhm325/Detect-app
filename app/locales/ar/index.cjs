@@ -36,6 +36,7 @@ const doctorAppointments = require("./doctorAppointments.json");
 const doctorDetails = require("./doctorDetails.json");
 const adminDashboard = require("./adminDashboard.json");
 const doctorSettings = require("./doctorSettings.json");
+const notifications = require("./notifications.json");
 
 module.exports = {
   navbar,
@@ -74,5 +75,6 @@ module.exports = {
   doctorPatients,
   doctorSettings,
   doctorDetails,
-  adminDashboard
+  adminDashboard,
+  notifications
 };

@@ -504,7 +504,9 @@ export default function PatientChatPage() {
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
                 {currentMessages.map((message, idx) => (
                   <div
-                    key={message.renderId || `${message.id || 'msg'}-${message.time || message.createdAt || idx}`}
+                    key={
+                      message.clientKey || message.renderId || `${message.id || 'msg'}-${message.createdAt ? new Date(message.createdAt).getTime() : 'no-ts'}-${idx}`
+                    }
                     className={`flex ${message.sender === "patient" ? "justify-start" : "justify-end"}`}
                   >
                     <div

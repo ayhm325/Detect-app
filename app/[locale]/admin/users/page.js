@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
-import AdminLayout from "../AdminLayout";
+// Page is rendered inside the route-level AdminLayout; avoid double-wrapping
 import { useToast } from "../../../components/ui/Toast";
 import useLocale from "../../../hooks/useLocale";
 import { useTranslations } from "next-intl";
@@ -292,9 +292,8 @@ export default function UsersPage() {
 
   return (
     <>
-      <AdminLayout breadcrumbs={[t('breadcrumbs.home'), t('breadcrumbs.users')] }>
-        <ToastContainer />
-        <div className="p-6">
+      <ToastContainer />
+      <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -663,7 +662,6 @@ export default function UsersPage() {
             </div>
           )}
         </div>
-      </AdminLayout>
     </>
   );
 }

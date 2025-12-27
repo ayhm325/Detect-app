@@ -1,14 +1,30 @@
 {
   "title": "الإشعارات",
+  "pageTitle": "الإشعارات",
   "noNotifications": "لا توجد إشعارات حالياً",
   "markAllAsRead": "تحديد الكل كمقروء",
   "deleteAll": "حذف جميع الإشعارات",
+  "pageTitleShort": "الإشعارات",
+  "unreadCount": "{unread} غير مقروءة من {total}",
+  "allRead": "جميع الإشعارات مقروءة ({total})",
+  "filterAll": "الكل",
+  "filterUnread": "غير مقروءة",
+  "filterRead": "مقروءة",
+  "markAllRead": "تحديد الكل كمقروء",
+  "markAsRead": "تحديد كمقروء",
+  "markAsUnread": "تحديد كغير مقروء",
+  "deleteNotification": "حذف الإشعار",
   "types": {
     "appointment": "موعد",
     "result": "نتيجة",
     "message": "رسالة",
     "system": "نظام"
   },
+  "typeAppointment": "موعد",
+  "typeResult": "نتيجة",
+  "typeMessage": "رسالة",
+  "typeReminder": "تذكير",
+  "typeSystem": "نظام",
   "actions": {
     "view": "عرض",
     "delete": "حذف",
@@ -19,8 +35,25 @@
     "deleted": "تم حذف الإشعار",
     "deletedAll": "تم حذف جميع الإشعارات"
   },
+  "notificationDeleted": "تم حذف الإشعار",
+  "allDeleted": "تم حذف جميع الإشعارات",
+  "markedRead": "تم تحديد كمقروء",
+  "markedUnread": "تم تحديد كغير مقروء",
+  "allMarkedRead": "تم تحديد جميع الإشعارات كمقروءة",
   "emptyState": {
     "title": "لا توجد إشعارات",
     "description": "ستظهر هنا جميع الإشعارات الجديدة عند توفرها."
-  }
+  },
+  "noUnread": "لا توجد إشعارات غير مقروءة",
+  "noRead": "لا توجد إشعارات مقروءة",
+  "statsTotal": "الإجمالي",
+  "statsUnread": "غير مقروءة",
+  "statsRead": "مقروءة",
+  "confirmDeleteAll": "هل أنت متأكد من حذف جميع الإشعارات؟",
+  "timeMinutesAgo": "{mins} دقيقة مضت",
+  "timeHourAgo": "منذ ساعة",
+  "timeHoursAgo": "{hours} ساعات مضت",
+  "timeDaysAgo": "{days} أيام مضت",
+  "timeJustNow": "الآن"
+
 }

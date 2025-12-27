@@ -54,19 +54,42 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  // Rewrite localized API requests like `/en/api/admin/...` -> `/api/admin/...`
+  const localeApiMatch = pathname.match(/^\/[a-z]{2}\/api\/(admin|doctor|patient)(\/.*|$)/);
+  if (localeApiMatch) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace(/^\/[a-z]{2}\/api/, '/api');
+    return NextResponse.rewrite(url);
+  }
+
   // Detect API route
   const isApi = pathname.startsWith('/api');
 
-  // Locale-based routing
+  // Handle API routes separately: normalize cleanPath by stripping '/api'
+  // so '/api/admin/...' becomes '/admin/...', allowing the same RBAC checks below.
+  if (isApi) {
+    const cleanPath = pathname.replace(/^\/api/, '') || '/';
+    // allow empty api root to continue
+    // Proceed to protected route lookup using cleanPath
+    // Prevent access to empty API root
+    if (cleanPath === '/' ) return NextResponse.next();
+    // Attach cleaned path to a local var used below via re-assignment
+    request.nextUrl.pathname = pathname; // keep original
+    // set variable in scope for later use
+    var _cleanPath = cleanPath;
+    // Only check protected routes (will look at _cleanPath)
+    const routeApi = protectedRoutes.find(r => r.path.test(_cleanPath));
+    if (!routeApi) return NextResponse.next();
+    // extract token and run RBAC logic below using _cleanPath
+    // (fall through to the main auth logic and use _cleanPath where needed)
+  }
+
+  // Locale-based routing for UI routes
   const segments = pathname.split('/');
   const locale = segments[1];
   if (!locales.includes(locale)) {
     // For UI routes, redirect to default locale
-    if (!isApi) {
-      return NextResponse.redirect(new URL(`/en${pathname}`, request.url));
-    }
-    // For API, just continue (no locale enforcement)
-    return NextResponse.next();
+    return NextResponse.redirect(new URL(`/en${pathname}`, request.url));
   }
 
   // Remove locale for RBAC check
@@ -78,15 +101,16 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
   }
 
-  // Only check protected routes
-  const route = protectedRoutes.find(r => r.path.test(cleanPath));
+  // Only check protected routes (use normalized path for API)
+  const effectiveCleanPath = isApi ? _cleanPath : cleanPath;
+  const route = protectedRoutes.find(r => r.path.test(effectiveCleanPath));
   if (!route) return NextResponse.next();
 
   // Get JWT from cookie
   const token = request.cookies.get('token')?.value;
   try {
     // Debug: log token presence for E2E troubleshooting
-    console.log('[middleware] path=', pathname, 'cleanPath=', cleanPath, 'token=', Boolean(token));
+    console.log('[middleware] path=', pathname, 'cleanPath=', effectiveCleanPath, 'token=', Boolean(token));
   } catch (e) {}
   if (!token) {
     if (isApi) {
@@ -135,5 +159,11 @@ export const config = {
     '/admin/:path*',
     '/doctor/:path*',
     '/patient/:path*',
+    '/api/admin/:path*',
+    '/api/doctor/:path*',
+    '/api/patient/:path*',
+    '/:locale/api/admin/:path*',
+    '/:locale/api/doctor/:path*',
+    '/:locale/api/patient/:path*',
   ],
 };

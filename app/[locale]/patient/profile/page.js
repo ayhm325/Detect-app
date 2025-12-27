@@ -1,46 +1,13 @@
 
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { useToast } from "../../../components/ui/Toast";
 import { useTranslations, useLocale } from "next-intl";
-import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCalendarAlt, FaIdCard, FaHeartbeat, FaWeight, FaRuler, FaAllergies, FaNotesMedical, FaEdit, FaSave, FaTimes, FaBell, FaLock, FaLanguage, FaMoon, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone } from "react-icons/fa";
 
 export default function PatientProfilePage() {
-    // Doctor change modal state
-    const [showChangeDoctor, setShowChangeDoctor] = useState(false);
-    const [availableDoctors, setAvailableDoctors] = useState([]);
-    const [doctorsLoading, setDoctorsLoading] = useState(false);
-
-    // Doctor change request handler (frontend only)
-    const handleSubmitChangeDoctor = (e) => {
-        e.preventDefault();
-        const form = e.target;
-        const fd = new FormData(form);
-        const requestedDoctorId = fd.get('requestedDoctorId');
-        const reasonValue = fd.get('reason');
-        (async () => {
-          try {
-            const res = await fetch('/api/doctor-change-requests', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ requestedDoctorId, reason: reasonValue })
-            });
-            if (!res.ok) {
-              const err = await res.json().catch(() => ({}));
-              showToast(err.error || (locale === 'ar' ? 'فشل الطلب' : 'Request failed'), 'error');
-              return;
-            }
-            setShowChangeDoctor(false);
-            showToast(locale === "ar" ? "تم إرسال طلب تغيير الطبيب للإدارة وسيتم مراجعته قريباً" : "Your doctor change request has been sent to admin for approval.", "success");
-          } catch (err) {
-            console.error('Error submitting doctor change request', err);
-            showToast(locale === 'ar' ? 'فشل الاتصال' : 'Network error', 'error');
-          }
-        })();
-    };
+    // ...existing code...
   const locale = useLocale();
   const t = useTranslations("profile");
   const { showToast, ToastContainer } = useToast();
@@ -96,18 +63,24 @@ export default function PatientProfilePage() {
   };
 
   const [profileData, setProfileData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    birthDate: "",
-    gender: "",
-    bloodType: "",
-    notes: ""
+    id: '',
+    userId: '',
+    fullName: '',
+    email: '',
+    doctorId: '',
+    doctorName: '',
+    phone: '',
+    gender: '',
+    birthDate: '',
+    bloodType: '',
+    joinDate: '',
+    lastVisit: '',
+    status: '',
+    notes: '',
+    createdAt: '',
+    updatedAt: ''
   });
-  // ensure doctor fields exist
-  useEffect(() => {
-    setProfileData(prev => ({ id: prev.id || '', doctorId: prev.doctorId || '', doctorName: prev.doctorName || '', ...prev }));
-  }, []);
+  // (تمت إزالة useEffect غير الضروري الذي يعدل الحالة مباشرة)
 
   // healthData removed per request — no default sample health info
 
@@ -123,15 +96,22 @@ export default function PatientProfilePage() {
         const p = data.profile || {};
         setProfileData({
           id: p.id || '',
+          userId: p.userId || '',
           fullName: p.fullName || '',
           email: p.email || '',
+          doctorId: p.doctorId || '',
+          doctorName: p.doctor?.fullName || '',
           phone: p.phone || '',
-          birthDate: p.birthDate || '',
           gender: p.gender || '',
+          birthDate: p.birthDate || '',
           bloodType: p.bloodType || '',
-          notes: p.notes || ''
+          joinDate: p.joinDate || '',
+          lastVisit: p.lastVisit || '',
+          status: p.status || '',
+          notes: p.notes || '',
+          createdAt: p.createdAt || '',
+          updatedAt: p.updatedAt || ''
         });
-        if (p.doctor) setProfileData(prev => ({ ...prev, doctorName: p.doctor.fullName, doctorId: p.doctor.id }));
       } catch (err) {
         console.error('Failed to load profile', err);
       }
@@ -139,172 +119,285 @@ export default function PatientProfilePage() {
     return () => { mounted = false; };
   }, []);
 
-  // fetch available doctors when opening modal
-  useEffect(() => {
-    if (!showChangeDoctor) return;
-    let mounted = true;
-    (async () => {
-      setDoctorsLoading(true);
-      try {
-        const res = await fetch('/api/doctor-change-requests');
-        const text = await res.text();
-        let data;
-        try {
-          data = text ? JSON.parse(text) : {};
-        } catch (e) {
-          console.error('Failed to parse /api/doctor-change-requests response', text, e);
-          data = { success: false };
-        }
-        console.debug('/api/doctor-change-requests response', { ok: res.ok, status: res.status, data });
-        if (!mounted) return;
-        if (!res.ok || !data.success) {
-          setAvailableDoctors([]);
-          showToast && showToast(locale === 'ar' ? 'فشل تحميل الأطباء' : 'Failed to load doctors', 'error');
-        } else {
-          setAvailableDoctors(Array.isArray(data.doctors) ? data.doctors : []);
-        }
-      } catch (e) {
-        console.error('Failed to load doctors', e);
-        setAvailableDoctors([]);
-        showToast && showToast(locale === 'ar' ? 'فشل الاتصال بجلب الأطباء' : 'Network error loading doctors', 'error');
-      } finally {
-        setDoctorsLoading(false);
-      }
-    })();
-    return () => { mounted = false; };
-  }, [showChangeDoctor, locale, showToast]);
+  // ...existing code...
 
-  const [notificationSettings, setNotificationSettings] = useState({
-    emailNotifications: true,
-    smsNotifications: true,
-    pushNotifications: true,
-    appointmentReminders: true,
-    reportUpdates: true,
-    medicationReminders: true,
-    healthTips: false
-  });
+  // ...existing code...
 
-  const [passwordData, setPasswordData] = useState({
-    oldPassword: "",
-    newPassword: "",
-    confirmPassword: ""
-  });
+  // ...existing code...
 
-  const calculateBMI = () => {
-    const height = parseFloat(profileData.height);
-    const weight = parseFloat(profileData.weight);
-    if (!height || !weight || Number.isNaN(height) || Number.isNaN(weight)) return null;
-    const heightM = height / 100;
-    if (heightM === 0) return null;
-    const bmi = (weight / (heightM * heightM));
-    if (!isFinite(bmi)) return null;
-    return bmi.toFixed(1);
+  // ...existing code...
+
+  // ...existing code...
+
+  // --- Editable fields ---
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const getBMIStatus = () => {
-    const bmiVal = calculateBMI();
-    if (!bmiVal) return { text: "-", color: "text-gray-600" };
-    const bmi = parseFloat(bmiVal);
-    if (bmi < 18.5) return { text: labels.bmiUnderweight, color: "text-blue-600 dark:text-blue-400" };
-    if (bmi < 25) return { text: labels.bmiNormal, color: "text-green-600 dark:text-green-400" };
-    if (bmi < 30) return { text: labels.bmiOverweight, color: "text-orange-600 dark:text-orange-400" };
-    return { text: labels.bmiObese, color: "text-red-600 dark:text-red-400" };
-  };
-
-  const handleSaveProfile = () => {
-    (async () => {
-      try {
-        const res = await fetch('/api/patient/profile', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(profileData)
-        });
-        if (!res.ok) {
-          showToast(labels.toastSaveError || 'Save failed', 'error');
-          return;
-        }
-        const data = await res.json();
-        setProfileData(prev => ({ ...prev, ...data.profile }));
-        setIsEditing(false);
-        showToast(labels.toastSaveSuccess, 'success');
-      } catch (err) {
-        console.error('Error saving profile', err);
+  const handleSave = async () => {
+    try {
+      const res = await fetch('/api/patient/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData)
+      });
+      if (!res.ok) {
         showToast(labels.toastSaveError || 'Save failed', 'error');
+        return;
       }
-    })();
+      const data = await res.json();
+      setProfileData((prev) => ({ ...prev, ...data.profile }));
+      setIsEditing(false);
+      showToast(labels.toastSaveSuccess, 'success');
+    } catch (err) {
+      showToast(labels.toastSaveError || 'Save failed', 'error');
+    }
   };
 
-  const handleCancelEdit = () => {
+  const handleCancel = () => {
     setIsEditing(false);
-    showToast(labels.toastCancelEdit, "info");
-  };
-
-  const handleChangePassword = () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      showToast(labels.toastPasswordMismatch, "error");
-      return;
-    }
-    if (passwordData.newPassword.length < 8) {
-      showToast(labels.toastPasswordLength, "error");
-      return;
-    }
-    showToast(labels.toastPasswordChanged, "success");
-    setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
-  };
-
-  const handleNotificationToggle = (key) => {
-    const updated = { ...notificationSettings, [key]: !notificationSettings[key] };
-    setNotificationSettings(updated);
-    // persist change to server
+    // reload profile from API to discard changes
     (async () => {
       try {
-        const res = await fetch('/api/patient/profile', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ notificationSettings: updated })
+        const res = await fetch('/api/patient/profile');
+        if (!res.ok) return;
+        const data = await res.json();
+        const p = data.profile || {};
+        setProfileData({
+          id: p.id || '',
+          userId: p.userId || '',
+          fullName: p.fullName || '',
+          email: p.email || '',
+          doctorId: p.doctorId || '',
+          doctorName: p.doctor?.fullName || '',
+          phone: p.phone || '',
+          gender: p.gender || '',
+          birthDate: p.birthDate || '',
+          bloodType: p.bloodType || '',
+          joinDate: p.joinDate || '',
+          lastVisit: p.lastVisit || '',
+          status: p.status || '',
+          notes: p.notes || '',
+          createdAt: p.createdAt || '',
+          updatedAt: p.updatedAt || ''
         });
-        if (!res.ok) {
-          showToast(labels.toastSaveError || 'Failed to update', 'error');
-          return;
-        }
-        showToast(labels.toastNotificationUpdated, 'success');
-      } catch (err) {
-        console.error('Error saving notification settings', err);
-        showToast(labels.toastSaveError || 'Failed to update', 'error');
-      }
+      } catch {}
     })();
+    showToast(labels.toastCancelEdit, 'info');
   };
-
-  const bmiStatus = getBMIStatus();
-
-  // Small reusable toggle button to reduce repetition and improve accessibility
-  const ToggleButton = ({ checked, onClick, ariaLabel, wrapClass = "w-14 h-7", knobClass = "w-5 h-5", translateWhenOn = "translate-x-8" }) => (
-    <button
-      onClick={onClick}
-      className={`${wrapClass} rounded-full transition-colors ${checked ? "bg-blue-600 dark:bg-blue-500" : "bg-gray-300 dark:bg-gray-600"}`}
-      aria-pressed={checked}
-      aria-label={ariaLabel}
-    >
-      <div className={`${knobClass} bg-white rounded-full transition-transform ${checked ? translateWhenOn : "translate-x-1"}`} />
-    </button>
-  );
 
   return (
     <>
       <ToastContainer />
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-6 flex justify-center">
-        <div className="w-full max-w-4xl">
+        <div className="w-full max-w-2xl">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">{labels.pageTitle}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">{labels.pageSubtitle}</p>
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">{labels.pageTitle}</h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">{labels.pageSubtitle}</p>
+            </div>
+            <div>
+              {!isEditing && (
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onClick={() => setIsEditing(true)}>{labels.btnEdit}</button>
+              )}
+              {isEditing && (
+                <>
+                  <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mr-2" onClick={handleSave}>{labels.btnSave}</button>
+                  <button className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded" onClick={handleCancel}>{labels.btnCancel}</button>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Profile Card, Tabs, and Tab Content */}
-          {/* ...insert the rest of the JSX for the profile page here, as originally structured... */}
+          {/* Profile Card */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-8 flex flex-col gap-6">
+            <div className="flex items-center gap-6">
+              <div className="shrink-0 w-20 h-20 rounded-full bg-blue-100 dark:bg-slate-700 flex items-center justify-center text-4xl text-blue-600 dark:text-blue-300">
+                <FaUser />
+              </div>
+              <div>
+                {isEditing ? (
+                  <input name="fullName" value={profileData.fullName} onChange={handleFieldChange} className="text-xl font-bold text-gray-900 dark:text-white bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500" />
+                ) : (
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">{profileData.fullName || '—'}</div>
+                )}
+                <div className="text-gray-500 dark:text-gray-300 mt-1 flex items-center gap-2">
+                  <FaEnvelope className="inline" />
+                  {isEditing ? (
+                    <input name="email" value={profileData.email} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500" />
+                  ) : (
+                    profileData.email || '—'
+                  )}
+                </div>
+                <div className="text-gray-500 dark:text-gray-300 mt-1 flex items-center gap-2">
+                  <FaPhone className="inline" />
+                  {isEditing ? (
+                    <input name="phone" value={profileData.phone} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500" />
+                  ) : (
+                    profileData.phone || '—'
+                  )}
+                </div>
+                {profileData.id && (
+                  <div className="text-gray-400 text-xs mt-1">{labels.patientNumber || 'Patient No.'}: {profileData.id}</div>
+                )}
+                {profileData.userId && (
+                  <div className="text-gray-400 text-xs mt-1">User ID: {profileData.userId}</div>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.birthDate}</div>
+                {isEditing ? (
+                  <input type="date" name="birthDate" value={profileData.birthDate ? profileData.birthDate.slice(0,10) : ''} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white" />
+                ) : (
+                  <div className="text-gray-900 dark:text-white">{profileData.birthDate ? new Date(profileData.birthDate).toLocaleDateString(locale) : '—'}</div>
+                )}
+              </div>
+              <div>
+                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.bloodType}</div>
+                {isEditing ? (
+                  <input name="bloodType" value={profileData.bloodType} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white" />
+                ) : (
+                  <div className="text-gray-900 dark:text-white">{profileData.bloodType || '—'}</div>
+                )}
+              </div>
+              <div>
+                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.gender || 'الجنس'}</div>
+                {isEditing ? (
+                  <input name="gender" value={profileData.gender} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white" />
+                ) : (
+                  <div className="text-gray-900 dark:text-white">{profileData.gender || '—'}</div>
+                )}
+              </div>
+              <div>
+                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.notes || 'ملاحظات'}</div>
+                {isEditing ? (
+                  <input name="notes" value={profileData.notes} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white" />
+                ) : (
+                  <div className="text-gray-900 dark:text-white">{profileData.notes || '—'}</div>
+                )}
+              </div>
+              {profileData.doctorName && (
+                <div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">الطبيب الحالي</div>
+                  <div className="text-gray-900 dark:text-white">{profileData.doctorName} {profileData.doctorId && <span className="text-xs text-gray-400">({profileData.doctorId})</span>}</div>
+                </div>
+              )}
+              {profileData.joinDate && (
+                <div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">تاريخ الانضمام</div>
+                  <div className="text-gray-900 dark:text-white">{new Date(profileData.joinDate).toLocaleDateString(locale)}</div>
+                </div>
+              )}
+              {profileData.lastVisit && (
+                <div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">آخر زيارة</div>
+                  <div className="text-gray-900 dark:text-white">{new Date(profileData.lastVisit).toLocaleDateString(locale)}</div>
+                </div>
+              )}
+              {profileData.status && (
+                <div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">الحالة</div>
+                  <div className="text-gray-900 dark:text-white">{profileData.status}</div>
+                </div>
+              )}
+              {profileData.createdAt && (
+                <div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">تاريخ الإنشاء</div>
+                  <div className="text-gray-900 dark:text-white">{new Date(profileData.createdAt).toLocaleDateString(locale)}</div>
+                </div>
+              )}
+              {profileData.updatedAt && (
+                <div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">آخر تحديث</div>
+                  <div className="text-gray-900 dark:text-white">{new Date(profileData.updatedAt).toLocaleDateString(locale)}</div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Doctor Change Request Section */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6 mt-8">
+            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">طلب تغيير الطبيب</h2>
+            <DoctorChangeRequestForm showToast={showToast} />
+          </div>
         </div>
       </div>
     </>
-// ...existing code for the rest of the JSX tabs and content goes here, properly nested inside the main fragment above...
+  );
+}
+
+// --- DoctorChangeRequestForm: fetches real doctors and renders the form ---
+function DoctorChangeRequestForm({ showToast }) {
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/doctor/list');
+        if (!res.ok) throw new Error('فشل جلب قائمة الأطباء');
+        const data = await res.json();
+        if (mounted) setDoctors(data.doctors || []);
+      } catch {
+        if (mounted) setDoctors([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const requestedDoctorId = form.requestedDoctorId.value;
+        const reason = form.reason.value;
+        if (!requestedDoctorId) {
+          showToast('يرجى اختيار طبيب جديد', 'error');
+          return;
+        }
+        try {
+          const res = await fetch('/api/doctor-change-requests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ requestedDoctorId, reason })
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            showToast(err.error || 'فشل الطلب', 'error');
+            return;
+          }
+          showToast('تم إرسال طلب تغيير الطبيب للإدارة وسيتم مراجعته قريباً', 'success');
+          form.reset();
+        } catch (err) {
+          showToast('فشل الاتصال', 'error');
+        }
+      }}
+      className="flex flex-col gap-4"
+    >
+      <div>
+        <label className="block mb-1 text-gray-700 dark:text-gray-200">اختر الطبيب الجديد</label>
+        <select name="requestedDoctorId" className="w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white" disabled={loading}>
+          <option value="">-- اختر --</option>
+          {loading && <option disabled>جاري التحميل...</option>}
+          {!loading && doctors.length === 0 && <option disabled>لا يوجد أطباء متاحون</option>}
+          {doctors.map((doc) => (
+            <option key={doc.id} value={doc.id}>{doc.fullName || doc.name || doc.email || doc.id}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block mb-1 text-gray-700 dark:text-gray-200">سبب الطلب (اختياري)</label>
+        <textarea name="reason" className="w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white" rows={2} placeholder="اكتب سبب رغبتك في تغيير الطبيب (اختياري)" />
+      </div>
+      <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded self-end">إرسال الطلب</button>
+    </form>
   );
 }

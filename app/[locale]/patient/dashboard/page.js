@@ -11,7 +11,7 @@ export const headers = () => {
   return [["Cache-Control", "no-store"]];
 };
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../components/ui/Toast";
 import { FaCalendarAlt, FaFileAlt, FaEnvelope, FaHeartbeat, FaArrowUp, FaBell } from "react-icons/fa";
@@ -32,13 +32,17 @@ export default function PatientDashboardPage() {
   let today = new Date().toLocaleDateString(locale === "ar" ? "ar-JO" : "en-US", { dateStyle: "full" });
   if (locale === "ar") today = toWesternDigits(today);
 
+
   /* ===================== STATS ===================== */
-  const [stats, setStats] = React.useState([
+  const [stats, setStats] = useState([
     { title: t("dashboard.stats.upcomingAppointments"), value: "-", change: null, icon: FaCalendarAlt },
     { title: t("dashboard.stats.readyReports"), value: "-", change: null, icon: FaFileAlt },
     { title: t("dashboard.stats.newMessages"), value: "-", change: null, icon: FaEnvelope },
     { title: t("dashboard.stats.vitalSigns"), value: "-", icon: FaHeartbeat },
   ]);
+
+  // Unread notifications count
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     async function fetchStats() {
@@ -57,6 +61,20 @@ export default function PatientDashboardPage() {
     fetchStats();
   }, [t]);
 
+  // Fetch unread notifications count
+  useEffect(() => {
+    async function fetchUnreadCount() {
+      try {
+        const res = await fetch("/api/patient/notifications?userId=demo-user-id", { method: "HEAD" });
+        if (res.ok) {
+          const count = res.headers.get("X-Unread-Count");
+          setUnreadCount(Number(count) || 0);
+        }
+      } catch {}
+    }
+    fetchUnreadCount();
+  }, []);
+
   /* ===================== QUICK ACTIONS ===================== */
   const quickActions = [
     { title: t("dashboard.quickActions.bookAppointment"), desc: t("dashboard.quickActions.desc.bookAppointment"), icon: "📅", href: "/patient/appointments" },
@@ -64,6 +82,7 @@ export default function PatientDashboardPage() {
     { title: t("dashboard.quickActions.viewReports"), desc: t("dashboard.quickActions.desc.viewReports"), icon: "📋", href: "/patient/results" },
     { title: t("dashboard.quickActions.chatDoctor"), desc: t("dashboard.quickActions.desc.chatDoctor"), icon: "💬", href: "/patient/chat" },
   ];
+
 
   return (
     <PatientDashboardWrapper>
@@ -82,9 +101,11 @@ export default function PatientDashboardPage() {
             className="relative p-3 bg-white dark:bg-slate-800 rounded-full shadow"
           >
             <FaBell />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-              3
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                {unreadCount}
+              </span>
+            )}
           </button>
         </div>
 

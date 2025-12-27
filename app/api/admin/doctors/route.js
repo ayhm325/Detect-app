@@ -24,7 +24,7 @@ export const POST = withRBAC(async (request, user) => {
         email,
         role: "doctor",
         password: "$2a$10$wQ8QnQwQ8QnQwQ8QnQwQ8uQ8QnQwQ8QnQwQ8QnQwQ8QnQwQ8QnQW", // bcrypt hash for 'doctor123'
-        isActive: status === "active"
+        isActive: true // دائماً نشط عند الإنشاء
       }
     });
     const doctor = await prisma.doctor.create({
@@ -32,7 +32,7 @@ export const POST = withRBAC(async (request, user) => {
         userId: userCreated.id,
         phone,
         licenseNumber,
-        status: status === "active" ? "active" : status === "banned" ? "banned" : "suspended"
+        status: "active" // دائماً نشط عند الإنشاء
       },
       include: {
         user: {

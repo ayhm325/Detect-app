@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "../../../components/ui/Toast";
 import { useTranslations } from "next-intl";
 import { FaBell, FaTrash, FaCheck, FaCheckDouble } from "react-icons/fa";
@@ -12,8 +12,8 @@ export default function PatientNotificationsPage() {
   const t = useTranslations("notifications");
   const labels = {
     pageTitle: t("pageTitle", { defaultValue: "Notifications" }),
-    unreadCount: t("unreadCount", { defaultValue: "Unread" }),
-    allRead: t("allRead", { defaultValue: "All Read" }),
+    unreadCount: (...args) => t("unreadCount", { defaultValue: "Unread", unread: args[0], total: args[1] }),
+    allRead: (...args) => t("allRead", { defaultValue: "All Read", total: args[0] }),
     filterAll: t("filterAll", { defaultValue: "All" }),
     filterUnread: t("filterUnread", { defaultValue: "Unread" }),
     filterRead: t("filterRead", { defaultValue: "Read" }),
@@ -41,103 +41,36 @@ export default function PatientNotificationsPage() {
       markedUnread: t("markedUnread", { defaultValue: "Marked as unread" })
     },
     confirmDeleteAll: t("confirmDeleteAll", { defaultValue: "Confirm delete all" }),
-    timeMinutesAgo: t("timeMinutesAgo", { defaultValue: (mins) => `Minutes ago: ${mins}` }),
-    timeHourAgo: t("timeHourAgo", { defaultValue: "An hour ago" }),
-    timeHoursAgo: t("timeHoursAgo", { defaultValue: (hours) => `Hours ago: ${hours}` }),
-    timeDaysAgo: t("timeDaysAgo", { defaultValue: (days) => `Days ago: ${days}` }),
-    timeJustNow: t("timeJustNow", { defaultValue: "Just now" }),
+    timeMinutesAgo: (mins) => t("timeMinutesAgo", { mins, defaultValue: `Minutes ago: ${mins}` }),
+    timeHourAgo: () => t("timeHourAgo", { defaultValue: "An hour ago" }),
+    timeHoursAgo: (hours) => t("timeHoursAgo", { hours, defaultValue: `Hours ago: ${hours}` }),
+    timeDaysAgo: (days) => t("timeDaysAgo", { days, defaultValue: `Days ago: ${days}` }),
+    timeJustNow: () => t("timeJustNow", { defaultValue: "Just now" }),
     // ...add all other keys as needed...
   };
   // ...existing code...
   // The following block is misplaced and should be removed or integrated into the i18n system.
   // Removed duplicate Arabic labels object.
   
-  // Bilingual notifications seed data
-  const [notifications, setNotifications] = useState(
-    locale === "en" ? [
-      { 
-        id: 1, 
-        title: "Your Doctor Appointment", 
-        message: "Your appointment with Dr. Mohamed Salem has been confirmed for tomorrow at 3 PM", 
-        time: labels.timeMinutesAgo(10), 
-        read: false, 
-        type: "appointment" 
-      },
-      { 
-        id: 2, 
-        title: "Test Results Ready", 
-        message: "Your medical test results are now available, please review them", 
-        time: labels.timeMinutesAgo(20), 
-        read: false, 
-        type: "result" 
-      },
-      { 
-        id: 3, 
-        title: "Doctor Response", 
-        message: "Dr. Layla Hassan replied to your question about the medication", 
-        time: labels.timeHourAgo, 
-        read: true, 
-        type: "message" 
-      },
-      { 
-        id: 4, 
-        title: "Appointment Reminder", 
-        message: "You have an appointment with Dr. Sami Youssef in 3 days", 
-        time: labels.timeHoursAgo(2), 
-        read: true, 
-        type: "reminder" 
-      },
-      { 
-        id: 5, 
-        title: "Account Update", 
-        message: "Your personal information has been successfully updated", 
-        time: labels.timeDaysAgo(2), 
-        read: false, 
-        type: "system" 
+  // Start with empty notifications (no fake data)
+  const [notifications, setNotifications] = useState([]);
+
+  // جلب الإشعارات الحقيقية من API
+  useEffect(() => {
+    async function fetchNotifications() {
+      try {
+        // يمكن تعديل userId حسب نظام المصادقة لديك
+        const res = await fetch("/api/patient/notifications?userId=demo-user-id");
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications(data);
+        }
+      } catch (err) {
+        // يمكن عرض رسالة خطأ إذا أردت
       }
-    ] : [
-      { 
-        id: 1, 
-        title: "موعدك مع الدكتور", 
-        message: "تم تأكيد موعدك مع د. محمد سالم غداً الساعة 3 مساءً", 
-        time: labels.timeMinutesAgo(10), 
-        read: false, 
-        type: "appointment" 
-      },
-      { 
-        id: 2, 
-        title: "نتيجة الفحص جاهزة", 
-        message: "نتائج فحصك الطبي أخيراً متاحة الآن، يرجى مراجعتها", 
-        time: labels.timeMinutesAgo(20), 
-        read: false, 
-        type: "result" 
-      },
-      { 
-        id: 3, 
-        title: "رد من الدكتور", 
-        message: "د. ليلى حسن ردت على استفسارك بخصوص الدواء", 
-        time: labels.timeHourAgo, 
-        read: true, 
-        type: "message" 
-      },
-      { 
-        id: 4, 
-        title: "تذكير بالموعد", 
-        message: "لديك موعد مع د. سامي يوسف في خلال 3 أيام", 
-        time: labels.timeHoursAgo(2), 
-        read: true, 
-        type: "reminder" 
-      },
-      { 
-        id: 5, 
-        title: "تحديث الحساب", 
-        message: "تم تحديث بياناتك الشخصية بنجاح", 
-        time: labels.timeDaysAgo(2), 
-        read: false, 
-        type: "system" 
-      }
-    ]
-  );
+    }
+    fetchNotifications();
+  }, []);
 
   const filteredNotifications = notifications.filter(notif => {
     if (filter === "unread") return !notif.read;
@@ -145,31 +78,38 @@ export default function PatientNotificationsPage() {
     return true;
   });
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    await fetch(`/api/patient/notifications?userId=demo-user-id&id=${id}`, { method: "DELETE" });
     setNotifications(notifications.filter(n => n.id !== id));
     showToast(labels.toast.notificationDeleted, "info");
   };
 
-  const handleDeleteAll = () => {
+  const handleDeleteAll = async () => {
     if (window.confirm(labels.confirmDeleteAll)) {
+      // حذف من الباك-إند
+      await fetch("/api/patient/notifications?userId=demo-user-id", { method: "DELETE" });
       setNotifications([]);
       showToast(labels.toast.allDeleted, "success");
     }
   };
 
-  const handleMarkAsRead = (id) => {
+  const handleMarkAsRead = async (id) => {
+    await fetch(`/api/patient/notifications?userId=demo-user-id&id=${id}`, { method: "PUT", body: JSON.stringify({ read: true }), headers: { "Content-Type": "application/json" } });
     setNotifications(notifications.map(n => 
       n.id === id ? { ...n, read: true } : n
     ));
     showToast(labels.toast.markedRead, "info");
   };
 
-  const handleMarkAllAsRead = () => {
+  const handleMarkAllAsRead = async () => {
+    // تحديث في الباك-إند
+    await fetch("/api/patient/notifications?userId=demo-user-id", { method: "PUT" });
     setNotifications(notifications.map(n => ({ ...n, read: true })));
     showToast(labels.toast.allMarkedRead, "success");
   };
 
-  const handleMarkAsUnread = (id) => {
+  const handleMarkAsUnread = async (id) => {
+    await fetch(`/api/patient/notifications?userId=demo-user-id&id=${id}`, { method: "PUT", body: JSON.stringify({ read: false }), headers: { "Content-Type": "application/json" } });
     setNotifications(notifications.map(n => 
       n.id === id ? { ...n, read: false } : n
     ));

@@ -36,7 +36,18 @@ export async function PATCH(request) {
     const req = await prisma.changeRequest.findUnique({ where: { id } });
     if (!req) return NextResponse.json({ success: false, error: 'Request not found' }, { status: 404 });
     if (req.type !== 'doctor_change') return NextResponse.json({ success: false, error: 'Invalid request type' }, { status: 400 });
-    if (req.status !== 'pending') return NextResponse.json({ success: false, error: 'Request not pending' }, { status: 400 });
+    // Allow idempotent operations: if request already approved/rejected,
+    // return success for the same action (no-op). Otherwise error.
+    if (req.status !== 'pending') {
+      console.warn(`Attempted to act on changeRequest ${id} but status is ${req.status}`);
+      if (req.status === 'approved' && action === 'approve') {
+        return NextResponse.json({ success: true, message: 'Request already approved', request: req });
+      }
+      if (req.status === 'rejected' && action === 'reject') {
+        return NextResponse.json({ success: true, message: 'Request already rejected', request: req });
+      }
+      return NextResponse.json({ success: false, error: `Request not pending (current: ${req.status})`, currentStatus: req.status }, { status: 400 });
+    }
 
     if (action === 'approve') {
       const details = req.details || {};
