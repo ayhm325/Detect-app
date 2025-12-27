@@ -44,85 +44,52 @@ export default function DoctorResultsPage() {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const scansTemplate = useMemo(
-    () => [
-      {
-        id: 1,
-        patientName: t("scan1PatientName", { defaultValue: "Patient 1" }),
-        patientId: t("scan1PatientId", { defaultValue: "ID001" }),
-        type: t("scan1Type", { defaultValue: "X-Ray" }),
-        bodyPart: t("scan1BodyPart", { defaultValue: "Chest" }),
-        date: t("scan1Date", { defaultValue: "2025-12-19" }),
-        time: t("scan1Time", { defaultValue: "10:00" }),
-        status: t("scan1Status", { defaultValue: "Completed" }),
-        aiSummary: t("scan1AiSummary", { defaultValue: "No issues detected" }),
-        thumbnail: t("scan1Thumbnail", { defaultValue: "Image" }),
-        findings: [
-          { type: t("scan1Finding1Type", { defaultValue: "Normal" }), text: t("scan1Finding1Text", { defaultValue: "No masses detected" }) },
-          { type: t("scan1Finding2Type", { defaultValue: "Normal" }), text: t("scan1Finding2Text", { defaultValue: "No tumors detected" }) }
-        ]
-      },
-      // ...repeat for other scans with short keys and defaultValue
-      {
-        patientId: t("patientId"),
-        type: t("type"),
-        bodyPart: t("bodyPart"),
-        date: t("date"),
-        time: t("time"),
-        status: "pending", // Use key only, not translation
-        aiSummary: t("aiSummary"),
-        thumbnail: t("thumbnail"),
-        findings: [
-          { type: t("type"), text: t("text") },
-          { type: t("type"), text: t("text") },
-        ]
-      },
-      {
-        id: 4,
-        patientName: t("patientName"),
-        patientId: t("patientId"),
-        type: t("type"),
-        bodyPart: t("bodyPart"),
-        date: t("date"),
-        time: t("time"),
-        status: "pending", // Use key only, not translation
-        aiSummary: t("aiSummary"),
-        thumbnail: t("thumbnail"),
-        findings: [
-          { type: t("type"), text: t("text") },
-        ]
-      },
-      {
-        id: 5,
-        patientName: t("patientName"),
-        patientId: t("patientId"),
-        type: t("type"),
-        bodyPart: t("bodyPart"),
-        date: t("date"),
-        time: t("time"),
-        status: "pending", // Use key only, not translation
-        aiSummary: t("aiSummary"),
-        thumbnail: t("thumbnail"),
-        findings: [
-          { type: t("type"), text: t("text") },
-          { type: t("type"), text: t("text") },
-        ]
-      }
-    ],
-    [t]
-  );
 
-  const [scans, setScans] = useState(scansTemplate);
+  const [scans, setScans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setScans(scansTemplate);
-  }, [scansTemplate]);
+    fetch("/api/doctor/results")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch results");
+        const data = await res.json();
+        // Transform API data to match UI expectations
+        const mapped = (data.records || []).map((r) => ({
+          id: r.id,
+          patientName: r.patient?.name || "-",
+          patientId: r.patient?.id || "-",
+          type: r.title || "X-Ray",
+          bodyPart: t("bodyPart", { defaultValue: "Chest" }),
+          date: r.createdAt,
+          time: r.createdAt,
+          status: "completed", // Assume completed for now
+          aiSummary: r.aiResult || t("aiSummary", { defaultValue: "No AI summary" }),
+          thumbnail: r.imageUrl || "/icons/xray-placeholder.png",
+          findings: r.aiResult ? [{ type: "ai", text: r.aiResult }] : [],
+        }));
+        setScans(mapped);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [t]);
 
   const stats = {
     total: scans.length,
     completed: scans.filter((s) => s.status === "completed").length,
     pending: scans.filter((s) => s.status === "pending").length,
-    today: scans.filter((s) => s.date === "2025-12-04").length,
+    today: scans.filter((s) => {
+      const today = new Date();
+      const scanDate = new Date(s.date);
+      return (
+        scanDate.getDate() === today.getDate() &&
+        scanDate.getMonth() === today.getMonth() &&
+        scanDate.getFullYear() === today.getFullYear()
+      );
+    }).length,
   };
 
   const filteredScans = scans
@@ -131,9 +98,9 @@ export default function DoctorResultsPage() {
       if (filterStatus !== "all" && scan.status !== filterStatus) return false;
       if (searchQuery) {
         return (
-          scan.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          scan.patientId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          scan.type.toLowerCase().includes(searchQuery.toLowerCase())
+          (scan.patientName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (scan.patientId || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (scan.type || "").toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
       return true;
@@ -190,6 +157,28 @@ export default function DoctorResultsPage() {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <DoctorLayout>
+        <ToastContainer />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-lg text-gray-500">{t("loading", { defaultValue: "Loading results..." })}</div>
+        </div>
+      </DoctorLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DoctorLayout>
+        <ToastContainer />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-lg text-red-500">{t("error", { defaultValue: "Error loading results:" })} {error}</div>
+        </div>
+      </DoctorLayout>
+    );
+  }
 
   return (
     <DoctorLayout>
@@ -272,20 +261,7 @@ export default function DoctorResultsPage() {
                   />
                 </div>
               </div>
-
-              {/* Type Filter */}
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              >
-                <option value="all">{t("filters.allTypes", { defaultValue: "All types" })}</option>
-                <option value="X-Ray">X-Ray</option>
-                <option value="CT Scan">CT Scan</option>
-                <option value="MRI">MRI</option>
-                <option value="Ultrasound">Ultrasound</option>
-              </select>
-
+            
               {/* Status Filter */}
               <select
                 value={filterStatus}
@@ -397,7 +373,7 @@ export default function DoctorResultsPage() {
           {filteredScans.length === 0 && (
             <div className="rounded-xl bg-white p-12 text-center shadow-lg border border-gray-100">
               <FaXRay className="mx-auto mb-4 text-5xl text-gray-300" />
-              <p className="text-lg text-gray-600">{labels.emptyState}</p>
+              <p className="text-lg text-gray-600">{t("emptyState", { defaultValue: "No results found." })}</p>
             </div>
           )}
         </div>

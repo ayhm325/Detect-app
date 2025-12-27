@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../components/ui/Toast";
 import { FaFileAlt, FaXRay, FaSearch, FaFilter, FaDownload, FaEye, FaShare, FaPrint, FaTimes, FaCheckCircle, FaHourglassHalf, FaExclamationTriangle } from "react-icons/fa";
@@ -20,205 +20,31 @@ export default function PatientResultsPage() {
   const [selectedReport, setSelectedReport] = useState(null);
   const labels = t;
 
-  // ...existing code...
-  const reportsTemplate = locale === "en"
-    ? [
-      {
-        id: 1,
-        title: t("report1Title", { defaultValue: "Report 1" }),
-        type: t("report1Type", { defaultValue: "Type" }),
-        typeIcon: t("report1TypeIcon", { defaultValue: "Icon" }),
-        date: t("report1Date", { defaultValue: "2025-12-19" }),
-        time: t("report1Time", { defaultValue: "10:00" }),
-        status: t("report1Status", { defaultValue: "Completed" }),
-        doctor: t("report1Doctor", { defaultValue: "Dr. Smith" }),
-        facility: t("report1Facility", { defaultValue: "Clinic A" }),
-        priority: t("report1Priority", { defaultValue: "Normal" }),
-        aiSummary: t("report1AiSummary", { defaultValue: "No issues detected" }),
-        findings: [
-          { text: t("report1Findings", { defaultValue: "All clear" }), type: "normal" }
-        ],
-        images: [t("report1Images", { defaultValue: "Image" })],
-        notes: t("report1Notes", { defaultValue: "No additional notes" })
-      },
-      // ...repeat for other reports with short keys and defaultValue
-      {
-        id: 5,
-        title: "Electrocardiogram (ECG)",
-        type: "ECG",
-        typeIcon: "❤️",
-        date: "2025-11-20",
-        time: "03:30 PM",
-        status: "ready",
-        doctor: "Dr. Layla Youssef",
-        facility: "Specialized Heart Center",
-        priority: "Urgent",
-        aiSummary: "Heart rhythm is regular with a slight increase in heart rate noted.",
-        findings: [
-          { text: "Heart rhythm is regular", type: "normal" },
-          { text: "Heart rate: 95 beats/minute", type: "warning" },
-          { text: "No signs of blood clots", type: "normal" },
-          { text: "Heart rate monitoring recommended", type: "info" }
-        ],
-        images: [],
-        notes: "Reducing caffeine and stress is recommended"
-      },
-      {
-        id: 6,
-        title: "Kidney Function Test",
-        type: "Laboratory",
-        typeIcon: "🔬",
-        date: "2025-11-15",
-        time: "08:00 AM",
-        status: "ready",
-        doctor: "Dr. Omar Al-Sayed",
-        facility: "Hope Medical Laboratory",
-        priority: "Normal",
-        aiSummary: "All kidney function values are within normal range.",
-        findings: [
-          { text: "Creatinine: 1.0 mg/dL (normal)", type: "normal" },
-          { text: "Urea: 25 mg/dL (normal)", type: "normal" },
-          { text: "Glomerular filtration rate: 95 mL/min (normal)", type: "normal" }
-        ],
-        images: [],
-        notes: "Kidneys are functioning with excellent efficiency"
-      }
-    ]
-    : [
-      {
-        id: 1,
-        title: "أشعة الصدر",
-        type: "أشعة",
-        typeIcon: "🩻",
-        date: "2025-12-02",
-        time: "10:30 صباحاً",
-        status: "جاهز",
-        doctor: "د. سارة أحمد",
-        facility: "مركز الأشعة التخصصي",
-        priority: "عادي",
-        aiSummary: "النتائج طبيعية، لا توجد مؤشرات على أي مشاكل في الرئتين أو الصدر.",
-        findings: [
-          { text: "الرئتان نظيفتان وخاليتان من الالتهابات", type: "normal" },
-          { text: "القلب بحجم طبيعي", type: "normal" },
-          { text: "لا توجد كسور في القفص الصدري", type: "normal" }
-        ],
-        images: ["/icons/patient-placeholder.png"],
-        notes: "يُنصح بإجراء فحص متابعة بعد 6 أشهر"
-      },
-      {
-        id: 2,
-        title: "تحليل دم شامل",
-        type: "تحاليل",
-        typeIcon: "🔬",
-        date: "2025-12-01",
-        time: "09:00 صباحاً",
-        status: "جاهز",
-        doctor: "د. محمد علي",
-        facility: "مختبر الحياة الطبي",
-        priority: "عادي",
-        aiSummary: "معظم القيم ضمن المعدل الطبيعي مع ملاحظة انخفاض طفيف في فيتامين D.",
-        findings: [
-          { text: "تعداد كريات الدم البيضاء: 7,500 (طبيعي)", type: "normal" },
-          { text: "تعداد كريات الدم الحمراء: 5.2 مليون (طبيعي)", type: "normal" },
-          { text: "الهيموجلوبين: 14.5 جم/ديسيلتر (طبيعي)", type: "normal" },
-          { text: "فيتامين D: 18 نانوغرام/مل (منخفض)", type: "warning" }
-        ],
-        images: [],
-        notes: "يُنصح بتناول مكملات فيتامين D والتعرض للشمس"
-      },
-      {
-        id: 3,
-        title: "أشعة الركبة اليمنى",
-        type: "أشعة",
-        typeIcon: "🩻",
-        date: "2025-11-28",
-        time: "02:00 مساءً",
-        status: "قيد المراجعة",
-        doctor: "د. فاطمة حسن",
-        facility: "مستشفى السلام",
-        priority: "عاجل",
-        aiSummary: "يتم حالياً مراجعة الصور من قبل الطبيب المختص.",
-        findings: [
-          { text: "في انتظار تقرير الطبيب المفصل", type: "info" }
-        ],
-        images: ["/icons/patient-placeholder.png", "/icons/patient-placeholder.png"],
-        notes: "سيتم إبلاغك عند جاهزية التقرير النهائي"
-      },
-      {
-        id: 4,
-        title: "أشعة مقطعية للبطن",
-        type: "أشعة مقطعية",
-        typeIcon: "🔬",
-        date: "2025-11-25",
-        time: "11:00 صباحاً",
-        status: "جاهز",
-        doctor: "د. أحمد خالد",
-        facility: "مركز التصوير المتقدم",
-        priority: "عادي",
-        aiSummary: "الفحص يظهر جميع الأعضاء بحالة طبيعية دون أي علامات مرضية.",
-        findings: [
-          { text: "الكبد والطحال بحجم طبيعي", type: "normal" },
-          { text: "الكليتان تعملان بشكل طبيعي", type: "normal" },
-          { text: "البنكرياس سليم", type: "normal" },
-          { text: "لا توجد كتل أو أورام", type: "normal" }
-        ],
-        images: ["/icons/patient-placeholder.png"],
-        notes: "النتائج ممتازة، لا حاجة لمتابعة إضافية"
-      },
-      {
-        id: 5,
-        title: "تخطيط القلب الكهربائي",
-        type: "تخطيط قلب",
-        typeIcon: "❤️",
-        date: "2025-11-20",
-        time: "03:30 مساءً",
-        status: "جاهز",
-        doctor: "د. ليلى يوسف",
-        facility: "مركز القلب التخصصي",
-        priority: "عاجل",
-        aiSummary: "نظم القلب منتظم مع ملاحظة زيادة طفيفة في معدل ضربات القلب.",
-        findings: [
-          { text: "النظم القلبي منتظم", type: "normal" },
-          { text: "معدل ضربات القلب: 95 نبضة/دقيقة", type: "warning" },
-          { text: "لا توجد علامات على جلطات", type: "normal" },
-          { text: "يُنصح بمراقبة معدل القلب", type: "info" }
-        ],
-        images: [],
-        notes: "يُنصح بتقليل الكافيين والتوتر"
-      },
-      {
-        id: 6,
-        title: "تحليل وظائف الكلى",
-        type: "تحاليل",
-        typeIcon: "🔬",
-        date: "2025-11-15",
-        time: "08:00 صباحاً",
-        status: "جاهز",
-        doctor: "د. عمر السيد",
-        facility: "مختبر الأمل الطبي",
-        priority: "عادي",
-        aiSummary: "جميع قيم وظائف الكلى ضمن المعدل الطبيعي.",
-        findings: [
-          { text: "الكرياتينين: 1.0 ملغ/ديسيلتر (طبيعي)", type: "normal" },
-          { text: "اليوريا: 25 ملغ/ديسيلتر (طبيعي)", type: "normal" },
-          { text: "معدل الترشيح الكبيبي: 95 مل/دقيقة (طبيعي)", type: "normal" }
-        ],
-        images: [],
-        notes: "الكليتان تعملان بكفاءة ممتازة"
-      }
-    ];
+  // fetch real reports from API (only chest X-rays will be returned)
+  const [reports, setReports] = useState([]);
 
-  const [reports, setReports] = useState(reportsTemplate);
-
-  const tResults = useTranslations("patientResults");
+  // load real reports from API (server returns chest X-rays only)
+  useEffect(() => {
+    Promise.resolve().then(async () => {
+      try {
+        const res = await fetch("/api/patient/results");
+        if (!res.ok) return;
+        const data = await res.json();
+        setReports(data.records || []);
+      } catch (err) {
+        console.error("Failed to load patient results:", err);
+      }
+    });
+  }, []);
+  const tResults = t;
   const statsLabels = {
-    total: tResults("stats.total"),
-    ready: tResults("stats.ready"),
-    pending: tResults("stats.pending"),
-    thisMonth: tResults("stats.thisMonth")
+    total: t("stats.total"),
+    ready: t("stats.ready"),
+    pending: t("stats.pending"),
+    thisMonth: t("stats.thisMonth")
   };
-  const readyStatus = tResults("status.ready");
-  const pendingStatus = tResults("status.pending");
+  const readyStatus = t("status.ready");
+  const pendingStatus = t("status.pending");
 
   const stats = [
     {
@@ -362,22 +188,7 @@ export default function PatientResultsPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pr-10 pl-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-            </div>
-            <div className="relative">
-              <FaFilter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="w-full pr-10 pl-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-              >
-                <option value="all">{labels('filters.allTypes')}</option>
-                <option value={locale === "en" ? "X-Ray" : "أشعة"}>{labels('types.xray')}</option>
-                <option value={locale === "en" ? "CT Scan" : "أشعة مقطعية"}>{labels('types.ct')}</option>
-                <option value={locale === "en" ? "MRI" : "رنين مغناطيسي"}>{labels('types.mri')}</option>
-                <option value={locale === "en" ? "Laboratory" : "تحاليل"}>{labels('types.lab')}</option>
-                <option value={locale === "en" ? "ECG" : "تخطيط قلب"}>{labels('types.ultrasound')}</option>
-              </select>
-            </div>
+            </div>        
             <div className="relative">
               <FaFilter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <select

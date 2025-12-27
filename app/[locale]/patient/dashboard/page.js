@@ -11,7 +11,7 @@ export const headers = () => {
   return [["Cache-Control", "no-store"]];
 };
 
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../components/ui/Toast";
 import { FaCalendarAlt, FaFileAlt, FaEnvelope, FaHeartbeat, FaArrowUp, FaBell } from "react-icons/fa";
@@ -33,12 +33,29 @@ export default function PatientDashboardPage() {
   if (locale === "ar") today = toWesternDigits(today);
 
   /* ===================== STATS ===================== */
-  const stats = [
-    { title: t("dashboard.stats.upcomingAppointments"), value: "3", change: "+50%", icon: FaCalendarAlt },
-    { title: t("dashboard.stats.readyReports"), value: "8", change: "+33%", icon: FaFileAlt },
-    { title: t("dashboard.stats.newMessages"), value: "12", change: "+71%", icon: FaEnvelope },
-    { title: t("dashboard.stats.vitalSigns"), value: t("healthScoreValue"), icon: FaHeartbeat },
-  ];
+  const [stats, setStats] = React.useState([
+    { title: t("dashboard.stats.upcomingAppointments"), value: "-", change: null, icon: FaCalendarAlt },
+    { title: t("dashboard.stats.readyReports"), value: "-", change: null, icon: FaFileAlt },
+    { title: t("dashboard.stats.newMessages"), value: "-", change: null, icon: FaEnvelope },
+    { title: t("dashboard.stats.vitalSigns"), value: "-", icon: FaHeartbeat },
+  ]);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch("/api/patient/dashboard-stats", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        setStats([
+          { title: t("dashboard.stats.upcomingAppointments"), value: data.upcomingAppointments, change: null, icon: FaCalendarAlt },
+          { title: t("dashboard.stats.readyReports"), value: data.readyReports, change: null, icon: FaFileAlt },
+          { title: t("dashboard.stats.newMessages"), value: data.newMessages, change: null, icon: FaEnvelope },
+          { title: t("dashboard.stats.vitalSigns"), value: data.vitalSigns, icon: FaHeartbeat },
+        ]);
+      } catch {}
+    }
+    fetchStats();
+  }, [t]);
 
   /* ===================== QUICK ACTIONS ===================== */
   const quickActions = [
@@ -77,11 +94,6 @@ export default function PatientDashboardPage() {
             <div key={i} className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
               <div className="flex justify-between mb-3">
                 <s.icon className="text-2xl text-blue-500" />
-                {s.change && (
-                  <span className="text-green-600 flex items-center gap-1">
-                    <FaArrowUp /> {s.change}
-                  </span>
-                )}
               </div>
               <p className="text-gray-500 text-sm">{s.title}</p>
               <p className="text-3xl font-bold">{s.value}</p>

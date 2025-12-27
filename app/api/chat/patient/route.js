@@ -1,34 +1,16 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import prisma from "../../../../lib/prismaClient.js";
+import { withRBAC } from "../../../../lib/auth/withRBAC";
+import { rateLimit } from "../../../../lib/security/rateLimiter";
+import { logAudit } from "../../../../lib/security/auditLogger";
 
-const SECRET = process.env.JWT_SECRET || "your-secret-key";
-
-export async function GET(request) {
+export const GET = withRBAC(async (request, user) => {
+  const rl = rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/chat/patient" } });
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
   try {
-    // Accept token from cookie OR Authorization header (Bearer) as fallback
-    let token = request.cookies.get("token")?.value;
-    if (!token) {
-      const hdr = request.headers.get("authorization") || request.headers.get("Authorization");
-      if (hdr && hdr.startsWith("Bearer ")) token = hdr.slice(7).trim();
-    }
-    if (!token) {
-      console.warn("/api/chat/patient missing auth token (cookie/header)");
-      return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
-    }
-    let user;
-    try {
-      user = jwt.verify(token, SECRET);
-      console.debug("/api/chat/patient decoded user:", user);
-    } catch (e) {
-      return NextResponse.json({ error: "invalid_token" }, { status: 401 });
-    }
-    if (user.role !== "patient") {
-      console.warn("/api/chat/patient forbidden - user role:", user.role);
-      return NextResponse.json({ error: "forbidden" }, { status: 403 });
-    }
-
-    // find patient record
     const patient = await prisma.patient.findUnique({ where: { userId: user.id } });
     if (!patient) return NextResponse.json({ error: "patient_not_found" }, { status: 404 });
 
@@ -41,9 +23,10 @@ export async function GET(request) {
       orderBy: { updatedAt: "desc" },
     });
 
+    logAudit({ event: "patient_chats_listed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { chatCount: chats.length } });
     return NextResponse.json({ chats });
   } catch (error) {
-    console.error("/api/chat/patient error", error);
+    logAudit({ event: "patient_chats_list_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error.message } });
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
-}
+}, ["patient"]);

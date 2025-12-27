@@ -63,21 +63,24 @@ export default function useSocket({ url } = {}) {
   }, []);
 
   const onTyping = useCallback((handler) => {
-    if (!socketRef.current) return;
-    socketRef.current.on('typing', handler);
-    return () => socketRef.current.off('typing', handler);
+    const sock = socketRef.current;
+    if (!sock) return;
+    sock.on('typing', handler);
+    return () => { try { sock.off('typing', handler); } catch (e) {} };
   }, []);
 
   const onPresence = useCallback((handler) => {
-    if (!socketRef.current) return;
-    socketRef.current.on('presence', handler);
-    return () => socketRef.current.off('presence', handler);
+    const sock = socketRef.current;
+    if (!sock) return;
+    sock.on('presence', handler);
+    return () => { try { sock.off('presence', handler); } catch (e) {} };
   }, []);
 
   const onMessage = useCallback((handler) => {
-    if (!socketRef.current) return;
-    socketRef.current.on('message', handler);
-    return () => socketRef.current.off('message', handler);
+    const sock = socketRef.current;
+    if (!sock) return;
+    sock.on('message', handler);
+    return () => { try { sock.off('message', handler); } catch (e) {} };
   }, []);
 
   useEffect(() => {

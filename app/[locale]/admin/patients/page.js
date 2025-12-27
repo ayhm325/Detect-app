@@ -47,14 +47,14 @@ export default function PatientsPage() {
   const { data: patients = [], error, isLoading, mutate } = useSWR('/api/admin/patients', fetcher);
   const [patientsState, setPatients] = useState([]);
   // عند وصول البيانات من السيرفر، خزّنها في الحالة المحلية (للتعديل/الحذف/الإضافة)
-  const formatDate = (d) => {
+  const formatDate = React.useCallback((d) => {
     if (!d) return "";
     try {
       return new Date(d).toLocaleString(locale === 'en' ? 'en-US' : 'ar-SA', { dateStyle: 'medium', timeStyle: 'short' });
     } catch {
       return String(d);
     }
-  };
+  }, [locale]);
 
   // Age computation is performed during normalization effect to keep render pure.
 
@@ -115,7 +115,7 @@ export default function PatientsPage() {
       });
       setPatients(normalized);
     }
-  }, [patients?.length]);
+  }, [patients]);
 
   // Fetch doctors list for the doctor selector in edit modal
   React.useEffect(() => {

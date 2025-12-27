@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useToast } from "../../../components/ui/Toast";
+import { useTranslations } from "next-intl";
 import { FaBell, FaTrash, FaCheck, FaCheckDouble } from "react-icons/fa";
 import useLocale from "../../../hooks/useLocale";
 

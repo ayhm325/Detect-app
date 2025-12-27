@@ -37,14 +37,20 @@ io.use(async (socket, next) => {
   try {
     // Prefer token passed in handshake auth (client may send dev token)
     let token = socket.handshake.auth && socket.handshake.auth.token;
+    const cookieHeader = socket.handshake.headers?.cookie;
+    if (token) {
+      console.log('socket handshake auth token provided (truncated):', token.length > 20 ? token.slice(0,20) + '...' : token);
+    } else if (cookieHeader) {
+      console.log('socket handshake cookie header present (truncated):', cookieHeader.slice(0,100));
+    }
     if (!token) {
       // fallback: parse cookie header
-      const cookieHeader = socket.handshake.headers?.cookie;
       const cookies = parseCookieString(cookieHeader || '');
       token = cookies.token;
     }
     if (!token) return next(new Error('unauthenticated'));
     const user = jwt.verify(token, SECRET);
+    console.log('socket auth succeeded for user', user && user.id);
     // attach minimal user info
     socket.user = { id: user.id, role: user.role, email: user.email };
     return next();

@@ -18,7 +18,6 @@
     "error_message": "An error occurred. Please try again.",
     "update": "Update",
     "language": "Language",
-    "notifications": "Notifications",
     "enable_notifications": "Enable Notifications",
     "disable_notifications": "Disable Notifications",
     "tabs": {
@@ -36,6 +35,27 @@
       "license": "Medical License Number",
       "bio": "Doctor Bio",
       "save": "Save"
-    }
+    },
+    "availability": {
+      "header": "Working Hours",
+      "workDays": "Work Days",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "slotDuration": "Appointment Duration (minutes)",
+      "maxPatients": "Max Patients Per Day",
+      "saveButton": "Save Hours"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "email": "Email Notifications",
+      "sms": "SMS Notifications",
+      "push": "Push Notifications",
+      "newAppointment": "New Appointments",
+      "appointmentReminder": "Appointment Reminders",
+      "patientMessages": "Patient Messages",
+      "systemUpdates": "System Updates",
+      "saveButton": "Save Preferences"
+    },
+    "security_min_length": "Password must be at least 8 characters"
   }
 }

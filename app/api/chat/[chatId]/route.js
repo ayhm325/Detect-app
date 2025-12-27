@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import prisma from "../../../../../lib/prismaClient.js";
+import prisma from "../../../../lib/prismaClient.js";
 
 const SECRET = process.env.JWT_SECRET || "your-secret-key";
 

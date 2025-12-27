@@ -2,7 +2,7 @@
 
 import DoctorLayout from "../DoctorLayout";
 import { useToast } from "../../../components/ui/Toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FaUser,
   FaClock,
@@ -50,6 +50,18 @@ export default function DoctorSettingsPage() {
       };
 
   const [profile, setProfile] = useState(profileTemplate);
+  const [userEmail, setUserEmail] = useState("");
+
+  // جلب البريد الإلكتروني الحقيقي للمستخدم الحالي عند تحميل الصفحة
+  useEffect(() => {
+    fetch("/api/auth/whoami")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.email) {
+          setUserEmail(data.email);
+        }
+      });
+  }, []);
 
   // Availability Settings (bilingual)
   const availabilityTemplate = locale === "en"
@@ -122,8 +134,32 @@ export default function DoctorSettingsPage() {
       showToast(locale === "en" ? "Password must be at least 8 characters" : "كلمة السر يجب أن تكون 8 أحرف على الأقل", "error");
       return;
     }
-    showToast(t("security.toast.saved"), "success");
-    setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    // إرسال الطلب إلى API لتغيير كلمة المرور
+    fetch("/api/doctor/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: userEmail,
+        currentPassword: security.currentPassword,
+        newPassword: security.newPassword,
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(locale === "en" ? "Password changed successfully" : "تم تغيير كلمة المرور بنجاح", "success");
+          setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
+          // تسجيل خروج المستخدم تلقائياً بعد تغيير كلمة المرور
+          setTimeout(() => {
+            window.location.href = "/logout";
+          }, 1200); // إعطاء المستخدم إشعار النجاح أولاً
+        } else {
+          showToast(data.error || (locale === "en" ? "Failed to change password" : "فشل تغيير كلمة المرور"), "error");
+        }
+      })
+      .catch(() => {
+        showToast(locale === "en" ? "Failed to change password" : "فشل تغيير كلمة المرور", "error");
+      });
   };
 
   const allDays = locale === "en"
@@ -131,10 +167,10 @@ export default function DoctorSettingsPage() {
     : ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
   const tabs = [
-    { id: "profile", label: t("tabs.profile"), icon: FaUser },
-    { id: "availability", label: t("tabs.availability"), icon: FaClock },
-    { id: "notifications", label: t("tabs.notifications"), icon: FaBell },
-    { id: "security", label: t("tabs.security"), icon: FaLock },
+    { id: "profile", label: t("doctorSettings.tabs.profile"), icon: FaUser },
+    { id: "availability", label: t("doctorSettings.tabs.availability"), icon: FaClock },
+    { id: "notifications", label: t("doctorSettings.tabs.notifications"), icon: FaBell },
+    { id: "security", label: t("doctorSettings.tabs.security"), icon: FaLock },
   ];
 
   return (
@@ -153,9 +189,9 @@ export default function DoctorSettingsPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
               <FaUserMd className="text-blue-600" />
-              {t("title")}
+              {t("doctorSettings.title")}
             </h1>
-            <p className="mt-2 text-gray-600 dark:text-gray-300">{t("subtitle")}</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-300">{t("doctorSettings.subtitle")}</p>
           </div>
 
           {/* Tabs Navigation */}
@@ -181,14 +217,14 @@ export default function DoctorSettingsPage() {
             <div className="rounded-xl bg-white p-8 shadow-lg border border-gray-100">
               <div className="mb-6 flex items-center gap-3">
                 <FaUserMd className="text-2xl text-blue-600" />
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('profile.header')}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('doctorSettings.profile.header')}</h2>
               </div>
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     <FaUser className="inline ml-2" />
-                    {t('profile.name')}
+                    {t('doctorSettings.profile.name')}
                   </label>
                   <input
                     type="text"
@@ -201,7 +237,7 @@ export default function DoctorSettingsPage() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     <FaStethoscope className="inline ml-2" />
-                    {t('profile.specialty')}
+                    {t('doctorSettings.profile.specialty')}
                   </label>
                   <input
                     type="text"
@@ -214,7 +250,7 @@ export default function DoctorSettingsPage() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     <FaEnvelope className="inline ml-2" />
-                    {t('profile.email')}
+                    {t('doctorSettings.profile.email')}
                   </label>
                   <input
                     type="email"
@@ -227,7 +263,7 @@ export default function DoctorSettingsPage() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     <FaPhone className="inline ml-2" />
-                    {t('profile.phone')}
+                    {t('doctorSettings.profile.phone')}
                   </label>
                   <input
                     type="tel"
@@ -239,7 +275,7 @@ export default function DoctorSettingsPage() {
 
                 <div className="md:col-span-2">
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {t('profile.license')}
+                    {t('doctorSettings.profile.license')}
                   </label>
                   <input
                     type="text"
@@ -250,7 +286,7 @@ export default function DoctorSettingsPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('profile.bio')}</label>
+                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('doctorSettings.profile.bio')}</label>
                   <textarea
                     rows={4}
                     value={profile.bio}
@@ -265,7 +301,7 @@ export default function DoctorSettingsPage() {
                 className="mt-6 flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 <FaSave />
-                {t('profile.save')}
+                {t('doctorSettings.profile.save')}
               </button>
             </div>
           )}
@@ -275,7 +311,7 @@ export default function DoctorSettingsPage() {
             <div className="rounded-xl bg-white p-8 shadow-lg border border-gray-100">
               <div className="mb-6 flex items-center gap-3">
                 <FaClock className="text-2xl text-blue-600" />
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{labels.availability.header}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('doctorSettings.availability.header', { defaultValue: 'مواعيد العمل' })}</h2>
               </div>
 
               <div className="space-y-6">
@@ -283,7 +319,7 @@ export default function DoctorSettingsPage() {
                 <div>
                   <label className="mb-3 block text-sm font-medium text-gray-700">
                     <FaCalendarAlt className="inline ml-2" />
-                    {ds.availability?.workDays || "Work Days"}
+                    {t('doctorSettings.availability.workDays', { defaultValue: 'Work Days' })}
                   </label>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-7">
                     {allDays.map(
@@ -314,7 +350,7 @@ export default function DoctorSettingsPage() {
                 {/* Working Hours */}
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">{ds.availability?.startTime || "Start Time"}</label>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">{t('doctorSettings.availability.startTime', { defaultValue: 'Start Time' })}</label>
                     <input
                       type="time"
                       value={availability.startTime}
@@ -326,7 +362,7 @@ export default function DoctorSettingsPage() {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">{ds.availability?.endTime || "End Time"}</label>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">{t('doctorSettings.availability.endTime', { defaultValue: 'End Time' })}</label>
                     <input
                       type="time"
                       value={availability.endTime}
@@ -337,7 +373,7 @@ export default function DoctorSettingsPage() {
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
-                      {ds.availability?.slotDuration || "Appointment Duration (minutes)"}
+                      {t('doctorSettings.availability.slotDuration', { defaultValue: 'Appointment Duration (minutes)' })}
                     </label>
                     <select
                       value={availability.slotDuration}
@@ -355,7 +391,7 @@ export default function DoctorSettingsPage() {
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
-                      {ds.availability?.maxPatients || "Max Patients Per Day"}
+                      {t('doctorSettings.availability.maxPatients', { defaultValue: 'Max Patients Per Day' })}
                     </label>
                     <input
                       type="number"
@@ -374,7 +410,7 @@ export default function DoctorSettingsPage() {
                 className="mt-6 flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 <FaSave />
-                {ds.availability?.saveButton || "Save Hours"}
+                {t('doctorSettings.availability.saveButton', { defaultValue: 'Save Hours' })}
               </button>
             </div>
           )}
@@ -384,7 +420,7 @@ export default function DoctorSettingsPage() {
             <div className="rounded-xl bg-white p-8 shadow-lg border border-gray-100">
               <div className="mb-6 flex items-center gap-3">
                 <FaBell className="text-2xl text-blue-600" />
-                <h2 className="text-2xl font-bold text-gray-900">{ds.notifications?.title || "Notification Settings"}</h2>
+                <h2 className="text-2xl font-bold text-gray-900">{t('doctorSettings.notifications.title', { defaultValue: 'Notification Settings' })}</h2>
               </div>
 
               <div className="space-y-6">
@@ -396,7 +432,7 @@ export default function DoctorSettingsPage() {
                       <div className="flex items-center gap-3">
                         <FaEnvelope className="text-xl text-blue-600" />
                         <div>
-                          <p className="font-medium text-gray-900">{ds.notifications?.email || "Email Notifications"}</p>
+                          <p className="font-medium text-gray-900">{t('doctorSettings.notifications.email', { defaultValue: 'Email Notifications' })}</p>
                           <p className="text-sm text-gray-600">
                             {locale === "en" ? "Receive notifications via email" : "استلام الإشعارات عبر بريد إلكتروني"}
                           </p>
@@ -423,7 +459,7 @@ export default function DoctorSettingsPage() {
                       <div className="flex items-center gap-3">
                         <FaSms className="text-xl text-green-600" />
                         <div>
-                          <p className="font-medium text-gray-900">{ds.notifications?.sms || "SMS Notifications"}</p>
+                          <p className="font-medium text-gray-900">{t('doctorSettings.notifications.sms', { defaultValue: 'SMS Notifications' })}</p>
                           <p className="text-sm text-gray-600">{locale === "en" ? "Receive notifications via SMS" : "استلام الإشعارات عبر SMS"}</p>
                         </div>
                       </div>
@@ -448,7 +484,7 @@ export default function DoctorSettingsPage() {
                       <div className="flex items-center gap-3">
                         <FaBell className="text-xl text-purple-600" />
                         <div>
-                          <p className="font-medium text-gray-900">{ds.notifications?.push || "Push Notifications"}</p>
+                          <p className="font-medium text-gray-900">{t('doctorSettings.notifications.push', { defaultValue: 'Push Notifications' })}</p>
                           <p className="text-sm text-gray-600">{locale === "en" ? "Receive notifications in app" : "استلام الإشعارات داخل التطبيق"}</p>
                         </div>
                       </div>
@@ -478,22 +514,22 @@ export default function DoctorSettingsPage() {
                     {[
                       {
                         key: "newAppointment",
-                        label: ds.notifications?.newAppointment || "New Appointments",
+                        label: t('doctorSettings.notifications.newAppointment', { defaultValue: 'New Appointments' }),
                         desc: locale === "en" ? "When a new appointment is booked" : "عند حجز موعد جديد",
                       },
                       {
                         key: "appointmentReminder",
-                        label: ds.notifications?.appointmentReminder || "Appointment Reminders",
+                        label: t('doctorSettings.notifications.appointmentReminder', { defaultValue: 'Appointment Reminders' }),
                         desc: locale === "en" ? "One hour before appointment" : "قبل الموعد بساعة",
                       },
                       {
                         key: "patientMessages",
-                        label: ds.notifications?.patientMessages || "Patient Messages",
+                        label: t('doctorSettings.notifications.patientMessages', { defaultValue: 'Patient Messages' }),
                         desc: locale === "en" ? "When receiving a new message" : "عند استلام رسالة جديدة",
                       },
                       {
                         key: "systemUpdates",
-                        label: ds.notifications?.systemUpdates || "System Updates",
+                        label: t('doctorSettings.notifications.systemUpdates', { defaultValue: 'System Updates' }),
                         desc: locale === "en" ? "About system updates" : "إشعارات حول التحديثات",
                       },
                     ].map((item) => (
@@ -531,7 +567,7 @@ export default function DoctorSettingsPage() {
                 className="mt-6 flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 <FaSave />
-                {ds.notifications?.saveButton || "Save Preferences"}
+                {t('doctorSettings.notifications.saveButton', { defaultValue: 'حفظ التفضيلات' })}
               </button>
             </div>
           )}
@@ -541,13 +577,13 @@ export default function DoctorSettingsPage() {
             <div className="rounded-xl bg-white p-8 shadow-lg border border-gray-100">
               <div className="mb-6 flex items-center gap-3">
                 <FaLock className="text-2xl text-blue-600" />
-                <h2 className="text-2xl font-bold text-gray-900">{ds.security?.title || "Change Password"}</h2>
+                <h2 className="text-2xl font-bold text-gray-900">{t('doctorSettings.change_password', { defaultValue: 'Change Password' })}</h2>
               </div>
 
               <div className="space-y-6">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700">
-                    {ds.security?.current || "Current Password"}
+                    {t('doctorSettings.current_password', { defaultValue: 'Current Password' })}
                   </label>
                   <div className="relative">
                     <input
@@ -572,7 +608,7 @@ export default function DoctorSettingsPage() {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700">
-                    {ds.security?.new || "New Password"}
+                    {t('doctorSettings.new_password', { defaultValue: 'New Password' })}
                   </label>
                   <div className="relative">
                     <input
@@ -589,12 +625,13 @@ export default function DoctorSettingsPage() {
                       {showPassword.new ? <FaEyeSlash /> : <FaEye />}
                     </button>
                   </div>
-                  <p className="mt-1 text-sm text-gray-600">{ds.security?.minLength || "Password must be at least 8 characters"}</p>
+                   <p className="mt-1 text-sm text-gray-600">{t('doctorSettings.security_min_length', { defaultValue: 'Password must be at least 8 characters' })}</p>
+                                   <p className="mt-1 text-sm text-gray-600">{t('doctorSettings.security_min_length', { defaultValue: 'Password must be at least 8 characters' })}</p>
                 </div>
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700">
-                    {ds.security?.confirm || "Confirm Password"}
+                    {t('doctorSettings.confirm_password', { defaultValue: 'Confirm Password' })}
                   </label>
                   <div className="relative">
                     <input
@@ -623,7 +660,7 @@ export default function DoctorSettingsPage() {
                 className="mt-6 flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 <FaLock />
-                {ds.security?.changeButton || "Change Password"}
+                {t('doctorSettings.change_password', { defaultValue: 'Change Password' })}
               </button>
             </div>
           )}

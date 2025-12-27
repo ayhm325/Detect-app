@@ -55,6 +55,9 @@
     "findings": "Findings",
     "emptyState": "No results for this scan."
   },
+  "emptyState": "No results found.",
+  "loading": "Loading results...",
+  "error": "Error loading results:",
   "statusLabel": "Status",
   "toast": {
     "viewingScan": "Viewing scan...",

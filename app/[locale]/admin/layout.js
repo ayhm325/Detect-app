@@ -1,11 +1,10 @@
 import AuthGuard from "../../components/AuthGuard";
+import AdminLayout from "./AdminLayout";
 
-export default function AdminLayout({ children }) {
+export default function AdminLayoutWrapper({ children }) {
   return (
     <AuthGuard>
-      <section className="min-h-screen bg-gray-50 dark:bg-zinc-950">
-        {children}
-      </section>
+      <AdminLayout>{children}</AdminLayout>
     </AuthGuard>
   );
 }

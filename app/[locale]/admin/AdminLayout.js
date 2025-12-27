@@ -12,7 +12,7 @@ export default function AdminLayout({ children, breadcrumbs, adminName = "الم
     ? { marginRight: `${sidebarWidth}px` }
     : { marginLeft: `${sidebarWidth}px` };
   return (
-    <div className={`min-h-screen bg-gray-50 dark:bg-slate-950`} dir={locale === "ar" ? "rtl" : "ltr"}>
+    <div data-testid="admin-shell" className={`min-h-screen bg-gray-50 dark:bg-slate-950`} dir={locale === "ar" ? "rtl" : "ltr"}>
       <div style={{ position: "fixed", top: 0, [locale === "ar" ? "right" : "left"]: 0, height: "100vh", width: `${sidebarWidth}px`, zIndex: 50 }}>
         <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       </div>

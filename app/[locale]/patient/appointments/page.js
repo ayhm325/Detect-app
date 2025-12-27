@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../components/ui/Toast";
 import {
@@ -33,34 +33,70 @@ export default function PatientAppointmentsPage() {
   const [showBookModal, setShowBookModal] = useState(false);
 
   /* ===================== DATA ===================== */
-  const appointments = useMemo(
-    () => [
-      {
-        id: 1,
-        doctorName: "Dr. Smith",
-        specialty: "Cardiology",
-        date: "2025-12-19",
-        time: "10:00",
-        type: "clinic",
-        status: "confirmed",
-        location: "Clinic A",
-        phone: "123-456-7890",
-        reason: "Routine checkup"
-      },
-      {
-        id: 2,
-        doctorName: "Dr. John Doe",
-        specialty: "Dermatology",
-        date: "2025-12-20",
-        time: "14:00",
-        type: "online",
-        status: "pending",
-        phone: "987-654-3210",
-        reason: "Skin rash"
+  const [appointments, setAppointments] = useState([]);
+
+  // booking form state
+  const [bookDoctorId, setBookDoctorId] = useState("");
+  const [bookDate, setBookDate] = useState("");
+  const [bookTime, setBookTime] = useState("");
+  const [bookType, setBookType] = useState("clinic");
+  const [bookReason, setBookReason] = useState("");
+  const [bookPhone, setBookPhone] = useState("");
+
+  async function loadAppointments() {
+    try {
+      const res = await fetch("/api/patient/appointments", { cache: "no-store", credentials: "same-origin" });
+      if (!res.ok) {
+        setAppointments([]);
+        return;
       }
-    ],
-    []
-  );
+      const json = await res.json();
+      const list = Array.isArray(json) ? json : json.appointments || [];
+      setAppointments(list);
+    } catch (e) {
+      setAppointments([]);
+    }
+  }
+
+  useEffect(() => {
+    let mounted = true;
+    // schedule load in microtask to avoid synchronous setState inside effect
+    Promise.resolve().then(async () => {
+      if (!mounted) return;
+      await loadAppointments();
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  async function createAppointment(e) {
+    e.preventDefault();
+    if (!bookDoctorId || !bookDate || !bookTime) {
+      showToast(t("appointments.toast.fillRequired"), "error");
+      return;
+    }
+    const scheduledAt = new Date(`${bookDate}T${bookTime}`);
+    try {
+      const res = await fetch("/api/patient/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ doctorId: bookDoctorId, scheduledAt: scheduledAt.toISOString(), type: bookType, reason: bookReason, phone: bookPhone })
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        showToast(err || t("appointments.toast.error"), "error");
+        return;
+      }
+      showToast(t("appointments.toast.created"), "success");
+      setShowBookModal(false);
+      setBookDoctorId(""); setBookDate(""); setBookTime(""); setBookType("clinic"); setBookReason(""); setBookPhone("");
+      await loadAppointments();
+    } catch (err) {
+      showToast(t("appointments.toast.error"), "error");
+    }
+  }
 
   /* ===================== FILTERING ===================== */
   const filteredAppointments = appointments.filter((a) => {
@@ -201,6 +237,45 @@ export default function PatientAppointmentsPage() {
           </div>
         )}
       </div>
+      
+      {showBookModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <form onSubmit={createAppointment} className="bg-white dark:bg-slate-800 p-6 rounded-lg w-full max-w-md">
+            <h3 className="text-lg font-bold mb-4">{t("appointments.new")}</h3>
+
+            <label className="block mb-2 text-sm">{t("appointments.form.doctorId")}</label>
+            <input value={bookDoctorId} onChange={(e) => setBookDoctorId(e.target.value)} className="w-full p-2 border rounded mb-3" />
+
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="block mb-2 text-sm">{t("appointments.form.date")}</label>
+                <input type="date" value={bookDate} onChange={(e) => setBookDate(e.target.value)} className="w-full p-2 border rounded" />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm">{t("appointments.form.time")}</label>
+                <input type="time" value={bookTime} onChange={(e) => setBookTime(e.target.value)} className="w-full p-2 border rounded" />
+              </div>
+            </div>
+
+            <label className="block mb-2 text-sm">{t("appointments.form.type")}</label>
+            <select value={bookType} onChange={(e) => setBookType(e.target.value)} className="w-full p-2 border rounded mb-3">
+              <option value="clinic">{t("appointments.type.clinic")}</option>
+              <option value="online">{t("appointments.type.online")}</option>
+            </select>
+
+            <label className="block mb-2 text-sm">{t("appointments.form.reason")}</label>
+            <input value={bookReason} onChange={(e) => setBookReason(e.target.value)} className="w-full p-2 border rounded mb-3" />
+
+            <label className="block mb-2 text-sm">{t("appointments.form.phone")}</label>
+            <input value={bookPhone} onChange={(e) => setBookPhone(e.target.value)} className="w-full p-2 border rounded mb-3" />
+
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => setShowBookModal(false)} className="px-4 py-2 rounded border">{t("appointments.form.cancel")}</button>
+              <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white">{t("appointments.form.submit")}</button>
+            </div>
+          </form>
+        </div>
+      )}
     </>
   );
 }

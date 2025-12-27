@@ -1,30 +1,35 @@
-// إضافة طبيب جديد
-export async function POST(request) {
+import { withRBAC } from "../../../../lib/auth/withRBAC";
+import { rateLimit } from "../../../../lib/security/rateLimiter";
+import { logAudit } from "../../../../lib/security/auditLogger";
+// ...existing code...
+
+export const POST = withRBAC(async (request, user) => {
+  const rl = rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "POST /api/admin/doctors" } });
+    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
   try {
     const { name, email, phone, licenseNumber, status } = await request.json();
     if (!name || !email || !phone || !licenseNumber || !status) {
       return Response.json({ error: "يرجى تعبئة جميع الحقول" }, { status: 400 });
     }
-    // تحقق من عدم وجود بريد إلكتروني مكرر
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return Response.json({ error: "البريد الإلكتروني مستخدم بالفعل" }, { status: 400 });
     }
-    // أنشئ المستخدم أولاً (بدون رقم الجوال)
-    const user = await prisma.user.create({
+    const userCreated = await prisma.user.create({
       data: {
         fullName: name,
         email,
         role: "doctor",
-        // كلمة المرور الافتراضية: doctor123 (يجب تغييرها لاحقًا)
         password: "$2a$10$wQ8QnQwQ8QnQwQ8QnQwQ8uQ8QnQwQ8QnQwQ8QnQwQ8QnQwQ8QnQW", // bcrypt hash for 'doctor123'
         isActive: status === "active"
       }
     });
-    // أنشئ الطبيب مع رقم الجوال وحقل الحالة
     const doctor = await prisma.doctor.create({
       data: {
-        userId: user.id,
+        userId: userCreated.id,
         phone,
         licenseNumber,
         status: status === "active" ? "active" : status === "banned" ? "banned" : "suspended"
@@ -41,30 +46,34 @@ export async function POST(request) {
         }
       }
     });
+    logAudit({ event: "admin_doctor_created", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { doctorId: doctor.userId } });
     return Response.json({ doctor });
   } catch (error) {
+    logAudit({ event: "admin_doctor_create_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error.message } });
     return Response.json({ error: "حدث خطأ أثناء إضافة الطبيب" }, { status: 500 });
   }
-}
+}, ["admin"]);
 import prisma from "../../../../lib/prismaClient";
 
-// جلب جميع الأطباء مع حالة التفعيل
-export async function GET() {
+
+export const GET = withRBAC(async (request, user) => {
+  const rl = rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/admin/doctors" } });
+    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
   try {
-    // جلب جميع الأطباء مع بيانات المستخدم
     const doctors = await prisma.doctor.findMany({
       include: {
         user: true
       }
     });
-    // إرجاع جميع بيانات الطبيب والمستخدم المرتبط
     const doctorsWithUser = doctors.map(d => ({
       id: d.userId,
       licenseNumber: d.licenseNumber,
       phone: d.phone,
       status: d.status,
       createdAt: d.createdAt,
-      // بيانات المستخدم المرتبط
       user: d.user ? {
         id: d.user.id,
         fullName: d.user.fullName,
@@ -74,14 +83,21 @@ export async function GET() {
         isDeleted: d.user.isDeleted
       } : null
     }));
+    logAudit({ event: "admin_doctors_listed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { count: doctorsWithUser.length } });
     return Response.json({ doctors: doctorsWithUser });
   } catch (error) {
+    logAudit({ event: "admin_doctors_list_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error.message } });
     return Response.json({ error: "حدث خطأ أثناء جلب الأطباء" }, { status: 500 });
   }
-}
+}, ["admin"]);
 
-// تحديث حالة التفعيل (موافقة أو رفض)
-export async function PATCH(request) {
+
+export const PATCH = withRBAC(async (request, user) => {
+  const rl = rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "PATCH /api/admin/doctors" } });
+    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
   try {
     const body = await request.json();
     const id = body.id;
@@ -89,36 +105,35 @@ export async function PATCH(request) {
       return Response.json({ error: "بيانات غير صالحة" }, { status: 400 });
     }
     let status = body.status;
-    // تحديث حالة الطبيب فقط
     const updated = await prisma.doctor.update({
       where: { userId: id },
       data: {
         status
       }
     });
-    // تحديث حالة المستخدم المرتبط
     await prisma.user.update({
       where: { id },
       data: { isActive: status === "active" }
     });
-    // جلب بيانات المستخدم لكتابة النشاط
-    const user = await prisma.user.findUnique({ where: { id } });
+    const affectedUser = await prisma.user.findUnique({ where: { id } });
     try {
       await prisma.activity.create({
         data: {
           type: status === "active" ? "approve_doctor" : "reject_or_delete_doctor",
           description: status === "active"
-            ? `تمت الموافقة على طبيب: ${user.fullName} (${user.email})`
-            : `تم رفض أو حذف طبيب: ${user.fullName} (${user.email})`,
-          userId: user.id,
+            ? `تمت الموافقة على طبيب: ${affectedUser.fullName} (${affectedUser.email})`
+            : `تم رفض أو حذف طبيب: ${affectedUser.fullName} (${affectedUser.email})`,
+          userId: affectedUser.id,
           meta: { status }
         }
       });
     } catch (e) {
-      console.error("خطأ في تسجيل نشاط الموافقة/الرفض:", e);
+      logAudit({ event: "admin_doctor_activity_log_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: e.message } });
     }
+    logAudit({ event: "admin_doctor_status_updated", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { doctorId: id, status } });
     return Response.json({ success: true });
   } catch (error) {
+    logAudit({ event: "admin_doctor_status_update_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error.message } });
     return Response.json({ error: "حدث خطأ أثناء التحديث" }, { status: 500 });
   }
-}
+}, ["admin"]);

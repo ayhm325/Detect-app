@@ -19,6 +19,7 @@
   "online": "متصل",
   "offline": "غير متصل",
   "searchPlaceholder": "ابحث باسم المريض...",
+  "deletedToast": "تم حذف المحادثة بنجاح",
   "items": [
     {
       "patientName": "المريض 1",
