@@ -1,5 +1,6 @@
 
 
+import React from 'react';
 import { Inter, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "./components/ui/ToastProvider";

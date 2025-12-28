@@ -55,6 +55,12 @@ export async function addRevokedToken(token, exp=null) {
 }
 ```
 
+Redis integration
+-----------------
+- The server helper auto-detects `REDIS_URL`. If set, it uses `lib/auth/revocation.redis.js`.
+- To enable Redis in your environment, set `REDIS_URL` (e.g., `redis://localhost:6379`) and restart the server.
+
+
 Tests
 -----
 - Unit tests already cover `isTokenRevoked` and `addRevokedToken` behavior.
@@ -70,3 +76,45 @@ If you want, I can:
 - add a short migration-check script to proactively convert the JSON file,
 - implement the Redis-backed helper now (drop-in replacement), or
 - add CI checks that validate the data format on PRs.
+ 
+Migration script
+----------------
+A one-off migration script was added at `scripts/migrate-revoked-to-redis.mjs`.
+
+Usage:
+```bash
+REDIS_URL=redis://localhost:6379 node scripts/migrate-revoked-to-redis.mjs
+```
+
+Safety flags
+------------
+- Preview only (no writes):
+
+```bash
+node scripts/migrate-revoked-to-redis.mjs --dry-run
+```
+
+- To perform the actual migration you must pass `--confirm` (or `-y`) to avoid accidental writes:
+
+```bash
+REDIS_URL=redis://localhost:6379 node scripts/migrate-revoked-to-redis.mjs --confirm
+```
+
+You can bypass the confirm check in scripted environments by setting `DISABLE_CONFIRM_CHECK=1` in the environment, but this is discouraged for production.
+
+The script:
+- reads `data/revokedTokens.json` (or `REVOKED_TOKENS_PATH` if set),
+- copies each entry's `hash` (or legacy `token` → hash) into Redis as `revoked:<hash>`,
+- applies TTL if `exp` is present,
+- backs up the JSON file with a timestamped `.bak` suffix when entries were migrated.
+
+Dry-run:
+-------
+You can preview what will be written without modifying Redis using `--dry-run` (or `-n`):
+
+```bash
+node scripts/migrate-revoked-to-redis.mjs --dry-run
+```
+
+The dry-run prints the `revoked:<hash>` keys and TTLs that would be written.
+
