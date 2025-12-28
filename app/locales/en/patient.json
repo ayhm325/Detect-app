@@ -46,6 +46,42 @@
       "activity": "Recent activity"
     }
   },
+  "profile": {
+    "tab": {
+      "personalInfo": "Personal",
+      "health": "Health",
+      "notifications": "Notifications",
+      "security": "Security"
+    },
+    "section": {
+      "personalInfo": "Personal Information",
+      "bodyMeasurements": "Body Measurements",
+      "emergencyContact": "Emergency Contact",
+      "healthInfo": "Health Information"
+    },
+    "field": {
+      "fullName": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "birthDate": "Birth date",
+      "nationalId": "National ID",
+      "address": "Address",
+      "bloodType": "Blood type",
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "bmi": "BMI",
+      "bmiNotAvailable": "Not available",
+      "emergencyName": "Contact name",
+      "emergencyPhone": "Contact phone",
+      "emergencyRelation": "Relation",
+      "patientNumber": "Patient No.",
+      "activeAccount": "Active Account",
+      "memberSince": "Member since"
+    },
+    "toast": {
+      "saveError": "Failed to save profile"
+    }
+  },
   "appointments": {
     "title": "Appointments",
     "subtitle": "Manage and track your appointments",
@@ -98,7 +134,20 @@
     "toast": {
       "confirm": "Appointment confirmed",
       "cancel": "Appointment cancelled",
-      "reschedule": "Reschedule request sent"
+      "reschedule": "Reschedule request sent",
+      "created": "Appointment created",
+      "error": "Failed to create appointment",
+      "fillRequired": "Please fill required fields"
+    },
+    "form": {
+      "doctorId": "Doctor ID",
+      "date": "Date",
+      "time": "Time",
+      "type": "Type",
+      "reason": "Reason",
+      "phone": "Phone",
+      "cancel": "Cancel",
+      "submit": "Book"
     },
     "modalTitle": "Need a new appointment?",
     "modalBody": "Chat with a doctor or request another time slot.",

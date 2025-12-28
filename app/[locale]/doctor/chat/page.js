@@ -43,20 +43,39 @@ export default function Page() {
   const [messageInput, setMessageInput] = useState("");
 
   const [conversations, setConversations] = useState([]);
+  const [allPatients, setAllPatients] = useState([]);
   const [messagesMap, setMessagesMap] = useState({}); // chatId -> messages[]
   const [loadingChats, setLoadingChats] = useState(true);
   const socket = useSocket();
   const typingTimeoutRef = useRef(null);
   const [socketMismatch, setSocketMismatch] = useState(false);
+  const [jwtToken, setJwtToken] = useState(null);
+
+  // Fetch JWT token on mount
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/token', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          if (mounted && data && data.token) setJwtToken(data.token);
+        }
+      } catch (e) {
+        // ignore
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
-    async function loadChats() {
+    async function loadChatsAndPatients() {
       try {
+        // جلب المحادثات النشطة
         const res = await fetch("/api/chat/doctor", { credentials: "include" });
         if (res.status === 403) {
           showToast("ليس لديك إذن لعرض هذه الصفحة — جاري إعادة التوجيه.", "error");
-          // redirect patients to their chat page
           router.push(`/${locale}/patient/chat`);
           return;
         }
@@ -67,6 +86,7 @@ export default function Page() {
         }
         const convs = (data.chats || []).map((c) => ({
           id: c.id,
+          patientId: c.patient?.id,
           patientName: c.patient?.fullName || "مريض",
           lastMessage: c.messages?.[0]?.text || "",
           lastMessageTime: c.messages?.[0]?.createdAt ? new Date(c.messages[0].createdAt).toLocaleTimeString() : "",
@@ -76,17 +96,23 @@ export default function Page() {
         }));
         if (!mounted) return;
         setConversations(convs);
-        if (convs.length && !selectedChat) setSelectedChat(convs[0].id);
-        } catch (e) {
+        // avoid reading `selectedChat` here to prevent unnecessary deps
+        setSelectedChat((prev) => prev ?? (convs.length ? convs[0].id : null));
+
+        // جلب جميع المرضى للطبيب
+        const res2 = await fetch("/api/doctor/patients", { credentials: "include" });
+        const patients = res2.ok ? await res2.json() : [];
+        setAllPatients(patients);
+      } catch (e) {
         console.error(e);
-        showToast("خطأ في جلب المحادثات", "error");
+        showToast("خطأ في جلب البيانات", "error");
       } finally {
         if (mounted) setLoadingChats(false);
       }
     }
-    loadChats();
+    loadChatsAndPatients();
     return () => (mounted = false);
-  }, [t]);
+  }, [t, router, locale, showToast]);
 
     // replace polling with Socket.io real-time updates when available
     useEffect(() => {
@@ -104,7 +130,12 @@ export default function Page() {
             return;
           }
           if (!mounted) return;
-          const mapped = (data.messages || []).map((msg) => ({ ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : "" }));
+          const genKey = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `k-${Math.random().toString(36).slice(2,9)}-${Date.now()}`);
+          const mapped = (data.messages || []).map((msg) => {
+            const hasServerId = msg.id && !String(msg.id).startsWith('tmp-');
+            const clientKey = hasServerId ? msg.id : (msg.clientKey || genKey());
+            return { ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : "", clientKey };
+          });
           setMessagesMap((prev) => ({ ...prev, [selectedChat]: mapped }));
         } catch (e) {
           console.error(e);
@@ -113,7 +144,7 @@ export default function Page() {
 
         // connect socket and join room (validate socket identity matches HTTP identity)
         try {
-          const s = socket.connect();
+          const s = socket.connect(jwtToken ? { token: jwtToken } : {});
           if (s) {
             // ask socket who it is (server debug helper)
             const whoamiPromise = new Promise((resolve) => {
@@ -151,12 +182,19 @@ export default function Page() {
           // message handler
           const offMsg = socket.onMessage((msg) => {
             if (!msg) return;
+            const genKey2 = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `k-${Math.random().toString(36).slice(2,9)}-${Date.now()}`);
+            const hasServerId = msg.id && !String(msg.id).startsWith('tmp-');
+            const normalized = { ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : msg.time || '', clientKey: hasServerId ? msg.id : (msg.clientKey || genKey2()) };
             setMessagesMap((prev) => {
               const prevList = prev[selectedChat] || [];
-              // avoid duplicates
-              const ids = new Set(prevList.map((m) => m.id));
-              if (ids.has(msg.id)) return prev;
-              const next = [...prevList, { ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : msg.time || '' }];
+              // تحقق من وجود الرسالة عبر id أو clientKey أو النص والوقت
+              const exists = prevList.some((m) =>
+                (normalized.id && m.id === normalized.id) ||
+                (normalized.clientKey && m.clientKey === normalized.clientKey) ||
+                (m.text === normalized.text && m.time === normalized.time && m.sender === normalized.sender)
+              );
+              if (exists) return prev;
+              const next = [...prevList, normalized];
               return { ...prev, [selectedChat]: next };
             });
           });
@@ -185,7 +223,7 @@ export default function Page() {
         // leave socket room
         try { socket.leave(selectedChat); } catch (e) {}
       };
-    }, [selectedChat]);
+    }, [selectedChat, jwtToken, showToast, socket]);
 
   const currentChat = conversations.find((c) => c.id === selectedChat);
   const currentMessages = messagesMap[selectedChat] || [];
@@ -204,10 +242,18 @@ export default function Page() {
     }
   }, [currentMessages.length, selectedChat]);
 
-  const filteredConversations = conversations.filter((conv) =>
-    conv.patientName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // بناء قائمة شاملة: كل المرضى مع ربط المحادثة إن وجدت
+  const filteredPatients = allPatients
+    .filter((p) => p.fullName.toLowerCase().includes(searchQuery.toLowerCase()));
+  const patientIdToConversation = Object.fromEntries(conversations.map(c => [c.patientId, c]));
 
+  // دالة مساعدة لتحديد إذا كان النص رابط صورة
+  const isImageUrl = (text) => {
+    return typeof text === 'string' && text.match(/^\/uploads\/.*\.(jpg|jpeg|png|gif|webp)$/i);
+  };
+
+  // ...existing code...
+  // دالة إرسال الرسالة (يجب أن تكون معرفة قبل استخدامها في JSX)
   const handleSendMessage = () => {
     if (!messageInput.trim()) {
       showToast("الرسالة فارغة", "error");
@@ -215,7 +261,7 @@ export default function Page() {
     }
     // optimistic UI + send via socket if available
     const tempId = `tmp-${Date.now()}`;
-    const tempMsg = { id: tempId, chatId: selectedChat, sender: "doctor", text: messageInput, status: "sent", time: new Date().toLocaleTimeString() };
+    const tempMsg = { id: tempId, chatId: selectedChat, sender: "doctor", text: messageInput, status: "sent", time: new Date().toLocaleTimeString(), clientKey: tempId };
     setMessagesMap((m) => ({ ...m, [selectedChat]: [...(m[selectedChat] || []), tempMsg] }));
     setConversations((cs) => cs.map((c) => (c.id === selectedChat ? { ...c, lastMessage: messageInput } : c)));
     const textToSend = messageInput;
@@ -268,8 +314,72 @@ export default function Page() {
     }
   };
 
+  // ...existing code...
+
+  // JSX لعرض الرسائل مع دعم الصور والروابط:
+  // ضع هذا الكود في مكان عرض الرسائل:
+  //
+  <div ref={messagesContainerRef} className="messages-list">
+    {currentMessages.map((msg) => (
+      <div key={msg.clientKey || msg.id} className="message">
+        {isImageUrl(msg.text) ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img src={msg.text} alt="صورة مرفقة" style={{maxWidth: '200px', maxHeight: '200px', borderRadius: '8px'}} />
+        ) : msg.text.match(/^https?:\/\//) ? (
+          <a href={msg.text} target="_blank" rel="noopener noreferrer">{msg.text}</a>
+        ) : (
+          msg.text
+        )}
+      </div>
+    ))}
+  </div>
+
   const handleAttachment = () => {
-    showToast("سأضيف الدعم قريبًا", "info");
+    // فتح نافذة اختيار ملف
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      // رفع الملف إلى الخادم
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch(`/api/chat/${selectedChat}/upload`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+        const data = await res.json();
+        if (!res.ok || !data.url) {
+          showToast(data.error || 'فشل رفع الملف', 'error');
+          return;
+        }
+        // إرسال رابط الملف كرسالة
+        if (socket && socket.connected) {
+          socket.sendMessage({ chatId: selectedChat, text: data.url }, (res) => {
+            if (res && res.ok) {
+              showToast('تم إرسال الملف بنجاح', 'success');
+            } else {
+              showToast('فشل إرسال الملف', 'error');
+            }
+          });
+        } else {
+          // fallback: إرسال عبر HTTP
+          await fetch(`/api/chat/${selectedChat}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ text: data.url }),
+          });
+          showToast('تم إرسال الملف بنجاح', 'success');
+        }
+      } catch (e) {
+        showToast('خطأ في رفع الملف', 'error');
+      }
+    };
+    input.click();
   };
 
   const handleVoiceCall = () => {
@@ -299,7 +409,7 @@ export default function Page() {
         const remaining = conversations.filter((c) => c.id !== prev);
         return remaining.length ? remaining[0].id : null;
       });
-      showToast(t("deletedToast") || "تم حذف المحادثة", "success");
+      showToast(safeT("deletedToast", "تم حذف المحادثة"), "success");
     } catch (e) {
       console.error(e);
       showToast("خطأ في الاتصال", "error");
@@ -390,47 +500,80 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* Conversations List */}
+              {/* قائمة جميع المرضى مع المحادثات */}
               <div className="flex-1 overflow-y-auto">
-                {filteredConversations.map((conv) => (
-                  <div
-                    key={conv.id}
-                    onClick={() => setSelectedChat(conv.id)}
-                    className={`cursor-pointer border-b border-gray-100 p-4 transition-all hover:bg-gray-50 ${
-                      selectedChat === conv.id ? "bg-blue-50 border-l-4 border-l-blue-600" : ""
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      {/* Avatar */}
-                      <div className="relative">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-2xl">
-                          {conv.avatar}
+                {filteredPatients.map((patient) => {
+                  const conv = patientIdToConversation[patient.id];
+                  return (
+                    <div
+                      key={patient.id}
+                      onClick={() => conv ? setSelectedChat(conv.id) : null}
+                      className={`cursor-pointer border-b border-gray-100 p-4 transition-all hover:bg-gray-50 ${
+                        conv && selectedChat === conv.id ? "bg-blue-50 border-l-4 border-l-blue-600" : ""
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {/* Avatar */}
+                        <div className="relative">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-2xl">
+                            {conv?.avatar || "👤"}
+                          </div>
                         </div>
-                        {conv.online && (
-                          <FaCircle className="absolute bottom-0 left-0 text-xs text-green-500 bg-white rounded-full" />
-                        )}
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-gray-900 truncate">
-                            {conv.patientName}
-                          </h3>
-                          <span className="text-xs text-gray-500">{conv.lastMessageTime}</span>
-                        </div>
-                        <div className="flex items-center justify-between mt-1">
-                          <p className="text-sm text-gray-600 truncate">{conv.lastMessage}</p>
-                          {conv.unreadCount > 0 && (
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-                              {conv.unreadCount}
-                            </span>
-                          )}
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-gray-900 truncate">{patient.fullName}</h3>
+                            <span className="text-xs text-gray-500">{conv?.lastMessageTime || ""}</span>
+                          </div>
+                          <div className="flex items-center justify-between mt-1">
+                            <p className="text-sm text-gray-600 truncate">{conv?.lastMessage || ""}</p>
+                            {conv ? (
+                              conv.unreadCount > 0 && (
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                                  {conv.unreadCount}
+                                </span>
+                              )
+                            ) : (
+                              <button
+                                className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 border border-blue-200 hover:bg-blue-200"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  // إنشاء محادثة جديدة للطبيب والمريض
+                                  try {
+                                    const res = await fetch(`/api/chat/doctor`, {
+                                      method: "POST",
+                                      headers: { "Content-Type": "application/json" },
+                                      credentials: "include",
+                                      body: JSON.stringify({ patientId: patient.id })
+                                    });
+                                    const data = await res.json();
+                                    if (res.ok && data.chat) {
+                                      setConversations((prev) => [...prev, {
+                                        id: data.chat.id,
+                                        patientId: patient.id,
+                                        patientName: patient.fullName,
+                                        lastMessage: "",
+                                        lastMessageTime: "",
+                                        unreadCount: 0,
+                                        online: false,
+                                        avatar: "👨"
+                                      }]);
+                                      setSelectedChat(data.chat.id);
+                                    } else {
+                                      showToast(data.error || "تعذر بدء المحادثة", "error");
+                                    }
+                                  } catch (err) {
+                                    showToast("تعذر بدء المحادثة", "error");
+                                  }
+                                }}
+                              >بدء محادثة جديدة</button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -491,9 +634,9 @@ export default function Page() {
                   {/* Messages Area */}
                   <div ref={messagesContainerRef} className="flex-1 overflow-y-auto bg-gray-50 p-6">
                     <div className="space-y-4">
-                      {currentMessages.map((msg) => (
+                      {currentMessages.map((msg, idx) => (
                         <div
-                          key={msg.id}
+                          key={`${msg.renderId || msg.id || 'msg'}-${idx}`}
                           className={`flex ${msg.sender === "doctor" ? "justify-start" : "justify-end"}`}
                         >
                           <div

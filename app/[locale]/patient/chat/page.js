@@ -59,7 +59,7 @@ export default function PatientChatPage() {
     }
     loadChats();
     return () => (mounted = false);
-  }, [locale]);
+  }, [locale, router, showToast]);
 
   useEffect(() => {
     if (!selectedChat) return;
@@ -76,7 +76,12 @@ export default function PatientChatPage() {
           return;
         }
         if (!mounted) return;
-        const mapped = (data.messages || []).map((msg) => ({ ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : "" }));
+        const genKey = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `k-${Math.random().toString(36).slice(2,9)}-${Date.now()}`);
+        const mapped = (data.messages || []).map((msg) => {
+              const hasServerId = msg.id && !String(msg.id).startsWith('tmp-');
+              const clientKey = hasServerId ? msg.id : (msg.clientKey || genKey());
+              return { ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : "", clientKey };
+            });
         setMessagesMap((prev) => ({ ...prev, [selectedChat]: mapped }));
       } catch (e) {
         console.error(e);
@@ -117,11 +122,14 @@ export default function PatientChatPage() {
 
         const offMsg = socket.onMessage((msg) => {
           if (!msg) return;
+          const genKey2 = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `k-${Math.random().toString(36).slice(2,9)}-${Date.now()}`);
+          const hasServerId = msg.id && !String(msg.id).startsWith('tmp-');
+          const normalized = { ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : msg.time || '', clientKey: hasServerId ? msg.id : (msg.clientKey || genKey2()) };
           setMessagesMap((prev) => {
             const prevList = prev[selectedChat] || [];
             const ids = new Set(prevList.map((m) => m.id));
-            if (ids.has(msg.id)) return prev;
-            const next = [...prevList, { ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : msg.time || '' }];
+            if (ids.has(normalized.id)) return prev;
+            const next = [...prevList, normalized];
             return { ...prev, [selectedChat]: next };
           });
         });
@@ -146,7 +154,7 @@ export default function PatientChatPage() {
       cleanupFns.forEach((fn) => fn && fn());
       try { socket.leave(selectedChat); } catch (e) {}
     };
-  }, [selectedChat]);
+  }, [selectedChat, locale, showToast, socket]);
 
   // If you want to use translations, keep only one declaration for labels
   const t = useTranslations("patientChat");
@@ -214,7 +222,7 @@ export default function PatientChatPage() {
     if (!messageInput.trim()) return;
     // optimistic UI
     const tempId = `tmp-${Date.now()}`;
-    const tempMsg = { id: tempId, chatId: selectedChat, sender: "patient", text: messageInput, status: "sent", time: new Date().toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") };
+    const tempMsg = { id: tempId, chatId: selectedChat, sender: "patient", text: messageInput, status: "sent", time: new Date().toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG"), clientKey: tempId };
     setMessagesMap((m) => ({ ...m, [selectedChat]: [...(m[selectedChat] || []), tempMsg] }));
     setConversations((cs) => cs.map(c => c.id === selectedChat ? { ...c, lastMessage: messageInput } : c));
     setMessageInput("");
@@ -285,22 +293,46 @@ export default function PatientChatPage() {
                   className="rounded bg-white px-3 py-1 text-sm font-medium text-red-700 border border-red-200"
                   onClick={async () => {
                     try {
+                      // force a clean reconnection: disconnect first to clear any stale handshake
+                      try { socket.disconnect(); } catch (e) {}
+
+                      // refresh HTTP identity (ensure cookies/session are up-to-date)
+                      let http = null;
+                      try {
+                        const r = await fetch('/api/auth/whoami', { credentials: 'include' });
+                        if (r.ok) http = await r.json();
+                      } catch (e) { console.warn('whoami fetch failed', e); }
+
                       const s = socket.connect();
-                      if (!s) return;
+                      if (!s) {
+                        showToast('فشل في إنشاء اتصال Socket', 'error');
+                        return;
+                      }
+
+                      // wait briefly for socket to establish
+                      await new Promise((resolve) => {
+                        if (s.connected) return resolve();
+                        const onConnect = () => { try { s.off('connect', onConnect); } catch(e){}; resolve(); };
+                        s.on('connect', onConnect);
+                        setTimeout(resolve, 2000);
+                      });
+
                       const who = await new Promise((resolve) => {
                         const h = (m) => { try { s.off('me', h); } catch(e){}; resolve(m); };
                         s.on('me', h);
                         try { s.emit('whoami'); } catch (e) { resolve({ error: 'emit_failed' }); }
                         setTimeout(() => { try { s.off('me', h); } catch(e){}; resolve({ error: 'timeout' }); }, 2000);
                       });
-                      const r = await fetch('/api/auth/whoami', { credentials: 'include' });
-                      const http = r.ok ? await r.json() : null;
+
                       if (who && who.id && http && http.id && who.id === http.id) {
                         showToast('تمت المصادقة بنجاح عبر Socket', 'success');
                         setSocketMismatch(false);
                         socket.join(selectedChat);
                       } else {
-                        showToast('ما زالت الهوية غير متطابقة', 'error');
+                        // still mismatched — clear socket and redirect to login to re-establish session
+                        try { socket.disconnect(); } catch (e) {}
+                        showToast('هوية الجلسة ما زالت غير متطابقة، سيتم إعادة التوجيه لتسجيل الدخول.', 'error');
+                        router.push(`/${locale}/login`);
                       }
                     } catch (e) {
                       console.warn(e);
@@ -470,9 +502,11 @@ export default function PatientChatPage() {
 
               {/* Messages Area */}
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
-                {currentMessages.map((message) => (
+                {currentMessages.map((message, idx) => (
                   <div
-                    key={message.id}
+                    key={
+                      message.clientKey || message.renderId || `${message.id || 'msg'}-${message.createdAt ? new Date(message.createdAt).getTime() : 'no-ts'}-${idx}`
+                    }
                     className={`flex ${message.sender === "patient" ? "justify-start" : "justify-end"}`}
                   >
                     <div

@@ -54,6 +54,8 @@ export function ToastContainer({ toasts, removeToast }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Calling setState here is intentional: wait until client hydration completes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

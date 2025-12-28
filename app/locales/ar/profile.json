@@ -23,4 +23,39 @@
   "toastPasswordLength": "كلمة المرور قصيرة جدًا",
   "toastPasswordChanged": "تم تغيير كلمة المرور",
   "toastNotificationUpdated": "تم تحديث الإشعارات"
+  ,
+  "tab": {
+    "personalInfo": "البيانات الشخصية",
+    "health": "الصحة",
+    "notifications": "الإشعارات",
+    "security": "الأمان"
+  },
+  "section": {
+    "personalInfo": "المعلومات الشخصية",
+    "bodyMeasurements": "قياسات الجسم",
+    "emergencyContact": "جهة اتصال للطوارئ",
+    "healthInfo": "المعلومات الصحية"
+  },
+  "field": {
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "birthDate": "تاريخ الميلاد",
+    "nationalId": "الهوية الوطنية",
+    "address": "العنوان",
+    "bloodType": "فصيلة الدم",
+    "height": "الطول (سم)",
+    "weight": "الوزن (كغ)",
+    "bmi": "مؤشر كتلة الجسم",
+    "bmiNotAvailable": "غير متوفر",
+    "emergencyName": "اسم جهة الاتصال",
+    "emergencyPhone": "هاتف جهة الاتصال",
+    "emergencyRelation": "صلة القرابة",
+    "patientNumber": "رقم المريض",
+    "activeAccount": "الحساب مفعل",
+    "memberSince": "عضو منذ"
+  },
+  "toast": {
+    "saveError": "فشل حفظ الملف الشخصي"
+  }
 }

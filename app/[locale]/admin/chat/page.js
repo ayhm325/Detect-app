@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import AdminLayout from "../AdminLayout";
+// Page is rendered inside the route-level AdminLayout; avoid double-wrapping
 import { useToast } from "../../../components/ui/Toast";
 import {
   FaMagnifyingGlass,
@@ -67,9 +67,9 @@ export default function AdminChatPage() {
   // مع استخدام المتغيرات المصححة مثل tr و labels
 
   return (
-    <AdminLayout breadcrumbs={[breadcrumbs.home, breadcrumbs.chats]}>
+    <>
       <ToastContainer />
       {/* باقي الواجهة تبقى كما هي، مع استخدام statusLabels, actionLabels, conversationLabels, deleteLabels, toastLabels */}
-    </AdminLayout>
+    </>
   );
 }

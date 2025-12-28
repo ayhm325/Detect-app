@@ -18,7 +18,17 @@
     "error_message": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     "update": "تحديث",
     "language": "اللغة",
-    "notifications": "الإشعارات",
+    "notifications": {
+      "title": "إعدادات الإشعارات",
+      "email": "إشعارات البريد الإلكتروني",
+      "sms": "إشعارات الرسائل النصية القصيرة",
+      "push": "إشعارات التطبيق",
+      "newAppointment": "مواعيد جديدة",
+      "appointmentReminder": "تذكير بالمواعيد",
+      "patientMessages": "رسائل المرضى",
+      "systemUpdates": "تحديثات النظام",
+      "saveButton": "حفظ التفضيلات"
+    },
     "enable_notifications": "تفعيل الإشعارات",
     "disable_notifications": "تعطيل الإشعارات",
     "tabs": {
@@ -36,6 +46,16 @@
       "license": "رقم الترخيص الطبي",
       "bio": "نبذة عن الطبيب",
       "save": "حفظ"
-    }
+    },
+    "availability": {
+      "header": "مواعيد العمل",
+      "workDays": "أيام العمل",
+      "startTime": "وقت البدء",
+      "endTime": "وقت الانتهاء",
+      "slotDuration": "مدة الموعد (بالدقائق)",
+      "maxPatients": "الحد الأقصى للمرضى في اليوم",
+      "saveButton": "حفظ المواعيد"
+    },
+    "security_min_length": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل"
   }
 }

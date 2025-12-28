@@ -43,6 +43,7 @@
     "clinic": "في العيادة"
   },
   "reasonLabel": "السبب:",
+  "emptyState": "لا توجد مواعيد.",
   "items": [
     {
       "patientName": "محمد أحمد",

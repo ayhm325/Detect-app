@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import AdminLayout from "../AdminLayout";
+// Page is rendered inside the route-level AdminLayout; avoid double-wrapping
 import { useToast } from "../../../components/ui/Toast";
 import { FaSave } from "react-icons/fa";
 import { FiSettings, FiGlobe, FiUser, FiClock, FiLock, FiUsers } from "react-icons/fi";
@@ -31,7 +31,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <AdminLayout>
+    <>
       <ToastContainer />
       <div className="min-h-screen w-full p-10 bg-gradient-to-b from-slate-100 via-white to-white flex items-start">
         <div className="w-full max-w-6xl mx-auto bg-white/60 backdrop-blur-md rounded-3xl p-6 shadow-xl">
@@ -239,6 +239,6 @@ export default function SettingsPage() {
         </div>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 }

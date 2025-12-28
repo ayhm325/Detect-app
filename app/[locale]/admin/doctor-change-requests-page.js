@@ -6,7 +6,7 @@ import {
   approveDoctorChangeRequest,
   rejectDoctorChangeRequest,
 } from "./doctor-change-requests";
-import AdminLayout from "./AdminLayout";
+// Page is rendered inside the route-level AdminLayout; avoid double-wrapping
 import useLocale from "../../hooks/useLocale";
 import en from "../../locales/en";
 import ar from "../../locales/ar";
@@ -26,41 +26,38 @@ export default function DoctorChangeRequestsPage() {
       ? ar.default?.doctorChangeRequests
       : en.default?.doctorChangeRequests);
 
+  const [refresh, setRefresh] = useState(0);
   const requests = useDoctorChangeRequests();
-  const [, forceRerender] = useState(0);
+  const [actionLoading, setActionLoading] = useState(null);
 
-  const handleApprove = (id) => {
-    approveDoctorChangeRequest(id);
-    forceRerender((v) => v + 1);
+  const handleApprove = async (id) => {
+    setActionLoading(id);
+    await approveDoctorChangeRequest(id);
+    setActionLoading(null);
+    setRefresh((v) => v + 1);
   };
 
-  const handleReject = (id) => {
-    rejectDoctorChangeRequest(id);
-    forceRerender((v) => v + 1);
+  const handleReject = async (id) => {
+    setActionLoading(id);
+    await rejectDoctorChangeRequest(id);
+    setActionLoading(null);
+    setRefresh((v) => v + 1);
   };
 
   if (!tResolved || !tResolved.title) {
     return (
-      <AdminLayout
-        breadcrumbs={[
-          { label: "Translation missing", href: "/admin/doctor-change-requests" },
-        ]}
-      >
+      <>
         <div className="p-8">
           <h1 className="text-3xl font-bold text-red-600">
             Translation for DoctorChangeRequests is missing
           </h1>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout
-      breadcrumbs={[
-        { label: tResolved.title, href: "/admin/doctor-change-requests" },
-      ]}
-    >
+    <>
       <div className="py-8 px-4 md:px-8">
         <h1 className="text-3xl font-bold mb-6">{tResolved.title}</h1>
 
@@ -75,98 +72,69 @@ export default function DoctorChangeRequestsPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4 max-w-3xl">
-            {requests.map((req) => {
-              const patientName =
-                typeof req.patientName === "object"
-                  ? req.patientName[locale]
-                  : req.patientName;
-
-              const newDoctorLabel =
-                typeof req.newDoctor === "object"
-                  ? req.newDoctor[locale]
-                  : req.newDoctor;
-
-              return (
-                <div
-                  key={req.id}
-                  className="bg-white dark:bg-slate-800 rounded-xl shadow p-6 border-l-4 border-yellow-500"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    {/* Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <FaUser className="text-blue-500" />
-                        <span className="font-bold text-lg">
-                          {patientName ||
-                            (locale === "ar"
-                              ? "مريض مجهول"
-                              : "Unknown Patient")}
-                        </span>
-                      </div>
-
-                      <div className="mb-2">
-                        <span className="font-medium">
-                          {tResolved.table.doctorName}:
-                        </span>
-                        <span className="ml-2">{newDoctorLabel}</span>
-                      </div>
-
-                      <div className="mb-2">
-                        <span className="font-medium">
-                          {tResolved.table.requestType}:
-                        </span>
-                        <span className="ml-2">{req.reason}</span>
-                      </div>
-
-                      <div>
-                        <span className="font-medium">
-                          {tResolved.table.status}:
-                        </span>
-                        <span
-                          className={`ml-2 px-2 py-1 rounded text-xs font-bold ${
-                            req.status === "pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : req.status === "approved"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {req.status === "pending"
-                            ? tResolved.pending
-                            : req.status === "approved"
-                            ? tResolved.approved
-                            : tResolved.rejected}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    {req.status === "pending" && (
-                      <div className="flex gap-2 shrink-0">
-                        <button
-                          onClick={() => handleApprove(req.id)}
-                          className="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg"
-                          title={tResolved.approve}
-                        >
-                          <FaCheck size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleReject(req.id)}
-                          className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg"
-                          title={tResolved.reject}
-                        >
-                          <FaTimes size={18} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="overflow-x-auto max-w-3xl">
+            <table className="w-full border bg-white dark:bg-slate-800">
+              <thead>
+                <tr className="bg-gray-100 dark:bg-slate-700">
+                  <th className="p-2 border">المريض</th>
+                  <th className="p-2 border">الطبيب الحالي</th>
+                  <th className="p-2 border">الطبيب المطلوب</th>
+                  <th className="p-2 border">السبب</th>
+                  <th className="p-2 border">الحالة</th>
+                  <th className="p-2 border">إجراء</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requests.map((req) => (
+                  <tr key={req.id} className="border-b">
+                    <td className="p-2 border">{req.patientName || '—'}</td>
+                    <td className="p-2 border">{req.currentDoctorName || '—'}</td>
+                    <td className="p-2 border">{req.requestedDoctorName || '—'}</td>
+                    <td className="p-2 border">{req.reason || '—'}</td>
+                    <td className="p-2 border">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${
+                        req.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : req.status === 'approved'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {req.status === 'pending'
+                          ? tResolved.pending
+                          : req.status === 'approved'
+                          ? tResolved.approved
+                          : tResolved.rejected}
+                      </span>
+                    </td>
+                    <td className="p-2 border">
+                      {req.status === 'pending' ? (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleApprove(req.id)}
+                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded disabled:opacity-50"
+                            disabled={actionLoading === req.id}
+                          >
+                            موافقة
+                          </button>
+                          <button
+                            onClick={() => handleReject(req.id)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded disabled:opacity-50"
+                            disabled={actionLoading === req.id}
+                          >
+                            رفض
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
-    </AdminLayout>
+    </>
   );
 }

@@ -10,8 +10,6 @@ import AdminDashboardWrapper from "../../../components/AdminDashboardWrapper";
 import { useMemo, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast, ToastContainer } from "../../../components/ui/ToastProvider";
-import AdminShell from "../AdminShell";
-console.log("DEBUG AdminShell:", AdminShell);
 import { FaUsers, FaUserMd, FaUserInjured, FaXRay, FaArrowUp, FaArrowDown, FaBell, FaChartLine, FaExclamationTriangle, FaCheckCircle, FaClock } from "react-icons/fa";
 import useLocale from "../../../hooks/useLocale";
 
@@ -153,8 +151,17 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // إشعارات الأدمن
+  const [unreadCount, setUnreadCount] = useState(0);
+  useEffect(() => {
+    fetch("/api/admin/notifications-unread")
+      .then((res) => res.json())
+      .then((data) => setUnreadCount(data.unread || 0))
+      .catch(() => setUnreadCount(0));
+  }, []);
+
   return (
-    <AdminShell>
+    <>
       {/* ToastContainer is rendered by ToastProvider at the app root. Do not render here. */}
       <div className="p-6">
         {/* Header */}
@@ -166,14 +173,16 @@ export default function AdminDashboardPage() {
             <p className="text-gray-600 dark:text-gray-400 mt-2">{formattedDate}</p>
           </div>
           <button
-            onClick={() => showToast(ad.toast?.notificationsComingSoon || t.adminDashboard?.toast?.notifications, "info")}
+            onClick={() => router.push(`${basePrefix}/admin/notifications`)}
             className="relative p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg hover:shadow-xl transition-shadow"
             title={ad.notifications || t.adminDashboard?.notifications}
           >
             <FaBell className="text-xl text-gray-700 dark:text-gray-300" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-              7
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                {unreadCount}
+              </span>
+            )}
           </button>
         </div>
 
@@ -359,6 +368,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
-    </AdminShell>
+    </>
   );
 }

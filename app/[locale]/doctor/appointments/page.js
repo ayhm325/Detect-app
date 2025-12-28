@@ -35,77 +35,35 @@ export default function DoctorAppointmentsPage() {
   const [viewMode, setViewMode] = useState("list"); // list or calendar
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const appointmentTemplates = useMemo(
-    () => [
-      {
-        id: 1,
-        patientName: t("items.0.patientName"),
-        date: t("items.0.date"),
-        time: t("appointments.1.time"),
-        type: t("appointments.1.type"),
-        status: t("appointments.1.status"),
-        phone: t("appointments.1.phone"),
-        reason: t("appointments.1.reason")
-      },
-      {
-        id: 2,
-        patientName: t("appointments.2.patientName"),
-        date: t("appointments.2.date"),
-        time: t("appointments.2.time"),
-        type: t("appointments.2.type"),
-        status: t("appointments.2.status"),
-        phone: t("appointments.2.phone"),
-        reason: t("appointments.2.reason")
-      },
-      {
-        id: 3,
-        patientName: t("appointments.3.patientName"),
-        date: t("appointments.3.date"),
-        time: t("appointments.3.time"),
-        type: t("appointments.3.type"),
-        status: t("appointments.3.status"),
-        phone: t("appointments.3.phone"),
-        reason: t("appointments.3.reason")
-      },
-      {
-        id: 4,
-        patientName: t("appointments.4.patientName"),
-        date: t("appointments.4.date"),
-        time: t("appointments.4.time"),
-        type: t("appointments.4.type"),
-        status: t("appointments.4.status"),
-        phone: t("appointments.4.phone"),
-        reason: t("appointments.4.reason")
-      },
-      {
-        id: 5,
-        patientName: t("appointments.5.patientName"),
-        date: t("appointments.5.date"),
-        time: t("appointments.5.time"),
-        type: t("appointments.5.type"),
-        status: t("appointments.5.status"),
-        phone: t("appointments.5.phone"),
-        reason: t("appointments.5.reason")
-      },
-      {
-        id: 6,
-        patientName: t("appointments.6.patientName"),
-        date: t("appointments.6.date"),
-        time: t("appointments.6.time"),
-        type: t("appointments.6.type"),
-        status: t("appointments.6.status"),
-        phone: t("appointments.6.phone"),
-        reason: t("appointments.6.reason")
-      }
-    ],
-    [t]
-  );
 
-  const [appointments, setAppointments] = useState(appointmentTemplates);
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setAppointments(appointmentTemplates);
-  }, [appointmentTemplates]);
+    fetch("/api/doctor/appointments")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch appointments");
+        const data = await res.json();
+        // Transform API data to match UI expectations
+        const mapped = (data.appointments || []).map((a) => ({
+          id: a.id,
+          patientName: a.patient?.name || "-",
+          date: a.scheduledAt,
+          time: a.scheduledAt ? new Date(a.scheduledAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG", { hour: "2-digit", minute: "2-digit" }) : "-",
+          type: "clinic", // You can adjust this if you have type info
+          status: a.status || "pending",
+          phone: a.patient?.phone || "-",
+          reason: a.reason || "-"
+        }));
+        setAppointments(mapped);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [t, locale]);
 
   const stats = {
     total: appointments.length,
@@ -122,8 +80,8 @@ export default function DoctorAppointmentsPage() {
     .filter((apt) => {
       if (!searchQuery) return true;
       return (
-        apt.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        apt.reason.toLowerCase().includes(searchQuery.toLowerCase())
+        (apt.patientName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (apt.reason || "").toLowerCase().includes(searchQuery.toLowerCase())
       );
     });
 
@@ -165,6 +123,28 @@ export default function DoctorAppointmentsPage() {
     if (status === "pending") return <FaHourglassHalf className="text-orange-600" />;
     return <FaTimesCircle className="text-red-600" />;
   };
+
+  if (loading) {
+    return (
+      <DoctorLayout>
+        <ToastContainer />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-lg text-gray-500">{t("loading", { defaultValue: "Loading appointments..." })}</div>
+        </div>
+      </DoctorLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DoctorLayout>
+        <ToastContainer />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-lg text-red-500">{t("error", { defaultValue: "Error loading appointments:" })} {error}</div>
+        </div>
+      </DoctorLayout>
+    );
+  }
 
   return (
     <DoctorLayout>

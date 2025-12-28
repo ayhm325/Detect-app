@@ -11,7 +11,7 @@ const getDoctorStatus = (doctor) => {
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import AdminLayout from "../AdminLayout";
+// Page is rendered inside the route-level AdminLayout; avoid double-wrapping
 import DoctorDetailsCard from "../../../components/admin/DoctorDetailsCard";
 import DoctorsTable from "../../../components/admin/DoctorsTable";
 import { useToast, ToastContainer } from "../../../components/ui/ToastProvider";
@@ -382,7 +382,7 @@ function DoctorsPage() {
   };
 
   return (
-    <AdminLayout breadcrumbs={tDoctors('breadcrumbs.doctors')}>
+    <>
       <ToastContainer />
       <div className="p-6">
          
@@ -696,7 +696,7 @@ function DoctorsPage() {
         )}
 
       </div>
-    </AdminLayout>
+    </>
   );
 }
 

@@ -23,4 +23,39 @@
   "toastPasswordLength": "Password too short",
   "toastPasswordChanged": "Password changed",
   "toastNotificationUpdated": "Notification updated"
+  ,
+  "tab": {
+    "personalInfo": "Personal",
+    "health": "Health",
+    "notifications": "Notifications",
+    "security": "Security"
+  },
+  "section": {
+    "personalInfo": "Personal Information",
+    "bodyMeasurements": "Body Measurements",
+    "emergencyContact": "Emergency Contact",
+    "healthInfo": "Health Information"
+  },
+  "field": {
+    "fullName": "Full name",
+    "email": "Email",
+    "phone": "Phone",
+    "birthDate": "Birth date",
+    "nationalId": "National ID",
+    "address": "Address",
+    "bloodType": "Blood type",
+    "height": "Height (cm)",
+    "weight": "Weight (kg)",
+    "bmi": "BMI",
+    "bmiNotAvailable": "Not available",
+    "emergencyName": "Contact name",
+    "emergencyPhone": "Contact phone",
+    "emergencyRelation": "Relation",
+    "patientNumber": "Patient No.",
+    "activeAccount": "Active Account",
+    "memberSince": "Member since"
+  },
+  "toast": {
+    "saveError": "Failed to save profile"
+  }
 }

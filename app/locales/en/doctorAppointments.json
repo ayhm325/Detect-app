@@ -43,6 +43,7 @@
     "clinic": "Clinic"
   },
   "reasonLabel": "Reason:",
+  "emptyState": "No appointments found.",
   "items": [
     {
       "patientName": "Mohammed Ahmed",

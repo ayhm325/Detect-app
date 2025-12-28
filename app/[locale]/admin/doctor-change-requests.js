@@ -1,22 +1,23 @@
 
+
 import { useEffect, useState } from 'react';
 
-// جلب الطلبات المعلقة من API
+// جلب جميع الطلبات (ليست فقط المعلقة) من API
 export function useDoctorChangeRequests() {
   const [requests, setRequests] = useState([]);
   useEffect(() => {
-    fetch('/api/doctor-change-requests')
+    fetch('/api/admin/doctor-change-requests?all=1')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && Array.isArray(data.doctors)) {
-          // تحويل بيانات الطبيب إلى نفس شكل الطلب القديم (للتوافق مع الواجهة)
+        if (data.success && Array.isArray(data.requests)) {
           setRequests(
-            data.doctors.map((doc) => ({
-              id: doc.userId,
-              patientName: doc.user?.fullName || '',
-              newDoctor: doc.user?.fullName || '',
-              status: 'pending',
-              reason: 'طلب انضمام طبيب',
+            data.requests.map((r) => ({
+              id: r.id,
+              patientName: r.patientName || '',
+              currentDoctorName: r.details?.currentDoctorName || r.details?.currentDoctorId || '',
+              requestedDoctorName: r.details?.requestedDoctorName || r.details?.requestedDoctorId || '',
+              status: r.status || 'pending',
+              reason: r.reason || r.details?.reason || ''
             }))
           );
         } else {
@@ -28,24 +29,39 @@ export function useDoctorChangeRequests() {
   return requests;
 }
 
-// الدوال التالية تحتاج تعديل لاحق لتعمل مع API حقيقي
-export function approveDoctorChangeRequest(id) {
-  // TODO: إرسال طلب موافقة للطبيب عبر API
-  alert('تمت الموافقة (تجريبي)');
-}
 
-export async function rejectDoctorChangeRequest(id) {
+// الموافقة على الطلب
+export async function approveDoctorChangeRequest(id) {
   try {
-    const res = await fetch(`/api/admin/doctors/${id}`, {
+    const res = await fetch('/api/admin/doctor-change-requests', {
       method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, action: 'approve' })
     });
     const data = await res.json();
-    if (data.success) {
-      alert('تم رفض الطبيب بنجاح');
-    } else {
-      alert('فشل الرفض: ' + (data.error || 'خطأ غير معروف'));
-    }
+    if (!data.success) throw new Error(data.error || 'خطأ غير معروف');
+    return true;
   } catch (e) {
-    alert('فشل الرفض: خطأ في الاتصال');
+    alert('فشل الموافقة: ' + (e.message || 'خطأ في الاتصال'));
+    return false;
+  }
+}
+
+// رفض الطلب
+export async function rejectDoctorChangeRequest(id) {
+  try {
+    const res = await fetch('/api/admin/doctor-change-requests', {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, action: 'reject' })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'خطأ غير معروف');
+    return true;
+  } catch (e) {
+    alert('فشل الرفض: ' + (e.message || 'خطأ في الاتصال'));
+    return false;
   }
 }

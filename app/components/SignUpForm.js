@@ -45,24 +45,17 @@ function SignUpForm() {
       setDoctorsLoading(true);
       setDoctorsError("");
       try {
-        const res = await fetch("/api/admin/doctors");
+        const apiPath = `/api/doctor/list${process.env.NEXT_PUBLIC_DEBUG_INCLUDE_PENDING === 'true' ? '?includePending=true' : ''}`;
+        const res = await fetch(apiPath);
         const data = await res.json();
         if (data.doctors) {
-          // Some API responses include activation on the nested `user` object
-          // while others put it on the doctor record. Accept either form.
           setDoctors(
-            data.doctors
-              .filter((doc) => (
-                // allow doctor if either top-level or nested user is active and not deleted
-                (doc.isActive === true || doc.status === "active" || (doc.user && doc.user.isActive === true))
-                && (doc.isDeleted !== true) && !(doc.user && doc.user.isDeleted === true)
-              ))
-              .map((doc) => ({
-                id: doc.userId || doc.id || (doc.user && doc.user.id) || "",
-                name: doc.user?.fullName || doc.fullName || doc.name || "",
-                specialty: Array.isArray(doc.specialties) && doc.specialties.length > 0 ? doc.specialties.map(s => s.specialty?.name).join(", ") : "",
-                email: doc.user?.email || doc.email || ""
-              }))
+            data.doctors.map((doc) => ({
+              id: doc.id,
+              name: doc.fullName || doc.name || doc.email || doc.id,
+              specialty: doc.specialty || "",
+              email: doc.email || ""
+            }))
           );
         } else {
           setDoctors([]);

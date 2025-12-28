@@ -46,6 +46,42 @@
       "activity": "النشاطات الأخيرة"
     }
   },
+  "profile": {
+    "tab": {
+      "personalInfo": "البيانات الشخصية",
+      "health": "الصحة",
+      "notifications": "الإشعارات",
+      "security": "الأمان"
+    },
+    "section": {
+      "personalInfo": "المعلومات الشخصية",
+      "bodyMeasurements": "قياسات الجسم",
+      "emergencyContact": "جهة اتصال للطوارئ",
+      "healthInfo": "المعلومات الصحية"
+    },
+    "field": {
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "birthDate": "تاريخ الميلاد",
+      "nationalId": "الهوية الوطنية",
+      "address": "العنوان",
+      "bloodType": "فصيلة الدم",
+      "height": "الطول (سم)",
+      "weight": "الوزن (كغ)",
+      "bmi": "مؤشر الكتلة الجسمية",
+      "bmiNotAvailable": "غير متوفر",
+      "emergencyName": "اسم جهة الاتصال",
+      "emergencyPhone": "هاتف جهة الاتصال",
+      "emergencyRelation": "صلة القرابة",
+      "patientNumber": "رقم المريض",
+      "activeAccount": "الحساب مفعل",
+      "memberSince": "عضو منذ"
+    },
+    "toast": {
+      "saveError": "فشل حفظ الملف الشخصي"
+    }
+  },
   "appointments": {
     "title": "المواعيد",
     "subtitle": "إدارة وتتبع مواعيدك",
@@ -98,7 +134,20 @@
     "toast": {
       "confirm": "تم تأكيد الموعد",
       "cancel": "تم إلغاء الموعد",
-      "reschedule": "تم إرسال طلب إعادة الجدولة"
+      "reschedule": "تم إرسال طلب إعادة الجدولة",
+      "created": "تم إنشاء الموعد",
+      "error": "فشل إنشاء الموعد",
+      "fillRequired": "يرجى تعبئة الحقول المطلوبة"
+    },
+    "form": {
+      "doctorId": "معرّف الطبيب",
+      "date": "التاريخ",
+      "time": "الوقت",
+      "type": "النوع",
+      "reason": "السبب",
+      "phone": "الهاتف",
+      "cancel": "إلغاء",
+      "submit": "حجز"
     },
     "modalTitle": "تحتاج موعداً جديداً؟",
     "modalBody": "تحدث مع طبيب أو اطلب موعداً آخر.",

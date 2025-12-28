@@ -4,11 +4,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"next dev\" \"cross-env NODE_ENV=development JWT_SECRET=your-secret node scripts/socket-server.js\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "docs": "openapi-generator-cli generate -i openapi.yaml -g html -o docs"
   },
   "dependencies": {
@@ -20,6 +22,8 @@
     "clsx": "^2.1.1",
     "express": "^5.2.1",
     "framer-motion": "^12.23.25",
+    "ioredis": "^5.8.2",
+    "jose": "^4.15.9",
     "jsonwebtoken": "^9.0.3",
     "next": "^16.1.0",
     "next-intl": "^4.6.1",
@@ -32,15 +36,7 @@
     "socket.io-client": "^4.8.3",
     "swr": "^2.3.8"
   },
-  "jest": {
-    "transform": {
-      "^.+\\.[jt]sx?$": "babel-jest"
-    },
-    "testEnvironment": "node",
-    "testMatch": [
-      "**/__tests__/**/*.test.js"
-    ]
-  },
+  
   "devDependencies": {
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
@@ -51,6 +47,8 @@
     "@types/react": "19.2.7",
     "babel-jest": "^30.2.0",
     "babel-plugin-react-compiler": "1.0.0",
+    "concurrently": "^8.2.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.6",
     "jest": "^30.2.0",

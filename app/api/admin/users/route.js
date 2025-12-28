@@ -1,6 +1,17 @@
-import prisma from '../../../../lib/prismaClient';
+// Security: All API routes are protected by withRBAC() for authentication and RBAC. No inline JWT logic.
+// Rate limiting and audit logging enabled for sensitive admin endpoints.
 
-export async function GET(req) {
+import { withRBAC } from "../../../../lib/auth/withRBAC";
+import prisma from "../../../../lib/prismaClient";
+import { rateLimit } from "../../../../lib/security/rateLimiter";
+import { logAudit } from "../../../../lib/security/auditLogger";
+
+export const GET = withRBAC(async (request, user) => {
+  const rl = rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/admin/users" } });
+    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
   try {
     const users = await prisma.user.findMany({
       include: {
@@ -9,34 +20,33 @@ export async function GET(req) {
       },
       orderBy: { createdAt: 'desc' },
     });
-
-    return new Response(JSON.stringify(users), { status: 200 });
+    logAudit({ event: "admin_users_listed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { count: users.length } });
+    return Response.json(users);
   } catch (error) {
-    console.error('Failed to fetch users', error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    logAudit({ event: "admin_users_list_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error.message } });
+    return Response.json({ error: "Internal error" }, { status: 500 });
   }
-}
+}, ["admin"]);
 
-export async function POST(req) {
+export const POST = withRBAC(async (request, user) => {
+  const rl = rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "POST /api/admin/users" } });
+    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
   try {
-    const body = await req.json();
+    const body = await request.json();
     const { name, email, password, status } = body;
-
     if (!name || !email || !password) {
-      return new Response(JSON.stringify({ error: 'name, email and password are required' }), { status: 400 });
+      return Response.json({ error: 'name, email and password are required' }, { status: 400 });
     }
-
-    // check existing user
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return new Response(JSON.stringify({ error: 'User with this email already exists' }), { status: 409 });
+      return Response.json({ error: 'User with this email already exists' }, { status: 409 });
     }
-
-    // hash password
     const bcrypt = await import('bcrypt');
     const hashed = await bcrypt.hash(password, 10);
-
-    const user = await prisma.user.create({
+    const userCreated = await prisma.user.create({
       data: {
         fullName: name,
         email,
@@ -45,13 +55,11 @@ export async function POST(req) {
         isActive: (status || 'active') === 'active'
       }
     });
-
-    // Do not return password
-    const { password: _pw, ...safe } = user;
-
-    return new Response(JSON.stringify(safe), { status: 201 });
+    logAudit({ event: "admin_user_created", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { createdUserId: userCreated.id } });
+    const { password: _pw, ...safe } = userCreated;
+    return Response.json(safe, { status: 201 });
   } catch (error) {
-    console.error('Failed to create user', error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    logAudit({ event: "admin_user_create_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error.message } });
+    return Response.json({ error: "Internal error" }, { status: 500 });
   }
-}
+}, ["admin"]);

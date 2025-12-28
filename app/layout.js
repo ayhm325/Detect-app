@@ -74,6 +74,29 @@ export default async function RootLayout({ children, params }) {
   return (
     <html className={`${inter.variable} ${robotoMono.variable}`} lang={locale} dir={dir} data-scroll-behavior="smooth">
       <body>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){
+          try {
+            if (typeof window === 'undefined') return;
+            const OrigWS = window.WebSocket;
+            window.WebSocket = function(url, protocols){
+              try{
+                if (typeof url === 'string' && (url.includes(':5500') || url.includes('127.0.0.1:5500') || url.includes('localhost:5500'))) {
+                  console.info('Blocked LiveReload WebSocket:', url);
+                  return {
+                    addEventListener: function(){},
+                    removeEventListener: function(){},
+                    close: function(){},
+                    send: function(){},
+                    readyState: 3
+                  };
+                }
+              } catch (e) {}
+              return new OrigWS(url, protocols);
+            };
+            try { window.WebSocket.prototype = OrigWS.prototype; } catch(e) {}
+            ['CONNECTING','OPEN','CLOSING','CLOSED'].forEach(k=>{ try{ window.WebSocket[k]=OrigWS[k]; }catch(e){} });
+          } catch(e) {}
+        })();` }} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LocaleProvider>
             <ThemeProvider>

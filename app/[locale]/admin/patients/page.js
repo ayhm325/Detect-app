@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import useSWR from 'swr';
-import AdminLayout from "../AdminLayout";
+// AdminLayout is provided by the admin route layout wrapper; avoid double-wrapping pages
 import { useToast } from "../../../components/ui/Toast";
 import useLocale from "../../../hooks/useLocale";
 import { useTranslations } from "next-intl";
@@ -47,14 +47,14 @@ export default function PatientsPage() {
   const { data: patients = [], error, isLoading, mutate } = useSWR('/api/admin/patients', fetcher);
   const [patientsState, setPatients] = useState([]);
   // عند وصول البيانات من السيرفر، خزّنها في الحالة المحلية (للتعديل/الحذف/الإضافة)
-  const formatDate = (d) => {
+  const formatDate = React.useCallback((d) => {
     if (!d) return "";
     try {
       return new Date(d).toLocaleString(locale === 'en' ? 'en-US' : 'ar-SA', { dateStyle: 'medium', timeStyle: 'short' });
     } catch {
       return String(d);
     }
-  };
+  }, [locale]);
 
   // Age computation is performed during normalization effect to keep render pure.
 
@@ -113,9 +113,18 @@ export default function PatientsPage() {
           doctorName: doctorUser ? (doctorUser.fullName || doctorUser.name) : (p.doctorName || ""),
         };
       });
-      setPatients(normalized);
+      setPatients((prev) => {
+        try {
+          if (prev && Array.isArray(prev) && JSON.stringify(prev) === JSON.stringify(normalized)) {
+            return prev;
+          }
+        } catch (e) {
+          // If comparison fails for any reason, fallthrough to set
+        }
+        return normalized;
+      });
     }
-  }, [patients?.length]);
+  }, [patients, formatDate]);
 
   // Fetch doctors list for the doctor selector in edit modal
   React.useEffect(() => {
@@ -415,7 +424,7 @@ export default function PatientsPage() {
   });
 
   return (
-    <AdminLayout breadcrumbs={[tPatients('breadcrumbs.home'), tPatients('breadcrumbs.patients')] }>
+    <>
       <ToastContainer />
       <div className="p-6">
         {/* Header */}
@@ -875,6 +884,6 @@ export default function PatientsPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </>
   );
 }
