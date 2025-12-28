@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { io } from 'socket.io-client';
 
 // Client hook to connect to Socket.io server.
@@ -170,5 +170,19 @@ export default function useSocket({ url } = {}) {
     };
   }, [disconnect]);
 
-  return { connect, disconnect, join, leave, sendMessage, sendTyping, onMessage, onTyping, onPresence, connected };
+  // Memoize returned API so its identity is stable across renders.
+  const api = useMemo(() => ({
+    connect,
+    disconnect,
+    join,
+    leave,
+    sendMessage,
+    sendTyping,
+    onMessage,
+    onTyping,
+    onPresence,
+    connected,
+  }), [connect, disconnect, join, leave, sendMessage, sendTyping, onMessage, onTyping, onPresence, connected]);
+
+  return api;
 }

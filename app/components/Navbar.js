@@ -65,7 +65,7 @@ export default function Navbar() {
 
   return (
     <>
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes spin-slow {
           from {
             transform: rotate(0deg);
@@ -77,7 +77,7 @@ export default function Navbar() {
         .galaxy-bg {
           animation: spin-slow 200s linear infinite;
         }
-      `}</style>
+      ` }} />
       <nav className="w-full flex items-center justify-between py-2 px-4 lg:px-12 relative z-50 overflow-hidden">
         {/* خلفية المجرة المتحركة */}
         <div className="galaxy-bg absolute inset-0 -z-10 pointer-events-none">

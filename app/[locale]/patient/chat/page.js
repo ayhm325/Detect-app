@@ -125,12 +125,23 @@ export default function PatientChatPage() {
           const genKey2 = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `k-${Math.random().toString(36).slice(2,9)}-${Date.now()}`);
           const hasServerId = msg.id && !String(msg.id).startsWith('tmp-');
           const normalized = { ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : msg.time || '', clientKey: hasServerId ? msg.id : (msg.clientKey || genKey2()) };
+
           setMessagesMap((prev) => {
             const prevList = prev[selectedChat] || [];
-            const ids = new Set(prevList.map((m) => m.id));
-            if (ids.has(normalized.id)) return prev;
-            const next = [...prevList, normalized];
-            return { ...prev, [selectedChat]: next };
+
+            // 1) If a message with same server id exists, skip
+            if (normalized.id && prevList.some((m) => m.id === normalized.id)) return prev;
+
+            // 2) If a message with same clientKey exists (optimistic), skip
+            if (normalized.clientKey && prevList.some((m) => m.clientKey && m.clientKey === normalized.clientKey)) return prev;
+
+            // 3) Fallback dedupe: same sender + same text + similar time
+            if (normalized.text) {
+              const match = prevList.find((m) => m.sender === normalized.sender && m.text === normalized.text && Math.abs(new Date((m.createdAt || m.createdAt) || 0) - new Date((msg.createdAt || msg.createdAt) || 0)) < 2000);
+              if (match) return prev;
+            }
+
+            return { ...prev, [selectedChat]: [...prevList, normalized] };
           });
         });
         cleanupFns.push(offMsg);
@@ -227,12 +238,16 @@ export default function PatientChatPage() {
     setConversations((cs) => cs.map(c => c.id === selectedChat ? { ...c, lastMessage: messageInput } : c));
     setMessageInput("");
 
-    if (socket && socket.connected) {
+      if (socket && socket.connected) {
       socket.sendMessage({ chatId: selectedChat, text: messageInput }, (res) => {
         if (res && res.ok && res.message) {
           setMessagesMap((m) => {
-            const list = (m[selectedChat] || []).filter((x) => x.id !== tempId);
-            return { ...m, [selectedChat]: [...list, { ...res.message, time: res.message.createdAt ? new Date(res.message.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : "" }] };
+            const list = m[selectedChat] || [];
+            const serverId = res.message.id;
+            // remove optimistic temp message and any duplicate server message that may have arrived via socket event
+            const filtered = list.filter((x) => x.id !== tempId && x.id !== serverId);
+            const serverMsg = { ...res.message, time: res.message.createdAt ? new Date(res.message.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : "" };
+            return { ...m, [selectedChat]: [...filtered, serverMsg] };
           });
         } else {
           setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).filter((x) => x.id !== tempId) }));
