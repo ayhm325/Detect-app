@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 
 const Toast = ({ message, type = "info", duration = 3000, onClose }) => {
   const [isVisible, setIsVisible] = useState(true);
@@ -49,16 +49,19 @@ export default Toast;
 export const useToast = () => {
   const [toasts, setToasts] = useState([]);
 
-  const showToast = (message, type = "info", duration = 3000) => {
+  // Stable showToast so components can safely include it in effect deps
+  const showToast = useCallback((message, type = "info", duration = 3000) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
     setToasts((prev) => [...prev, { id, message, type, duration }]);
 
+    // schedule removal
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, duration);
-  };
+  }, [setToasts]);
 
-  const ToastContainer = () => (
+  // Stable container component to avoid re-creating component identity
+  const ToastContainer = useCallback(() => (
     <>
       {toasts.map((toast) => (
         <Toast
@@ -70,7 +73,7 @@ export const useToast = () => {
         />
       ))}
     </>
-  );
+  ), [toasts]);
 
-  return { showToast, ToastContainer };
+  return useMemo(() => ({ showToast, ToastContainer }), [showToast, ToastContainer]);
 };

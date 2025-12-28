@@ -4,6 +4,8 @@ import prisma from "../../../../lib/prismaClient";
 import { getAppointmentsForPatient } from "../../../../lib/prismaQueries";
 
 import { withRBAC } from "../../../../lib/auth/withRBAC";
+import { rateLimit } from "../../../../lib/security/rateLimiter";
+import { logAudit } from "../../../../lib/security/auditLogger";
 
 function getTokenFromRequest(request) {
   try {

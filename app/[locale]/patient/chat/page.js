@@ -154,7 +154,7 @@ export default function PatientChatPage() {
       cleanupFns.forEach((fn) => fn && fn());
       try { socket.leave(selectedChat); } catch (e) {}
     };
-  }, [selectedChat]);
+  }, [selectedChat, locale, showToast, socket]);
 
   // If you want to use translations, keep only one declaration for labels
   const t = useTranslations("patientChat");

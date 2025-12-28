@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-
+import { isTokenRevoked } from '../../../../lib/auth/revocation.server';
 const SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export async function GET(request) {
@@ -12,6 +12,16 @@ export async function GET(request) {
       if (hdr && hdr.startsWith('Bearer ')) token = hdr.slice(7).trim();
     }
     if (!token) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
+
+    // Check revoked tokens list using shared helper
+    try {
+      const revoked = await isTokenRevoked(token);
+      if (revoked) return NextResponse.json({ error: 'token_revoked' }, { status: 401 });
+    } catch (e) {
+      console.warn('/api/auth/whoami: revoked check failed', e && e.message);
+      // proceed with verification if helper not available
+    }
+
     let user;
     try {
       user = jwt.verify(token, SECRET);
