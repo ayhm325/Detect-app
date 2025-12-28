@@ -239,7 +239,8 @@ export default function PatientChatPage() {
     setMessageInput("");
 
       if (socket && socket.connected) {
-      socket.sendMessage({ chatId: selectedChat, text: messageInput }, (res) => {
+      // include the optimistic clientKey so server can perform idempotent lookup
+      socket.sendMessage({ chatId: selectedChat, text: messageInput, clientKey: tempId }, (res) => {
         if (res && res.ok && res.message) {
           setMessagesMap((m) => {
             const list = m[selectedChat] || [];

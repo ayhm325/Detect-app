@@ -133,6 +133,21 @@ export default function useSocket({ url } = {}) {
 
   const sendMessage = useCallback((payload, cb) => {
     if (!socketRef.current) return cb && cb({ error: 'not_connected' });
+
+    // Ensure a stable clientKey exists for idempotency. Prefer native crypto
+    // in browsers, fallback to a timestamp-based key if unavailable.
+    try {
+      if (!payload.clientKey) {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+          payload.clientKey = crypto.randomUUID();
+        } else {
+          payload.clientKey = `tmp-${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
+        }
+      }
+    } catch (e) {
+      payload.clientKey = payload.clientKey || `tmp-${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
+    }
+
     socketRef.current.emit('message', payload, cb);
   }, []);
 
