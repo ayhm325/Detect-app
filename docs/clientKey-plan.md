@@ -22,13 +22,29 @@ Phased implementation (recommended)
   - Add `clientKey String?` to Prisma schema for `Message` and run migration (adds column nullable)
   - Add unique index `@@unique([chatId, clientKey])` if you want DB-level dedupe (optional; migration will fail if duplicates exist)
 
+Prisma snippet example (for review):
+
+```prisma
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String
+  senderId  String
+  text      String
+  createdAt DateTime @default(now())
+  clientKey String?  // nullable client-provided idempotency key
+
+  @@index([chatId])
+  // Consider adding this only after backfill: @@unique([chatId, clientKey])
+}
+```
+
 - Phase 3: Server + socket changes
   - Update socket `message` handler to check existing message by `chatId`+`clientKey` before creating
   - When ack-ing, return the existing message if found
   - Update HTTP POST fallback to accept `clientKey`
 
 - Phase 4: Client changes + tests
-  - Generate `clientKey` on optimistic send (e.g. `tmp-${Date.now()}-${random}`)
+  - Generate `clientKey` on optimistic send (e.g. `tmp-${Date.now()}-${random}` or `uuidv4()`)
   - Include the `clientKey` in socket emit and HTTP POST body
   - Update client dedupe to prefer server id or `clientKey` matching
   - Add Jest unit tests and enhance `scripts/e2e-socket-test.mjs` to assert single DB row
@@ -36,6 +52,11 @@ Phased implementation (recommended)
 Migration considerations
 - Dry-run: scan existing messages for duplicates or existing `clientKey` collisions.
 - If adding a unique index, ensure existing rows either have `NULL` or unique `clientKey`s; you may need to backfill `clientKey` for historical messages or keep column nullable.
+
+Backfill & validation example (high level):
+- Run a dry-run script that searches for potential duplicates by `(chatId, text, createdAt window)` and outputs a report `reports/clientkey-duplicates-<ts>.json`.
+- Decide on backfill strategy: either leave historical rows `NULL` or generate stable `clientKey` values for sets of messages you consider unique.
+- After backfill, create a partial unique index (see `pr-skeleton/example-migration-updated.sql`) and validate.
 
 Risks and mitigations
 - Risk: race conditions if two clients send the same `clientKey` (client-side generation should be globally unique). Mitigation: make clientKey sufficiently random/unique (UUIDv4 or sha256 of timestamp+client id).
