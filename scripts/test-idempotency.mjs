@@ -2,6 +2,7 @@
 // Quick idempotency test script: POST twice with same clientKey and verify DB.
 import fetch from 'node-fetch';
 import prisma from '../lib/prismaClient.js';
+import { execSync } from 'child_process';
 
 async function main() {
   const chatId = process.env.TEST_CHAT_ID || 'test-chat-1';
@@ -11,9 +12,23 @@ async function main() {
 
   const body = { text: 'Idempotent test message', clientKey };
 
+  // Determine auth token: prefer DEV_TOKEN env, else attempt to generate via TEST_USER_EMAIL
+  let token = process.env.DEV_TOKEN;
+  if (!token && process.env.TEST_USER_EMAIL) {
+    try {
+      const out = execSync(`node scripts/create-dev-token.mjs ${process.env.TEST_USER_EMAIL}`, { encoding: 'utf8' }).trim();
+      token = out;
+      console.log('Generated token for', process.env.TEST_USER_EMAIL);
+    } catch (e) {
+      console.warn('Failed to generate dev token from TEST_USER_EMAIL', e.message);
+    }
+  }
+
   for (let i = 0; i < 2; i++) {
     try {
-      const res = await fetch(url, { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(url, { method: 'POST', body: JSON.stringify(body), headers, credentials: 'include' });
       const data = await res.json();
       console.log('POST', i+1, 'status', res.status, 'body', data);
     } catch (e) {
