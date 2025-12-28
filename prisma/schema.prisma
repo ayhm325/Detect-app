@@ -273,6 +273,7 @@ model Message {
   text      String
   status    MessageStatus @default(sent)
   createdAt DateTime      @default(now())
+  clientKey String?
 
   chat Chat @relation(fields: [chatId], references: [id])
 

@@ -98,7 +98,7 @@ io.on('connection', (socket) => {
   if (!socket.rate) socket.rate = { timestamps: [] };
 
   socket.on('message', async (payload, ack) => {
-    // payload: { chatId, text }
+    // payload: { chatId, text, clientKey? }
     try {
       // basic rate limiting
       const now = Date.now();
@@ -108,7 +108,7 @@ io.on('connection', (socket) => {
       }
       socket.rate.timestamps.push(now);
 
-      const { chatId, text } = payload || {};
+      const { chatId, text, clientKey } = payload || {};
       if (!chatId || !text || !text.trim()) return ack && ack({ error: 'invalid_payload' });
 
       // verify chat exists and user is participant
@@ -126,7 +126,19 @@ io.on('connection', (socket) => {
       }
 
       const sender = user.role === 'doctor' ? 'doctor' : 'patient';
-      const message = await prisma.message.create({ data: { chatId, sender, text } });
+
+      // If clientKey provided, attempt idempotent lookup first
+      if (clientKey) {
+        const existing = await prisma.message.findFirst({ where: { chatId, clientKey } });
+        if (existing) {
+          const payloadOut = { ...existing, time: existing.createdAt };
+          // still emit to the room to ensure receivers have the message (safe)
+          io.to(`chat:${chatId}`).emit('message', payloadOut);
+          return ack && ack({ ok: true, message: payloadOut, existing: true });
+        }
+      }
+
+      const message = await prisma.message.create({ data: { chatId, sender, text, clientKey } });
 
       // broadcast to room with ackable payload
       const payloadOut = { ...message, time: message.createdAt };

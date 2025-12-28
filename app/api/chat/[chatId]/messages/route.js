@@ -78,7 +78,7 @@ export async function POST(request, context) {
     }
 
     const body = await request.json();
-    const { text } = body;
+    const { text, clientKey } = body;
     if (!text || !text.trim()) return NextResponse.json({ error: "empty_message" }, { status: 400 });
 
     const chat = await prisma.chat.findUnique({ where: { id: chatId } });
@@ -94,7 +94,16 @@ export async function POST(request, context) {
     }
 
     const sender = user.role === "doctor" ? "doctor" : "patient";
-    const message = await prisma.message.create({ data: { chatId, sender, text } });
+
+    // If clientKey provided, attempt idempotent lookup first
+    if (clientKey) {
+      const existing = await prisma.message.findFirst({ where: { chatId, clientKey } });
+      if (existing) {
+        return NextResponse.json({ message: existing, existing: true }, { status: 200 });
+      }
+    }
+
+    const message = await prisma.message.create({ data: { chatId, sender, text, clientKey } });
 
     // touch chat updatedAt
     await prisma.chat.update({ where: { id: chatId }, data: { updatedAt: new Date() } });
