@@ -13,6 +13,8 @@
 import http from 'http';
 import express from 'express';
 import { Server } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
+import Redis from 'ioredis';
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prismaClient.js';
 
@@ -24,6 +26,23 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: true, credentials: true },
 });
+
+// Initialize Redis adapter if REDIS_URL provided
+let redis = null;
+if (process.env.REDIS_URL) {
+  try {
+    redis = new Redis(process.env.REDIS_URL);
+    const sub = redis.duplicate();
+    // Connect both clients (ioredis connects lazily, ensure connected)
+    redis.connect().catch(() => {});
+    sub.connect().catch(() => {});
+    io.adapter(createAdapter(redis, sub));
+    console.log('Socket.IO using Redis adapter');
+  } catch (e) {
+    console.warn('Failed to initialize Redis adapter', e.message || e);
+    redis = null;
+  }
+}
 
 function parseCookieString(cookie = '') {
   return cookie.split(';').map(c => c.trim()).reduce((acc, cur) => {
@@ -50,12 +69,12 @@ io.use(async (socket, next) => {
     }
     if (!token) return next(new Error('unauthenticated'));
     const user = jwt.verify(token, SECRET);
-    console.log('socket auth succeeded for user', user && user.id);
+    console.log('[Socket Auth Success]', { socketId: socket.id, userId: user && user.id, role: user && user.role });
     // attach minimal user info
     socket.user = { id: user.id, role: user.role, email: user.email };
     return next();
   } catch (err) {
-    console.warn('socket auth failed', err.message);
+    console.warn('[Socket Auth Failed]', { socketId: socket.id, err: err && err.message });
     return next(new Error('invalid_token'));
   }
 });
@@ -66,8 +85,10 @@ io.on('connection', (socket) => {
   // Debug helper: client can request its authenticated user info
   socket.on('whoami', () => {
     try {
+      console.log('[Socket WhoAmI]', { socketId: socket.id, user: socket.user });
       socket.emit('me', { id: socket.user?.id, role: socket.user?.role, email: socket.user?.email });
     } catch (e) {
+      console.warn('[Socket WhoAmI Error]', { socketId: socket.id, err: e && e.message });
       socket.emit('me', { error: 'no_user' });
     }
   });
@@ -76,6 +97,12 @@ io.on('connection', (socket) => {
     if (!chatId) return;
     socket.join(`chat:${chatId}`);
     console.log(`socket ${socket.id} joined chat:${chatId}`);
+    // persist presence in Redis set per chat for multi-instance
+    try {
+      if (redis) {
+        await redis.sadd(`chat:${chatId}:online`, socket.user.id);
+      }
+    } catch (e) { console.error('presence add error', e); }
     // broadcast presence
     socket.to(`chat:${chatId}`).emit('presence', { userId: socket.user.id, online: true });
   });
@@ -83,6 +110,11 @@ io.on('connection', (socket) => {
   socket.on('leave', (chatId) => {
     if (!chatId) return;
     socket.leave(`chat:${chatId}`);
+    try {
+      if (redis) {
+        redis.srem(`chat:${chatId}:online`, socket.user.id).catch(() => {});
+      }
+    } catch (e) { console.error('presence rem error', e); }
     socket.to(`chat:${chatId}`).emit('presence', { userId: socket.user.id, online: false });
   });
 
@@ -98,7 +130,7 @@ io.on('connection', (socket) => {
   if (!socket.rate) socket.rate = { timestamps: [] };
 
   socket.on('message', async (payload, ack) => {
-    // payload: { chatId, text, clientKey? }
+    // payload: { chatId, text?, fileUrl?, mimeType?, fileName?, clientKey? }
     try {
       // basic rate limiting
       const now = Date.now();
@@ -108,8 +140,9 @@ io.on('connection', (socket) => {
       }
       socket.rate.timestamps.push(now);
 
-      const { chatId, text, clientKey } = payload || {};
-      if (!chatId || !text || !text.trim()) return ack && ack({ error: 'invalid_payload' });
+      const { chatId, text, fileUrl, mimeType, fileName, clientKey } = payload || {};
+      if (!chatId) return ack && ack({ error: 'invalid_payload' });
+      if (!text && !fileUrl) return ack && ack({ error: 'invalid_payload' });
 
       // verify chat exists and user is participant
       const chat = await prisma.chat.findUnique({ where: { id: chatId } });
@@ -138,9 +171,15 @@ io.on('connection', (socket) => {
         }
       }
 
-      const message = await prisma.message.create({ data: { chatId, sender, text, clientKey } });
+      const createData = { chatId, sender, clientKey };
+      if (text) createData.text = text;
+      if (fileUrl) createData.fileUrl = fileUrl;
+      if (mimeType) createData.mimeType = mimeType;
+      if (fileName) createData.fileName = fileName;
 
-      // broadcast to room with ackable payload
+      const message = await prisma.message.create({ data: createData });
+
+      // broadcast to room with ackable payload (include file fields)
       const payloadOut = { ...message, time: message.createdAt };
       io.to(`chat:${chatId}`).emit('message', payloadOut);
 
@@ -154,9 +193,68 @@ io.on('connection', (socket) => {
     }
   });
 
+  // delivered/read acknowledgements from clients
+  // payload: { messageIds: [id,...] }
+  socket.on('delivered_ack', async ({ messageIds } = {}) => {
+    try {
+      if (!Array.isArray(messageIds) || !messageIds.length) return;
+      for (const id of messageIds) {
+        try {
+          const msg = await prisma.message.findUnique({ where: { id } });
+          if (!msg) continue;
+          // upgrade status: sent -> delivered
+          if (msg.status === 'sent') {
+            await prisma.message.update({ where: { id }, data: { status: 'delivered' } });
+            io.to(`chat:${msg.chatId}`).emit('message_update', { id, status: 'delivered' });
+          }
+        } catch (e) { console.error('delivered_ack error', e); }
+      }
+    } catch (e) { console.error('delivered_ack handler error', e); }
+  });
+
+  socket.on('read_ack', async ({ messageIds } = {}) => {
+    try {
+      if (!Array.isArray(messageIds) || !messageIds.length) return;
+      for (const id of messageIds) {
+        try {
+          const msg = await prisma.message.findUnique({ where: { id } });
+          if (!msg) continue;
+          // upgrade status to read
+          if (msg.status !== 'read') {
+            await prisma.message.update({ where: { id }, data: { status: 'read' } });
+            io.to(`chat:${msg.chatId}`).emit('message_update', { id, status: 'read' });
+            io.to(`chat:${msg.chatId}`).emit('message_read', { messageId: id, userId: socket.user.id, timestamp: new Date() });
+          }
+        } catch (e) { console.error('read_ack error', e); }
+      }
+    } catch (e) { console.error('read_ack handler error', e); }
+  });
+
   socket.on('disconnect', (reason) => {
     console.log('socket disconnected', socket.id, reason);
+    // On disconnect, remove the user from any chat:${chatId}:online sets they were part of
+    try {
+      const rooms = Array.from(socket.rooms || []);
+      rooms.forEach((r) => {
+        if (!r.startsWith('chat:')) return;
+        const chatId = r.split(':')[1];
+        if (redis) {
+          redis.srem(`chat:${chatId}:online`, socket.user.id).catch(() => {});
+        }
+        socket.to(r).emit('presence', { userId: socket.user.id, online: false });
+      });
+    } catch (e) { console.error('disconnect presence cleanup failed', e); }
   });
+});
+
+server.on('error', (err) => {
+  if (err && err.code === 'EADDRINUSE') {
+    console.warn(`Socket.io port ${PORT} already in use — skipping socket server start.`);
+    // exit gracefully so developer workflow can continue (non-fatal)
+    process.exit(0);
+  }
+  console.error('Socket server error', err);
+  process.exit(1);
 });
 
 server.listen(PORT, () => {

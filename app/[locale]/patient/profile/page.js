@@ -80,10 +80,6 @@ export default function PatientProfilePage() {
     createdAt: '',
     updatedAt: ''
   });
-  // (تمت إزالة useEffect غير الضروري الذي يعدل الحالة مباشرة)
-
-  // healthData removed per request — no default sample health info
-
   // load profile from API
   useEffect(() => {
     let mounted = true;
@@ -118,17 +114,6 @@ export default function PatientProfilePage() {
     });
     return () => { mounted = false; };
   }, []);
-
-  // ...existing code...
-
-  // ...existing code...
-
-  // ...existing code...
-
-  // ...existing code...
-
-  // ...existing code...
-
   // --- Editable fields ---
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
@@ -243,7 +228,7 @@ export default function PatientProfilePage() {
                   <div className="text-gray-400 text-xs mt-1">{labels.patientNumber || 'Patient No.'}: {profileData.id}</div>
                 )}
                 {profileData.userId && (
-                  <div className="text-gray-400 text-xs mt-1">User ID: {profileData.userId}</div>
+                  <div className="text-gray-400 text-xs mt-1">{t('userId', { defaultValue: 'User ID' })}: {profileData.userId}</div>
                 )}
               </div>
             </div>
@@ -265,15 +250,28 @@ export default function PatientProfilePage() {
                 )}
               </div>
               <div>
-                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.gender || 'الجنس'}</div>
+                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.gender || t('field.genderLabel', { defaultValue: 'الجنس' })}</div>
                 {isEditing ? (
-                  <input name="gender" value={profileData.gender} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white" />
+                  <select
+                    name="gender"
+                    value={profileData.gender || ''}
+                    onChange={handleFieldChange}
+                    className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+                  >
+                    <option value="">—</option>
+                    <option value="male">{t('field.gender.male', { defaultValue: 'ذكر' })}</option>
+                    <option value="female">{t('field.gender.female', { defaultValue: 'أنثى' })}</option>
+                  </select>
                 ) : (
-                  <div className="text-gray-900 dark:text-white">{profileData.gender || '—'}</div>
+                  <div className="text-gray-900 dark:text-white">
+                    {profileData.gender === 'male' && t('field.gender.male', { defaultValue: 'ذكر' })}
+                    {profileData.gender === 'female' && t('field.gender.female', { defaultValue: 'أنثى' })}
+                    {!profileData.gender && '—'}
+                  </div>
                 )}
               </div>
               <div>
-                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.notes || 'ملاحظات'}</div>
+                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.notes || t('field.notes', { defaultValue: 'ملاحظات' })}</div>
                 {isEditing ? (
                   <input name="notes" value={profileData.notes} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white" />
                 ) : (
@@ -282,37 +280,37 @@ export default function PatientProfilePage() {
               </div>
               {profileData.doctorName && (
                 <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">الطبيب الحالي</div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('currentDoctor', { defaultValue: 'الطبيب الحالي' })}</div>
                   <div className="text-gray-900 dark:text-white">{profileData.doctorName} {profileData.doctorId && <span className="text-xs text-gray-400">({profileData.doctorId})</span>}</div>
                 </div>
               )}
               {profileData.joinDate && (
                 <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">تاريخ الانضمام</div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('joinDate', { defaultValue: 'تاريخ الانضمام' })}</div>
                   <div className="text-gray-900 dark:text-white">{new Date(profileData.joinDate).toLocaleDateString(locale)}</div>
                 </div>
               )}
               {profileData.lastVisit && (
                 <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">آخر زيارة</div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('lastVisit', { defaultValue: 'آخر زيارة' })}</div>
                   <div className="text-gray-900 dark:text-white">{new Date(profileData.lastVisit).toLocaleDateString(locale)}</div>
                 </div>
               )}
               {profileData.status && (
                 <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">الحالة</div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('status', { defaultValue: 'الحالة' })}</div>
                   <div className="text-gray-900 dark:text-white">{profileData.status}</div>
                 </div>
               )}
               {profileData.createdAt && (
                 <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">تاريخ الإنشاء</div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('createdAt', { defaultValue: 'تاريخ الإنشاء' })}</div>
                   <div className="text-gray-900 dark:text-white">{new Date(profileData.createdAt).toLocaleDateString(locale)}</div>
                 </div>
               )}
               {profileData.updatedAt && (
                 <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">آخر تحديث</div>
+                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('updatedAt', { defaultValue: 'آخر تحديث' })}</div>
                   <div className="text-gray-900 dark:text-white">{new Date(profileData.updatedAt).toLocaleDateString(locale)}</div>
                 </div>
               )}
@@ -321,8 +319,8 @@ export default function PatientProfilePage() {
 
           {/* Doctor Change Request Section */}
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6 mt-8">
-            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">طلب تغيير الطبيب</h2>
-            <DoctorChangeRequestForm showToast={showToast} />
+            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">{t('doctorChange.title', { defaultValue: 'طلب تغيير الطبيب' })}</h2>
+            <DoctorChangeRequestForm showToast={showToast} t={t} />
           </div>
         </div>
       </div>
@@ -331,7 +329,7 @@ export default function PatientProfilePage() {
 }
 
 // --- DoctorChangeRequestForm: fetches real doctors and renders the form ---
-function DoctorChangeRequestForm({ showToast }) {
+function DoctorChangeRequestForm({ showToast, t }) {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -359,7 +357,7 @@ function DoctorChangeRequestForm({ showToast }) {
         const requestedDoctorId = form.requestedDoctorId.value;
         const reason = form.reason.value;
         if (!requestedDoctorId) {
-          showToast('يرجى اختيار طبيب جديد', 'error');
+          showToast(t('toast.doctorChangeSelect', { defaultValue: 'يرجى اختيار طبيب جديد' }), 'error');
           return;
         }
         try {
@@ -371,33 +369,33 @@ function DoctorChangeRequestForm({ showToast }) {
           });
           if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            showToast(err.error || 'فشل الطلب', 'error');
+            showToast(err.error || t('toast.doctorChangeFail', { defaultValue: 'فشل الطلب' }), 'error');
             return;
           }
-          showToast('تم إرسال طلب تغيير الطبيب للإدارة وسيتم مراجعته قريباً', 'success');
+          showToast(t('toast.doctorChangeSent', { defaultValue: 'تم إرسال طلب تغيير الطبيب للإدارة وسيتم مراجعته قريباً' }), 'success');
           form.reset();
         } catch (err) {
-          showToast('فشل الاتصال', 'error');
+          showToast(t('toast.doctorChangeNetwork', { defaultValue: 'فشل الاتصال' }), 'error');
         }
       }}
       className="flex flex-col gap-4"
     >
       <div>
-        <label className="block mb-1 text-gray-700 dark:text-gray-200">اختر الطبيب الجديد</label>
+        <label className="block mb-1 text-gray-700 dark:text-gray-200">{t('doctorChange.selectLabel', { defaultValue: 'اختر الطبيب الجديد' })}</label>
         <select name="requestedDoctorId" className="w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white" disabled={loading}>
-          <option value="">-- اختر --</option>
-          {loading && <option disabled>جاري التحميل...</option>}
-          {!loading && doctors.length === 0 && <option disabled>لا يوجد أطباء متاحون</option>}
+          <option value="">{t('doctorChange.selectPlaceholder', { defaultValue: '-- اختر --' })}</option>
+          {loading && <option disabled>{t('doctorChange.loading', { defaultValue: 'جاري التحميل...' })}</option>}
+          {!loading && doctors.length === 0 && <option disabled>{t('doctorChange.noDoctors', { defaultValue: 'لا يوجد أطباء متاحون' })}</option>}
           {doctors.map((doc) => (
             <option key={doc.id} value={doc.id}>{doc.fullName || doc.name || doc.email || doc.id}</option>
           ))}
         </select>
       </div>
       <div>
-        <label className="block mb-1 text-gray-700 dark:text-gray-200">سبب الطلب (اختياري)</label>
-        <textarea name="reason" className="w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white" rows={2} placeholder="اكتب سبب رغبتك في تغيير الطبيب (اختياري)" />
+        <label className="block mb-1 text-gray-700 dark:text-gray-200">{t('doctorChange.reasonLabel', { defaultValue: 'سبب الطلب (اختياري)' })}</label>
+        <textarea name="reason" className="w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white" rows={2} placeholder={t('doctorChange.reasonPlaceholder', { defaultValue: 'اكتب سبب رغبتك في تغيير الطبيب (اختياري)' })} />
       </div>
-      <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded self-end">إرسال الطلب</button>
+      <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded self-end">{t('doctorChange.submit', { defaultValue: 'إرسال الطلب' })}</button>
     </form>
   );
 }

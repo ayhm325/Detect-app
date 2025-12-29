@@ -1,5 +1,7 @@
 import prisma from '../lib/prismaClient.js';
-import { v4 as uuidv4 } from 'uuid';
+
+// Prefer native crypto.randomUUID when available (Node 18+ / modern runtimes).
+const hasNativeRandomUUID = Boolean(globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function');
 
 async function main() {
   console.log('Starting backfill for clientKey...');
@@ -10,7 +12,14 @@ async function main() {
     const msgs = await prisma.message.findMany({ where: { clientKey: null }, take: batchSize });
     if (!msgs || msgs.length === 0) break;
     for (const m of msgs) {
-      const key = uuidv4();
+      let key;
+      if (hasNativeRandomUUID) {
+        key = globalThis.crypto.randomUUID();
+      } else {
+        // dynamic import to avoid requiring `uuid` unless needed
+        const { v4: uuidv4 } = await import('uuid');
+        key = uuidv4();
+      }
       await prisma.message.update({ where: { id: m.id }, data: { clientKey: key } });
       updated++;
     }

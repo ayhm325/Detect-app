@@ -40,41 +40,105 @@ export default function DoctorAppointmentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // booking form state for doctor creating appointments
+  const [bookPatientId, setBookPatientId] = useState("");
+  const [patients, setPatients] = useState([]);
+  const [patientsLoading, setPatientsLoading] = useState(false);
+  const [patientSearch, setPatientSearch] = useState("");
+  const [bookDate, setBookDate] = useState("");
+  const [bookTime, setBookTime] = useState("");
+  const [bookType, setBookType] = useState("clinic");
+  const [bookReason, setBookReason] = useState("");
+
   useEffect(() => {
-    fetch("/api/doctor/appointments")
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Failed to fetch appointments");
-        const data = await res.json();
-        // Transform API data to match UI expectations
-        const mapped = (data.appointments || []).map((a) => ({
-          id: a.id,
-          patientName: a.patient?.name || "-",
-          date: a.scheduledAt,
-          time: a.scheduledAt ? new Date(a.scheduledAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG", { hour: "2-digit", minute: "2-digit" }) : "-",
-          type: "clinic", // You can adjust this if you have type info
-          status: a.status || "pending",
-          phone: a.patient?.phone || "-",
-          reason: a.reason || "-"
-        }));
-        setAppointments(mapped);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+    // use reusable loader
+    fetchAppointments();
+    fetchPatients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t, locale]);
+
+  async function fetchPatients() {
+    setPatientsLoading(true);
+    try {
+      const res = await fetch("/api/doctor/patients");
+      if (!res.ok) throw new Error("Failed to fetch patients");
+      const data = await res.json();
+      // patients returned as array of patient records
+      const mapped = (data || []).map((p) => ({ id: p.id, fullName: p.fullName || p.user?.fullName || p.email, phone: p.phone || "" }));
+      setPatients(mapped);
+    } catch (err) {
+      // ignore silently
+      setPatients([]);
+    } finally {
+      setPatientsLoading(false);
+    }
+  }
+
+  async function fetchAppointments() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/doctor/appointments");
+      if (!res.ok) throw new Error("Failed to fetch appointments");
+      const data = await res.json();
+      const mapped = (data.appointments || []).map((a) => ({
+        id: a.id,
+        patientName: a.patient?.name || "-",
+        date: a.scheduledAt,
+        time: a.scheduledAt ? new Date(a.scheduledAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG", { hour: "2-digit", minute: "2-digit" }) : "-",
+        type: a.type || "clinic",
+        status: a.status || "pending",
+        phone: a.doctor?.phone || a.patient?.phone || "-",
+        reason: a.reason || "-",
+        patientReason: a.patientReason || "",
+        location: a.type === "online" ? (a.location || "عن بعد") : (a.location || "العيادة")
+      }));
+      setAppointments(mapped);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  }
+
+  async function createAppointment(e) {
+    e.preventDefault();
+    if (!bookPatientId || !bookDate || !bookTime) {
+      showToast(t("toast.fillRequired", { defaultValue: "Please fill required fields" }), "error");
+      return;
+    }
+    const scheduledAt = new Date(`${bookDate}T${bookTime}`);
+    try {
+      const res = await fetch("/api/doctor/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ patientId: bookPatientId, scheduledAt: scheduledAt.toISOString(), type: bookType, reason: bookReason })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || t("toast.error", { defaultValue: "Failed to create appointment" }), "error");
+        return;
+      }
+      showToast(t("toast.created", { defaultValue: "Appointment created" }), "success");
+      setShowAddModal(false);
+      setBookPatientId(""); setBookDate(""); setBookTime(""); setBookType("clinic"); setBookReason("");
+      await fetchAppointments();
+    } catch (err) {
+      showToast(t("toast.error", { defaultValue: "Failed to create appointment" }), "error");
+    }
+  }
 
   const stats = {
     total: appointments.length,
-    confirmed: appointments.filter((a) => a.status === "confirmed").length,
-    pending: appointments.filter((a) => a.status === "pending").length,
+    confirmed: appointments.filter((a) => a.status === "confirmed" || a.status === "completed").length,
+    pending: appointments.filter((a) => a.status === "pending" || a.status === "scheduled" || !a.status).length,
     cancelled: appointments.filter((a) => a.status === "cancelled").length,
   };
 
   const filteredAppointments = appointments
     .filter((apt) => {
       if (filter === "all") return true;
+      if (filter === "confirmed") return apt.status === "confirmed" || apt.status === "completed";
       return apt.status === filter;
     })
     .filter((apt) => {
@@ -99,27 +163,45 @@ export default function DoctorAppointmentsPage() {
           showToast(t("toast.cancel"), "info");
   };
 
-  const handleDelete = (id) => {
-    setAppointments(appointments.filter((apt) => apt.id !== id));
-          showToast(t("toast.delete"), "success");
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`/api/doctor/appointments/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || t("toast.error", { defaultValue: "Failed to delete appointment" }), "error");
+        return;
+      }
+      setAppointments(appointments.filter((apt) => apt.id !== id));
+      showToast(t("toast.delete"), "success");
+    } catch (err) {
+      showToast(t("toast.error", { defaultValue: "Failed to delete appointment" }), "error");
+    }
   };
 
   const getStatusBadge = (status) => {
-    const statusConfig = {
-            confirmed: { label: t("statuses.confirmed"), color: "bg-green-100 text-green-700 border-green-200" },
-            pending: { label: t("statuses.pending"), color: "bg-orange-100 text-orange-700 border-orange-200" },
-            cancelled: { label: t("statuses.cancelled"), color: "bg-red-100 text-red-700 border-red-200" },
-    };
-    const config = statusConfig[status] || statusConfig.pending;
+    let label, color;
+    if (status === "confirmed" || status === "completed") {
+      label = t("statuses.confirmed");
+      color = "bg-green-100 text-green-700 border-green-200";
+    } else if (status === "pending") {
+      label = t("statuses.pending");
+      color = "bg-orange-100 text-orange-700 border-orange-200";
+    } else if (status === "cancelled") {
+      label = t("statuses.cancelled");
+      color = "bg-red-100 text-red-700 border-red-200";
+    } else {
+      label = t("statuses.pending");
+      color = "bg-gray-100 text-gray-700 border-gray-200";
+    }
     return (
-      <span className={`rounded-full border px-3 py-1 text-xs font-medium ${config.color}`}>
-        {config.label}
+      <span className={`rounded-full border px-3 py-1 text-xs font-medium ${color}`}>
+        {label}
       </span>
     );
   };
 
   const getStatusIcon = (status) => {
-    if (status === "confirmed") return <FaCheckCircle className="text-green-600" />;
+    if (status === "confirmed" || status === "completed") return <FaCheckCircle className="text-green-600" />;
     if (status === "pending") return <FaHourglassHalf className="text-orange-600" />;
     return <FaTimesCircle className="text-red-600" />;
   };
@@ -310,7 +392,7 @@ export default function DoctorAppointmentsPage() {
                             ) : (
                               <FaMapMarkerAlt className="text-red-600" />
                             )}
-                                  {apt.type === "online" ? t("types.online") : t("types.clinic")}
+                            {apt.location}
                           </div>
                         </div>
 
@@ -320,8 +402,13 @@ export default function DoctorAppointmentsPage() {
                         </div>
 
                         <p className="text-sm text-gray-700">
-                          <span className="font-medium">{t("reasonLabel")}</span> {apt.reason}
+                          <span className="font-bold">{t("reasonLabel")}</span> {apt.reason}
                         </p>
+                        {apt.status === "cancelled" && apt.patientReason && (
+                          <p className="text-sm text-red-700 mt-1">
+                            <span className="font-bold">{t("cancelReasonLabel", { defaultValue: "سبب الإلغاء:" })}</span> {apt.patientReason}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -330,7 +417,7 @@ export default function DoctorAppointmentsPage() {
                       {apt.status === "pending" && (
                         <button
                           onClick={() => handleConfirm(apt.id)}
-                          className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-green-700"
+                          className="flex items-center gap-2 rounded-lg bg-green-900 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-green-700"
                         >
                           <FaCheckCircle />
                                 {t("actions.confirm")}
@@ -339,7 +426,7 @@ export default function DoctorAppointmentsPage() {
                       {apt.status !== "cancelled" && (
                         <button
                           onClick={() => handleCancel(apt.id)}
-                          className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-orange-700"
+                          className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-orange-700"
                         >
                           <FaTimesCircle />
                                 {t("actions.cancel")}
@@ -347,7 +434,7 @@ export default function DoctorAppointmentsPage() {
                       )}
                       <button
                         onClick={() => handleDelete(apt.id)}
-                        className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-red-700"
+                        className="flex items-center gap-2 rounded-lg bg-red-900 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-red-700"
                       >
                         <FaTrash />
                               {t("actions.delete")}
@@ -360,6 +447,66 @@ export default function DoctorAppointmentsPage() {
           </div>
         </div>
       </div>
+
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <form onSubmit={createAppointment} className="bg-white dark:bg-slate-800 p-6 rounded-lg w-full max-w-md">
+            <h3 className="text-lg font-bold mb-4">{t("addButton", { defaultValue: "Add New Appointment" })}</h3>
+
+            <label className="block mb-2 text-sm">{t("patient", { defaultValue: "Patient" })}</label>
+            <input
+              placeholder={t("searchPlaceholder", { defaultValue: "Search by patient name..." })}
+              value={patientSearch}
+              onChange={(e) => setPatientSearch(e.target.value)}
+              className="w-full p-2 border rounded mb-2"
+            />
+            <select
+              value={bookPatientId}
+              onChange={(e) => setBookPatientId(e.target.value)}
+              className="w-full p-2 border rounded mb-3"
+            >
+              <option value="">{patientsLoading ? t("loading", { defaultValue: "Loading..." }) : t("patient", { defaultValue: "Select patient" })}</option>
+              {patients
+                .filter((p) => (patientSearch ? p.fullName.toLowerCase().includes(patientSearch.toLowerCase()) : true))
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.fullName} {p.phone ? ` - ${p.phone}` : ""}
+                  </option>
+                ))}
+            </select>
+
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="block mb-2 text-sm">{t("date", { defaultValue: "Date" })}</label>
+                <input type="date" value={bookDate} onChange={(e) => setBookDate(e.target.value)} className="w-full p-2 border rounded" />
+              </div>
+              <div>
+                <label className="block mb-2 text-sm">{t("time", { defaultValue: "Time" })}</label>
+                <input type="time" value={bookTime} onChange={(e) => setBookTime(e.target.value)} className="w-full p-2 border rounded" />
+              </div>
+            </div>
+
+            <label className="block mb-2 text-sm">{t("types.clinic", { defaultValue: "Type" })}</label>
+            <select value={bookType} onChange={(e) => setBookType(e.target.value)} className="w-full p-2 border rounded mb-3">
+              <option value="clinic">{t("types.clinic", { defaultValue: "Clinic" })}</option>
+              <option value="online">{t("types.online", { defaultValue: "Online" })}</option>
+            </select>
+
+            <label className="block mb-2 text-sm">{t("reasonLabel", { defaultValue: "Reason:" })}</label>
+            <input value={bookReason} onChange={(e) => setBookReason(e.target.value)} className="w-full p-2 border rounded mb-3" />
+
+            {/* phone removed from booking form */}
+
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => setShowAddModal(false)} className="px-4 py-2 rounded border">{t("actions.cancel", { defaultValue: "Cancel" })}</button>
+              <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white">{t("appointments.form.submit", { defaultValue: "Book" })}</button>
+            </div>
+          </form>
+        </div>
+      )}
+
     </DoctorLayout>
   );
 }
+
+// Modal form was added above inside the component return; ensure it's included here

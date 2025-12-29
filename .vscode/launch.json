@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Open Next.js in Browser (ensure dev)",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "preLaunchTask": "Dev: Next.js",
+      "webRoot": "${workspaceFolder}",
+      "presentation": {
+        "hidden": false
+      }
+    },
+    {
+      "name": "Run E2E (start dev + socket)",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "args": ["playwright","test","--project=chromium"],
+      "preLaunchTask": "Dev: Next.js + Socket",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

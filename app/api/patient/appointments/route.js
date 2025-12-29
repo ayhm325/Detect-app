@@ -46,11 +46,15 @@ export const GET = withRBAC(async (request, user) => {
 
     const out = appointments.map((a) => ({
       id: a.id,
-      doctor: a.doctor?.user?.fullName || a.doctor?.user?.displayName || null,
+      patient: a.patient ? { id: a.patient.id, name: a.patient.fullName, phone: a.patient.phone || null } : null,
+      doctor: a.doctor ? { id: a.doctor.id, name: a.doctor.user?.fullName || a.doctor.user?.displayName || null, phone: a.doctor.phone || null, user: a.doctor.user || null, clinic: a.doctor?.clinic || null } : null,
       doctorId: a.doctorId,
       scheduledAt: a.scheduledAt,
       status: a.status,
       reason: a.reason,
+      type: a.type || "clinic",
+      // try several possible location sources: appointment.location, doctor's clinic, doctor's user.address
+      location: a.location || (a.doctor && (a.doctor.clinic || a.doctor.user?.address)) || null,
       createdAt: a.createdAt
     }));
 
@@ -70,7 +74,7 @@ export const POST = withRBAC(async (request, user) => {
   }
   try {
     const body = await request.json();
-    const { doctorId, scheduledAt, reason } = body;
+    const { doctorId, scheduledAt, reason, location, phone } = body;
     if (!doctorId || !scheduledAt) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
     const userId = user.id;
@@ -85,7 +89,9 @@ export const POST = withRBAC(async (request, user) => {
           patientId: patient.id,
           scheduledAt: scheduledDate,
           status: "scheduled",
-          reason: reason || null
+          reason: reason || null,
+          location: location || null,
+          phone: phone || null
         }
       });
 

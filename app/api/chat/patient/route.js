@@ -1,3 +1,47 @@
+
+export const POST = withRBAC(async (request, user) => {
+  try {
+    const body = await request.json();
+    // If doctor, keep old logic
+    if (user.role === "doctor") {
+      const { patientId } = body;
+      if (!patientId) {
+        return NextResponse.json({ error: "missing_patient_id" }, { status: 400 });
+      }
+      // Check if chat already exists
+      let chat = await prisma.chat.findFirst({ where: { doctorId: user.id, patientId } });
+      if (!chat) {
+        chat = await prisma.chat.create({ data: { doctorId: user.id, patientId } });
+      }
+      return NextResponse.json({ chat }, { status: 201 });
+    }
+    // If patient, allow them to start a chat with their assigned doctor
+    if (user.role === "patient") {
+      // Find patient record
+      const patient = await prisma.patient.findUnique({ where: { userId: user.id } });
+      if (!patient) {
+        return NextResponse.json({ error: "patient_not_found" }, { status: 404 });
+      }
+      if (!patient.doctorId) {
+        return NextResponse.json({ error: "no_doctor_linked" }, { status: 400 });
+      }
+      // Check if chat already exists
+      let chat = await prisma.chat.findFirst({ where: { doctorId: patient.doctorId, patientId: patient.id } });
+      if (!chat) {
+        chat = await prisma.chat.create({ data: { doctorId: patient.doctorId, patientId: patient.id } });
+      }
+      return NextResponse.json({ chat }, { status: 201 });
+    }
+    // Otherwise, forbidden
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("/api/chat/patient POST error:", error);
+      return NextResponse.json({ error: error.message || String(error) }, { status: 500 });
+    }
+    return NextResponse.json({ error: "server_error" }, { status: 500 });
+  }
+}, ["doctor", "patient"]);
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prismaClient.js";
 import { withRBAC } from "../../../../lib/auth/withRBAC";

@@ -14,6 +14,9 @@ const config = {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
   },
+  projects: [
+    { name: 'chromium', use: { browserName: 'chromium' } },
+  ],
 };
 
 export default config;

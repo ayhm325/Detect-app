@@ -32,104 +32,82 @@ export default function DoctorPatientsPage({ locale }) {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [patients, setPatients] = useState([]);
 
-  const patientsTemplate = useMemo(
-    () => [
-      {
-        id: 1,
-              name: t("items.0.name"),
-              age: t("items.0.age"),
-              gender: t("items.0.gender"),
-              phone: t("items.0.phone"),
-              email: t("items.0.email"),
-              status: t("items.0.status"),
-              lastVisit: t("items.0.lastVisit"),
-              nextAppointment: t("items.0.nextAppointment"),
-              diagnosis: t("items.0.diagnosis"),
-              scansCount: t("items.0.scansCount"),
-              avatar: t("items.0.avatar"),
-              bloodType: t("items.0.bloodType"),
-              conditions: t("items.0.conditions", { returnObjects: true }),
-      },
-      {
-        id: 2,
-              name: t("items.1.name"),
-              age: t("items.1.age"),
-              gender: t("items.1.gender"),
-              phone: t("items.1.phone"),
-              email: t("items.1.email"),
-              status: t("items.1.status"),
-              lastVisit: t("items.1.lastVisit"),
-              nextAppointment: t("items.1.nextAppointment"),
-              diagnosis: t("items.1.diagnosis"),
-              scansCount: t("items.1.scansCount"),
-              avatar: t("items.1.avatar"),
-              bloodType: t("items.1.bloodType"),
-              conditions: t("items.1.conditions", { returnObjects: true }),
-      },
-      {
-        id: 3,
-              name: t("items.2.name"),
-              age: t("items.2.age"),
-              gender: t("items.2.gender"),
-              phone: t("items.2.phone"),
-              email: t("items.2.email"),
-              status: t("items.2.status"),
-              lastVisit: t("items.2.lastVisit"),
-              nextAppointment: t("items.2.nextAppointment"),
-              diagnosis: t("items.2.diagnosis"),
-              scansCount: t("items.2.scansCount"),
-              avatar: t("items.2.avatar"),
-              bloodType: t("items.2.bloodType"),
-              conditions: t("items.2.conditions", { returnObjects: true }),
-      },
-      {
-        id: 4,
-              name: t("items.3.name"),
-              age: t("items.3.age"),
-              gender: t("items.3.gender"),
-              phone: t("items.3.phone"),
-              email: t("items.3.email"),
-              status: t("items.3.status"),
-              lastVisit: t("items.3.lastVisit"),
-              nextAppointment: t("items.3.nextAppointment"),
-              diagnosis: t("items.3.diagnosis"),
-              scansCount: t("items.3.scansCount"),
-              avatar: t("items.3.avatar"),
-              bloodType: t("items.3.bloodType"),
-              conditions: t("items.3.conditions", { returnObjects: true }),
-      },
-      {
-        id: 5,
-              name: t("items.4.name"),
-              age: t("items.4.age"),
-              gender: t("items.4.gender"),
-              phone: t("items.4.phone"),
-              email: t("items.4.email"),
-              status: t("items.4.status"),
-              lastVisit: t("items.4.lastVisit"),
-              nextAppointment: t("items.4.nextAppointment"),
-              diagnosis: t("items.4.diagnosis"),
-              scansCount: t("items.4.scansCount"),
-              avatar: t("items.4.avatar"),
-              bloodType: t("items.4.bloodType"),
-              conditions: t("items.4.conditions", { returnObjects: true }),
-      },
-    ],
-    [t]
-  );
+  // Helper: compute age from birthDate string
+  const computeAge = (birthDate) => {
+    if (!birthDate) return "";
+    try {
+      const bd = new Date(birthDate);
+      const diff = Date.now() - bd.getTime();
+      const ageDt = new Date(diff);
+      return Math.abs(ageDt.getUTCFullYear() - 1970);
+    } catch (e) {
+      return "";
+    }
+  };
 
-  const [patients, setPatients] = useState(patientsTemplate);
+  // Map server patient shape to UI shape expected by this page
+  const mapPatient = (p) => {
+    const name = p.fullName || (p.user && p.user.fullName) || p.name || "";
+    const birthDate = p.birthDate || p.birth_date || null;
+    const age = p.age || computeAge(birthDate) || "";
+    const gender = p.gender || (p.user && p.user.gender) || "";
+    const phone = p.phone || (p.user && p.user.phone) || p.mobile || "";
+    const email = p.email || (p.user && p.user.email) || "";
+    // Map backend status (e.g., active/suspended) to UI status keys (stable/critical/recovering)
+    let status = p.status || (p.user && p.user.status) || "stable";
+    if (status === "active") status = "stable";
+    if (status === "suspended") status = "critical";
 
+    return {
+      id: p.id || p.userId || Math.random().toString(36).slice(2, 9),
+      name,
+      age,
+      gender,
+      phone,
+      email,
+      status,
+      lastVisit: p.lastVisit || p.last_visit || p.joinDate || new Date().toISOString(),
+      nextAppointment: p.nextAppointment || p.next_appointment || null,
+      diagnosis: p.notes || p.diagnosis || (p.medicalRecords && p.medicalRecords[0] && p.medicalRecords[0].doctorNotes) || "",
+      scansCount: p.medicalRecordsCount || p.scansCount || 0,
+      avatar: (name && name.charAt ? name.charAt(0) : ""),
+      bloodType: p.bloodType || p.blood_type || "",
+      conditions: p.conditions || p.chronicConditions || p.notes || "",
+    };
+  };
+
+  // Fetch real patients from the API (fallback to translation-based template on error)
   useEffect(() => {
-    setPatients(patientsTemplate);
-  }, [patientsTemplate]);
+    let mounted = true;
+    const prefix = locale ? `/${locale}` : "";
+    (async () => {
+      try {
+        const res = await fetch(`${prefix}/api/doctor/patients`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        // support both direct array and { patients: [] }
+        const list = Array.isArray(json) ? json : json.patients || json.list || [];
+        const mapped = list.map(mapPatient);
+        if (mounted) setPatients(mapped);
+      } catch (err) {
+        // fetch failed — leave `patients` as-is (the translations-based template
+        // is applied by a separate effect). Log for debugging.
+        // eslint-disable-next-line no-console
+        console.error("Failed to fetch doctor patients:", err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [locale]);
 
   const stats = {
     total: patients.length,
-    stable: patients.filter((p) => p.status === t("statuses.stable")).length,
-    critical: patients.filter((p) => p.status === t("statuses.critical")).length,
-    recovering: patients.filter((p) => p.status === t("statuses.recovering")).length,
+    stable: patients.filter((p) => p.status === "stable").length,
+    critical: patients.filter((p) => p.status === "critical").length,
+    recovering: patients.filter((p) => p.status === "recovering").length,
   };
 
   const filteredPatients = patients.filter((patient) => {
@@ -180,6 +158,8 @@ export default function DoctorPatientsPage({ locale }) {
     );
   };
 
+  // No translation-based patient template — patients come from the API only.
+
   return (
     <DoctorLayout>
       <ToastContainer />
@@ -201,13 +181,7 @@ export default function DoctorPatientsPage({ locale }) {
               <p className="mt-2 text-gray-600">{t("subtitle")}</p>
             </div>
 
-            <button
-              onClick={() => showToast(t("toast.addSoon"), "info")}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              <FaUserPlus />
-              {t("addButton")}
-            </button>
+            {/* Add patient button removed per request */}
           </div>
 
           {/* Stats Cards */}

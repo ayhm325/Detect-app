@@ -11,25 +11,59 @@ export default function useSocket({ url } = {}) {
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
 
+  // Helper to find any existing global socket (prefer hook socketRef)
+  const getGlobalSocket = useCallback(() => {
+    if (socketRef.current) return socketRef.current;
+    const map = globalThis.__app_socket_by_user;
+    if (map && typeof map === 'object') {
+      const keys = Object.keys(map);
+      if (keys.length) return map[keys[0]].socket;
+    }
+    return (globalThis.__app_socket && globalThis.__app_socket.socket) || null;
+  }, []);
   // Create or reuse a global, reference-counted socket instance to avoid
   // multiple connections during HMR or when multiple components mount.
   const connect = useCallback((opts = {}) => {
+    // If we already have a socket for the same user, reuse it; otherwise ensure previous socket is cleaned up
+    const providedToken = opts.token || (typeof window !== 'undefined' ? window.__DEV_TOKEN : undefined);
+    const decodePayload = (tok) => {
+      try {
+        const parts = tok.split('.');
+        if (parts.length < 2) return null;
+        const b = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const json = decodeURIComponent(atob(b).split('').map(function(c) { return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); }).join(''));
+        return JSON.parse(json);
+      } catch (e) { return null; }
+    };
+    const newPayload = providedToken ? decodePayload(providedToken) : null;
+    const newUserId = newPayload && (newPayload.id ?? newPayload.userId ?? null);
+
     if (socketRef.current) {
-      return socketRef.current;
+      // If existing hook socket is for a different user, and we know newUserId, ensure we don't keep wrong user
+      const existingUserKey = socketRef.current.__app_userKey || null;
+      if (newUserId && existingUserKey && String(newUserId) !== String(existingUserKey)) {
+        try { socketRef.current.disconnect(); } catch (e) {}
+        socketRef.current = null;
+      } else {
+        return socketRef.current;
+      }
     }
 
     const devToken = typeof window !== 'undefined' ? window.__DEV_TOKEN : undefined;
-    const auth = opts.token || devToken ? { token: opts.token || devToken } : undefined;
+    const authToken = opts.token || devToken ? (opts.token || devToken) : undefined;
+    const auth = authToken ? { token: authToken } : undefined;
     const defaultUrl = (typeof window !== 'undefined' && (devToken || process.env.NODE_ENV === 'development'))
-      ? 'http://localhost:4000'
+      ? (typeof window !== 'undefined' && (window.__DEV_SOCKET_URL || globalThis.__DEV_SOCKET_URL) ? (window.__DEV_SOCKET_URL || globalThis.__DEV_SOCKET_URL) : 'http://localhost:4000')
       : (typeof window !== 'undefined' ? window.location.origin : '');
 
     const socketKey = url || defaultUrl;
 
-    // reuse global socket if present and for same URL
-    if (globalThis.__app_socket && globalThis.__app_socket.url === socketKey) {
-      globalThis.__app_socket_refcount = (globalThis.__app_socket_refcount || 0) + 1;
-      socketRef.current = globalThis.__app_socket.socket;
+    // reuse per-user socket if present and for same URL
+    const map = globalThis.__app_socket_by_user || {};
+    const userKey = newUserId || '__anon__';
+    if (map[userKey] && map[userKey].url === socketKey) {
+      map[userKey].refcount = (map[userKey].refcount || 0) + 1;
+      socketRef.current = map[userKey].socket;
       // attach per-hook listeners for connect/disconnect but keep references
       const existing = socketRef.current;
       const onConnect = () => setConnected(true);
@@ -43,6 +77,16 @@ export default function useSocket({ url } = {}) {
           existing.off('disconnect', onDisconnect);
         } catch (e) {}
       };
+
+      // If a token was provided and differs from the current socket auth, update it and force reconnect
+      const newToken = authToken;
+      try {
+        if (newToken && existing.auth?.token !== newToken) {
+          existing.auth = { token: newToken };
+          try { if (existing.connected) existing.disconnect(); existing.connect(); } catch (e) {}
+        }
+      } catch (e) {}
+
       return socketRef.current;
     }
 
@@ -56,9 +100,17 @@ export default function useSocket({ url } = {}) {
       reconnectionDelayMax: 2000,
     });
 
-    // store globally
-    globalThis.__app_socket = { socket, url: socketKey };
-    globalThis.__app_socket_refcount = (globalThis.__app_socket_refcount || 0) + 1;
+    // store in per-user map
+    try {
+      const userKeyStore = newUserId || '__anon__';
+      globalThis.__app_socket_by_user = globalThis.__app_socket_by_user || {};
+      globalThis.__app_socket_by_user[userKeyStore] = { socket, url: socketKey, refcount: (globalThis.__app_socket_by_user[userKeyStore]?.refcount || 0) + 1 };
+      // tag socket with userKey for cleanup
+      try { socket.__app_userKey = userKeyStore; } catch (e) {}
+      // also set legacy pointer for compatibility
+      globalThis.__app_socket = { socket, url: socketKey };
+      try { globalThis.__app_socket_userId = newUserId; } catch (e) {}
+    } catch (e) {}
 
     // set up per-hook listeners and save cleanup
     const onConnect = () => setConnected(true);
@@ -88,18 +140,37 @@ export default function useSocket({ url } = {}) {
     if (!sock) return;
     // run per-hook cleanup (remove handlers added by this hook)
     try { if (sock._myCleanup) { sock._myCleanup(); sock._myCleanup = null; } } catch (e) {}
-    // decrement global refcount and only disconnect when no more consumers
-    globalThis.__app_socket_refcount = Math.max((globalThis.__app_socket_refcount || 1) - 1, 0);
-    if (globalThis.__app_socket_refcount === 0) {
-      try { sock.disconnect(); } catch (e) {}
-      delete globalThis.__app_socket;
-      delete globalThis.__app_socket_refcount;
-    }
+    // Prefer per-user map refcounts
+    try {
+      const userKey = sock.__app_userKey || '__anon__';
+      const map = globalThis.__app_socket_by_user || {};
+      if (map[userKey]) {
+        map[userKey].refcount = Math.max((map[userKey].refcount || 1) - 1, 0);
+        if (map[userKey].refcount === 0) {
+          try { sock.disconnect(); } catch (e) {}
+          try { delete globalThis.__app_socket_by_user[userKey]; } catch (e) {}
+          // clean legacy pointer if it matches
+          try { if (globalThis.__app_socket && globalThis.__app_socket.socket === sock) { delete globalThis.__app_socket; delete globalThis.__app_socket_userId; } } catch (e) {}
+        }
+        socketRef.current = null;
+        return;
+      }
+    } catch (e) {}
+
+    // fallback: legacy global refcount
+    try {
+      globalThis.__app_socket_refcount = Math.max((globalThis.__app_socket_refcount || 1) - 1, 0);
+      if (globalThis.__app_socket_refcount === 0) {
+        try { sock.disconnect(); } catch (e) {}
+        delete globalThis.__app_socket;
+        delete globalThis.__app_socket_refcount;
+      }
+    } catch (e) {}
     socketRef.current = null;
   }, []);
 
   const join = useCallback((chatId) => {
-    const sock = socketRef.current || (globalThis.__app_socket && globalThis.__app_socket.socket);
+    const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     // ensure we don't spam repeated join emits for same room
     globalThis.__app_socket_joinedRooms = globalThis.__app_socket_joinedRooms || new Map();
@@ -122,7 +193,7 @@ export default function useSocket({ url } = {}) {
   }, []);
 
   const leave = useCallback((chatId) => {
-    const sock = socketRef.current || (globalThis.__app_socket && globalThis.__app_socket.socket);
+    const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     try {
       sock.emit('leave', chatId);
@@ -157,24 +228,66 @@ export default function useSocket({ url } = {}) {
   }, []);
 
   const onTyping = useCallback((handler) => {
-    const sock = socketRef.current || (globalThis.__app_socket && globalThis.__app_socket.socket);
+    const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     sock.on('typing', handler);
     return () => { try { sock.off('typing', handler); } catch (e) {} };
   }, []);
 
   const onPresence = useCallback((handler) => {
-    const sock = socketRef.current || (globalThis.__app_socket && globalThis.__app_socket.socket);
+    const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     sock.on('presence', handler);
     return () => { try { sock.off('presence', handler); } catch (e) {} };
   }, []);
 
+  const on = useCallback((event, handler) => {
+    const sock = socketRef.current || getGlobalSocket();
+    if (!sock || !event || typeof handler !== 'function') return;
+    try { sock.on(event, handler); } catch (e) {}
+    return () => { try { sock.off && sock.off(event, handler); } catch (e) {} };
+  }, []);
+
+  const off = useCallback((event, handler) => {
+    const sock = socketRef.current || getGlobalSocket();
+    if (!sock || !event || typeof handler !== 'function') return;
+    try { sock.off && sock.off(event, handler); } catch (e) {}
+  }, []);
+
   const onMessage = useCallback((handler) => {
-    const sock = socketRef.current || (globalThis.__app_socket && globalThis.__app_socket.socket);
+    const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     sock.on('message', handler);
     return () => { try { sock.off('message', handler); } catch (e) {} };
+  }, []);
+
+  const onMessageUpdate = useCallback((handler) => {
+    const sock = socketRef.current || getGlobalSocket();
+    if (!sock) return;
+    sock.on('message_update', handler);
+    return () => { try { sock.off('message_update', handler); } catch (e) {} };
+  }, []);
+
+  const onMessageRead = useCallback((handler) => {
+    const sock = socketRef.current || getGlobalSocket();
+    if (!sock) return;
+    sock.on('message_read', handler);
+    return () => { try { sock.off('message_read', handler); } catch (e) {} };
+  }, []);
+
+  const onConnectError = useCallback((handler) => {
+    const sock = socketRef.current || getGlobalSocket();
+    if (!sock) return;
+    sock.on('connect_error', handler);
+    return () => { try { sock.off('connect_error', handler); } catch (e) {} };
+  }, []);
+
+  const emitEvent = useCallback((event, payload, cb) => {
+    const sock = socketRef.current || getGlobalSocket();
+    if (!sock) return cb && cb({ error: 'not_connected' });
+    try {
+      sock.emit(event, payload, cb);
+    } catch (e) { if (cb) cb({ error: 'emit_failed' }); }
   }, []);
 
   useEffect(() => {
@@ -194,8 +307,14 @@ export default function useSocket({ url } = {}) {
     sendMessage,
     sendTyping,
     onMessage,
+    onMessageUpdate,
+    onMessageRead,
     onTyping,
     onPresence,
+    on,
+    off,
+    emitEvent,
+    onConnectError,
     connected,
   }), [connect, disconnect, join, leave, sendMessage, sendTyping, onMessage, onTyping, onPresence, connected]);
 

@@ -54,8 +54,36 @@
     "patientNumber": "رقم المريض",
     "activeAccount": "الحساب مفعل",
     "memberSince": "عضو منذ"
+  ,
+    "gender": {
+      "male": "ذكر",
+      "female": "أنثى"
+    },
+    "genderLabel": "الجنس",
+    "notes": "ملاحظات"
   },
   "toast": {
-    "saveError": "فشل حفظ الملف الشخصي"
-  }
+    "saveError": "فشل حفظ الملف الشخصي",
+    "doctorChangeSent": "تم إرسال طلب تغيير الطبيب للإدارة وسيتم مراجعته قريباً",
+    "doctorChangeFail": "فشل الطلب",
+    "doctorChangeSelect": "يرجى اختيار طبيب جديد",
+    "doctorChangeNetwork": "فشل الاتصال"
+  },
+  "doctorChange": {
+    "title": "طلب تغيير الطبيب",
+    "selectLabel": "اختر الطبيب الجديد",
+    "selectPlaceholder": "-- اختر --",
+    "loading": "جاري التحميل...",
+    "noDoctors": "لا يوجد أطباء متاحون",
+    "reasonLabel": "سبب الطلب (اختياري)",
+    "reasonPlaceholder": "اكتب سبب رغبتك في تغيير الطبيب (اختياري)",
+    "submit": "إرسال الطلب"
+  },
+  "currentDoctor": "الطبيب الحالي",
+  "joinDate": "تاريخ الانضمام",
+  "lastVisit": "آخر زيارة",
+  "status": "الحالة",
+  "createdAt": "تاريخ الإنشاء",
+  "updatedAt": "آخر تحديث",
+  "userId": "معرف المستخدم"
 }

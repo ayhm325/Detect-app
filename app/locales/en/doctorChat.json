@@ -1,4 +1,8 @@
 {
+  "messageSent": "Message sent",
+  "errorSendMessage": "Error sending message",
+  "connectionError": "Connection error",
+  "emptyMessage": "Message is empty",
   "messageInput": "Type your message...",
   "actions": {
     "call": "Call",

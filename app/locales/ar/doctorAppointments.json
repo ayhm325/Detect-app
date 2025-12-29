@@ -1,4 +1,5 @@
 {
+  "cancelReasonLabel": "سبب الإلغاء:",
   "title": "مواعيد الطبيب",
   "subtitle": "إدارة مواعيدك مع المرضى.",
   "noAppointments": "لا توجد مواعيد حالياً.",
@@ -21,6 +22,14 @@
   },
   "searchPlaceholder": "ابحث باسم المريض...",
   "addButton": "إضافة موعد جديد",
+  "toast": {
+    "addSoon": "ستنفتح نافذة إضافة الموعد قريبًا.",
+    "created": "تم إنشاء الموعد.",
+    "confirm": "تم تأكيد الموعد.",
+    "cancel": "تم إلغاء الموعد.",
+    "delete": "تم حذف الموعد.",
+    "fillRequired": "يرجى تعبئة جميع الحقول المطلوبة."
+  },
   "stats": {
     "total": "إجمالي المواعيد",
     "confirmed": "المؤكدة",
@@ -42,6 +51,12 @@
     "online": "عن بعد",
     "clinic": "في العيادة"
   },
+  "phone": "الهاتف",
+  "appointments": {
+    "form": {
+      "submit": "حجز"
+    }
+  },
   "reasonLabel": "السبب:",
   "emptyState": "لا توجد مواعيد.",
   "items": [
@@ -55,7 +70,7 @@
       "reason": "استشارة طبية"
     }
   ],
-  "appointments": [
+  "appointmentSamples": [
     {
       "patientName": "سارة علي",
       "date": "2025-12-23",

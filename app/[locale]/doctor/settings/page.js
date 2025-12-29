@@ -30,70 +30,56 @@ export default function DoctorSettingsPage() {
   const t = useTranslations("doctorSettings");
   // All UI labels should use t("key") directly, e.g. t("title"), t("profile.header"), t("availability.header"), etc.
 
-  // Profile Settings (bilingual)
-  const profileTemplate = locale === "en" 
-    ? {
-        name: "Dr. Ahmed Mohammed",
-        specialty: "Diagnostic Radiologist",
-        email: "dr.ahmed@hospital.com",
-        phone: "+966 50 123 4567",
-        bio: "15 years of experience in diagnostic radiology and medical imaging",
-        licenseNumber: "MED-2024-15678",
-      }
-    : {
-        name: "د. أحمد محمد",
-        specialty: "أخصائي الأشعة التشخيصية",
-        email: "dr.ahmed@hospital.com",
-        phone: "+966 50 123 4567",
-        bio: "خبرة 15 عاماً في مجال الأشعة التشخيصية والتصوير الطبي",
-        licenseNumber: "MED-2024-15678",
-      };
-
-  const [profile, setProfile] = useState(profileTemplate);
+  // بيانات الطبيب الحقيقية (تُجلب من API لاحقاً)
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    bio: "",
+    licenseNumber: ""
+  });
   const [userEmail, setUserEmail] = useState("");
 
   // جلب البريد الإلكتروني الحقيقي للمستخدم الحالي عند تحميل الصفحة
   useEffect(() => {
-    fetch("/api/auth/whoami")
+    // جلب بيانات الطبيب الحقيقية من API الجديد
+    fetch("/api/doctor/me")
       .then((res) => res.json())
       .then((data) => {
-        if (data && data.email) {
-          setUserEmail(data.email);
+        if (data && data.profile) {
+          setProfile({
+            name: data.profile.name || "",
+            email: data.profile.email || "",
+            phone: data.profile.phone || "",
+            bio: data.profile.bio || "",
+            licenseNumber: data.profile.licenseNumber || ""
+          });
+          setUserEmail(data.profile.email || "");
         }
       });
   }, []);
 
-  // Availability Settings (bilingual)
-  const availabilityTemplate = locale === "en"
-    ? {
-        workDays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
-        startTime: "08:00",
-        endTime: "16:00",
-        slotDuration: "30",
-        maxPatients: "20",
-      }
-    : {
-        workDays: ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"],
-        startTime: "08:00",
-        endTime: "16:00",
-        slotDuration: "30",
-        maxPatients: "20",
-      };
+  // إعدادات المواعيد (تُجلب من API لاحقاً)
+  const [availability, setAvailability] = useState({
+    workDays: [],
+    startTime: "",
+    endTime: "",
+    slotDuration: "",
+    maxPatients: ""
+  });
 
-  const [availability, setAvailability] = useState(availabilityTemplate);
-
-  // Notification Settings
+  // إعدادات الإشعارات (تُجلب من API لاحقاً)
   const [notifications, setNotifications] = useState({
-    emailNotifications: true,
+    emailNotifications: false,
     smsNotifications: false,
-    pushNotifications: true,
-    newAppointment: true,
-    appointmentReminder: true,
-    patientMessages: true,
+    pushNotifications: false,
+    newAppointment: false,
+    appointmentReminder: false,
+    patientMessages: false,
     systemUpdates: false,
   });
 
-  // Security Settings
+  // إعدادات الأمان
   const [security, setSecurity] = useState({
     currentPassword: "",
     newPassword: "",
@@ -110,14 +96,17 @@ export default function DoctorSettingsPage() {
 
 
   const handleSaveProfile = () => {
+    // عند توفر API: أرسل البيانات الحقيقية هنا
     showToast(t("profile.toast.saved"), "success");
   };
 
   const handleSaveAvailability = () => {
+    // عند توفر API: أرسل البيانات الحقيقية هنا
     showToast(t("availability.toast.saved"), "success");
   };
 
   const handleSaveNotifications = () => {
+    // عند توفر API: أرسل البيانات الحقيقية هنا
     showToast(t("notifications.toast.saved"), "success");
   };
 
@@ -234,18 +223,7 @@ export default function DoctorSettingsPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <FaStethoscope className="inline ml-2" />
-                    {t('doctorSettings.profile.specialty')}
-                  </label>
-                  <input
-                    type="text"
-                    value={profile.specialty}
-                    onChange={(e) => setProfile({ ...profile, specialty: e.target.value })}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
+
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">

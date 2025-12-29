@@ -90,6 +90,7 @@
     "searchPlaceholder": "Search doctor, specialty, or reason",
     "status": {
       "all": "All",
+      "scheduled": "Scheduled",
       "confirmed": "Confirmed",
       "pending": "Pending",
       "cancelled": "Cancelled",
@@ -119,6 +120,8 @@
     },
     "upcoming": "Upcoming appointments",
     "noUpcoming": "No upcoming appointments",
+    "pastOrCancelled": "Past / Cancelled appointments",
+    "noPastOrCancelled": "No past or cancelled appointments",
     "onlineLabel": "Online session",
     "reasonLabel": "Reason",
     "notesLabel": "Notes",
@@ -128,6 +131,7 @@
     "actions": {
       "confirm": "Confirm",
       "cancel": "Cancel",
+      "delete": "Delete appointment",
       "reschedule": "Reschedule",
       "book": "Book new appointment"
     },
@@ -147,7 +151,9 @@
       "reason": "Reason",
       "phone": "Phone",
       "cancel": "Cancel",
-      "submit": "Book"
+      "submit": "Send",
+      "cancelReasonTitle": "Reason for cancellation",
+      "cancelReasonLabel": "Please enter the reason for cancellation"
     },
     "modalTitle": "Need a new appointment?",
     "modalBody": "Chat with a doctor or request another time slot.",

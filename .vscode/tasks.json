@@ -2,96 +2,106 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build Next.js project",
-			"type": "shell",
-			"command": "npx next build",
-			"isBackground": false,
-			"problemMatcher": [
-				"$tsc"
-			],
-			"group": "build"
-		},
-		{
-			"label": "Build Next.js project",
-			"type": "shell",
-			"command": "npx next build",
-			"isBackground": false,
-			"problemMatcher": [
-				"$tsc"
-			],
-			"group": "build"
-		},
-		{
-			"label": "Clean Next.js cache and node_modules",
-			"type": "shell",
-			"command": "rm -rf .next node_modules && npm install",
-			"isBackground": false
-		},
-		{
-			"label": "Clean Next.js cache and node_modules",
-			"type": "shell",
-			"command": "rm -rf .next node_modules && npm install"
-		},
-		{
-			"label": "Clean .next cache (Windows)",
-			"type": "shell",
-			"command": "Remove-Item -Recurse -Force .next; npm install"
-		},
-		{
-			"label": "Build Next.js project",
-			"type": "shell",
-			"command": "npx next build"
-		},
-		{
-			"label": "Clean .next cache (Windows)",
-			"type": "shell",
-			"command": "Remove-Item -Recurse -Force .next"
-		},
-		{
-			"label": "Build Next.js project",
-			"type": "shell",
-			"command": "npx next build"
-		},
-		{
-			"label": "Clean .next and reinstall Next.js",
-			"type": "shell",
-			"command": "Remove-Item -Recurse -Force .next; npm install next@latest"
-		},
-		{
-			"label": "Rebuild Next.js project after cleaning",
-			"type": "shell",
-			"command": "npx next build"
-		},
-		{
-			"label": "Start Next.js dev server",
-			"type": "shell",
-			"command": "npx next dev",
+			"label": "Dev: Next.js",
+			"type": "npm",
+			"script": "dev:next",
 			"isBackground": true,
-			"group": "build"
+			"problemMatcher": {
+				"pattern": [
+					{
+						"regexp": ".",
+						"file": 1,
+						"location": 2,
+						"message": 3
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Starting|starting|Compiled successfully|ready - started",
+					"endsPattern": "Local:",
+					"timeout": 60000
+				}
+			},
+			"presentation": {
+				"reveal": "never",
+				"panel": "dedicated",
+				"clear": true
+			}
 		},
 		{
-			"label": "Reset and migrate Prisma database",
+			"label": "Dev: Socket server",
 			"type": "shell",
-			"command": "npx prisma migrate reset --force --skip-seed",
-			"isBackground": false
+			"command": "npx cross-env NODE_ENV=development node scripts/socket-server.js",
+			"isBackground": true,
+			"problemMatcher": {
+				"pattern": [
+					{
+						"regexp": ".",
+						"file": 1,
+						"location": 2,
+						"message": 3
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Starting socket|Socket.io server listening",
+					"endsPattern": "Socket.io server listening",
+					"timeout": 60000
+				}
+			},
+			"presentation": {
+				"reveal": "never",
+				"panel": "dedicated",
+				"clear": true
+			}
 		},
 		{
-			"label": "Reset and migrate Prisma database (retry)",
-			"type": "shell",
-			"command": "npx prisma migrate reset --force --skip-seed",
-			"isBackground": false
+			"label": "E2E: Playwright watch",
+			"type": "npm",
+			"script": "test:e2e:watch",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"options": {
+				"env": {
+					"NODE_ENV": "test",
+					"PLAYWRIGHT_HTML_REPORT": "true"
+				}
+			},
+			"presentation": {
+				"reveal": "never",
+				"panel": "dedicated",
+				"clear": true
+			},
+			"dependsOn": ["Dev: Next.js", "Dev: Socket server"]
 		},
 		{
-			"label": "Reset and migrate Prisma database (final retry)",
-			"type": "shell",
-			"command": "npx prisma migrate reset --force --skip-seed",
-			"isBackground": false
+			"label": "Dev: Next.js + Socket",
+			"dependsOn": ["Dev: Next.js", "Dev: Socket server"],
+			"dependsOrder": "parallel"
 		},
 		{
-			"label": "Reset and migrate Prisma database (final, after enum fix)",
+			"label": "Dev: E2E (Next + Playwright watch)",
 			"type": "shell",
-			"command": "npx prisma migrate reset --force --skip-seed",
-			"isBackground": false
+			"command": "npm run dev:e2e",
+			"isBackground": true,
+			"options": {
+				"env": {
+					"NODE_ENV": "test",
+					"PLAYWRIGHT_HTML_REPORT": "true"
+				}
+			},
+			"presentation": {
+				"reveal": "never",
+				"panel": "dedicated",
+				"clear": true
+			},
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"dependsOn": ["Dev: Next.js", "Dev: Socket server"]
 		}
 	]
 }

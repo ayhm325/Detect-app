@@ -76,7 +76,12 @@
       "emergencyRelation": "صلة القرابة",
       "patientNumber": "رقم المريض",
       "activeAccount": "الحساب مفعل",
-      "memberSince": "عضو منذ"
+      "memberSince": "عضو منذ",
+      "gender": {
+        "male": "ذكر",
+        "female": "أنثى",
+        "other": "آخر"
+      }
     },
     "toast": {
       "saveError": "فشل حفظ الملف الشخصي"
@@ -90,6 +95,7 @@
     "searchPlaceholder": "ابحث عن طبيب، تخصص أو سبب",
     "status": {
       "all": "الكل",
+      "scheduled": "مجدول",
       "confirmed": "مؤكد",
       "pending": "قيد الانتظار",
       "cancelled": "ملغي",
@@ -119,6 +125,8 @@
     },
     "upcoming": "المواعيد القادمة",
     "noUpcoming": "لا توجد مواعيد قادمة",
+    "pastOrCancelled": "المواعيد السابقة / الملغاة",
+    "noPastOrCancelled": "لا يوجد مواعيد سابقة أو ملغاة",
     "onlineLabel": "موعد عن بُعد",
     "reasonLabel": "السبب",
     "notesLabel": "ملاحظات",
@@ -128,6 +136,7 @@
     "actions": {
       "confirm": "تأكيد",
       "cancel": "إلغاء",
+      "delete": "حذف الموعد",
       "reschedule": "إعادة جدولة",
       "book": "حجز موعد جديد"
     },
@@ -147,11 +156,14 @@
       "reason": "السبب",
       "phone": "الهاتف",
       "cancel": "إلغاء",
-      "submit": "حجز"
+      "submit": "إرسال",
+      "cancelReasonTitle": "سبب الإلغاء",
+      "cancelReasonLabel": "يرجى كتابة سبب الإلغاء"
     },
     "modalTitle": "تحتاج موعداً جديداً؟",
     "modalBody": "تحدث مع طبيب أو اطلب موعداً آخر.",
     "chatButton": "محادثة مع طبيب",
-    "closeButton": "إغلاق"
+    "closeButton": "إغلاق",
+    "noLocation": "لا يوجد موقع"
   }
 }

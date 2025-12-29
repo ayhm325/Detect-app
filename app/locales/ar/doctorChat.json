@@ -1,4 +1,8 @@
 {
+  "messageSent": "تم إرسال الرسالة",
+  "errorSendMessage": "خطأ عند إرسال الرسالة",
+  "connectionError": "خطأ في الاتصال",
+  "emptyMessage": "الرسالة فارغة",
   "messageInput": "اكتب رسالتك...",
   "actions": {
     "call": "اتصال",

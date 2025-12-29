@@ -22,17 +22,63 @@ export const GET = withRBAC(async (request, user) => {
     });
     const out = appointments.map((a) => ({
       id: a.id,
-      patient: a.patient ? { id: a.patient.id, name: a.patient.fullName, email: a.patient.email } : null,
-      doctor: a.doctor?.user ? { id: a.doctor.id, name: a.doctor.user.fullName } : null,
+      patient: a.patient ? { id: a.patient.id, name: a.patient.fullName, email: a.patient.email, phone: a.patient.phone || null } : null,
+      doctor: a.doctor ? { id: a.doctor.id, name: a.doctor.user?.fullName || null, phone: a.doctor.phone || null } : null,
       scheduledAt: a.scheduledAt,
       status: a.status,
       reason: a.reason,
-      createdAt: a.createdAt
+      patientReason: a.patientReason,
+      createdAt: a.createdAt,
+      type: a.type || "clinic",
+      location: a.location || null
     }));
     logAudit({ event: "doctor_appointments_listed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { count: out.length } });
     return Response.json({ appointments: out }, { status: 200 });
   } catch (err) {
     logAudit({ event: "doctor_appointments_list_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: err.message } });
+    return Response.json({ error: "Server error" }, { status: 500 });
+  }
+}, ["doctor"]);
+
+// POST /api/doctor/appointments
+export const POST = withRBAC(async (request, user) => {
+  try {
+    const body = await request.json();
+    const { patientId, scheduledAt, reason, phone, type } = body || {};
+    if (!patientId || !scheduledAt) {
+      return Response.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    const scheduled = new Date(scheduledAt);
+    if (isNaN(scheduled.getTime())) {
+      return Response.json({ error: "Invalid date" }, { status: 400 });
+    }
+
+    // determine location: if type is online, set to 'عن بعد', else use provided or doctor's clinic/address
+    let locationValue;
+    if (type === "online") {
+      locationValue = "عن بعد";
+    } else {
+      const doctorProfile = await prisma.doctor.findUnique({ where: { userId: user.id }, include: { user: true } });
+      locationValue = body.location || (doctorProfile && (doctorProfile.clinic || doctorProfile.user?.address)) || null;
+    }
+
+    // create appointment for the current doctor
+    const created = await prisma.appointment.create({
+      data: {
+        doctorId: user.id,
+        patientId,
+        scheduledAt: scheduled.toISOString(),
+        status: "scheduled",
+        reason: reason || null,
+        location: locationValue,
+        type: type || "clinic"
+      }
+    });
+
+    logAudit({ event: "doctor_appointment_created", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { appointmentId: created.id, patientId } });
+    return Response.json({ appointment: created }, { status: 201 });
+  } catch (err) {
+    logAudit({ event: "doctor_appointment_create_error", userId: user?.id, ip: request?.headers?.get('x-forwarded-for'), details: { error: err.message } });
     return Response.json({ error: "Server error" }, { status: 500 });
   }
 }, ["doctor"]);

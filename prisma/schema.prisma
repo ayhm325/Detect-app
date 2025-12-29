@@ -49,6 +49,7 @@ model Doctor {
 
   phone         String @unique
   licenseNumber String @unique
+  clinic        String?
 
   // مصدر الحقيقة الوحيد لحالة الطبيب
   status DoctorStatus @default(pending)
@@ -118,9 +119,11 @@ model Appointment {
   doctorId    String
   patientId   String
   scheduledAt DateTime
-
   status AppointmentStatus
+  location  String?
+  type      String?   // clinic or online
   reason String?
+  patientReason String?
 
   createdAt DateTime @default(now())
   isDeleted Boolean  @default(false)
@@ -270,7 +273,10 @@ model Message {
   id        String        @id @default(uuid())
   chatId    String
   sender    Sender
-  text      String
+  text      String?
+  fileUrl   String?
+  mimeType  String?
+  fileName  String?
   status    MessageStatus @default(sent)
   createdAt DateTime      @default(now())
   clientKey String?
