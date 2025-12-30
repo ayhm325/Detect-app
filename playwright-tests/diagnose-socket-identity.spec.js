@@ -19,7 +19,7 @@ test('diagnose socket identity mismatch (doctor)', async ({ page, context }) => 
   const token = execSync(`node ${path.join('scripts','create-dev-token.mjs')} ${user.email}`, { encoding: 'utf8' }).trim();
 
   // set cookie for auth before navigation (use url for CI compatibility)
-  const cookieUrl = process.env.PW_BASE_URL || 'http://localhost';
+  const cookieUrl = process.env.PW_BASE_URL || 'http://localhost:3000';
   await context.addCookies([{ name: 'token', value: token, url: cookieUrl, path: '/' }]);
 
   // ensure page will connect to our test socket server port

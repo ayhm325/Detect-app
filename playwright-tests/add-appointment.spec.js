@@ -11,7 +11,7 @@ test('click add appointment button shows toast', async ({ page, baseURL, context
   const user = doctor.userId ? await prisma.user.findUnique({ where: { id: doctor.userId } }) : null;
   if (!user) throw new Error('Doctor has no linked user account');
   const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, SECRET, { expiresIn: '1h' });
-  const cookieUrl = baseURL || process.env.PW_BASE_URL || 'http://localhost';
+  const cookieUrl = baseURL || process.env.PW_BASE_URL || 'http://localhost:3000';
   await context.addCookies([{ name: 'token', value: token, url: cookieUrl, path: '/' }]);
 
   await page.goto('/ar/doctor/appointments');

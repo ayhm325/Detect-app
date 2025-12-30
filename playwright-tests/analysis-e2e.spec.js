@@ -16,7 +16,7 @@ test('upload image -> analyze -> shows result card and heatmap -> saved in histo
     // fallback: token only
   }
 
-  const cookieUrl = process.env.PW_BASE_URL || 'http://localhost';
+  const cookieUrl = process.env.PW_BASE_URL || 'http://localhost:3000';
   await page.context().addCookies([{ name: 'token', value: token, url: cookieUrl, path: '/' }]);
   await page.goto(`${cookieUrl.replace(/\/$/, '')}/en/patient/analysis`);
 

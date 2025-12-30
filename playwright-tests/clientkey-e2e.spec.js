@@ -30,7 +30,7 @@ test('clientKey idempotency: socket send (no ack) then HTTP fallback', async ({ 
   const token = execSync(`node ${path.join('scripts','create-dev-token.mjs')} ${patientUser.email}`, { encoding: 'utf8' }).trim();
 
   // 3) set cookie for auth (use url so it works in CI and local)
-  const cookieUrl = process.env.PW_BASE_URL || (globalThis?.__PW_BASE_URL__ ?? 'http://localhost');
+  const cookieUrl = process.env.PW_BASE_URL || (globalThis?.__PW_BASE_URL__ ?? 'http://localhost:3000');
   await context.addCookies([{ name: 'token', value: token, url: cookieUrl, path: '/' }]);
 
   // 4) ensure socket server is running (spawn in test)
