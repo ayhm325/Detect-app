@@ -4,14 +4,15 @@ import jwt from 'jsonwebtoken';
 const prisma = prismaDefault.default ?? prismaDefault;
 const SECRET = process.env.JWT_SECRET || 'your-secret';
 
-test('click add appointment button shows toast', async ({ page, baseURL }) => {
+test('click add appointment button shows toast', async ({ page, baseURL, context }) => {
   // ensure a dev token for a doctor user is present so UI shows doctor actions
   const doctor = await prisma.doctor.findFirst();
   if (!doctor) throw new Error('No doctor found in DB for E2E test');
   const user = doctor.userId ? await prisma.user.findUnique({ where: { id: doctor.userId } }) : null;
   if (!user) throw new Error('Doctor has no linked user account');
   const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, SECRET, { expiresIn: '1h' });
-  await page.context().addCookies([{ name: 'token', value: token, domain: 'localhost', path: '/' }]);
+  const cookieUrl = baseURL || process.env.PW_BASE_URL || 'http://localhost';
+  await context.addCookies([{ name: 'token', value: token, url: cookieUrl, path: '/' }]);
 
   await page.goto('/ar/doctor/appointments');
 
