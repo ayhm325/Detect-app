@@ -14,10 +14,11 @@ async function seedE2E() {
       },
     });
 
+    const doctorPhone = `05${Math.floor(100000000 + Math.random() * 899999999)}`;
     const doctor = await prisma.doctor.create({
       data: {
         userId: doctorUser.id,
-        phone: '0500000000',
+        phone: doctorPhone,
         licenseNumber: `LIC-${Math.floor(Math.random() * 100000)}`,
         status: 'active',
       },
@@ -41,7 +42,7 @@ async function seedE2E() {
         fullName: patientUser.fullName,
         email: patientUser.email,
         doctorId: doctor.userId,
-        phone: '0590000000',
+        phone: `05${Math.floor(100000000 + Math.random() * 899999999)}`,
         status: 'active',
       },
     });
