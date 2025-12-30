@@ -40,7 +40,7 @@ async function seedE2E() {
         userId: patientUser.id,
         fullName: patientUser.fullName,
         email: patientUser.email,
-        doctorId: doctor.id,
+        doctorId: doctor.userId,
         phone: '0590000000',
         status: 'active',
       },
@@ -49,12 +49,18 @@ async function seedE2E() {
     // create a chat between them
     const chat = await prisma.chat.create({
       data: {
-        doctorId: doctor.id,
+        doctorId: doctor.userId,
         patientId: patient.id,
       },
     });
 
-    console.log(JSON.stringify({ doctorId: doctor.id, patientId: patient.id, chatId: chat.id }));
+    // debug counts
+    const usersCount = await prisma.user.count();
+    const doctorsCount = await prisma.doctor.count();
+    const patientsCount = await prisma.patient.count();
+    const chatsCount = await prisma.chat.count();
+
+    console.log(JSON.stringify({ doctorUserId: doctor.userId, patientId: patient.id, chatId: chat.id, counts: { usersCount, doctorsCount, patientsCount, chatsCount } }));
   } catch (e) {
     console.error('seed-e2e error', e && e.message ? e.message : e);
     process.exit(1);
