@@ -29,6 +29,7 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/detect
+      PW_BASE_URL: http://localhost:3000
 
     steps:
       - name: Checkout
@@ -57,10 +58,15 @@ jobs:
 
       - name: Seed database for E2E
         run: |
-          if [ -f scripts/seed-e2e.js ]; then
-            node scripts/seed-e2e.js || true
+          if [ -f prisma/seed.cjs ]; then
+            echo "Running prisma/seed.cjs"
+            node prisma/seed.cjs
+          elif [ -f scripts/seed-e2e.js ]; then
+            echo "Running scripts/seed-e2e.js"
+            node scripts/seed-e2e.js
           elif [ -f scripts/seedAnalysisResult.js ]; then
-            node scripts/seedAnalysisResult.js || true
+            echo "Running scripts/seedAnalysisResult.js"
+            node scripts/seedAnalysisResult.js
           else
             echo "No seed script found, skipping"
           fi
