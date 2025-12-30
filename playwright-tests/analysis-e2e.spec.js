@@ -17,7 +17,9 @@ test('upload image -> analyze -> shows result card and heatmap -> saved in histo
   }
 
   const cookieUrl = process.env.PW_BASE_URL || 'http://localhost:3000';
-  await page.context().addCookies([{ name: 'token', value: token, url: cookieUrl, path: '/' }]);
+  // Navigate to base URL then set cookie via document.cookie to ensure origin matches
+  await page.goto(cookieUrl);
+  await page.evaluate((t) => { document.cookie = `token=${t}; path=/`; }, token);
   await page.goto(`${cookieUrl.replace(/\/$/, '')}/en/patient/analysis`);
 
   // attach file to input[type=file] — selector may vary depending on the app markup
