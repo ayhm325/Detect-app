@@ -32,7 +32,7 @@ export async function POST(req) {
           return new Response(JSON.stringify({ error: 'invalid_file_type' }), { status: 400 });
         }
         const url = `https://${bucketToUse}.s3.${regionToUse}.amazonaws.com/${encodeURIComponent(key)}`;
-        return new Response(JSON.stringify({ url, key, provider: 's3' }), { status: 200 });
+        return new Response(JSON.stringify({ url, key, provider: 's3', contentType, filename: filename || key }), { status: 200 });
       } catch (e) {
         console.error('S3 head error', e);
         return new Response(JSON.stringify({ error: 's3_error' }), { status: 500 });
@@ -46,8 +46,15 @@ export async function POST(req) {
     if (!extAllowed(filename || key)) return new Response(JSON.stringify({ error: 'invalid_file_type' }), { status: 400 });
 
     // Return a publically-accessible URL under /uploads/... (public folder is served)
+    const guessedType = (() => {
+      const ext = (filename || key || '').toLowerCase();
+      if (ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.webp') || ext.endsWith('.gif')) return 'image/*';
+      if (ext.endsWith('.pdf')) return 'application/pdf';
+      if (ext.endsWith('.doc') || ext.endsWith('.docx')) return 'application/msword';
+      return 'application/octet-stream';
+    })();
     const url = `/${key}`;
-    return new Response(JSON.stringify({ url, key, provider: 'local' }), { status: 200 });
+    return new Response(JSON.stringify({ url, key, provider: 'local', contentType: guessedType, filename: filename || key }), { status: 200 });
   } catch (e) {
     console.error(e);
     return new Response(JSON.stringify({ error: 'Server error' }), { status: 500 });

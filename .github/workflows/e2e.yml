@@ -75,5 +75,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: Generate Playwright storage state
+        run: node playwright/generate-storage-state.mjs
+
       - name: Run E2E Test
         run: npm run test:e2e

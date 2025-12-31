@@ -38,6 +38,7 @@ const adminDashboard = require("./adminDashboard.json");
 const doctorSettings = require("./doctorSettings.json");
 const notifications = require("./notifications.json");
 const logout = require("./logout.json");
+const uploadXray = require('./uploadXray.json');
 
 module.exports = {
   navbar,
@@ -78,5 +79,6 @@ module.exports = {
   doctorDetails,
   adminDashboard,
   notifications,
-  logout
+  logout,
+  uploadXray
 };

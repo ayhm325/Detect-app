@@ -19,6 +19,8 @@
   "btnCancel": "Cancel",
   "toastSaveSuccess": "Saved successfully",
   "toastCancelEdit": "Edit cancelled",
+  "toastPasswordChangeFail": "Failed to change password",
+  "toastPasswordChangeNetwork": "Network error",
   "toastPasswordMismatch": "Passwords do not match",
   "toastPasswordLength": "Password too short",
   "toastPasswordChanged": "Password changed",
@@ -60,7 +62,8 @@
       "female": "Female"      
     },
     "genderLabel": "Gender",
-    "notes": "Notes"
+    "notes": "Notes",
+    "oldPassword": "Old password"
   },
   "toast": {
     "saveError": "Failed to save profile",
@@ -86,4 +89,14 @@
   "createdAt": "Created At",
   "updatedAt": "Last Updated",
   "userId": "User ID"
+  ,
+  "security": {
+    "changePasswordTitle": "Change password",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Confirm new password",
+    "changePasswordButton": "Change Password"
+  },
+  "hide": "Hide",
+  "show": "Show",
+  "saving": "Saving..."
 }

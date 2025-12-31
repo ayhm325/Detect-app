@@ -116,12 +116,13 @@ export default function PatientChatPage() {
       setMessages(prev => {
         if (msg.id && prev.some(m => m.id === msg.id)) return prev;
         if (msg.clientKey && prev.some(m => m.clientKey === msg.clientKey)) return prev;
-        const mapped = {
-          ...msg,
-          time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : msg.time || "",
-          file: msg.fileUrl ? { url: msg.fileUrl, type: msg.mimeType, name: msg.fileName } : (msg.file || null)
-        };
-        return [...prev, mapped];
+        return [
+          ...prev,
+          {
+            ...msg,
+            time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG") : msg.time || ""
+          }
+        ];
       });
     });
 
@@ -244,7 +245,7 @@ export default function PatientChatPage() {
         // Notify server / room about the new message
         try {
           if (socket && socket.connected) {
-            socket.sendMessage({ chatId, fileUrl: compData.url, mimeType: file.type, fileName: file.name, clientKey: tempId }, (res) => {
+            socket.sendMessage({ chatId, fileUrl: compData.url, mimeType: compData.contentType || file.type, fileName: compData.filename || file.name, clientKey: tempId }, (res) => {
               if (res && res.ok && res.message) {
                 setMessages(prev => {
                   const filtered = prev.filter(x => x.id !== tempId && x.id !== res.message.id);
@@ -253,9 +254,9 @@ export default function PatientChatPage() {
                 });
               } else {
                 // fallback: try HTTP POST
-                (async () => {
-                  try {
-                    const r = await fetch(`/api/chat/${chatId}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: file.type, fileName: file.name, clientKey: tempId }) });
+                  (async () => {
+                    try {
+                      const r = await fetch(`/api/chat/${chatId}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: compData.contentType || file.type, fileName: compData.filename || file.name, clientKey: tempId }) });
                     if (r.ok) {
                       const d = await r.json();
                       // refresh messages
@@ -271,7 +272,7 @@ export default function PatientChatPage() {
             });
           } else {
             // socket not connected, use HTTP POST
-            const r = await fetch(`/api/chat/${chatId}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: file.type, fileName: file.name, clientKey: tempId }) });
+            const r = await fetch(`/api/chat/${chatId}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: compData.contentType || file.type, fileName: compData.filename || file.name, clientKey: tempId }) });
             if (r.ok) {
               const r2 = await fetch(`/api/chat/${chatId}/messages`, { credentials: 'include' });
               if (r2.ok) {
@@ -340,8 +341,8 @@ export default function PatientChatPage() {
       const compRes = await fetch('/api/uploads/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ chatId: msg.chatId, key: initData.key, filename: theFile.name, contentType: theFile.type, provider: initData.provider, bucket: initData.bucket, region: initData.region }) });
       const compData = await compRes.json();
       if (!compRes.ok || !compData?.url) throw new Error(compData?.error || 'complete_failed');
-      // send message with URL
-      const msgRes = await fetch(`/api/chat/${msg.chatId}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: theFile.type, fileName: theFile.name }) });
+      // send message with file metadata
+      const msgRes = await fetch(`/api/chat/${msg.chatId}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: compData.contentType || theFile.type, fileName: compData.filename || theFile.name }) });
       if (!msgRes.ok) throw new Error('send_failed');
       // replace temp message with server message via fetching messages list
       const res2 = await fetch(`/api/chat/${msg.chatId}/messages`, { credentials: 'include' });
@@ -391,10 +392,15 @@ export default function PatientChatPage() {
                 : messages.map((msg, idx)=>(
                   <div key={msg.clientKey || `${msg.id}-${idx}`} className={`flex ${msg.sender==="patient"?"justify-start":"justify-end"}`}>
                     <div className={`max-w-[70%] rounded-2xl px-4 py-3 ${msg.sender==="patient"?"bg-blue-600 text-white":"bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow"}`}>
-                      {msg.file && typeof msg.file === 'object' && typeof msg.file.type === 'string' ? (
-                        msg.file.type.startsWith("image/") ? <img src={msg.file.url||URL.createObjectURL(msg.file)} alt="img" className="max-w-full rounded"/>
-                        : msg.file.type === "application/pdf" ? <div className="flex items-center gap-2"><FaFilePdf className="text-red-500"/><a href={msg.file.url||URL.createObjectURL(msg.file)} target="_blank" className="underline">{msg.file.name}</a></div>
-                        : <div className="flex items-center gap-2"><FaFileAlt/><a href={msg.file.url||URL.createObjectURL(msg.file)} target="_blank" className="underline">{msg.file.name}</a></div>
+                      {(msg.file && typeof msg.file === 'object' && typeof msg.file.type === 'string') || msg.fileUrl ? (
+                        (() => {
+                          const url = msg.fileUrl || msg.file?.url || (msg.file && URL.createObjectURL(msg.file));
+                          const mime = msg.mimeType || msg.file?.type || '';
+                          const name = msg.fileName || msg.file?.name || 'attachment';
+                          if (mime && mime.startsWith('image/')) return <img src={url} alt="img" className="max-w-full rounded"/>;
+                          if (mime && mime.includes('pdf')) return <div className="flex items-center gap-2"><FaFilePdf className="text-red-500"/><a href={url} target="_blank" className="underline">{name}</a></div>;
+                          return <div className="flex items-center gap-2"><FaFileAlt/><a href={url} target="_blank" className="underline">{name}</a></div>;
+                        })()
                       ) : <p className="text-sm mb-1">{msg.text}</p>}
                       <div className="flex justify-between items-center mt-1 text-xs">
                         <span>{msg.time}</span>

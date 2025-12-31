@@ -17,9 +17,11 @@ function isImageUrl(url) {
 
 export default function ChatMessage({ message, patient }) {
   const isDoctor = message.sender === 'doctor';
-  const maybeImage = isImageUrl(message.text) || (message.file && message.file.url) || (message.fileUrl && isImageUrl(message.fileUrl));
+  const fileUrl = message.fileUrl || message.file?.url || null;
+  const mime = message.mimeType || message.file?.type || null;
+  const maybeImage = (fileUrl && mime && mime.startsWith('image/')) || isImageUrl(message.text) || (fileUrl && /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(fileUrl));
 
-  const imageUrl = message.file?.url || message.fileUrl || (maybeImage && message.text);
+  const imageUrl = fileUrl || (maybeImage && message.text);
 
   return (
     <div className={isDoctor ? styles.doctorMsg : styles.patientMsg}>

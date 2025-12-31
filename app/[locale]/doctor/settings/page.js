@@ -139,8 +139,22 @@ export default function DoctorSettingsPage() {
           showToast(locale === "en" ? "Password changed successfully" : "تم تغيير كلمة المرور بنجاح", "success");
           setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
           // تسجيل خروج المستخدم تلقائياً بعد تغيير كلمة المرور
-          setTimeout(() => {
-            window.location.href = "/logout";
+          setTimeout(async () => {
+            try {
+              const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+              await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include',
+                headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+                body: token ? JSON.stringify({ token }) : undefined,
+              }).catch(() => {});
+            } finally {
+              if (typeof window !== 'undefined') {
+                localStorage.clear();
+                sessionStorage.clear();
+              }
+              window.location.href = locale === 'en' ? '/en' : '/ar';
+            }
           }, 1200); // إعطاء المستخدم إشعار النجاح أولاً
         } else {
           showToast(data.error || (locale === "en" ? "Failed to change password" : "فشل تغيير كلمة المرور"), "error");

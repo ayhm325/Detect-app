@@ -2,9 +2,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from "../../../components/ui/Toast";
 import { useTranslations, useLocale } from "next-intl";
-import { FaUser, FaEnvelope, FaPhone } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function PatientProfilePage() {
     // ...existing code...
@@ -322,6 +323,11 @@ export default function PatientProfilePage() {
             <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">{t('doctorChange.title', { defaultValue: 'طلب تغيير الطبيب' })}</h2>
             <DoctorChangeRequestForm showToast={showToast} t={t} />
           </div>
+          {/* Change Password Section (under doctor change request) */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6 mt-6">
+            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">{t('security.changePasswordTitle', { defaultValue: 'تغيير كلمة السر' })}</h2>
+            <ChangePasswordForm showToast={showToast} t={t} />
+          </div>
         </div>
       </div>
     </>
@@ -396,6 +402,115 @@ function DoctorChangeRequestForm({ showToast, t }) {
         <textarea name="reason" className="w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white" rows={2} placeholder={t('doctorChange.reasonPlaceholder', { defaultValue: 'اكتب سبب رغبتك في تغيير الطبيب (اختياري)' })} />
       </div>
       <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded self-end">{t('doctorChange.submit', { defaultValue: 'إرسال الطلب' })}</button>
+    </form>
+  );
+}
+
+// --- ChangePasswordForm: allows user to change their password ---
+function ChangePasswordForm({ showToast, t }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      showToast(t('toastPasswordLength', { defaultValue: 'Password too short' }), 'error');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast(t('toastPasswordMismatch', { defaultValue: 'Passwords do not match' }), 'error');
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch('/api/patient/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ oldPassword, newPassword })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || t('toastPasswordChangeFail', { defaultValue: 'Failed to change password' }), 'error');
+        setLoading(false);
+        return;
+      }
+      showToast(t('toastPasswordChanged', { defaultValue: 'Password changed' }), 'success');
+      // logout the user and redirect to locale root
+      try {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
+      } catch {}
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
+      const locale = pathname?.startsWith('/en') ? 'en' : 'ar';
+      const basePrefix = locale === 'en' ? '/en' : '/ar';
+      router.replace(basePrefix);
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      showToast(t('toastPasswordChangeNetwork', { defaultValue: 'Network error' }), 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div>
+        <label className="block mb-1 text-gray-700 dark:text-gray-200">{t('field.oldPassword', { defaultValue: 'Old password' })}</label>
+        <div className="flex items-center gap-2">
+          <input
+            type={showOld ? 'text' : 'password'}
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            className="flex-1 w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white"
+          />
+          <button type="button" onClick={() => setShowOld(v => !v)} aria-label={showOld ? t('hide', { defaultValue: 'Hide' }) : t('show', { defaultValue: 'Show' })} className="text-gray-600 dark:text-gray-300 px-2">
+            {showOld ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+      <div>
+        <label className="block mb-1 text-gray-700 dark:text-gray-200">{t('security.newPasswordLabel', { defaultValue: 'New password' })}</label>
+        <div className="flex items-center gap-2">
+          <input
+            type={showNew ? 'text' : 'password'}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="flex-1 w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white"
+          />
+          <button type="button" onClick={() => setShowNew(v => !v)} aria-label={showNew ? t('hide', { defaultValue: 'Hide' }) : t('show', { defaultValue: 'Show' })} className="text-gray-600 dark:text-gray-300 px-2">
+            {showNew ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+      <div>
+        <label className="block mb-1 text-gray-700 dark:text-gray-200">{t('security.confirmPasswordLabel', { defaultValue: 'Confirm new password' })}</label>
+        <div className="flex items-center gap-2">
+          <input
+            type={showConfirm ? 'text' : 'password'}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="flex-1 w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white"
+          />
+          <button type="button" onClick={() => setShowConfirm(v => !v)} aria-label={showConfirm ? t('hide', { defaultValue: 'Hide' }) : t('show', { defaultValue: 'Show' })} className="text-gray-600 dark:text-gray-300 px-2">
+            {showConfirm ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button type="submit" disabled={loading} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">{loading ? t('saving', { defaultValue: 'Saving...' }) : t('security.changePasswordButton', { defaultValue: 'Change Password' })}</button>
+      </div>
     </form>
   );
 }

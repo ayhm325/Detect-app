@@ -123,74 +123,6 @@ export default function Page() {
           <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">{t("pageTitle", { defaultValue: "Upload X-ray" })}</h1>
           <span className="text-sm text-gray-500 dark:text-gray-400">{t("fileTypes", { defaultValue: "Allowed file types" })} {MAX_MB}{MB}</span>
         </header>
-        {/* ...existing code... */}
-      </section>
-    </>
-  );
-}
-
-  function clearSelection() {
-    setFile(null);
-    setPreviewUrl(null);
-    if (inputRef.current) inputRef.current.value = "";
-  }
-
-  function onDrop(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const f = e.dataTransfer?.files?.[0];
-    if (!f) return;
-    const fakeEvent = { target: { files: [f] } };
-    onSelect(fakeEvent);
-  }
-
-  function onDragOver(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  function mockUpload() {
-    if (!file) {
-      const errorMsg = t("errorNoFile", { defaultValue: "No file selected" });
-      setError(errorMsg);
-      showToast(errorMsg, "error");
-      return;
-    }
-    setError("");
-    setUploading(true);
-    setProgress(0);
-    showToast(t("uploading", { defaultValue: "Uploading..." }), "info");
-    const start = Date.now();
-    const timer = setInterval(() => {
-      const elapsed = Date.now() - start;
-      const pct = Math.min(100, Math.round((elapsed / 1500) * 100));
-      setProgress(pct);
-      if (pct >= 100) {
-        clearInterval(timer);
-        setUploading(false);
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(1) + MB;
-        setRecent((r) => [
-          { id: `U${Date.now()}`, name: file.name, size: sizeMB, status: t("pending_review", { defaultValue: "Pending Review" }) },
-          ...r,
-        ]);
-        const successMsg = t("uploadSuccess", { defaultValue: "Upload successful" });
-        setSuccessMsg(successMsg);
-        showToast(successMsg, "success");
-        clearSelection();
-        setNotes("");
-        setTimeout(() => setSuccessMsg(""), 2500);
-      }
-    }, 100);
-  }
-
-  return (
-    <>
-      <ToastContainer />
-      <section className="space-y-6">
-        <header className="flex items-center justify-between">
-          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">{t("pageTitle", { defaultValue: "Upload X-ray" })}</h1>
-          <span className="text-sm text-gray-500 dark:text-gray-400">{t("fileTypes", { defaultValue: "Allowed file types" })} {MAX_MB}{MB}</span>
-        </header>
 
         <GlassCard title={t("uploadCard_title", { defaultValue: "Upload File" })}> 
           <div className="space-y-4">
@@ -293,5 +225,4 @@ export default function Page() {
       </section>
     </>
   );
-
-// ...existing code...
+}

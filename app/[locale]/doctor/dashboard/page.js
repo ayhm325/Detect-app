@@ -41,11 +41,11 @@ export default async function DoctorDashboard({ params }) {
     end.setHours(23, 59, 59, 999);
 
     const [patientsCount, todayAppointmentsCount, pendingScansCount, unreadNotificationsCount, todayAppointmentsList, recentActivity] = await Promise.all([
-      prisma.patient.count({ where: { doctorId: user.id } }),
-      prisma.appointment.count({ where: { doctorId: user.id, scheduledAt: { gte: start, lte: end } } }),
-      prisma.medicalRecord.count({ where: { doctorId: user.id, reviewedByDoctor: false } }),
+      prisma.patient.count({ where: { doctorId: doctor.id } }),
+      prisma.appointment.count({ where: { doctorId: doctor.id, scheduledAt: { gte: start, lte: end } } }),
+      prisma.medicalRecord.count({ where: { doctorId: doctor.id, reviewedByDoctor: false } }),
       prisma.notification.count({ where: { userId: user.id, isRead: false, isDeleted: false } }),
-      prisma.appointment.findMany({ where: { doctorId: user.id, scheduledAt: { gte: start, lte: end } }, include: { patient: true }, orderBy: { scheduledAt: 'asc' }, take: 10 }),
+      prisma.appointment.findMany({ where: { doctorId: doctor.id, scheduledAt: { gte: start, lte: end } }, include: { patient: true }, orderBy: { scheduledAt: 'asc' }, take: 10 }),
       prisma.activity.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 6 }),
     ]);
 

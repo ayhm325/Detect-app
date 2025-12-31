@@ -19,6 +19,8 @@
   "btnCancel": "إلغاء",
   "toastSaveSuccess": "تم الحفظ بنجاح",
   "toastCancelEdit": "تم إلغاء التعديل",
+  "toastPasswordChangeFail": "فشل تغيير كلمة المرور",
+  "toastPasswordChangeNetwork": "فشل الاتصال",
   "toastPasswordMismatch": "كلمتا المرور غير متطابقتين",
   "toastPasswordLength": "كلمة المرور قصيرة جدًا",
   "toastPasswordChanged": "تم تغيير كلمة المرور",
@@ -53,14 +55,14 @@
     "emergencyRelation": "صلة القرابة",
     "patientNumber": "رقم المريض",
     "activeAccount": "الحساب مفعل",
-    "memberSince": "عضو منذ"
-  ,
+    "memberSince": "عضو منذ",
     "gender": {
       "male": "ذكر",
       "female": "أنثى"
     },
     "genderLabel": "الجنس",
-    "notes": "ملاحظات"
+    "notes": "ملاحظات",
+    "oldPassword": "كلمة المرور القديمة"
   },
   "toast": {
     "saveError": "فشل حفظ الملف الشخصي",
@@ -86,4 +88,14 @@
   "createdAt": "تاريخ الإنشاء",
   "updatedAt": "آخر تحديث",
   "userId": "معرف المستخدم"
+  ,
+  "security": {
+    "changePasswordTitle": "تغيير كلمة السر",
+    "newPasswordLabel": "كلمة المرور الجديدة",
+    "confirmPasswordLabel": "تأكيد كلمة المرور",
+    "changePasswordButton": "تغيير كلمة المرور"
+  },
+   "hide": "إخفاء",
+  "show": "إظهار",
+  "saving": "جارٍ الحفظ..."
 }

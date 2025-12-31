@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "../../theme-provider";
 import { useLocaleContext } from "../../hooks/useLocaleContext";
@@ -15,6 +15,26 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
   const t = useTranslations("adminSidebar");
   const basePrefix = `/${locale}`;
   const isDark = theme === "dark";
+  const router = useRouter();
+
+  const handleLogoutClick = async () => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+        body: token ? JSON.stringify({ token }) : undefined,
+      }).catch(() => {});
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        sessionStorage.clear();
+      }
+      router.replace(basePrefix);
+    }
+  };
   // ...existing code...
   // Use t("key") for all navigation labels
   const items = [
@@ -86,7 +106,7 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
               return (
                 <button
                   key="logout"
-                  onClick={() => window.location.href = basePrefix}
+                  onClick={handleLogoutClick}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-red-100 dark:hover:bg-red-500/20 transition-all ${collapsed ? "justify-center" : ""}`}
                   title={collapsed ? item.label : ""}
                 >

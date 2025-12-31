@@ -35,7 +35,18 @@ export async function POST(request) {
       // still proceed to return ok (best-effort)
     }
 
-    return NextResponse.json({ ok: true });
+    // Return OK and clear HttpOnly cookie to immediately remove token from browser
+    const res = NextResponse.json({ ok: true });
+    try {
+      const isProd = process.env.NODE_ENV === 'production';
+      const sameSite = isProd ? 'none' : 'lax';
+      const secure = isProd;
+      res.cookies.set('token', '', { httpOnly: true, path: '/', maxAge: 0, sameSite, secure });
+    } catch (e) {
+      // If cookie API isn't available in runtime, ignore and rely on revocation list
+      console.warn('/api/auth/logout: could not clear cookie', e && e.message);
+    }
+    return res;
   } catch (e) {
     console.error('/api/auth/logout error', e);
     return NextResponse.json({ error: 'server_error' }, { status: 500 });

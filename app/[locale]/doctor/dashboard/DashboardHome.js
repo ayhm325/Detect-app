@@ -51,8 +51,8 @@ export default function DashboardHome({ serverData = {} }) {
         todayAppointments: {
           title: "Today's appointments",
           viewAll: "View All",
-          types: { xray: "X-ray", consult: "Consultation", followup: "Follow-up", ct: "CT Scan" },
-          status: { confirmed: "Confirmed", pending: "Pending" },
+          types: { xray: "X-ray", consult: "Consultation", followup: "Follow-up", ct: "CT Scan", clinic: 'Clinic', online: 'Online' },
+          status: { scheduled: 'Scheduled', confirmed: "Confirmed", pending: "Pending", cancelled: 'Cancelled' },
         },
         pendingScans: {
           title: "Pending scans",
@@ -84,8 +84,8 @@ export default function DashboardHome({ serverData = {} }) {
         todayAppointments: {
           title: "مواعيد اليوم",
           viewAll: "عرض الكل",
-          types: { xray: "أشعة", consult: "استشارة", followup: "متابعة", ct: "أشعة مقطعية" },
-          status: { confirmed: "مؤكد", pending: "معلق" },
+          types: { xray: "أشعة", consult: "استشارة", followup: "متابعة", ct: "أشعة مقطعية", clinic: 'العيادة', online: 'أونلاين' },
+          status: { scheduled: 'مجدول', confirmed: "مؤكد", pending: "معلق", cancelled: 'ملغى' },
         },
         pendingScans: {
           title: "فحوصات معلقة",
@@ -126,6 +126,16 @@ export default function DashboardHome({ serverData = {} }) {
     const raw = typeof val === "string" ? val : new Date(val).toLocaleString(locale === 'en' ? 'en-US' : 'ar-EG-u-nu-latn');
     // Remove Arabic comma (U+060C) and normalize whitespace so server and client match
     return raw.replace(/\u060C/g, "").replace(/\s+/g, " ").trim();
+  };
+
+  // Map DB appointment statuses to UI status keys we use for labels/colors
+  const normalizeStatus = (s) => {
+    if (!s) return 'pending';
+    if (s === 'completed') return 'confirmed';
+    if (s === 'scheduled') return 'pending';
+    if (s === 'cancelled') return 'cancelled';
+    if (s === 'no_show') return 'no_show';
+    return s;
   };
 
   const stats = [
@@ -175,21 +185,10 @@ export default function DashboardHome({ serverData = {} }) {
     },
   ];
 
-  const defaultTodayAppointments = useMemo(() => locale === "en" ? [
-    { id: 1, time: "09:00 AM", patient: "Mohammed Ahmed", type: "xray", status: "confirmed" },
-    { id: 2, time: "10:30 AM", patient: "Fatima Ali", type: "consult", status: "confirmed" },
-    { id: 3, time: "11:00 AM", patient: "Ahmed Khaled", type: "followup", status: "pending" },
-    { id: 4, time: "02:00 PM", patient: "Sarah Mahmoud", type: "ct", status: "confirmed" },
-  ] : [
-    { id: 1, time: "09:00 ص", patient: "محمد أحمد", type: "xray", status: "confirmed" },
-    { id: 2, time: "10:30 ص", patient: "فاطمة علي", type: "consult", status: "confirmed" },
-    { id: 3, time: "11:00 ص", patient: "أحمد خالد", type: "followup", status: "pending" },
-    { id: 4, time: "02:00 م", patient: "سارة محمود", type: "ct", status: "confirmed" },
-  ], [locale]);
-
+  // Use appointments provided by the server. If none, show an empty array so UI can display a no-data message.
   const todayAppointments = (serverData.todayAppointments && serverData.todayAppointments.length)
-    ? serverData.todayAppointments.map((a, i) => ({ id: a.id || i, time: new Date(a.time).toLocaleTimeString(locale === 'en' ? 'en-US' : 'ar-EG-u-nu-latn', { hour: '2-digit', minute: '2-digit' }), patient: a.patient, type: a.type || 'consult', status: a.status || 'confirmed' }))
-    : defaultTodayAppointments;
+    ? serverData.todayAppointments.map((a, i) => ({ id: a.id || i, time: new Date(a.time).toLocaleTimeString(locale === 'en' ? 'en-US' : 'ar-EG-u-nu-latn', { hour: '2-digit', minute: '2-digit' }), patient: a.patient, type: a.type || 'consult', status: a.status }))
+    : [];
 
   const defaultRecentActivity = useMemo(() => locale === "en" ? [
     { id: 1, action: "Reviewed X-ray for Mohammed Ali", time: "10 min ago", icon: FaCheckCircle, color: "text-green-600" },
@@ -348,34 +347,46 @@ export default function DashboardHome({ serverData = {} }) {
                 </button>
               </div>
               <div className="space-y-3">
-                {todayAppointments.map((apt) => (
-                  <div
-                    key={apt.id}
-                    className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-zinc-800 p-4 transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
-                        <FaClock className="text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-gray-900 dark:text-white">{apt.patient}</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{labels.todayAppointments.types[apt.type] || apt.type}</p>
-                      </div>
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900 dark:text-white">{apt.time}</p>
-                      <span
-                        className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${
-                          apt.status === "confirmed"
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200"
-                            : "bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-200"
-                        }`}
-                      >
-                        {labels.todayAppointments.status[apt.status] || apt.status}
-                      </span>
-                    </div>
+                {todayAppointments.length === 0 ? (
+                  <div className="rounded-lg border border-dashed border-gray-200 dark:border-zinc-800 p-6 text-center text-gray-600 dark:text-gray-300">
+                    {locale === 'en' ? 'No appointments for today.' : 'لا توجد مواعيد اليوم'}
                   </div>
-                ))}
+                ) : (
+                  todayAppointments.map((apt) => (
+                    <div
+                      key={apt.id}
+                      className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-zinc-800 p-4 transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
+                          <FaClock className="text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 dark:text-white">{apt.patient}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{apt.place || apt.location || labels.todayAppointments.types[apt.type] || apt.type}</p>
+                        </div>
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium text-gray-900 dark:text-white">{apt.time}</p>
+                        {(() => {
+                          const displayStatus = normalizeStatus(apt.status);
+                          const badgeClass = displayStatus === 'confirmed'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200'
+                            : displayStatus === 'pending'
+                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-200'
+                            : displayStatus === 'cancelled'
+                            ? 'bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-200'
+                            : 'bg-gray-100 text-gray-700 dark:bg-gray-900/60 dark:text-gray-200';
+                          return (
+                            <span className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${badgeClass}`}>
+                              {labels.todayAppointments.status[displayStatus] || displayStatus}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 

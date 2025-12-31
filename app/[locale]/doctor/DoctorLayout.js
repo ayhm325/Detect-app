@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = 'force-dynamic';
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -36,7 +37,7 @@ export default function DoctorLayout({
   ];
 
   const handleLogout = () => {
-    router.push(`${basePrefix}`);
+    router.push(`${basePrefix}/doctor/logout`);
   };
 
   return (

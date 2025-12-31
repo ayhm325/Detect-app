@@ -61,7 +61,7 @@ export const POST = withRBAC(async (request, user, context) => {
     const body = await request.json();
     let { text, clientKey, fileUrl, mimeType, fileName } = body || {};
     text = sanitizeText(text || "");
-    // allow either text or a fileUrl
+    // Accept either text or a file Url
     if (!text && !fileUrl) return NextResponse.json({ error: "empty_message" }, { status: 400 });
     if (text && text.length > 2000) return NextResponse.json({ error: "message_too_long" }, { status: 400 });
 
@@ -85,13 +85,7 @@ export const POST = withRBAC(async (request, user, context) => {
       if (existing) return NextResponse.json({ message: existing, existing: true }, { status: 200 });
     }
 
-    const messageData = { chatId, sender, clientKey };
-    if (text) messageData.text = text;
-    if (fileUrl) messageData.fileUrl = fileUrl;
-    if (mimeType) messageData.mimeType = mimeType;
-    if (fileName) messageData.fileName = fileName;
-
-    const message = await prisma.message.create({ data: messageData });
+    const message = await prisma.message.create({ data: { chatId, sender, text: text || null, clientKey, fileUrl: fileUrl || null, mimeType: mimeType || null, fileName: fileName || null } });
     await prisma.chat.update({ where: { id: chatId }, data: { updatedAt: new Date() } });
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {

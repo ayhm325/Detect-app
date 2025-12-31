@@ -1,6 +1,7 @@
 "use client";
 import DashboardSidebarItem from "./sidebar/DashboardSidebarItem";
 import UploadXRaySidebarItem from "./sidebar/UploadXRaySidebarItem";
+import AnalysisSidebarItem from "./sidebar/AnalysisSidebarItem";
 import ResultsSidebarItem from "./sidebar/ResultsSidebarItem";
 import ChatSidebarItem from "./sidebar/ChatSidebarItem";
 import ProfileSidebarItem from "./sidebar/ProfileSidebarItem";
@@ -16,6 +17,7 @@ export default function SidebarNavigation() {
       <nav className="flex flex-col gap-2">
         <DashboardSidebarItem />
         <UploadXRaySidebarItem />
+        <AnalysisSidebarItem />
         <ResultsSidebarItem />
         <ChatSidebarItem />
         <ProfileSidebarItem />

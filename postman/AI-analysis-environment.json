@@ -1,0 +1,18 @@
+{
+  "id": "ai-analysis-env",
+  "name": "AI Analysis Env",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "enabled": true
+    },
+    {
+      "key": "token",
+      "value": "<TOKEN>",
+      "enabled": true
+    }
+  ],
+  "timestamp": 1735488000000,
+  "_postman_variable_scope": "environment"
+}

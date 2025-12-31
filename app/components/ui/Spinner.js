@@ -9,7 +9,7 @@ const Spinner = ({ size = "md", fullScreen = false }) => {
   }[size];
 
   const spinner = (
-    <div className={`${sizeClass} border-blue-300 border-t-blue-600 rounded-full animate-spin`} />
+    <div className={`${sizeClass} rounded-full animate-spin`} style={{ borderStyle: 'solid', borderColor: 'rgba(59,130,246,0.15)', borderTopColor: '#4f46e5' }} />
   );
 
   if (fullScreen) {

@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -19,45 +20,63 @@ export default function PatientLayout({ children }) {
   const basePath = locale === "en" ? "/en" : "/ar";
   const t = useTranslations("patient");
 
+  // Safe translation helper: next-intl throws when a key is missing for a locale.
+  // Use this to return a fallback string when translations are not present.
+  const safeT = (key, fallback) => {
+    try {
+      const v = t(key);
+      // If the translation function returns the key itself, treat as missing
+      if (typeof v === 'string' && v === key) return fallback;
+      return v;
+    } catch (e) {
+      return fallback;
+    }
+  };
+
   // Patient navigation items with translation
   const patientNavItems = [
     {
       href: `${basePath}/patient/dashboard`,
-      label: t("nav.home"),
+      label: safeT("nav.home", locale === 'ar' ? 'الرئيسية' : 'Home'),
       icon: "🏠",
     },
     {
       href: `${basePath}/patient/appointments`,
-      label: t("nav.appointments"),
+      label: safeT("nav.appointments", locale === 'ar' ? 'المواعيد' : 'Appointments'),
       icon: "📅",
     },
     {
+      href: `${basePath}/patient/analysis`,
+      label: safeT("nav.analysis", locale === 'ar' ? 'التحاليل' : 'Analysis'),
+      icon: "🔬",
+    },
+    {
+      href: `${basePath}/patient/analysis/history`,
+      label: safeT("nav.history", locale === 'ar' ? 'التاريخ' : 'History'),
+      icon: "📜",
+    },
+    {
       href: `${basePath}/patient/results`,
-      label: t("nav.results"),
+      label: safeT("nav.results", locale === 'ar' ? 'النتائج' : 'Results'),
       icon: "📄",
     },
     {
       href: `${basePath}/patient/chat`,
-      label: t("nav.chat"),
+      label: safeT("nav.chat", locale === 'ar' ? 'الدردشة' : 'Chat'),
       icon: "💬",
     },
     {
       href: `${basePath}/patient/profile`,
-      label: t("nav.profile"),
+      label: safeT("nav.profile", locale === 'ar' ? 'الملف' : 'Profile'),
       icon: "👤",
     },
     {
       href: "__logout__",
-      label: t("nav.logout"),
+      label: safeT("nav.logout", locale === 'ar' ? 'تسجيل الخروج' : 'Logout'),
       icon: "🚪",
     },
   ];
 
-  // Removed unnecessary setMounted and useEffect
-
-  // ...existing code...
-  // Remove all label objects and use t("key") for all UI text
-  // For example: t("items.0.home"), t("items.0.appointments"), t("items.0.results"), t("items.0.chat"), t("items.0.profile"), t("items.0.logout"), t("items.0.brand"), t("items.0.lightTheme"), t("items.0.darkTheme"), t("items.0.version"), t("items.0.status")
 
   const handleLogout = () => {
     if (typeof window !== "undefined") {
@@ -86,7 +105,7 @@ export default function PatientLayout({ children }) {
                     <span className="text-xl" aria-label="Lung icon">🫁</span>
                   </div>
                 </div>
-                <span className="font-black text-lg bg-linear-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">{t("brand")}</span>
+                <span className="font-black text-lg bg-linear-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">{safeT("brand", locale === 'ar' ? 'تطبيق التحاليل' : 'Analysis App')}</span>
               </div>
             )}
             <button
@@ -102,7 +121,17 @@ export default function PatientLayout({ children }) {
           <nav className="flex-1 overflow-y-auto py-4 px-3">
             <div className="space-y-1">
               {patientNavItems.map((item) => {
-                const isActive = pathname?.startsWith(item.href);
+                const normalize = (p) => (p || "").replace(/\/+$|^\s+|\s+$/g, '');
+                const np = normalize(pathname);
+                const ih = normalize(item.href);
+                // Prevent parent 'analysis' from matching child '/analysis/history'
+                const isActive = (() => {
+                  if (!np || !ih) return false;
+                  if (item.href === `${basePath}/patient/analysis`) {
+                    return np === ih;
+                  }
+                  return np === ih || np.startsWith(ih + '/');
+                })();
                 const isLogout = item.href === "__logout__";
 
                 if (isLogout) {
@@ -140,10 +169,10 @@ export default function PatientLayout({ children }) {
               <button
                 onClick={() => setTheme(isDark ? "light" : "dark")}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-700/50 transition-all w-full"
-                title={collapsed ? (isDark ? t("theme.light") : t("theme.dark")) : ""}
+                title={collapsed ? (isDark ? safeT("theme.light", locale === 'ar' ? 'وضع فاتح' : 'Light theme') : safeT("theme.dark", locale === 'ar' ? 'وضع داكن' : 'Dark theme')) : ""}
               >
                 <span className="text-lg shrink-0">{isDark ? "☀️" : "🌙"}</span>
-                {!collapsed && <span className="text-sm font-medium">{isDark ? t("theme.light") : t("theme.dark")}</span>}
+                {!collapsed && <span className="text-sm font-medium">{isDark ? safeT("theme.light", locale === 'ar' ? 'وضع فاتح' : 'Light theme') : safeT("theme.dark", locale === 'ar' ? 'وضع داكن' : 'Dark theme')}</span>}
               </button>
               <button
                 onClick={toggleLocale}
@@ -159,8 +188,8 @@ export default function PatientLayout({ children }) {
           {/* Footer */}
           {!collapsed && (
             <div className="border-t border-gray-200 dark:border-zinc-700 p-3 text-xs text-gray-500 dark:text-zinc-400 space-y-1">
-              <div>{t("version")}</div>
-              <div>{t("status")}</div>
+              <div>{safeT("version", "v1.0.0")}</div>
+              <div>{safeT("status", locale === 'ar' ? 'الاتصال بخادم' : 'Server status')}</div>
             </div>
           )}
         </div>

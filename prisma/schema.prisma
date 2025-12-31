@@ -30,7 +30,8 @@ model User {
   notifications    Notification[]
   activities       Activity[]
   changeRequests   ChangeRequest[]
-  reviewedRequests ChangeRequest[] @relation("ReviewedBy")
+  reviewedRequests ChangeRequest[]  @relation("ReviewedBy")
+  analysisResults  AnalysisResult[]
 }
 
 enum Role {
@@ -47,8 +48,8 @@ model Doctor {
   userId String @id
   user   User   @relation(fields: [userId], references: [id])
 
-  phone         String @unique
-  licenseNumber String @unique
+  phone         String  @unique
+  licenseNumber String  @unique
   clinic        String?
 
   // مصدر الحقيقة الوحيد لحالة الطبيب
@@ -115,14 +116,14 @@ model Patient {
 // المواعيد //
 //////////////////////
 model Appointment {
-  id          String   @id @default(uuid())
-  doctorId    String
-  patientId   String
-  scheduledAt DateTime
-  status AppointmentStatus
-  location  String?
-  type      String?   // clinic or online
-  reason String?
+  id            String            @id @default(uuid())
+  doctorId      String
+  patientId     String
+  scheduledAt   DateTime
+  status        AppointmentStatus
+  location      String?
+  type          String? // clinic or online
+  reason        String?
   patientReason String?
 
   createdAt DateTime @default(now())
@@ -284,6 +285,26 @@ model Message {
   chat Chat @relation(fields: [chatId], references: [id])
 
   @@index([chatId])
+}
+
+//////////////////////
+// Analysis results //
+//////////////////////
+model AnalysisResult {
+  id              String   @id @default(uuid())
+  userId          String
+  imageUrl        String
+  prediction      String
+  confidence      Float
+  explanation     String
+  heatmapUrl      String?
+  modelVersion    String
+  inferenceTimeMs Int
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
 }
 
 enum Sender {

@@ -1,0 +1,51 @@
+{
+  "info": {
+    "_postman_id": "ai-analysis-collection",
+    "name": "AI Analysis API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0",
+    "description": "Collection for /api/analysis endpoints (analyze + history). Use environment variables `baseUrl` and `token`."
+  },
+  "item": [
+    {
+      "name": "Analyze Image",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": ""
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/analysis/analyze",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","analysis","analyze"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Analysis History",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/analysis/history",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","analysis","history"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

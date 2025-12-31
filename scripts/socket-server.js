@@ -140,9 +140,8 @@ io.on('connection', (socket) => {
       }
       socket.rate.timestamps.push(now);
 
-      const { chatId, text, fileUrl, mimeType, fileName, clientKey } = payload || {};
-      if (!chatId) return ack && ack({ error: 'invalid_payload' });
-      if (!text && !fileUrl) return ack && ack({ error: 'invalid_payload' });
+      const { chatId, text, clientKey, fileUrl, mimeType, fileName } = payload || {};
+      if (!chatId || (!(text && text.trim()) && !fileUrl)) return ack && ack({ error: 'invalid_payload' });
 
       // verify chat exists and user is participant
       const chat = await prisma.chat.findUnique({ where: { id: chatId } });
@@ -171,15 +170,9 @@ io.on('connection', (socket) => {
         }
       }
 
-      const createData = { chatId, sender, clientKey };
-      if (text) createData.text = text;
-      if (fileUrl) createData.fileUrl = fileUrl;
-      if (mimeType) createData.mimeType = mimeType;
-      if (fileName) createData.fileName = fileName;
+      const message = await prisma.message.create({ data: { chatId, sender, text: text || null, clientKey, fileUrl: fileUrl || null, mimeType: mimeType || null, fileName: fileName || null } });
 
-      const message = await prisma.message.create({ data: createData });
-
-      // broadcast to room with ackable payload (include file fields)
+      // broadcast to room with ackable payload
       const payloadOut = { ...message, time: message.createdAt };
       io.to(`chat:${chatId}`).emit('message', payloadOut);
 

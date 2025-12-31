@@ -1,8 +1,6 @@
 "use client";
 
 
-
-
 import DoctorLayout from "../DoctorLayout";
 import { useToast } from "../../../components/ui/Toast";
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -20,8 +18,11 @@ import {
   FaVideo,
   FaCheck,
   FaCheckDouble,
+  FaFilePdf,
+  FaFileAlt,
 } from "react-icons/fa";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 export default function Page() {
   const { showToast, ToastContainer } = useToast();
@@ -48,107 +49,6 @@ export default function Page() {
   const socket = useSocket();
   const typingTimeoutRef = useRef(null);
   const messagesContainerRef = useRef(null);
-  // listen for retry events dispatched from retry buttons
-  useEffect(() => {
-    function onRetry(e) {
-      const { chatId, messageId } = e.detail || {};
-      if (!chatId || !messageId) return;
-      const list = messagesMap[chatId] || [];
-      const msg = list.find(m => m.id === messageId);
-      if (!msg || !msg.file) return;
-      // reuse patient retry logic: perform init -> PUT -> complete -> post message
-      (async () => {
-        try {
-          setMessagesMap((m) => ({ ...m, [chatId]: (m[chatId] || []).map(mm => mm.id === messageId ? { ...mm, status: 'uploading' } : mm) }));
-          const initRes = await fetch('/api/uploads/init', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ chatId, filename: msg.file.name, contentType: msg.file.type }) });
-          const initData = await initRes.json();
-          if (!initRes.ok || !initData?.uploadUrl) throw new Error('init_failed');
-          await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('PUT', initData.uploadUrl, true);
-            if (initData.provider === 's3' && msg.file.type) xhr.setRequestHeader('Content-Type', msg.file.type);
-            xhr.onload = () => { if (xhr.status >= 200 && xhr.status < 300) resolve(); else reject(new Error('upload_failed')); };
-            xhr.onerror = () => reject(new Error('upload_failed'));
-            xhr.send(msg.file);
-          });
-          const compRes = await fetch('/api/uploads/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ chatId, key: initData.key, filename: msg.file.name, contentType: msg.file.type, provider: initData.provider, bucket: initData.bucket, region: initData.region }) });
-          const compData = await compRes.json();
-          if (!compRes.ok || !compData?.url) throw new Error('complete_failed');
-          // send message containing the file URL (store as file metadata)
-          const msgRes = await fetch(`/api/chat/${chatId}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: msg.file.type, fileName: msg.file.name }) });
-          if (!msgRes.ok) throw new Error('send_failed');
-          const res2 = await fetch(`/api/chat/${chatId}/messages`, { credentials: 'include' });
-          if (res2.ok) {
-            const refreshed = await res2.json();
-            const mapped = (refreshed.messages || []).map((m) => ({ ...m, time: m.createdAt ? new Date(m.createdAt).toLocaleTimeString() : '' }));
-            setMessagesMap((m) => ({ ...m, [chatId]: mapped }));
-          }
-        } catch (e) {
-          console.error('retry upload failed', e);
-          setMessagesMap((m) => ({ ...m, [chatId]: (m[chatId] || []).map(mm => mm.id === messageId ? { ...mm, status: 'failed' } : mm) }));
-          showToast('فشل إعادة الرفع', 'error');
-        }
-      })();
-    }
-    window.addEventListener('chat:retry-upload', onRetry);
-    return () => window.removeEventListener('chat:retry-upload', onRetry);
-  }, [messagesMap]);
-
-  const patientIdToConversation = useMemo(() => {
-    const map = {};
-    conversations.forEach((c) => { if (c.patientId) map[c.patientId] = c; });
-    return map;
-  }, [conversations]);
-
-  const filteredPatients = useMemo(() => {
-    if (!searchQuery.trim()) return allPatients;
-    return allPatients.filter((p) => p.fullName.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [allPatients, searchQuery]);
-
-  const currentChat = selectedChat ? conversations.find((c) => c.id === selectedChat) : null;
-  const currentMessages = selectedChat ? messagesMap[selectedChat] || [] : [];
-
-  // When selectedChat changes: join room and fetch history
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      if (!selectedChat) return;
-      try {
-        try { socket?.join && socket.join(selectedChat); } catch (e) {}
-        if (!messagesMap[selectedChat] || messagesMap[selectedChat].length === 0) {
-          const res = await fetch(`/api/chat/${selectedChat}/messages`, { credentials: 'include' });
-          if (res.ok) {
-            const data = await res.json();
-            if (!mounted) return;
-              const mapped = (data.messages || []).map((msg) => ({ ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : '' }));
-              setMessagesMap((m) => ({ ...m, [selectedChat]: mapped }));
-              // mark messages as read for current user where applicable
-              try {
-                const unreadIds = (mapped || []).filter((msg) => msg.sender !== 'doctor' && msg.id).map((m) => m.id);
-                if (unreadIds.length && socket?.emitEvent) {
-                  socket.emitEvent('read_ack', { messageIds: unreadIds });
-                  // optimistic local update
-                  setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).map(mm => ({ ...mm, status: mm.sender !== 'doctor' ? 'read' : mm.status })) }));
-                }
-              } catch (e) { console.error('read ack emit', e); }
-          }
-        }
-      } catch (e) { console.error(e); }
-    })();
-    return () => { mounted = false; try { socket?.leave && socket.leave(selectedChat); } catch (e) {} };
-  }, [selectedChat]);
-
-  // Auto-scroll to bottom when new messages arrive for the open chat
-  useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container || !selectedChat) return;
-    const list = messagesMap[selectedChat] || [];
-    // if user is near bottom, auto-scroll
-    const isNearBottom = (container.scrollHeight - container.scrollTop - container.clientHeight) < 150;
-    if (isNearBottom) {
-      requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
-    }
-  }, [messagesMap, selectedChat]);
 
   // Fetch JWT token on mount
   useEffect(() => {
@@ -235,21 +135,31 @@ export default function Page() {
     const offMessage = socket.onMessage((msg) => {
       try {
         if (!msg) return;
-        const mapped = {
-          ...msg,
-          time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString(),
-          file: msg.fileUrl ? { url: msg.fileUrl, type: msg.mimeType, name: msg.fileName } : (msg.file || null)
-        };
+        // normalize incoming message fields: some servers/clients use different keys
+        const chatId = msg.chatId ?? (msg.chat && (typeof msg.chat === 'string' ? msg.chat : msg.chat.id)) ?? msg.chat_id ?? msg.roomId ?? msg.threadId ?? null;
+        const messageId = msg.id ?? msg._id ?? msg.messageId ?? null;
+        const clientKey = msg.clientKey ?? msg.client_key ?? null;
+
+        const mapped = { ...msg, id: messageId || msg.id, chatId, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString() };
+
+        if (!chatId) {
+          console.warn('[onMessage] received message without chatId - ignoring', msg);
+          return;
+        }
+        const chatKey = String(chatId);
+
         setMessagesMap((m) => {
-          const list = m[msg.chatId] || [];
+          const list = m[chatKey] || [];
           // avoid duplicates when the same client already added the message optimistically
-          if (msg.id && list.some(x => x.id === msg.id)) return m;
-          if (msg.clientKey && list.some(x => x.clientKey === msg.clientKey)) return m;
-          return { ...m, [msg.chatId]: [...list, mapped] };
+          if (messageId && list.some(x => x.id === messageId)) return m;
+          if (clientKey && list.some(x => x.clientKey === clientKey)) return m;
+          return { ...m, [chatKey]: [...list, mapped] };
         });
-        setConversations((cs) => cs.map((c) => c.id === msg.chatId ? { ...c, lastMessage: msg.text || '', lastMessageTime: mapped.time } : c));
-        if (selectedChat && msg.chatId === selectedChat) {
-          try { socket.emitEvent && socket.emitEvent('delivered_ack', { messageIds: [msg.id] }); } catch (e) {}
+
+        setConversations((cs) => cs.map((c) => c.id === chatKey ? { ...c, lastMessage: msg.text || '', lastMessageTime: mapped.time } : c));
+
+        if (selectedChat && chatKey === String(selectedChat)) {
+          try { socket.emitEvent && socket.emitEvent('delivered_ack', { messageIds: [messageId || msg.id] }); } catch (e) {}
         }
       } catch (e) { console.error('onMessage handler', e); }
     });
@@ -331,8 +241,8 @@ export default function Page() {
         }
 
         const convs = (data.chats || []).map((c) => ({
-          id: c.id,
-          patientId: c.patient?.id,
+          id: String(c.id),
+          patientId: c.patient?.id ? String(c.patient.id) : null,
           patientName: c.patient?.fullName || "مريض",
           lastMessage: c.messages?.[0]?.text || "",
           lastMessageTime: c.messages?.[0]?.createdAt ? new Date(c.messages[0].createdAt).toLocaleTimeString() : "",
@@ -343,7 +253,7 @@ export default function Page() {
 
         if (!mounted) return;
         setConversations(convs);
-        setSelectedChat((prev) => prev ?? (convs.length ? convs[0].id : null));
+        setSelectedChat((prev) => prev ?? (convs.length ? String(convs[0].id) : null));
 
         const res2 = await fetch("/api/doctor/patients", { credentials: "include" });
         const patients = res2.ok ? await res2.json() : [];
@@ -359,39 +269,74 @@ export default function Page() {
     return () => { mounted = false; };
   }, [locale, router, showToast]);
 
+  const patientIdToConversation = useMemo(() => {
+    const map = {};
+    conversations.forEach((c) => { if (c.patientId) map[c.patientId] = c; });
+    return map;
+  }, [conversations]);
+
+  const filteredPatients = useMemo(() => {
+    if (!searchQuery.trim()) return allPatients;
+    return allPatients.filter((p) => p.fullName.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [allPatients, searchQuery]);
+
+  const currentChat = selectedChat ? conversations.find((c) => c.id === selectedChat) : null;
+  const currentMessages = selectedChat ? messagesMap[selectedChat] || [] : [];
+
+  // Keep socket subscribed to the currently selected chat room so doctors
+  // receive patient messages in real time. Leave previous room when switching.
+  const _joinedChatRef = useRef(null);
+  useEffect(() => {
+    try {
+      if (!socket) return;
+      const prev = _joinedChatRef.current;
+      if (prev && String(prev) !== String(selectedChat)) {
+        try { socket.leave && socket.leave(prev); } catch (e) {}
+      }
+      if (selectedChat) {
+        try { socket.join && socket.join(selectedChat); _joinedChatRef.current = selectedChat; } catch (e) {}
+      }
+      return () => {
+        try { if (selectedChat) socket.leave && socket.leave(selectedChat); } catch (e) {}
+        _joinedChatRef.current = null;
+      };
+    } catch (e) { /* ignore */ }
+  }, [socket, selectedChat]);
+
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedChat) {
       showToast("الرسالة فارغة", "error");
       return;
     }
+    const chatKey = String(selectedChat);
     const tempId = `tmp-${Date.now()}`;
     const tempMsg = {
       id: tempId,
-      chatId: selectedChat,
+      chatId: chatKey,
       sender: "doctor",
       text: messageInput,
       status: "sent",
       time: new Date().toLocaleTimeString(),
       clientKey: tempId
     };
-    setMessagesMap((m) => ({ ...m, [selectedChat]: [...(m[selectedChat] || []), tempMsg] }));
-    setConversations((cs) => cs.map((c) => (c.id === selectedChat ? { ...c, lastMessage: messageInput } : c)));
+    setMessagesMap((m) => ({ ...m, [chatKey]: [...(m[chatKey] || []), tempMsg] }));
+    setConversations((cs) => cs.map((c) => (c.id === chatKey ? { ...c, lastMessage: messageInput } : c)));
     const textToSend = messageInput;
     setMessageInput("");
 
-    const removeTemp = () => setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).filter((x) => x.id !== tempId) }));
+    const removeTemp = () => setMessagesMap((m) => ({ ...m, [chatKey]: (m[chatKey] || []).filter((x) => x.id !== tempId) }));
 
     try {
-      if (socket && socket.connected) {
-        socket.sendMessage({ chatId: selectedChat, text: textToSend, clientKey: tempId }, (res) => {
+        if (socket && socket.connected) {
+        socket.sendMessage({ chatId: chatKey, text: textToSend, clientKey: tempId }, (res) => {
           if (res?.ok && res.message) {
             setMessagesMap((m) => {
-              const list = (m[selectedChat] || []).filter((x) => x.id !== tempId);
+              const list = (m[chatKey] || []).filter((x) => x.id !== tempId);
               // If server message already delivered via 'message' event, avoid adding duplicate
               if (res.message && list.some(x => (res.message.id && x.id === res.message.id) || (res.message.clientKey && x.clientKey === res.message.clientKey))) {
-                return { ...m, [selectedChat]: list };
+                return { ...m, [chatKey]: list };
               }
-              return { ...m, [selectedChat]: [...list, { ...res.message, time: res.message.createdAt ? new Date(res.message.createdAt).toLocaleTimeString() : "" }] };
+              return { ...m, [chatKey]: [...list, { ...res.message, time: res.message.createdAt ? new Date(res.message.createdAt).toLocaleTimeString() : "" }] };
             });
             showToast("تم إرسال الرسالة", "success");
           } else {
@@ -412,11 +357,11 @@ export default function Page() {
           showToast(data.error || "خطأ عند إرسال الرسالة", "error");
           return;
         }
-        const res2 = await fetch(`/api/chat/${selectedChat}/messages`, { credentials: "include" });
+        const res2 = await fetch(`/api/chat/${chatKey}/messages`, { credentials: "include" });
         const refreshed = await res2.json();
         if (res2.ok) {
           const mapped = (refreshed.messages || []).map((msg) => ({ ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : "" }));
-          setMessagesMap((m) => ({ ...m, [selectedChat]: mapped }));
+          setMessagesMap((m) => ({ ...m, [chatKey]: mapped }));
         }
         showToast("تم إرسال الرسالة", "success");
       }
@@ -449,7 +394,7 @@ export default function Page() {
         const initData = await initRes.json();
         if (!initRes.ok || !initData?.uploadUrl) {
           setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).map(mm => mm.id === tempId ? { ...mm, status: 'failed' } : mm) }));
-          showToast(initData?.error || 'فشل تهيئة الرفع', 'error');
+          // Send message containing the file metadata via socket (fallback to HTTP)
           return;
         }
 
@@ -491,7 +436,7 @@ export default function Page() {
         // Send message containing the file metadata via socket (fallback to HTTP)
         try {
           if (socket && socket.connected) {
-            socket.sendMessage({ chatId: selectedChat, fileUrl: compData.url, mimeType: file.type, fileName: file.name, clientKey: tempId }, (res) => {
+            socket.sendMessage({ chatId: selectedChat, fileUrl: compData.url, mimeType: compData.contentType || file.type, fileName: compData.filename || file.name, clientKey: tempId }, (res) => {
               if (res && res.ok && res.message) {
                 setMessagesMap((m) => {
                   const list = (m[selectedChat] || []).filter((x) => x.id !== tempId);
@@ -506,7 +451,7 @@ export default function Page() {
               } else {
                 // fallback to HTTP POST
                 (async () => {
-                  const msgRes = await fetch(`/api/chat/${selectedChat}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: file.type, fileName: file.name, clientKey: tempId }) });
+                  const msgRes = await fetch(`/api/chat/${selectedChat}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: compData.contentType || file.type, fileName: compData.filename || file.name, clientKey: tempId }) });
                   if (!msgRes.ok) {
                     setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).map(mm => mm.id === tempId ? { ...mm, status: 'failed' } : mm) }));
                     const err = await msgRes.json().catch(() => ({}));
@@ -525,7 +470,7 @@ export default function Page() {
               }
             });
           } else {
-            const msgRes = await fetch(`/api/chat/${selectedChat}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: file.type, fileName: file.name, clientKey: tempId }) });
+            const msgRes = await fetch(`/api/chat/${selectedChat}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: compData.contentType || file.type, fileName: compData.filename || file.name, clientKey: tempId }) });
             if (!msgRes.ok) {
               setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).map(mm => mm.id === tempId ? { ...mm, status: 'failed' } : mm) }));
               const err = await msgRes.json().catch(() => ({}));
@@ -632,7 +577,7 @@ export default function Page() {
               </div>
               <div className="flex-1 overflow-y-auto">
                 {filteredPatients.map((patient) => {
-                  const conv = patientIdToConversation[patient.id];
+                  const conv = patientIdToConversation[String(patient.id)];
                   return (
                     <div
                       key={patient.id}
@@ -661,10 +606,10 @@ export default function Page() {
                                       body: JSON.stringify({ patientId: patient.id })
                                     });
                                     const data = await res.json();
-                                    if (res.ok && data.chat) {
-                                      setConversations((prev) => [...prev, {
-                                        id: data.chat.id,
-                                        patientId: patient.id,
+                                                            if (res.ok && data.chat) {
+                                                                  setConversations((prev) => [...prev, {
+                                                                    id: String(data.chat.id),
+                                                                    patientId: patient.id ? String(patient.id) : null,
                                         patientName: patient.fullName,
                                         lastMessage: "",
                                         lastMessageTime: "",
@@ -672,7 +617,7 @@ export default function Page() {
                                         online: false,
                                         avatar: "👨"
                                       }]);
-                                      setSelectedChat(data.chat.id);
+                                                                  setSelectedChat(String(data.chat.id));
                                     } else {
                                       showToast(data.error || "تعذر بدء المحادثة", "error");
                                     }
@@ -721,7 +666,18 @@ export default function Page() {
                       {currentMessages.map((msg, idx) => (
                         <div key={`${msg.clientKey || msg.id}-${idx}`} className={`flex ${msg.sender==="doctor"?"justify-start":"justify-end"}`}>
                           <div className={`max-w-md rounded-2xl px-4 py-3 ${msg.sender==="doctor"?"bg-blue-600 text-white rounded-tr-sm":"bg-white text-gray-900 rounded-tl-sm shadow-md"}`}>
-                            <p className="text-sm">{msg.text}</p>
+                            {msg.fileUrl || (msg.file && typeof msg.file === 'object') ? (
+                              (() => {
+                                const url = msg.fileUrl || msg.file?.url || (msg.file && URL.createObjectURL(msg.file));
+                                const mime = msg.mimeType || msg.file?.type || '';
+                                const name = msg.fileName || msg.file?.name || 'attachment';
+                                if (mime && mime.startsWith('image/')) return <Image src={url} alt="img" className="max-w-full rounded" width={400} height={300} style={{ objectFit: 'contain' }} />;
+                                if (mime && mime.includes('pdf')) return <div className="flex items-center gap-2"><FaFilePdf className="text-red-500"/><a href={url} target="_blank" className="underline">{name}</a></div>;
+                                return <div className="flex items-center gap-2"><FaFileAlt/><a href={url} target="_blank" className="underline">{name}</a></div>;
+                              })()
+                            ) : (
+                              <p className="text-sm">{msg.text}</p>
+                            )}
                             <div className={`mt-1 flex items-center justify-end gap-1 text-xs ${msg.sender==="doctor"?"text-blue-100":"text-gray-500"}`}>
                               <span>{msg.time}</span>
                                       {msg.sender==="doctor" && (msg.status==="sent"?<FaCheck/>:msg.status==="delivered"?<FaCheckDouble/>:msg.status==="read"?<FaCheckDouble className="text-blue-300"/>:null)}
