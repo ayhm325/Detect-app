@@ -41,9 +41,12 @@ def main():
     nx.draw(G, pos=pos, with_labels=True, node_size=200, font_size=6, arrows=False)
     plt.title('Module hierarchy (networkx fallback)')
     plt.tight_layout()
-    out = 'model_graph_networkx.png'
-    plt.savefig(out, dpi=150)
-    print('Saved', out)
+    out_png = 'model_graph_networkx.png'
+    out_svg = 'model_graph_networkx.svg'
+    plt.savefig(out_png, dpi=150)
+    plt.savefig(out_svg)
+    print('Saved', out_png)
+    print('Saved', out_svg)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,823 @@
+{
+  "model_class": "ResNet",
+  "total_parameters": 11689512,
+  "trainable_parameters": 11689512,
+  "layers_count": 67,
+  "layers": [
+    {
+      "name": "conv1",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        64,
+        112,
+        112
+      ],
+      "params": 9408,
+      "trainable_params": 9408
+    },
+    {
+      "name": "bn1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        64,
+        112,
+        112
+      ],
+      "params": 128,
+      "trainable_params": 128
+    },
+    {
+      "name": "relu",
+      "type": "ReLU",
+      "output_shape": [
+        1,
+        64,
+        112,
+        112
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "maxpool",
+      "type": "MaxPool2d",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer1",
+      "type": "Sequential",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer1.0",
+      "type": "BasicBlock",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer1.0.conv1",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 36864,
+      "trainable_params": 36864
+    },
+    {
+      "name": "layer1.0.bn1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 128,
+      "trainable_params": 128
+    },
+    {
+      "name": "layer1.0.relu",
+      "type": "ReLU",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer1.0.conv2",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 36864,
+      "trainable_params": 36864
+    },
+    {
+      "name": "layer1.0.bn2",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 128,
+      "trainable_params": 128
+    },
+    {
+      "name": "layer1.1",
+      "type": "BasicBlock",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer1.1.conv1",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 36864,
+      "trainable_params": 36864
+    },
+    {
+      "name": "layer1.1.bn1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 128,
+      "trainable_params": 128
+    },
+    {
+      "name": "layer1.1.relu",
+      "type": "ReLU",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer1.1.conv2",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 36864,
+      "trainable_params": 36864
+    },
+    {
+      "name": "layer1.1.bn2",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "params": 128,
+      "trainable_params": 128
+    },
+    {
+      "name": "layer2",
+      "type": "Sequential",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer2.0",
+      "type": "BasicBlock",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer2.0.conv1",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 73728,
+      "trainable_params": 73728
+    },
+    {
+      "name": "layer2.0.bn1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 256,
+      "trainable_params": 256
+    },
+    {
+      "name": "layer2.0.relu",
+      "type": "ReLU",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer2.0.conv2",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 147456,
+      "trainable_params": 147456
+    },
+    {
+      "name": "layer2.0.bn2",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 256,
+      "trainable_params": 256
+    },
+    {
+      "name": "layer2.0.downsample",
+      "type": "Sequential",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer2.0.downsample.0",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 8192,
+      "trainable_params": 8192
+    },
+    {
+      "name": "layer2.0.downsample.1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 256,
+      "trainable_params": 256
+    },
+    {
+      "name": "layer2.1",
+      "type": "BasicBlock",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer2.1.conv1",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 147456,
+      "trainable_params": 147456
+    },
+    {
+      "name": "layer2.1.bn1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 256,
+      "trainable_params": 256
+    },
+    {
+      "name": "layer2.1.relu",
+      "type": "ReLU",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer2.1.conv2",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 147456,
+      "trainable_params": 147456
+    },
+    {
+      "name": "layer2.1.bn2",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "params": 256,
+      "trainable_params": 256
+    },
+    {
+      "name": "layer3",
+      "type": "Sequential",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer3.0",
+      "type": "BasicBlock",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer3.0.conv1",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 294912,
+      "trainable_params": 294912
+    },
+    {
+      "name": "layer3.0.bn1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 512,
+      "trainable_params": 512
+    },
+    {
+      "name": "layer3.0.relu",
+      "type": "ReLU",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer3.0.conv2",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 589824,
+      "trainable_params": 589824
+    },
+    {
+      "name": "layer3.0.bn2",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 512,
+      "trainable_params": 512
+    },
+    {
+      "name": "layer3.0.downsample",
+      "type": "Sequential",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer3.0.downsample.0",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 32768,
+      "trainable_params": 32768
+    },
+    {
+      "name": "layer3.0.downsample.1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 512,
+      "trainable_params": 512
+    },
+    {
+      "name": "layer3.1",
+      "type": "BasicBlock",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer3.1.conv1",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 589824,
+      "trainable_params": 589824
+    },
+    {
+      "name": "layer3.1.bn1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 512,
+      "trainable_params": 512
+    },
+    {
+      "name": "layer3.1.relu",
+      "type": "ReLU",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer3.1.conv2",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 589824,
+      "trainable_params": 589824
+    },
+    {
+      "name": "layer3.1.bn2",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "params": 512,
+      "trainable_params": 512
+    },
+    {
+      "name": "layer4",
+      "type": "Sequential",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer4.0",
+      "type": "BasicBlock",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer4.0.conv1",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 1179648,
+      "trainable_params": 1179648
+    },
+    {
+      "name": "layer4.0.bn1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 1024,
+      "trainable_params": 1024
+    },
+    {
+      "name": "layer4.0.relu",
+      "type": "ReLU",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer4.0.conv2",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 2359296,
+      "trainable_params": 2359296
+    },
+    {
+      "name": "layer4.0.bn2",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 1024,
+      "trainable_params": 1024
+    },
+    {
+      "name": "layer4.0.downsample",
+      "type": "Sequential",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer4.0.downsample.0",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 131072,
+      "trainable_params": 131072
+    },
+    {
+      "name": "layer4.0.downsample.1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 1024,
+      "trainable_params": 1024
+    },
+    {
+      "name": "layer4.1",
+      "type": "BasicBlock",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer4.1.conv1",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 2359296,
+      "trainable_params": 2359296
+    },
+    {
+      "name": "layer4.1.bn1",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 1024,
+      "trainable_params": 1024
+    },
+    {
+      "name": "layer4.1.relu",
+      "type": "ReLU",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "layer4.1.conv2",
+      "type": "Conv2d",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 2359296,
+      "trainable_params": 2359296
+    },
+    {
+      "name": "layer4.1.bn2",
+      "type": "BatchNorm2d",
+      "output_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "params": 1024,
+      "trainable_params": 1024
+    },
+    {
+      "name": "avgpool",
+      "type": "AdaptiveAvgPool2d",
+      "output_shape": [
+        1,
+        512,
+        1,
+        1
+      ],
+      "params": 0,
+      "trainable_params": 0
+    },
+    {
+      "name": "fc",
+      "type": "Linear",
+      "output_shape": [
+        1,
+        1000
+      ],
+      "params": 513000,
+      "trainable_params": 513000
+    }
+  ],
+  "input_shape": [
+    1,
+    3,
+    224,
+    224
+  ],
+  "output_shape": [
+    1,
+    1000
+  ],
+  "device": "cpu",
+  "dtype": "torch.float32",
+  "_visualization_error": "Visualization failed: Command '[WindowsPath('dot'), '-Kdot', '-Tsvg', '-O', 'model_graph']' returned non-zero exit status 1. [stderr: b'Warning: model_graph:4: string ran past end of line\\r\\nError: model_graph:5: syntax error near line 5\\r\\ncontext:  >>>  ( <<< 1, 1000)\" fillcolor=darkolivegreen1]\\r\\nWarning: model_graph:5: string ran past end of line\\r\\n']"
+}

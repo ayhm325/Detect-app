@@ -248,7 +248,10 @@ def summarize_model(
                     summary["_visualization_error"] = "Could not find a tensor output to visualize."
                 else:
                     # create graph and save
-                    graph = make_dot(gv_out, params=dict(model.named_parameters()))
+                    # Avoid passing the full params dict (names) to torchviz/graphviz
+                    # because parameter names can include characters that break DOT syntax.
+                    # Passing None produces a cleaner graph without per-parameter labels.
+                    graph = make_dot(gv_out, params=None)
                     # save in multiple formats if possible
                     svg_path = viz_path + ".svg"
                     pdf_path = viz_path + ".pdf"
