@@ -27,10 +27,16 @@
         { "value": "Asia/Dubai", "label": "Asia/Dubai" },
         { "value": "Africa/Cairo", "label": "Africa/Cairo" }
       ],
-      "languageOptions": [
-        { "value": "ar", "label": "Arabic" },
-        { "value": "en", "label": "English" }
-      ]
+      "appointmentOptions": {
+        "15": "15m",
+        "30": "30m",
+        "45": "45m",
+        "60": "60m"
+      },
+      "languageOptions": {
+        "ar": "Arabic",
+        "en": "English"
+      }
     },
     "backup": {
       "options": [
@@ -41,6 +47,71 @@
     },
     "save": "Save Changes",
     "saved": "Saved successfully"
+  },
+  "labels": {
+    "systemName": {
+      "label": "System Name",
+      "description": "Name displayed in the UI"
+    },
+    "defaultLanguage": {
+      "label": "Default Language",
+      "description": "Choose the UI language"
+    },
+    "registrationEnabled": {
+      "label": "Enable Registration",
+      "description": "Allow users to create accounts"
+    },
+    "allowPatientChangeDoctor": {
+      "label": "Allow Patient Change Doctor",
+      "description": "Allow patients to request a doctor change"
+    },
+    "maxDoctorChangeRequests": {
+      "label": "Max Doctor Change Requests",
+      "description": "Maximum pending requests per patient"
+    },
+    "appointmentInterval": {
+      "label": "Appointment Interval",
+      "description": "Minutes per appointment slot"
+    },
+    "rolePermissions": {
+      "label": "Role Permissions",
+      "description": "Toggle capabilities per role"
+    },
+    "sessionDuration": {
+      "label": "Session Duration",
+      "description": "Session length in minutes"
+    },
+    "enableTwoFactor": {
+      "label": "Enable Two-Factor",
+      "description": "Require two-step verification for users"
+    }
+  },
+  "sections": {
+    "general": "General Settings",
+    "access": "Access Control",
+    "medical": "Medical Settings",
+    "roles": "Role Permissions",
+    "security": "Security"
+  },
+  "ui": {
+    "secureBadge": "SECURE",
+    "unsavedChanges": "Unsaved changes",
+    "version": "v2.0.1"
+  },
+
+  "units": {
+    "minutes": "m"
+  },
+
+  "defaults": {
+    "systemName": "PneumoDetect"
+  },
+
+  "security": {
+    "hipaaNotice": "Enabling these features helps protect patient data and ensures HIPAA compliance.",
+    "title": "Security Settings",
+    "changePassword": "Change Password",
+    "twoFactor": "Enable Two-Factor Authentication"
   },
   "notifications": {
     "title": "Notification Settings",
@@ -53,11 +124,6 @@
     "users": "Users",
     "roles": "Roles",
     "edit": "Edit Permissions"
-  },
-  "security": {
-    "title": "Security Settings",
-    "changePassword": "Change Password",
-    "twoFactor": "Enable Two-Factor Authentication"
   },
   "actions": {
     "save": "Save",

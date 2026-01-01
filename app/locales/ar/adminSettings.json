@@ -27,10 +27,16 @@
         { "value": "Asia/Dubai", "label": "آسيا/دبي" },
         { "value": "Africa/Cairo", "label": "أفريقيا/القاهرة" }
       ],
-      "languageOptions": [
-        { "value": "ar", "label": "العربية" },
-        { "value": "en", "label": "الإنجليزية" }
-      ]
+      "appointmentOptions": {
+        "15": "15د",
+        "30": "30د",
+        "45": "45د",
+        "60": "60د"
+      },
+      "languageOptions": {
+        "ar": "العربية",
+        "en": "الإنجليزية"
+      }
     },
     "backup": {
       "options": [
@@ -41,6 +47,64 @@
     },
     "save": "حفظ التغييرات",
     "saved": "تم الحفظ بنجاح"
+  },
+  "labels": {
+    "systemName": {
+      "label": "اسم النظام",
+      "description": "الاسم الظاهر في واجهات المستخدم"
+    },
+    "defaultLanguage": {
+      "label": "اللغة الافتراضية",
+      "description": "اختيار لغة واجهة المستخدم"
+    },
+    "registrationEnabled": {
+      "label": "تفعيل التسجيل",
+      "description": "السماح للمستخدمين بإنشاء حسابات"
+    },
+    "allowPatientChangeDoctor": {
+      "label": "إمكانية تغيير الطبيب من المريض",
+      "description": "السماح للمرضى بطلب تغيير الطبيب"
+    },
+    "maxDoctorChangeRequests": {
+      "label": "الحد الأقصى لطلبات تغيير الطبيب",
+      "description": "الحد الأقصى للطلبات المعلقة لكل مريض"
+    },
+    "appointmentInterval": {
+      "label": "فترة الموعد",
+      "description": "عدد دقائق كل فترة موعد"
+    },
+    "rolePermissions": {
+      "label": "صلاحيات الأدوار",
+      "description": "التحكم بما يمكن لكل دور القيام به"
+    },
+    "sessionDuration": {
+      "label": "مدة الجلسة",
+      "description": "مدة الجلسة بالدقائق"
+    },
+    "enableTwoFactor": {
+      "label": "تفعيل التحقق الثنائي",
+      "description": "اشتراط التحقق بخطوتين للمستخدمين"
+    }
+  },
+  "sections": {
+    "general": "الإعدادات العامة",
+    "access": "التحكم بالوصول",
+    "medical": "الإعدادات الطبية",
+    "roles": "صلاحيات الأدوار",
+    "security": "الأمان"
+  },
+  "ui": {
+    "secureBadge": "مؤمّن",
+    "unsavedChanges": "تغييرات غير محفوظة",
+    "version": "v2.0.1"
+  },
+
+  "units": {
+    "minutes": "د"
+  },
+
+  "defaults": {
+    "systemName": "PneumoDetect"
   },
   "notifications": {
     "title": "إعدادات الإشعارات",
@@ -57,7 +121,8 @@
   "security": {
     "title": "إعدادات الأمان",
     "changePassword": "تغيير كلمة المرور",
-    "twoFactor": "تفعيل التحقق بخطوتين"
+    "twoFactor": "تفعيل التحقق بخطوتين",
+    "hipaaNotice": "تمكين هذه الميزات يساهم في حماية بيانات المرضى والالتزام بمعايير HIPAA."
   },
   "actions": {
     "save": "حفظ",

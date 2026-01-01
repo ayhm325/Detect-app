@@ -16,6 +16,7 @@
   "statuses": {
     "active": "نشط",
     "suspended": "معلق",
+    "pending": "قيد الانتظار",
     "banned": "محظور"
   },
   "table": {
@@ -33,6 +34,37 @@
     "userDeleted": "تم حذف المستخدم",
     "exportStarted": "جاري تصدير البيانات...",
     "notLoggedIn": "لم يسجل الدخول بعد"
+  },
+  "csv": {
+    "headers": {
+      "id": "المعرف",
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الجوال",
+      "role": "الدور",
+      "status": "الحالة",
+      "joinDate": "تاريخ الانضمام",
+      "lastLogin": "آخر تسجيل دخول",
+      "specialty": "التخصص",
+      "license": "الترخيص",
+      "patientId": "معرّف المريض"
+    },
+    "filename": "تصدير-المستخدمين-{date}.csv"
+  },
+  "avatars": {
+    "admin": "\uD83D\uDC68\u200D\uD83D\uDCBC",
+    "doctor": "\uD83D\uDC68\u200D\u2695\uFE0F",
+    "patient": "\uD83D\uDC64"
+  },
+  "errors": {
+    "fetchFailed": "فشل جلب المستخدمين",
+    "loadFailed": "فشل تحميل المستخدمين",
+    "exportFailed": "فشل التصدير",
+    "createAdminFailed": "فشل إنشاء المدير"
+  },
+  "messages": {
+    "adminCreated": "تم إنشاء المدير",
+    "userAddedSuccess": "تمت إضافة المستخدم بنجاح"
   },
   "stats": {
     "totalUsers": "إجمالي المستخدمين",

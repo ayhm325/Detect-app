@@ -78,7 +78,7 @@ export default function PatientDashboardPage() {
   /* ===================== QUICK ACTIONS ===================== */
   const quickActions = [
     { title: t("dashboard.quickActions.bookAppointment"), desc: t("dashboard.quickActions.desc.bookAppointment"), icon: "📅", href: "/patient/appointments" },
-    { title: t("dashboard.quickActions.uploadXray"), desc: t("dashboard.quickActions.desc.uploadXray") || "", icon: "🩻", href: "/patient/upload-xray" },
+    { title: t("dashboard.quickActions.uploadXray"), desc: t("dashboard.quickActions.desc.uploadXray") || "", icon: "🩻", href: "/patient/analysis" },
     { title: t("dashboard.quickActions.viewReports"), desc: t("dashboard.quickActions.desc.viewReports"), icon: "📋", href: "/patient/results" },
     { title: t("dashboard.quickActions.chatDoctor"), desc: t("dashboard.quickActions.desc.chatDoctor"), icon: "💬", href: "/patient/chat" },
   ];

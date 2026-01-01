@@ -1,0 +1,88 @@
+{
+  "PatientsManagement": {
+    "headerTitle": "المرضى",
+    "headerSubtitle": "إدارة المرضى والمواعيد والسجلات",
+    "exportButton": "تصدير CSV",
+    "addButton": "إضافة مريض",
+    "stats": {
+      "totalPatients": "إجمالي المرضى",
+      "activePatients": "المرضى النشطون",
+      "todayVisits": "زيارات اليوم",
+      "totalReports": "إجمالي التقارير"
+    },
+    "filters": {
+      "genderAll": "كل الأجناس",
+      "statusAll": "كل الحالات"
+    },
+    "searchPlaceholder": "ابحث بالاسم أو البريد أو الهاتف أو رقم الهوية...",
+    "ageUnit": "سنة",
+    "table": {
+      "noMatches": "لم يتم العثور على نتائج"
+    },
+    "errorFetching": "حدث خطأ أثناء جلب البيانات.",
+    "loading": "جاري تحميل البيانات...",
+    "toast": {
+      "fillFields": "يرجى ملء الحقول المطلوبة",
+      "patientAdded": "تم إضافة المريض",
+      "patientUpdated": "تم تحديث المريض",
+      "patientDeleted": "تم تعليق المريض",
+      "exportStarted": "بدأ تصدير CSV"
+    },
+    "csvHeader_id": "المعرف",
+    "csvHeader_name": "الاسم",
+    "csvHeader_gender": "الجنس",
+    "csvHeader_birthDate": "تاريخ الميلاد",
+    "csvHeader_bloodType": "فصيلة الدم",
+    "csvHeader_phone": "الهاتف",
+    "csvHeader_email": "البريد الإلكتروني",
+    "csvHeader_status": "الحالة",
+    "csvHeader_joinDate": "تاريخ الانضمام",
+    "csvHeader_doctor": "الطبيب",
+    "modals": {
+      "addTitle": "إضافة مريض",
+      "editTitle": "تعديل المريض",
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "gender": "الجنس",
+      "bloodType": "فصيلة الدم",
+      "doctor": "الطبيب",
+      "birthDate": "تاريخ الميلاد",
+      "status": "الحالة"
+    },
+    "buttons": {
+      "save": "حفظ",
+      "saveChanges": "حفظ التغييرات",
+      "cancel": "إلغاء"
+    },
+    "confirmDelete": {
+      "title": "تأكيد",
+      "description": "هل تريد تعليق المريض {name}؟",
+      "yes": "نعم، علق",
+      "no": "لا، إلغاء"
+    },
+    "genders": {
+      "male": "ذكر",
+      "female": "أنثى"
+    },
+    "statuses": {
+      "active": "نشط",
+      "suspended": "معلق",
+      "pending": "قيد الانتظار",
+      "banned": "محظور"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    }
+    ,
+    "statLabel": "الإحصائية",
+    "labels": {
+      "phone": "الهاتف",
+      "age": "العمر",
+      "blood": "فصيلة الدم",
+      "doctor": "طبيب"
+    },
+    "selectDoctorPlaceholder": "اختر الطبيب"
+  }
+}

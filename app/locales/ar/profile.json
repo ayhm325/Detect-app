@@ -24,8 +24,7 @@
   "toastPasswordMismatch": "كلمتا المرور غير متطابقتين",
   "toastPasswordLength": "كلمة المرور قصيرة جدًا",
   "toastPasswordChanged": "تم تغيير كلمة المرور",
-  "toastNotificationUpdated": "تم تحديث الإشعارات"
-  ,
+  "toastNotificationUpdated": "تم تحديث الإشعارات",
   "tab": {
     "personalInfo": "البيانات الشخصية",
     "health": "الصحة",
@@ -79,7 +78,8 @@
     "noDoctors": "لا يوجد أطباء متاحون",
     "reasonLabel": "سبب الطلب (اختياري)",
     "reasonPlaceholder": "اكتب سبب رغبتك في تغيير الطبيب (اختياري)",
-    "submit": "إرسال الطلب"
+    "submit": "إرسال الطلب",
+    "sending": "جاري الإرسال..."
   },
   "currentDoctor": "الطبيب الحالي",
   "joinDate": "تاريخ الانضمام",
@@ -87,15 +87,17 @@
   "status": "الحالة",
   "createdAt": "تاريخ الإنشاء",
   "updatedAt": "آخر تحديث",
-  "userId": "معرف المستخدم"
-  ,
+  "userId": "معرف المستخدم",
   "security": {
     "changePasswordTitle": "تغيير كلمة السر",
     "newPasswordLabel": "كلمة المرور الجديدة",
     "confirmPasswordLabel": "تأكيد كلمة المرور",
     "changePasswordButton": "تغيير كلمة المرور"
   },
-   "hide": "إخفاء",
+  "hide": "إخفاء",
   "show": "إظهار",
-  "saving": "جارٍ الحفظ..."
+  "saving": "جارٍ الحفظ...",
+  "placeholder": {
+    "empty": "—"
+  }
 }

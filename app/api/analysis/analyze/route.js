@@ -78,6 +78,17 @@ export async function POST(request) {
       size: buffer.length
     };
 
+    // pass optional with_heatmap flag from the multipart form (checkbox)
+    try {
+      const withHeatmapRaw = form.get('with_heatmap');
+      if (withHeatmapRaw !== null) {
+        // form fields arrive as strings: 'true'/'false' or 'on'
+        fileObj.with_heatmap = String(withHeatmapRaw) === 'true' || String(withHeatmapRaw) === 'on';
+      }
+    } catch (e) {
+      fileObj.with_heatmap = false;
+    }
+
     // detect file type from buffer (stronger than trusting the client-provided mime)
     let detected = null;
     try {

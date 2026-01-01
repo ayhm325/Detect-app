@@ -8,7 +8,8 @@
   "searchPlaceholder": "ابحث بالاسم أو البريد أو الجوال...",
   "filters": {
     "allStatuses": "كل الحالات",
-    "genderAll": "كل الأنواع"
+    "genderAll": "كل الأنواع",
+    "statusAll": "كل الحالات"
   },
   "statuses": {
     "active": "نشط",
@@ -45,6 +46,16 @@
     "todayVisits": "زيارات اليوم",
     "totalReports": "إجمالي التقارير"
   },
+  "loading": "جاري تحميل البيانات...",
+  "errorFetching": "حدث خطأ أثناء جلب البيانات.",
+  "statLabel": "الإحصائية",
+  "labels": {
+    "phone": "الهاتف",
+    "age": "العمر",
+    "blood": "فصيلة الدم",
+    "doctor": "طبيب"
+  },
+  "selectDoctorPlaceholder": "اختر الطبيب",
   "genders": {
     "male": "ذكر",
     "female": "أنثى"

@@ -9,8 +9,8 @@ export default function UploadXRaySidebarItem() {
   const basePrefix = locale === "en" ? "/en" : "/ar";
 
   return (
-    <Link href={`${basePrefix}/patient/upload-xray`} className="py-2 px-4 rounded hover:bg-blue-100 dark:hover:bg-zinc-800 font-medium block">
-      Upload X-Ray
+    <Link href={`${basePrefix}/patient/analysis`} className="py-2 px-4 rounded hover:bg-blue-100 dark:hover:bg-zinc-800 font-medium block">
+      Analysis
     </Link>
   );
 }

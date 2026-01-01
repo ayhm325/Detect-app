@@ -50,7 +50,7 @@ export default function UsersPage() {
             statusDisplay,
             joinDate,
             lastLogin,
-            avatar: role === 'admin' ? '👨‍💼' : role === 'doctor' ? '👨‍⚕️' : '👤',
+            avatar: role === 'admin' ? t('avatars.admin') : role === 'doctor' ? t('avatars.doctor') : t('avatars.patient'),
             specialty: u.doctor?.specialty,
             license: u.doctor?.licenseNumber,
             patientId: u.patient?.id,
@@ -66,7 +66,7 @@ export default function UsersPage() {
 
     loadUsers();
     return () => { mounted = false; };
-  }, [locale]);
+  }, [locale, t]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -154,11 +154,23 @@ export default function UsersPage() {
   const handleExport = () => {
     try {
       if (!users || users.length === 0) {
-        showToast(t('toast.notLoggedIn') || 'No users to export', 'info');
+        showToast(t('toast.notLoggedIn'), 'info');
         return;
       }
 
-      const headers = ['id','name','email','phone','role','status','joinDate','lastLogin','specialty','license','patientId'];
+      const headers = [
+        t('csv.headers.id'),
+        t('csv.headers.name'),
+        t('csv.headers.email'),
+        t('csv.headers.phone'),
+        t('csv.headers.role'),
+        t('csv.headers.status'),
+        t('csv.headers.joinDate'),
+        t('csv.headers.lastLogin'),
+        t('csv.headers.specialty'),
+        t('csv.headers.license'),
+        t('csv.headers.patientId')
+      ];
 
       const escapeCell = (val) => {
         if (val === null || val === undefined) return '';
@@ -189,15 +201,15 @@ export default function UsersPage() {
       const a = document.createElement('a');
       a.href = url;
       const date = new Date().toISOString().slice(0,10);
-      a.download = `users-export-${date}.csv`;
+      a.download = t('csv.filename', { date });
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      showToast(t('toast.exportStarted') || 'Export started', 'success');
+      showToast(t('toast.exportStarted'), 'success');
     } catch (err) {
       console.error('Export failed', err);
-      showToast('Export failed', 'error');
+      showToast(t('errors.exportFailed'), 'error');
     }
   };
 
@@ -215,7 +227,7 @@ export default function UsersPage() {
       lastLogin: new Date().toISOString().replace('T', ' ').substring(0, 16),
       phone: "",
       password: formData.password || 'changeme',
-      avatar: "👨‍💼"
+      avatar: t('avatars.admin')
     };
     
     setUsers([...users, newUser]);
@@ -227,7 +239,7 @@ export default function UsersPage() {
       role: "admin",
       status: "active"
     });
-    showToast("User added successfully", "success");
+    showToast(t('toast.userAdded'), 'success');
     // Create admin via API
     (async () => {
       try {
@@ -239,7 +251,7 @@ export default function UsersPage() {
 
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          showToast(err.error || 'Failed to create admin', 'error');
+          showToast(err.error || t('errors.createAdminFailed'), 'error');
           return;
         }
 
@@ -256,17 +268,17 @@ export default function UsersPage() {
           statusDisplay: t(`statuses.${created.isActive ? 'active' : 'suspended'}`),
           joinDate: created.createdAt ? new Date(created.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
           lastLogin: created.updatedAt ? new Date(created.updatedAt).toISOString().replace('T', ' ').substring(0, 16) : new Date().toISOString().replace('T', ' ').substring(0, 16),
-          avatar: '👨‍💼',
+          avatar: t('avatars.admin'),
           permissions: []
         };
 
         setUsers(prev => [uiUser, ...prev]);
         setShowAddModal(false);
         setFormData({ name: '', email: '', password: '', role: 'admin', status: 'active' });
-        showToast('Admin created', 'success');
+        showToast(t('messages.adminCreated'), 'success');
       } catch (err) {
         console.error(err);
-        showToast('Failed to create admin', 'error');
+        showToast(t('errors.createAdminFailed'), 'error');
       }
     })();
   };
@@ -281,13 +293,22 @@ export default function UsersPage() {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteUser = () => {
-    // In a real app, this would delete the user from a database
-    const updatedUsers = users.filter(user => user.id !== selectedUser.id);
-    setUsers(updatedUsers);
-    setShowDeleteModal(false);
-    setSelectedUser(null);
-    showToast("User deleted successfully", "success");
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+    try {
+      const res = await fetch(`/api/admin/users/${selectedUser.id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || t('errors.exportFailed'), 'error');
+        return;
+      }
+      setUsers(users.filter(user => user.id !== selectedUser.id));
+      setShowDeleteModal(false);
+      setSelectedUser(null);
+      showToast(t('toast.userDeleted'), 'success');
+    } catch (err) {
+      showToast(t('errors.exportFailed'), 'error');
+    }
   };
 
   return (
@@ -344,7 +365,7 @@ export default function UsersPage() {
                 <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder={t('searchPlaceholder', 'Search by name, email, or phone...')}
+                  placeholder={t('searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pr-10 pl-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -417,7 +438,7 @@ export default function UsersPage() {
                           <button
                             onClick={() => openDetailsModal(user)}
                             className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                            title={t('actions.viewDetails', 'View Details')}
+                            title={t('actions.viewDetails')}
                           >
                             <FaEye />
                           </button>
@@ -425,7 +446,7 @@ export default function UsersPage() {
                           <button
                             onClick={() => openDeleteModal(user)}
                             className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                            title={t('actions.delete', 'Delete')}
+                            title={t('actions.delete')}
                           >
                             <FaTrash />
                           </button>
@@ -443,7 +464,7 @@ export default function UsersPage() {
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('modal.addTitle', 'Add New User')}</h3>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('modal.addTitle')}</h3>
                   <button
                     onClick={() => setShowAddModal(false)}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
@@ -453,7 +474,7 @@ export default function UsersPage() {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.fullName', 'Full Name')}</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.fullName')}</label>
                     <input
                       type="text"
                       id="add-user-name"
@@ -464,7 +485,7 @@ export default function UsersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.email', 'Email')}</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.email')}</label>
                     <input
                       type="email"
                       id="add-user-email"
@@ -476,7 +497,7 @@ export default function UsersPage() {
                   </div>
 
                   <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.password', 'Password')}</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.password')}</label>
                     <input
                       type={showPassword ? 'text' : 'password'}
                       id="add-user-password"
@@ -489,13 +510,13 @@ export default function UsersPage() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-300 p-1"
-                      title={showPassword ? t('actions.hidePassword', 'Hide password') : t('actions.showPassword', 'Show password')}
+                      title={showPassword ? t('actions.hidePassword') : t('actions.showPassword')}
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.status', 'Status')}</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('form.status')}</label>
                     <div className="flex gap-3">
                       <button
                         type="button"
@@ -523,13 +544,13 @@ export default function UsersPage() {
                     className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors"
                   >
                     <FaSave />
-                    <span>{t('modal.add', 'Add')}</span>
+                    <span>{t('modal.add')}</span>
                   </button>
                   <button
                     onClick={() => setShowAddModal(false)}
                     className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors"
                   >
-                    {t('modal.cancel', 'Cancel')}
+                    {t('modal.cancel')}
                   </button>
                 </div>
               </div>
@@ -543,7 +564,7 @@ export default function UsersPage() {
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('modal.detailsTitle', 'User Details')}</h3>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('modal.detailsTitle')}</h3>
                   <button
                     onClick={() => setShowDetailsModal(false)}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
@@ -571,7 +592,7 @@ export default function UsersPage() {
                   <div className="p-4 bg-gray-50 dark:bg-slate-900 rounded-lg">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
                       <FaEnvelope />
-                      <span className="text-sm">{t('details.email', 'Email')}</span>
+                      <span className="text-sm">{t('details.email')}</span>
                     </div>
                     <p className="font-medium text-gray-900 dark:text-white">{selectedUser.email}</p>
                   </div>
@@ -579,7 +600,7 @@ export default function UsersPage() {
                   <div className="p-4 bg-gray-50 dark:bg-slate-900 rounded-lg">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
                       <FaPhone />
-                      <span className="text-sm">{t('details.phone', 'Phone Number')}</span>
+                      <span className="text-sm">{t('details.phone')}</span>
                     </div>
                     <p className="font-medium text-gray-900 dark:text-white">{selectedUser.phone}</p>
                   </div>
@@ -587,7 +608,7 @@ export default function UsersPage() {
                   <div className="p-4 bg-gray-50 dark:bg-slate-900 rounded-lg">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
                       <FaCalendarAlt />
-                      <span className="text-sm">{t('details.joinDate', 'Join Date')}</span>
+                      <span className="text-sm">{t('details.joinDate')}</span>
                     </div>
                     <p className="font-medium text-gray-900 dark:text-white">{selectedUser.joinDate}</p>
                   </div>
@@ -595,7 +616,7 @@ export default function UsersPage() {
                   <div className="p-4 bg-gray-50 dark:bg-slate-900 rounded-lg">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
                       <FaClock />
-                      <span className="text-sm">{t('details.lastLogin', 'Last Login')}</span>
+                      <span className="text-sm">{t('details.lastLogin')}</span>
                     </div>
                     <p className="font-medium text-gray-900 dark:text-white">{selectedUser.lastLogin}</p>
                   </div>
@@ -603,22 +624,22 @@ export default function UsersPage() {
 
                 {selectedUser.role === "doctor" && (
                   <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <h5 className="font-bold text-blue-900 dark:text-blue-300 mb-2">{t('details.doctorInfo', 'Doctor Information')}</h5>
-                    <p className="text-sm text-blue-700 dark:text-blue-300">{t('details.specialty', 'Specialty')}: {selectedUser.specialty}</p>
-                    <p className="text-sm text-blue-700 dark:text-blue-300">{t('details.license', 'License Number')}: {selectedUser.license}</p>
+                    <h5 className="font-bold text-blue-900 dark:text-blue-300 mb-2">{t('details.doctorInfo')}</h5>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">{t('details.specialty')}: {selectedUser.specialty}</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">{t('details.license')}: {selectedUser.license}</p>
                   </div>
                 )}
 
                 {selectedUser.role === "patient" && (
                   <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <h5 className="font-bold text-green-900 dark:text-green-300 mb-2">{t('details.patientInfo', 'Patient Information')}</h5>
-                    <p className="text-sm text-green-700 dark:text-green-300">{t('details.patientId', 'Patient ID')}: {selectedUser.patientId}</p>
+                    <h5 className="font-bold text-green-900 dark:text-green-300 mb-2">{t('details.patientInfo')}</h5>
+                    <p className="text-sm text-green-700 dark:text-green-300">{t('details.patientId')}: {selectedUser.patientId}</p>
                   </div>
                 )}
 
                 {selectedUser.permissions && (
                   <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                    <h5 className="font-bold text-purple-900 dark:text-purple-300 mb-2">{t('details.permissions', 'Permissions')}</h5>
+                    <h5 className="font-bold text-purple-900 dark:text-purple-300 mb-2">{t('details.permissions')}</h5>
                     <div className="flex flex-wrap gap-2">
                       {selectedUser.permissions.map((perm, idx) => (
                         <span key={idx} className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs">
@@ -638,10 +659,10 @@ export default function UsersPage() {
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full p-6">
                 <div className="text-center mb-6">
                   <div className="text-6xl mb-4">⚠️</div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('modal.deleteTitle', 'Confirm Deletion')}</h3>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('modal.deleteTitle')}</h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    {t('modal.deleteMessage', 'Are you sure you want to delete user')} <span className="font-bold">{selectedUser.name}</span>?
-                    {" "}{t('modal.deleteWarning', 'This action cannot be undone.')}
+                    {t('modal.deleteMessage')} <span className="font-bold">{selectedUser.name}</span>?
+                    {" "}{t('modal.deleteWarning')}
                   </p>
                 </div>
                 <div className="flex gap-3">
@@ -649,13 +670,13 @@ export default function UsersPage() {
                     onClick={handleDeleteUser}
                     className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg transition-colors font-medium"
                   >
-                    {t('modal.confirmDelete', 'Yes, Delete')}
+                    {t('modal.confirmDelete')}
                   </button>
                   <button
                     onClick={() => setShowDeleteModal(false)}
                     className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors"
                   >
-                    {t('modal.cancel', 'Cancel')}
+                    {t('modal.cancel')}
                   </button>
                 </div>
               </div>

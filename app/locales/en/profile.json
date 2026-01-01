@@ -80,7 +80,8 @@
     "noDoctors": "No doctors available",
     "reasonLabel": "Reason (optional)",
     "reasonPlaceholder": "Write your reason for changing doctor (optional)",
-    "submit": "Submit Request"
+    "submit": "Submit Request",
+    "sending": "Sending..."
   },
   "currentDoctor": "Current Doctor",
   "joinDate": "Join Date",
@@ -99,4 +100,8 @@
   "hide": "Hide",
   "show": "Show",
   "saving": "Saving..."
+  ,
+  "placeholder": {
+    "empty": "—"
+  }
 }

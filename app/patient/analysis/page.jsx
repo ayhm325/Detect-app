@@ -50,6 +50,7 @@ export default function AnalysisPage() {
   const [uploadTotal, setUploadTotal] = useState(null);
   const [uploadStartTime, setUploadStartTime] = useState(null);
   const [resultsVisible, setResultsVisible] = useState(false);
+  const [withHeatmap, setWithHeatmap] = useState(false);
 
   // Image selection
   const handleImageChange = (e) => {
@@ -132,6 +133,7 @@ export default function AnalysisPage() {
 
     const formData = new FormData();
     formData.append("image", selectedImage);
+    formData.append("with_heatmap", withHeatmap ? 'true' : 'false');
 
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -227,6 +229,19 @@ export default function AnalysisPage() {
             onChange={handleImageChange}
             className="hidden"
           />
+          <label className="inline-flex items-center gap-2">
+            <input
+              id="with_heatmap"
+              type="checkbox"
+              className="rounded"
+              checked={withHeatmap}
+              onChange={(e) => setWithHeatmap(e.target.checked)}
+            />
+            <span className="text-sm">Include Heatmap</span>
+          </label>
+          
+          {/* controlled state for heatmap checkbox (defaults false) */}
+          
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -264,13 +279,7 @@ export default function AnalysisPage() {
 
               <div className="p-4 flex items-center justify-between">
                 <div className="text-base text-slate-700 truncate">{selectedImage ? `${selectedImage.name}` : t("No file")}</div>
-                <div className="flex gap-3">
-                  <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-white/60 rounded-md text-sm shadow-sm hover:bg-white/80">
-                    {t("Replace")}
-                  </button>
-                  <button onClick={handleRemoveImage} className="px-4 py-2 bg-rose-50 text-rose-600 rounded-md text-sm">
-                    {t("Remove")}
-                  </button>
+                <div className="flex gap-3">                  
                 </div>
               </div>
             </div>
@@ -335,15 +344,23 @@ export default function AnalysisPage() {
 
             {analysisResult && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className={`p-6 rounded-3xl shadow-xl hover:scale-102 hover:shadow-2xl transition-transform duration-300 ${String(analysisResult.prediction).toLowerCase().includes("normal") ? "bg-linear-to-br from-emerald-50 to-white border border-emerald-200" : "bg-linear-to-br from-rose-50 to-white border border-rose-200"}`}>
-                  <h2 className="text-2xl font-semibold mb-3">{t("Diagnosis")}</h2>
-                  <p className="text-slate-900 text-lg font-semibold">{analysisResult.prediction}</p>
-                  <p className="text-sm text-slate-500 mt-3">{t("Model:")} {analysisResult.model_version ?? "unknown"} • {t("Inference Time:")} {analysisResult.inference_time_ms ?? 0} ms</p>
+                <div className={`p-6 rounded-3xl shadow-xl hover:scale-102 hover:shadow-2xl transition-transform duration-300 ${analysisResult?.needs_review ? 'bg-linear-to-br from-amber-50 to-white border border-amber-200' : (String(analysisResult.prediction).toLowerCase().includes("normal") ? "bg-linear-to-br from-emerald-50 to-white border border-emerald-200" : "bg-linear-to-br from-rose-50 to-white border border-rose-200")}`}>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold mb-3 text-slate-900 dark:text-sky-600">{t("Diagnosis")}</h2>
+                    {analysisResult?.needs_review && (
+                      <span className="ml-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-semibold border border-amber-200">
+                        ⚠ {t('Needs Radiologist Review')}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-slate-900 text-lg font-semibold">{analysisResult.display_label ?? analysisResult.prediction}</p>
+                  <p className="text-sm text-slate-700 mt-3">{t("Model:")} {analysisResult.model_version ?? "unknown"} • {t("Inference Time:")} {analysisResult.inference_time_ms ?? 0} ms</p>
                   {savedToHistory && <p className="text-emerald-700 mt-3">{t("Saved to history")}</p>}
                 </div>
 
                 <div className="p-6 rounded-3xl shadow-xl bg-linear-to-br from-sky-50 to-white hover:scale-102 transition-transform duration-300">
-                  <h2 className="text-2xl font-semibold mb-3">{t("Confidence")}</h2>
+                  <h2 className="text-2xl font-semibold mb-3 text-slate-800 dark:text-sky-600">{t("Confidence")}</h2>
                   <ConfidenceBar confidence={analysisResult.confidence} />
                   {analysisResult.explanation && (
                     <p className="mt-4 text-slate-700 text-sm"><strong>{t("Explanation")}:</strong> {analysisResult.explanation}</p>
@@ -356,7 +373,7 @@ export default function AnalysisPage() {
               <div className="mt-2">
                 <h1 className="text-md font-semibold mb-2">{t("Heatmap")}</h1>
                 <div className="w-full h-72 rounded-3xl border border-dashed border-white/10 flex items-center justify-center bg-white/30">
-                  <span className="text-slate-400 text-lg">{t("No heatmap available")}</span>
+                  <span className="text-slate-800 text-lg">{t("No heatmap available")}</span>
                 </div>
               </div>
             )}

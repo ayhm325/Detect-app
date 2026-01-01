@@ -1,67 +1,20 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from "../../../components/ui/Toast";
 import { useTranslations, useLocale } from "next-intl";
-import { FaUser, FaEnvelope, FaPhone, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaEye, FaEyeSlash, FaIdCard, FaUserMd, FaLock, FaSave, FaTimes, FaEdit, FaShieldAlt, FaHeart, FaCalendar } from "react-icons/fa";
 
 export default function PatientProfilePage() {
-    // ...existing code...
   const locale = useLocale();
   const t = useTranslations("profile");
   const { showToast, ToastContainer } = useToast();
-  
-  const [activeTab, setActiveTab] = useState("profile");
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [isEditing, setIsEditing] = useState(false);
-  const [showOldPassword, setShowOldPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const labels = {
-    pageTitle: t("pageTitle", { defaultValue: "Profile" }),
-    pageSubtitle: t("pageSubtitle", { defaultValue: "Your profile details" }),
-    activeNow: t("activeNow", { defaultValue: "Active now" }),
-    btnEdit: t("btnEdit", { defaultValue: "Edit" }),
-    btnSave: t("btnSave", { defaultValue: "Save" }),
-    btnCancel: t("btnCancel", { defaultValue: "Cancel" }),
-    toastSaveSuccess: t("toastSaveSuccess", { defaultValue: "Saved successfully" }),
-    toastCancelEdit: t("toastCancelEdit", { defaultValue: "Edit cancelled" }),
-    toastPasswordMismatch: t("toastPasswordMismatch", { defaultValue: "Passwords do not match" }),
-    toastPasswordLength: t("toastPasswordLength", { defaultValue: "Password too short" }),
-    toastPasswordChanged: t("toastPasswordChanged", { defaultValue: "Password changed" }),
-    toastNotificationUpdated: t("toastNotificationUpdated", { defaultValue: "Notification updated" }),
-    // Common UI labels for fields
-    tabPersonalInfo: t("tab.personalInfo", { defaultValue: "Personal" }),
-    tabHealthInfo: t("tab.health", { defaultValue: "Health" }),
-    tabNotifications: t("tab.notifications", { defaultValue: "Notifications" }),
-    tabSecurity: t("tab.security", { defaultValue: "Security" }),
-    sectionPersonalInfo: t("section.personalInfo", { defaultValue: "Personal Information" }),
-    sectionBodyMeasurements: t("section.bodyMeasurements", { defaultValue: "Body Measurements" }),
-    sectionEmergencyContact: t("section.emergencyContact", { defaultValue: "Emergency Contact" }),
-    sectionHealthInfo: t("section.healthInfo", { defaultValue: "Health Information" }),
-
-    fullName: t("field.fullName", { defaultValue: "Full name" }),
-    email: t("field.email", { defaultValue: "Email" }),
-    phone: t("field.phone", { defaultValue: "Phone" }),
-    birthDate: t("field.birthDate", { defaultValue: "Birth date" }),
-    nationalId: t("field.nationalId", { defaultValue: "National ID" }),
-    address: t("field.address", { defaultValue: "Address" }),
-    bloodType: t("field.bloodType", { defaultValue: "Blood type" }),
-    height: t("field.height", { defaultValue: "Height (cm)" }),
-    weight: t("field.weight", { defaultValue: "Weight (kg)" }),
-    bmi: t("field.bmi", { defaultValue: "BMI" }),
-    bmiNotAvailable: t("field.bmiNotAvailable", { defaultValue: "Not available" }),
-
-    emergencyName: t("field.emergencyName", { defaultValue: "Contact name" }),
-    emergencyPhone: t("field.emergencyPhone", { defaultValue: "Contact phone" }),
-    emergencyRelation: t("field.emergencyRelation", { defaultValue: "Relation" }),
-
-    patientNumber: t("field.patientNumber", { defaultValue: "Patient No." }),
-    activeAccount: t("field.activeAccount", { defaultValue: "Active Account" }),
-    memberSince: t("field.memberSince", { defaultValue: "Member since" })
-  };
+  const [loading, setLoading] = useState(false); // For initial load
 
   const [profileData, setProfileData] = useState({
     id: '',
@@ -81,9 +34,11 @@ export default function PatientProfilePage() {
     createdAt: '',
     updatedAt: ''
   });
-  // load profile from API
+
+  // Fetch Profile Data
   useEffect(() => {
     let mounted = true;
+    setLoading(true);
     Promise.resolve().then(async () => {
       try {
         const res = await fetch('/api/patient/profile');
@@ -111,17 +66,20 @@ export default function PatientProfilePage() {
         });
       } catch (err) {
         console.error('Failed to load profile', err);
+      } finally {
+        if (mounted) setLoading(false);
       }
     });
     return () => { mounted = false; };
   }, []);
-  // --- Editable fields ---
+
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
     setProfileData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/patient/profile', {
         method: 'PUT',
@@ -129,21 +87,24 @@ export default function PatientProfilePage() {
         body: JSON.stringify(profileData)
       });
       if (!res.ok) {
-        showToast(labels.toastSaveError || 'Save failed', 'error');
+        showToast(t('toastSaveError', { defaultValue: 'Save failed' }), 'error');
+        setLoading(false);
         return;
       }
       const data = await res.json();
       setProfileData((prev) => ({ ...prev, ...data.profile }));
       setIsEditing(false);
-      showToast(labels.toastSaveSuccess, 'success');
+      showToast(t('toastSaveSuccess', { defaultValue: 'Saved successfully' }), 'success');
     } catch (err) {
-      showToast(labels.toastSaveError || 'Save failed', 'error');
+      showToast(t('toastSaveError', { defaultValue: 'Save failed' }), 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    // reload profile from API to discard changes
+    // Reload to discard changes
     (async () => {
       try {
         const res = await fetch('/api/patient/profile');
@@ -170,180 +131,246 @@ export default function PatientProfilePage() {
         });
       } catch {}
     })();
-    showToast(labels.toastCancelEdit, 'info');
+    showToast(t('toastCancelEdit', { defaultValue: 'Edit cancelled' }), 'info');
   };
+
+  if (loading && !profileData.id) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <>
       <ToastContainer />
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-6 flex justify-center">
-        <div className="w-full max-w-2xl">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] text-slate-800 dark:text-slate-100 font-sans selection:bg-indigo-500 selection:text-white relative overflow-hidden">
+        
+        {/* Decorative Background Elements */}
+        <div className="absolute top-[-10%] left-[-5%] w-125 h-125 bg-indigo-400/10 dark:bg-indigo-900/10 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="absolute bottom-[-10%] right-[-5%] w-100 h-100 bg-emerald-400/10 dark:bg-emerald-900/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div className="relative z-10 max-w-3xl mx-auto p-6 md:p-10 space-y-8">
+          
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">{labels.pageTitle}</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">{labels.pageSubtitle}</p>
+              <h1 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
+                {t("pageTitle", { defaultValue: "Profile" })}
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-lg mt-2">{t("pageSubtitle", { defaultValue: "Your profile details" })}</p>
             </div>
-            <div>
-              {!isEditing && (
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onClick={() => setIsEditing(true)}>{labels.btnEdit}</button>
-              )}
-              {isEditing && (
+            <div className="flex gap-3">
+              {!isEditing ? (
+                <button 
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-1 font-medium"
+                >
+                  <FaEdit /> {t("btnEdit", { defaultValue: "Edit" })}
+                </button>
+              ) : (
                 <>
-                  <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mr-2" onClick={handleSave}>{labels.btnSave}</button>
-                  <button className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded" onClick={handleCancel}>{labels.btnCancel}</button>
+                  <button 
+                    onClick={handleCancel}
+                    disabled={loading}
+                    className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all font-medium"
+                  >
+                    <FaTimes /> {t("btnCancel", { defaultValue: "Cancel" })}
+                  </button>
+                  <button 
+                    onClick={handleSave}
+                    disabled={loading}
+                    className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:-translate-y-1 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FaSave /> {loading ? t('saving', { defaultValue: 'Saving...' }) : t("btnSave", { defaultValue: "Save" })}
+                  </button>
                 </>
               )}
             </div>
           </div>
 
           {/* Profile Card */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-8 flex flex-col gap-6">
-            <div className="flex items-center gap-6">
-              <div className="shrink-0 w-20 h-20 rounded-full bg-blue-100 dark:bg-slate-700 flex items-center justify-center text-4xl text-blue-600 dark:text-blue-300">
-                <FaUser />
+          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-4xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-white/50 dark:border-white/5">
+            
+            {/* Avatar & Identity */}
+            <div className="flex flex-col md:flex-row gap-8 items-center md:items-start mb-8 border-b border-slate-100 dark:border-slate-800 pb-8">
+              <div className="relative shrink-0">
+                <div className="w-32 h-32 rounded-full bg-linear-to-br from-indigo-100 to-slate-100 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-5xl text-indigo-600 dark:text-indigo-400 shadow-inner border-4 border-white dark:border-slate-800">
+                  <FaUser />
+                </div>
+                {profileData.status === 'active' && (
+                  <div className="absolute bottom-2 right-2 w-6 h-6 bg-emerald-500 border-4 border-white dark:border-slate-900 rounded-full"></div>
+                )}
               </div>
-              <div>
-                {isEditing ? (
-                  <input name="fullName" value={profileData.fullName} onChange={handleFieldChange} className="text-xl font-bold text-gray-900 dark:text-white bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500" />
-                ) : (
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">{profileData.fullName || '—'}</div>
-                )}
-                <div className="text-gray-500 dark:text-gray-300 mt-1 flex items-center gap-2">
-                  <FaEnvelope className="inline" />
+              
+              <div className="flex-1 w-full space-y-4">
+                {/* Name */}
+                <div className="group">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">{t("field.fullName", { defaultValue: "Full Name" })}</label>
                   {isEditing ? (
-                    <input name="email" value={profileData.email} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500" />
+                    <input name="fullName" value={profileData.fullName} onChange={handleFieldChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all font-bold text-lg text-slate-900 dark:text-white" />
                   ) : (
-                    profileData.email || '—'
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">{profileData.fullName || t('placeholder.empty', { defaultValue: '—' })}</div>
                   )}
                 </div>
-                <div className="text-gray-500 dark:text-gray-300 mt-1 flex items-center gap-2">
-                  <FaPhone className="inline" />
-                  {isEditing ? (
-                    <input name="phone" value={profileData.phone} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500" />
-                  ) : (
-                    profileData.phone || '—'
-                  )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Email */}
+                  <div className="group">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-2"><FaEnvelope className="text-indigo-400"/> {t("field.email", { defaultValue: "Email" })}</label>
+                    {isEditing ? (
+                      <input name="email" value={profileData.email} onChange={handleFieldChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all text-slate-800 dark:text-slate-200" />
+                    ) : (
+                      <div className="text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">{profileData.email || t('placeholder.empty', { defaultValue: '—' })}</div>
+                    )}
+                  </div>
+                  {/* Phone */}
+                  <div className="group">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-2"><FaPhone className="text-indigo-400"/> {t("field.phone", { defaultValue: "Phone" })}</label>
+                    {isEditing ? (
+                      <input name="phone" value={profileData.phone} onChange={handleFieldChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all text-slate-800 dark:text-slate-200" />
+                    ) : (
+                      <div className="text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">{profileData.phone || t('placeholder.empty', { defaultValue: '—' })}</div>
+                    )}
+                  </div>
                 </div>
-                {profileData.id && (
-                  <div className="text-gray-400 text-xs mt-1">{labels.patientNumber || 'Patient No.'}: {profileData.id}</div>
-                )}
-                {profileData.userId && (
-                  <div className="text-gray-400 text-xs mt-1">{t('userId', { defaultValue: 'User ID' })}: {profileData.userId}</div>
-                )}
+                
+                {/* IDs */}
+                <div className="flex flex-wrap gap-4 text-xs font-mono text-slate-400 pt-2">
+                  <div className="flex items-center gap-2"><FaIdCard /> {t("field.patientNumber", { defaultValue: "Patient No." })}: {profileData.id}</div>
+                  <div className="flex items-center gap-2"><FaIdCard /> {t('userId', { defaultValue: 'User ID' })}: {profileData.userId}</div>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Birth Date */}
               <div>
-                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.birthDate}</div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">{t("field.birthDate", { defaultValue: "Birth Date" })}</label>
                 {isEditing ? (
-                  <input type="date" name="birthDate" value={profileData.birthDate ? profileData.birthDate.slice(0,10) : ''} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white" />
+                  <input type="date" name="birthDate" value={profileData.birthDate ? profileData.birthDate.slice(0,10) : ''} onChange={handleFieldChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all text-slate-800 dark:text-slate-200" />
                 ) : (
-                  <div className="text-gray-900 dark:text-white">{profileData.birthDate ? new Date(profileData.birthDate).toLocaleDateString(locale) : '—'}</div>
+                  <div className="text-slate-800 dark:text-slate-200 font-medium">{profileData.birthDate ? new Date(profileData.birthDate).toLocaleDateString(locale) : t('placeholder.empty', { defaultValue: '—' })}</div>
                 )}
               </div>
+
+              {/* Gender */}
               <div>
-                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.bloodType}</div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">{t("field.genderLabel", { defaultValue: "Gender" })}</label>
                 {isEditing ? (
-                  <input name="bloodType" value={profileData.bloodType} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white" />
-                ) : (
-                  <div className="text-gray-900 dark:text-white">{profileData.bloodType || '—'}</div>
-                )}
-              </div>
-              <div>
-                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.gender || t('field.genderLabel', { defaultValue: 'الجنس' })}</div>
-                {isEditing ? (
-                  <select
-                    name="gender"
-                    value={profileData.gender || ''}
-                    onChange={handleFieldChange}
-                    className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white"
-                  >
-                    <option value="">—</option>
-                    <option value="male">{t('field.gender.male', { defaultValue: 'ذكر' })}</option>
-                    <option value="female">{t('field.gender.female', { defaultValue: 'أنثى' })}</option>
+                  <select name="gender" value={profileData.gender || ''} onChange={handleFieldChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all text-slate-800 dark:text-slate-200 appearance-none">
+                    <option value="">{t('placeholder.empty', { defaultValue: '—' })}</option>
+                    <option value="male">{t('field.gender.male', { defaultValue: 'Male' })}</option>
+                    <option value="female">{t('field.gender.female', { defaultValue: 'Female' })}</option>
                   </select>
                 ) : (
-                  <div className="text-gray-900 dark:text-white">
-                    {profileData.gender === 'male' && t('field.gender.male', { defaultValue: 'ذكر' })}
-                    {profileData.gender === 'female' && t('field.gender.female', { defaultValue: 'أنثى' })}
-                    {!profileData.gender && '—'}
+                  <div className="text-slate-800 dark:text-slate-200 font-medium">
+                    {profileData.gender === 'male' && t('field.gender.male', { defaultValue: 'Male' })}
+                    {profileData.gender === 'female' && t('field.gender.female', { defaultValue: 'Female' })}
+                    {!profileData.gender && t('placeholder.empty', { defaultValue: '—' })}
                   </div>
                 )}
               </div>
+
+              {/* Blood Type */}
               <div>
-                <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{labels.notes || t('field.notes', { defaultValue: 'ملاحظات' })}</div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2"><FaHeart className="text-rose-400"/> {t("field.bloodType", { defaultValue: "Blood Type" })}</label>
                 {isEditing ? (
-                  <input name="notes" value={profileData.notes} onChange={handleFieldChange} className="bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-900 dark:text-white" />
+                  <input name="bloodType" value={profileData.bloodType} onChange={handleFieldChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all text-slate-800 dark:text-slate-200" />
                 ) : (
-                  <div className="text-gray-900 dark:text-white">{profileData.notes || '—'}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold border border-rose-100 dark:border-rose-900/50">{profileData.bloodType || '?'}</span>                    
+                  </div>
                 )}
               </div>
-              {profileData.doctorName && (
-                <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('currentDoctor', { defaultValue: 'الطبيب الحالي' })}</div>
-                  <div className="text-gray-900 dark:text-white">{profileData.doctorName} {profileData.doctorId && <span className="text-xs text-gray-400">({profileData.doctorId})</span>}</div>
+
+              {/* Notes */}
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">{t("field.notes", { defaultValue: "Notes" })}</label>
+                  {isEditing ? (
+                  <input name="notes" value={profileData.notes} onChange={handleFieldChange} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all text-slate-800 dark:text-slate-200" />
+                ) : (
+                  <div className="text-slate-600 dark:text-slate-400 italic text-sm">{profileData.notes || t('placeholder.empty', { defaultValue: '—' })}</div>
+                )}
+              </div>
+            </div>
+
+            {/* Doctor & Stats Row */}
+            {(profileData.doctorName || profileData.joinDate) && (
+              <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {profileData.doctorName && (
+                  <div className="flex items-center gap-3 p-3 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 dark:border-indigo-900/20">
+                    <div className="p-2 bg-white dark:bg-slate-800 rounded-lg text-indigo-600 shadow-sm"><FaUserMd /></div>
+                    <div>
+                      <div className="text-xs text-slate-500 uppercase font-bold">{t('currentDoctor', { defaultValue: 'Doctor' })}</div>
+                      <div className="text-sm font-bold text-slate-800 dark:text-white truncate">{profileData.doctorName}</div>
+                    </div>
+                  </div>
+                )}
+                {profileData.joinDate && (
+                   <div className="flex items-center gap-3 p-3 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
+                    <div className="p-2 bg-white dark:bg-slate-800 rounded-lg text-emerald-600 shadow-sm"><FaCalendar /></div>
+                    <div>
+                      <div className="text-xs text-slate-500 uppercase font-bold">{t('joinDate', { defaultValue: 'Joined' })}</div>
+                      <div className="text-sm font-bold text-slate-800 dark:text-white">{new Date(profileData.joinDate).toLocaleDateString(locale)}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Doctor Change Request Card */}
+          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-4xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-white/50 dark:border-white/5 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-400/5 dark:bg-cyan-900/5 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-xl">
+                  <FaUserMd size={20} />
                 </div>
-              )}
-              {profileData.joinDate && (
-                <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('joinDate', { defaultValue: 'تاريخ الانضمام' })}</div>
-                  <div className="text-gray-900 dark:text-white">{new Date(profileData.joinDate).toLocaleDateString(locale)}</div>
-                </div>
-              )}
-              {profileData.lastVisit && (
-                <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('lastVisit', { defaultValue: 'آخر زيارة' })}</div>
-                  <div className="text-gray-900 dark:text-white">{new Date(profileData.lastVisit).toLocaleDateString(locale)}</div>
-                </div>
-              )}
-              {profileData.status && (
-                <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('status', { defaultValue: 'الحالة' })}</div>
-                  <div className="text-gray-900 dark:text-white">{profileData.status}</div>
-                </div>
-              )}
-              {profileData.createdAt && (
-                <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('createdAt', { defaultValue: 'تاريخ الإنشاء' })}</div>
-                  <div className="text-gray-900 dark:text-white">{new Date(profileData.createdAt).toLocaleDateString(locale)}</div>
-                </div>
-              )}
-              {profileData.updatedAt && (
-                <div>
-                  <div className="text-gray-700 dark:text-gray-200 font-medium mb-1">{t('updatedAt', { defaultValue: 'آخر تحديث' })}</div>
-                  <div className="text-gray-900 dark:text-white">{new Date(profileData.updatedAt).toLocaleDateString(locale)}</div>
-                </div>
-              )}
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t('doctorChange.title', { defaultValue: 'Change Doctor Request' })}</h2>
+              </div>
+              <DoctorChangeRequestForm showToast={showToast} t={t} />
             </div>
           </div>
 
-          {/* Doctor Change Request Section */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6 mt-8">
-            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">{t('doctorChange.title', { defaultValue: 'طلب تغيير الطبيب' })}</h2>
-            <DoctorChangeRequestForm showToast={showToast} t={t} />
+          {/* Security Card */}
+          <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-4xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-white/50 dark:border-white/5 overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-32 h-32 bg-rose-400/5 dark:bg-rose-900/5 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-xl">
+                  <FaShieldAlt size={20} />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t('security.changePasswordTitle', { defaultValue: 'Change Password' })}</h2>
+              </div>
+              <ChangePasswordForm showToast={showToast} t={t} router={router} pathname={pathname} />
+            </div>
           </div>
-          {/* Change Password Section (under doctor change request) */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6 mt-6">
-            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">{t('security.changePasswordTitle', { defaultValue: 'تغيير كلمة السر' })}</h2>
-            <ChangePasswordForm showToast={showToast} t={t} />
-          </div>
+
         </div>
       </div>
     </>
   );
 }
 
-// --- DoctorChangeRequestForm: fetches real doctors and renders the form ---
+// --- Styled Sub-Components ---
+
 function DoctorChangeRequestForm({ showToast, t }) {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         const res = await fetch('/api/doctor/list');
-        if (!res.ok) throw new Error('فشل جلب قائمة الأطباء');
+        if (!res.ok) throw new Error('Failed');
         const data = await res.json();
         if (mounted) setDoctors(data.doctors || []);
       } catch {
@@ -355,61 +382,67 @@ function DoctorChangeRequestForm({ showToast, t }) {
     return () => { mounted = false; };
   }, []);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const form = e.target;
+    const requestedDoctorId = form.requestedDoctorId.value;
+    const reason = form.reason.value;
+
+    if (!requestedDoctorId) {
+      showToast(t('doctorChange.selectPlaceholder', { defaultValue: 'Please select a doctor' }), 'error');
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/doctor-change-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ requestedDoctorId, reason })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || t('toast.doctorChangeFail', { defaultValue: 'Request failed' }), 'error');
+        setSubmitting(false);
+        return;
+      }
+      showToast(t('toast.doctorChangeSent', { defaultValue: 'Request sent successfully' }), 'success');
+      form.reset();
+    } catch (err) {
+      showToast(t('toast.doctorChangeNetwork', { defaultValue: 'Network error' }), 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <form
-      onSubmit={async (e) => {
-        e.preventDefault();
-        const form = e.target;
-        const requestedDoctorId = form.requestedDoctorId.value;
-        const reason = form.reason.value;
-        if (!requestedDoctorId) {
-          showToast(t('toast.doctorChangeSelect', { defaultValue: 'يرجى اختيار طبيب جديد' }), 'error');
-          return;
-        }
-        try {
-          const res = await fetch('/api/doctor-change-requests', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ requestedDoctorId, reason })
-          });
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            showToast(err.error || t('toast.doctorChangeFail', { defaultValue: 'فشل الطلب' }), 'error');
-            return;
-          }
-          showToast(t('toast.doctorChangeSent', { defaultValue: 'تم إرسال طلب تغيير الطبيب للإدارة وسيتم مراجعته قريباً' }), 'success');
-          form.reset();
-        } catch (err) {
-          showToast(t('toast.doctorChangeNetwork', { defaultValue: 'فشل الاتصال' }), 'error');
-        }
-      }}
-      className="flex flex-col gap-4"
-    >
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block mb-1 text-gray-700 dark:text-gray-200">{t('doctorChange.selectLabel', { defaultValue: 'اختر الطبيب الجديد' })}</label>
-        <select name="requestedDoctorId" className="w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white" disabled={loading}>
-          <option value="">{t('doctorChange.selectPlaceholder', { defaultValue: '-- اختر --' })}</option>
-          {loading && <option disabled>{t('doctorChange.loading', { defaultValue: 'جاري التحميل...' })}</option>}
-          {!loading && doctors.length === 0 && <option disabled>{t('doctorChange.noDoctors', { defaultValue: 'لا يوجد أطباء متاحون' })}</option>}
+        <label className="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">{t('doctorChange.selectLabel', { defaultValue: 'Select New Doctor' })}</label>
+        <select name="requestedDoctorId" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none transition-all text-slate-800 dark:text-white appearance-none cursor-pointer" disabled={loading}>
+          <option value="">{loading ? t('doctorChange.loading', { defaultValue: 'Loading...' }) : t('doctorChange.selectPlaceholder', { defaultValue: '-- Select --' })}</option>
+          {!loading && doctors.length === 0 && <option disabled>{t('doctorChange.noDoctors', { defaultValue: 'No doctors available' })}</option>}
           {doctors.map((doc) => (
             <option key={doc.id} value={doc.id}>{doc.fullName || doc.name || doc.email || doc.id}</option>
           ))}
         </select>
       </div>
       <div>
-        <label className="block mb-1 text-gray-700 dark:text-gray-200">{t('doctorChange.reasonLabel', { defaultValue: 'سبب الطلب (اختياري)' })}</label>
-        <textarea name="reason" className="w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white" rows={2} placeholder={t('doctorChange.reasonPlaceholder', { defaultValue: 'اكتب سبب رغبتك في تغيير الطبيب (اختياري)' })} />
+        <label className="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">{t('doctorChange.reasonLabel', { defaultValue: 'Reason (Optional)' })}</label>
+        <textarea name="reason" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 outline-none transition-all text-slate-800 dark:text-white resize-none" rows={3} placeholder={t('doctorChange.reasonPlaceholder', { defaultValue: 'Write a reason...' })} />
       </div>
-      <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded self-end">{t('doctorChange.submit', { defaultValue: 'إرسال الطلب' })}</button>
+      <div className="flex justify-end">
+        <button type="submit" disabled={submitting} className="flex items-center gap-2 px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl shadow-lg shadow-cyan-500/20 transition-all hover:-translate-y-0.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+          {submitting ? t('doctorChange.sending', { defaultValue: 'Sending...' }) : <span>{t('doctorChange.submit', { defaultValue: 'Send Request' })}</span>}
+        </button>
+      </div>
     </form>
   );
 }
 
-// --- ChangePasswordForm: allows user to change their password ---
-function ChangePasswordForm({ showToast, t }) {
-  const router = useRouter();
-  const pathname = usePathname();
+function ChangePasswordForm({ showToast, t, router, pathname }) {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -438,25 +471,19 @@ function ChangePasswordForm({ showToast, t }) {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        showToast(err.error || t('toastPasswordChangeFail', { defaultValue: 'Failed to change password' }), 'error');
+        showToast(err.error || t('toastPasswordChangeFail', { defaultValue: 'Failed' }), 'error');
         setLoading(false);
         return;
       }
       showToast(t('toastPasswordChanged', { defaultValue: 'Password changed' }), 'success');
-      // logout the user and redirect to locale root
-      try {
-        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
-      } catch {}
-      if (typeof window !== 'undefined') {
-        localStorage.clear();
-        sessionStorage.clear();
-      }
+      
+      // Logout Logic
+      try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {}); } catch {}
+      if (typeof window !== 'undefined') { localStorage.clear(); sessionStorage.clear(); }
       const locale = pathname?.startsWith('/en') ? 'en' : 'ar';
       const basePrefix = locale === 'en' ? '/en' : '/ar';
       router.replace(basePrefix);
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      
     } catch (err) {
       showToast(t('toastPasswordChangeNetwork', { defaultValue: 'Network error' }), 'error');
     } finally {
@@ -464,52 +491,49 @@ function ChangePasswordForm({ showToast, t }) {
     }
   };
 
+  const InputGroup = ({ label, value, onChange, show, toggleShow, type="password", name }) => (
+    <div>
+      <label className="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">{label}</label>
+      <div className="relative">
+        <input
+          type={show ? 'text' : type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          autoComplete="new-password"
+          className="w-full px-4 py-3 pr-10 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 outline-none transition-all text-slate-800 dark:text-white"
+        />
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={toggleShow} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+          {show ? <FaEyeSlash /> : <FaEye />}
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div>
-        <label className="block mb-1 text-gray-700 dark:text-gray-200">{t('field.oldPassword', { defaultValue: 'Old password' })}</label>
-        <div className="flex items-center gap-2">
-          <input
-            type={showOld ? 'text' : 'password'}
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            className="flex-1 w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white"
-          />
-          <button type="button" onClick={() => setShowOld(v => !v)} aria-label={showOld ? t('hide', { defaultValue: 'Hide' }) : t('show', { defaultValue: 'Show' })} className="text-gray-600 dark:text-gray-300 px-2">
-            {showOld ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
-          </button>
-        </div>
-      </div>
-      <div>
-        <label className="block mb-1 text-gray-700 dark:text-gray-200">{t('security.newPasswordLabel', { defaultValue: 'New password' })}</label>
-        <div className="flex items-center gap-2">
-          <input
-            type={showNew ? 'text' : 'password'}
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="flex-1 w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white"
-          />
-          <button type="button" onClick={() => setShowNew(v => !v)} aria-label={showNew ? t('hide', { defaultValue: 'Hide' }) : t('show', { defaultValue: 'Show' })} className="text-gray-600 dark:text-gray-300 px-2">
-            {showNew ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
-          </button>
-        </div>
-      </div>
-      <div>
-        <label className="block mb-1 text-gray-700 dark:text-gray-200">{t('security.confirmPasswordLabel', { defaultValue: 'Confirm new password' })}</label>
-        <div className="flex items-center gap-2">
-          <input
-            type={showConfirm ? 'text' : 'password'}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="flex-1 w-full border rounded p-2 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white"
-          />
-          <button type="button" onClick={() => setShowConfirm(v => !v)} aria-label={showConfirm ? t('hide', { defaultValue: 'Hide' }) : t('show', { defaultValue: 'Show' })} className="text-gray-600 dark:text-gray-300 px-2">
-            {showConfirm ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
-          </button>
-        </div>
-      </div>
-      <div className="flex justify-end">
-        <button type="submit" disabled={loading} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">{loading ? t('saving', { defaultValue: 'Saving...' }) : t('security.changePasswordButton', { defaultValue: 'Change Password' })}</button>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <InputGroup 
+        label={t('field.oldPassword', { defaultValue: 'Current Password' })} 
+        value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} 
+        show={showOld} toggleShow={() => setShowOld(!showOld)} 
+        name="oldPassword"
+      />
+      <InputGroup 
+        label={t('security.newPasswordLabel', { defaultValue: 'New Password' })} 
+        value={newPassword} onChange={(e) => setNewPassword(e.target.value)} 
+        show={showNew} toggleShow={() => setShowNew(!showNew)} 
+        name="newPassword"
+      />
+      <InputGroup 
+        label={t('security.confirmPasswordLabel', { defaultValue: 'Confirm New Password' })} 
+        value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} 
+        show={showConfirm} toggleShow={() => setShowConfirm(!showConfirm)} 
+        name="confirmPassword"
+      />
+      <div className="pt-2 flex justify-end">
+        <button type="submit" disabled={loading} className="flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-lg shadow-rose-500/20 transition-all hover:-translate-y-0.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+          <FaLock /> {loading ? t('saving', { defaultValue: 'Saving...' }) : t('security.changePasswordButton', { defaultValue: 'Update Password' })}
+        </button>
       </div>
     </form>
   );

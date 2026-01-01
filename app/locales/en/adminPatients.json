@@ -1,0 +1,88 @@
+{
+  "PatientsManagement": {
+    "headerTitle": "Patients",
+    "headerSubtitle": "Manage patients, appointments and records",
+    "exportButton": "Export CSV",
+    "addButton": "Add Patient",
+    "stats": {
+      "totalPatients": "Total Patients",
+      "activePatients": "Active Patients",
+      "todayVisits": "Today Visits",
+      "totalReports": "Total Reports"
+    },
+    "filters": {
+      "genderAll": "All genders",
+      "statusAll": "All statuses"
+    },
+    "searchPlaceholder": "Search by name, email, phone or ID...",
+    "ageUnit": "yrs",
+    "table": {
+      "noMatches": "No matches found"
+    },
+    "errorFetching": "An error occurred while fetching data.",
+    "loading": "Loading data...",
+    "toast": {
+      "fillFields": "Please fill required fields",
+      "patientAdded": "Patient added",
+      "patientUpdated": "Patient updated",
+      "patientDeleted": "Patient suspended",
+      "exportStarted": "CSV export started"
+    },
+    "csvHeader_id": "ID",
+    "csvHeader_name": "Name",
+    "csvHeader_gender": "Gender",
+    "csvHeader_birthDate": "Birth Date",
+    "csvHeader_bloodType": "Blood Type",
+    "csvHeader_phone": "Phone",
+    "csvHeader_email": "Email",
+    "csvHeader_status": "Status",
+    "csvHeader_joinDate": "Join Date",
+    "csvHeader_doctor": "Doctor",
+    "modals": {
+      "addTitle": "Add Patient",
+      "editTitle": "Edit Patient",
+      "fullName": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "gender": "Gender",
+      "bloodType": "Blood Type",
+      "doctor": "Doctor",
+      "birthDate": "Birth Date",
+      "status": "Status"
+    },
+    "buttons": {
+      "save": "Save",
+      "saveChanges": "Save Changes",
+      "cancel": "Cancel"
+    },
+    "confirmDelete": {
+      "title": "Confirm",
+      "description": "Suspend patient {name}?",
+      "yes": "Yes, Suspend",
+      "no": "No, Cancel"
+    },
+    "genders": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "statuses": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "pending": "Pending",
+      "banned": "Banned"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+    ,
+    "statLabel": "Stat",
+    "labels": {
+      "phone": "Phone",
+      "age": "Age",
+      "blood": "Blood",
+      "doctor": "Dr."
+    },
+    "selectDoctorPlaceholder": "-- Select Doctor --"
+  }
+}

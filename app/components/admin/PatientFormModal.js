@@ -71,7 +71,7 @@ function PatientFormModal() {
       title: t("dashboard.quickActions.uploadXray"),
       desc: t("dashboard.quickActions.desc.uploadXray"),
       icon: "🩻",
-      action: () => router.push(`${basePrefix}/patient/upload-xray`)
+      action: () => router.push(`${basePrefix}/patient/analysis`)
     },
     {
       title: t("dashboard.quickActions.viewReports"),

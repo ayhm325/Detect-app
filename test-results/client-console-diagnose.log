@@ -1,0 +1,40 @@
+[log] [Fast Refresh] done in 5344ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 4091ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 334ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 796ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 6703ms
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [HMR] connected
+[log] [DIAG] no_global_socket no socket object found
+[startGroup] [Socket Identity Check]
+[log] expectedUserId (from JWT): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
+[log] info.id (from server): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
+[log] full info from server: {id: 22ba263f-489f-4238-ba52-8aa6a3b8ed5e, role: doctor, email: eyas@yahoo.com}
+[log] jwtToken (short): eyJhbGciOiJIUzI1NiIs
+[endGroup] console.groupEnd
+[startGroup] [Socket Identity Check]
+[log] expectedUserId (from JWT): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
+[log] info.id (from server): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
+[log] full info from server: {id: 22ba263f-489f-4238-ba52-8aa6a3b8ed5e, role: doctor, email: eyas@yahoo.com}
+[log] jwtToken (short): eyJhbGciOiJIUzI1NiIs
+[endGroup] console.groupEnd
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 415ms
+[log] [DIAG] attached listeners attached
+[log] [DIAG] me {"id":"22ba263f-489f-4238-ba52-8aa6a3b8ed5e","role":"doctor","email":"eyas@yahoo.com"}
+[startGroup] [Socket Identity Check]
+[log] expectedUserId (from JWT): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
+[log] info.id (from server): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
+[log] full info from server: {id: 22ba263f-489f-4238-ba52-8aa6a3b8ed5e, role: doctor, email: eyas@yahoo.com}
+[log] jwtToken (short): eyJhbGciOiJIUzI1NiIs
+[endGroup] console.groupEnd
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 1226ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 135ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 108ms

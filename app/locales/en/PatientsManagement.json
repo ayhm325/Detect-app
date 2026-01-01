@@ -18,7 +18,8 @@
   "searchPlaceholder": "Search by name, email, or phone...",
   "filters": {
     "allStatuses": "All Statuses",
-    "genderAll": "All Genders"
+    "genderAll": "All Genders",
+    "statusAll": "All Statuses"
   },
   "statuses": {
     "active": "Active",
@@ -36,6 +37,7 @@
   "toast": {
     "fillFields": "Please fill all fields",
     "patientAdded": "Patient added successfully",
+    "patientUpdated": "Patient updated",
       "selectDoctor": "Select Doctor",
       "medicalId": "Medical ID",
       "allergiesPlaceholder": "e.g. Milk, Eggs",
@@ -59,6 +61,16 @@
     "todayVisits": "Today's Visits",
     "totalReports": "Total Reports"
   },
+  "loading": "Loading data...",
+  "errorFetching": "An error occurred while fetching data.",
+  "statLabel": "Stat",
+  "labels": {
+    "phone": "Phone",
+    "age": "Age",
+    "blood": "Blood",
+    "doctor": "Dr."
+  },
+  "selectDoctorPlaceholder": "-- Select Doctor --",
   "genders": {
     "male": "Male",
     "female": "Female"

@@ -19,6 +19,9 @@ export async function PATCH(req, { params }) {
     return new Response(JSON.stringify({ error: 'Patient not found' }), { status: 404 });
   }
   const userId = patient.userId;
+  if (!userId) {
+    return new Response(JSON.stringify({ error: 'Patient record missing userId, cannot update user.' }), { status: 400 });
+  }
 
   let body;
   try {

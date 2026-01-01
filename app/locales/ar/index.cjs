@@ -39,6 +39,7 @@ const doctorSettings = require("./doctorSettings.json");
 const notifications = require("./notifications.json");
 const logout = require("./logout.json");
 const uploadXray = require('./uploadXray.json');
+const adminPatients = require('./adminPatients.json');
 
 module.exports = {
   navbar,
@@ -70,6 +71,7 @@ module.exports = {
   doctorAppointments,
   doctorsTable,
   DoctorChangeRequests,
+  doctorChangeRequests: DoctorChangeRequests,
   adminSettings,
   patientChat,
   profile,
@@ -80,5 +82,6 @@ module.exports = {
   adminDashboard,
   notifications,
   logout,
-  uploadXray
+  uploadXray,
+  adminPatients
 };
