@@ -1,22 +1,25 @@
 import { FaUserMd, FaUserInjured, FaUsers, FaChartBar, FaCogs, FaComments } from "react-icons/fa";
+import { useTranslations } from "next-intl";
 
 export default function AdminDashboardStats() {
+  const t = useTranslations("adminDashboard");
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-      <div className="bg-linear-to-br from-yellow-100 via-red-100/40 to-white rounded-3xl shadow-xl p-8 flex flex-col items-center border-2 border-yellow-200">
-        <FaUsers className="text-4xl text-yellow-500 mb-3" />
-        <div className="text-2xl font-bold text-yellow-700 mb-1">120</div>
-        <div className="text-zinc-700">إجمالي المستخدمين</div>
+      <div className="card-glass flex flex-col items-center p-8">
+        <FaUsers className="mb-3 text-4xl text-(--ui-muted-2)" />
+        <div className="mb-1 text-2xl font-bold text-foreground">120</div>
+        <div className="text-(--ui-muted-2)">{t("stats.totalUsers")}</div>
       </div>
-      <div className="bg-linear-to-br from-yellow-100 via-red-100/40 to-white rounded-3xl shadow-xl p-8 flex flex-col items-center border-2 border-red-200">
-        <FaUserMd className="text-4xl text-red-500 mb-3" />
-        <div className="text-2xl font-bold text-red-700 mb-1">35</div>
-        <div className="text-zinc-700">عدد الأطباء</div>
+      <div className="card-glass flex flex-col items-center p-8">
+        <FaUserMd className="mb-3 text-4xl text-(--ui-muted-2)" />
+        <div className="mb-1 text-2xl font-bold text-foreground">35</div>
+        <div className="text-(--ui-muted-2)">{t("stats.doctors")}</div>
       </div>
-      <div className="bg-linear-to-br from-yellow-100 via-red-100/40 to-white rounded-3xl shadow-xl p-8 flex flex-col items-center border-2 border-yellow-300">
-        <FaUserInjured className="text-4xl text-yellow-600 mb-3" />
-        <div className="text-2xl font-bold text-yellow-800 mb-1">85</div>
-        <div className="text-zinc-700">عدد المرضى</div>
+      <div className="card-glass flex flex-col items-center p-8">
+        <FaUserInjured className="mb-3 text-4xl text-(--ui-muted-2)" />
+        <div className="mb-1 text-2xl font-bold text-foreground">85</div>
+        <div className="text-(--ui-muted-2)">{t("stats.patients")}</div>
       </div>
     </div>
   );

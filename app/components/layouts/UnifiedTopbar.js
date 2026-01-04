@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export default function UnifiedTopbar({
   userName,
@@ -10,36 +11,38 @@ export default function UnifiedTopbar({
   onToggleSidebar,
   actions = [], // Array of { label, icon, onClick, variant: 'primary'|'secondary' }
 }) {
+  const ui = useTranslations("ui");
+
   return (
-    <header className="flex items-center justify-between rounded-xl border border-gray-200 bg-white/70 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/70">
+    <header className="flex items-center justify-between rounded-xl card-glass p-4 shadow-sm">
       <div className="flex items-center gap-3">
         {/* Mobile hamburger menu */}
         <button
-          aria-label="فتح القائمة"
+          aria-label={ui("aria.openMenu")}
           onClick={onToggleSidebar}
-          className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-2 text-gray-900 hover:bg-gray-100 lg:hidden dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:hover:bg-slate-700"
+          className="inline-flex items-center justify-center rounded-md border border-(--ui-border) bg-(--ui-surface) px-3 py-2 text-(--ui-foreground) hover:bg-(--ui-surface-2) lg:hidden"
         >
           ☰
         </button>
         
         {/* Avatar */}
-        <div className="relative h-10 w-10 overflow-hidden rounded-full border border-gray-200 bg-gray-50 dark:border-slate-700 dark:bg-slate-700">
+        <div className="relative h-10 w-10 overflow-hidden rounded-full border border-(--ui-border) bg-(--ui-surface-2)">
           {avatarUrl ? (
             <Image
               src={avatarUrl}
-              alt={userName || "avatar"}
+              alt={userName || ui("profile.avatarAlt")}
               fill
               sizes="40px"
               className="object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-gray-400 dark:text-gray-500">👤</div>
+            <div className="flex h-full w-full items-center justify-center text-(--ui-muted-foreground)">👤</div>
           )}
         </div>
         
         {/* User name */}
-        <div className="text-base font-semibold text-gray-900 dark:text-gray-100">
-          {userName || "—"}
+        <div className="text-base font-semibold text-(--ui-foreground)">
+          {userName || ui("placeholder")}
         </div>
       </div>
 
@@ -47,10 +50,10 @@ export default function UnifiedTopbar({
       <div className="flex items-center gap-2">
         {/* Notifications */}
         {notificationsCount !== undefined && (
-          <button className="relative rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:hover:bg-slate-700">
-            الإشعارات
+          <button className="relative rounded-md border border-(--ui-border) bg-(--ui-surface) px-3 py-1.5 text-sm text-(--ui-foreground) hover:bg-(--ui-surface-2)">
+            {ui("topbar.notifications")}
             {notificationsCount > 0 && (
-              <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs text-white">
+              <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-(--ui-danger) px-1 text-xs text-(--ui-danger-foreground)">
                 {notificationsCount}
               </span>
             )}
@@ -64,8 +67,8 @@ export default function UnifiedTopbar({
             onClick={action.onClick}
             className={`rounded-md px-3 py-1.5 text-sm ${
               action.variant === "primary"
-                ? "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
-                : "border border-gray-200 bg-white text-gray-900 hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:hover:bg-slate-700"
+                ? "btn-gradient"
+                : "border border-(--ui-border) bg-(--ui-surface) text-(--ui-foreground) hover:bg-(--ui-surface-2)"
             }`}
           >
             {action.icon && <span className="mr-1">{action.icon}</span>}
@@ -77,9 +80,9 @@ export default function UnifiedTopbar({
         {onSettings && (
           <button
             onClick={onSettings}
-            className="rounded-md bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-black dark:bg-slate-700 dark:hover:bg-slate-600"
+            className="rounded-md btn-gradient px-3 py-1.5 text-sm"
           >
-            الإعدادات
+            {ui("topbar.settings")}
           </button>
         )}
       </div>

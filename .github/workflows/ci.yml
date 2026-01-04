@@ -9,6 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      JWT_SECRET: "ci-only-jwt-secret-32chars-minimum!!"
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/detect"
 
     steps:
       - uses: actions/checkout@v4
@@ -20,10 +24,13 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Lint
         run: npm run lint
 
       - name: Run tests
-        run: npm test --silent
+        run: npm test
+
+      - name: Build
+        run: npm run build

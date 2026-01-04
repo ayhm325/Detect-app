@@ -9,6 +9,7 @@ export default function PatientSidebar({ open = true, onClose }) {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("patientSidebar");
+  const navbar = useTranslations("navbar");
   // ...existing code...
   // Use t("key") for all navigation labels
   const items = [
@@ -22,9 +23,9 @@ export default function PatientSidebar({ open = true, onClose }) {
   return (
     <>
       {/* شريط جانبي دائم على الشاشات الكبيرة */}
-      <aside className="sticky top-4 hidden w-72 shrink-0 rounded-xl border border-gray-200 bg-white/70 p-4 shadow-sm lg:block">
+      <aside className="sticky top-4 hidden w-72 shrink-0 card-glass rounded-xl border border-(--ui-border) p-4 shadow-sm lg:block">
         <div className="mb-6 flex items-center justify-center">
-          <span className="text-2xl font-bold text-blue-700 tracking-wide whitespace-nowrap">PneumoDetect</span>
+          <span className="text-2xl font-bold brand-gradient-text tracking-wide whitespace-nowrap">{navbar("brand")}</span>
         </div>
         <nav className="space-y-1">
           {items.map((item) => {
@@ -33,7 +34,7 @@ export default function PatientSidebar({ open = true, onClose }) {
               return (
                 <button
                   key="logout"
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-100"
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-(--ui-foreground) hover:bg-(--ui-surface-2)/60"
                   onClick={() => router.push(withLocale("/patient/logout"))}
                 >
                   <span aria-hidden>{item.icon}</span>
@@ -46,7 +47,7 @@ export default function PatientSidebar({ open = true, onClose }) {
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${
-                  active ? "bg-blue-50 text-blue-700" : "text-gray-900 hover:bg-gray-100"
+                  active ? "bg-(--ui-surface-2)/70 text-(--ui-foreground)" : "text-(--ui-foreground) hover:bg-(--ui-surface-2)/60"
                 }`}
               >
                 <span aria-hidden>{item.icon}</span>
@@ -59,14 +60,14 @@ export default function PatientSidebar({ open = true, onClose }) {
 
       {/* شريط جانبي كـ Overlay على الشاشات الصغيرة */}
       {open && (
-        <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={onClose} />
+        <div className="fixed inset-0 z-40 bg-(--color-neutral)/40 lg:hidden" onClick={onClose} />
       )}
       <aside
-        className={`fixed inset-y-0 right-0 z-50 w-72 rounded-l-xl border border-gray-200 bg-white/90 p-4 shadow-lg transition-transform lg:hidden`}
+        className={`fixed inset-y-0 right-0 z-50 w-72 rounded-l-xl border border-(--ui-border) bg-(--ui-surface)/90 p-4 shadow-lg transition-transform lg:hidden`}
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
       >
         <div className="mb-6 flex items-center justify-center">
-          <span className="text-2xl font-bold text-blue-700 tracking-wide whitespace-nowrap">PneumoDetect</span>
+          <span className="text-2xl font-bold brand-gradient-text tracking-wide whitespace-nowrap">{navbar("brand")}</span>
         </div>
         <nav className="space-y-1">
           {items.map((item) => {
@@ -75,7 +76,7 @@ export default function PatientSidebar({ open = true, onClose }) {
               return (
                 <button
                   key="logout"
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-100"
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-(--ui-foreground) hover:bg-(--ui-surface-2)/60"
                   onClick={() => {
                     router.push(`${basePrefix}/patient/logout`);
                     onClose?.();
@@ -91,7 +92,7 @@ export default function PatientSidebar({ open = true, onClose }) {
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${
-                  active ? "bg-blue-50 text-blue-700" : "text-gray-900 hover:bg-gray-100"
+                  active ? "bg-(--ui-surface-2)/70 text-(--ui-foreground)" : "text-(--ui-foreground) hover:bg-(--ui-surface-2)/60"
                 }`}
                 onClick={onClose}
               >

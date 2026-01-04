@@ -3,8 +3,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import prisma from '../../../../lib/prismaClient.js';
 import { isTokenRevoked } from '../../../../lib/auth/revocation.server.js';
-
-const SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { getJwtSecret } from '../../../../lib/auth/jwtSecret.js';
+import { getJwtVerifyOptions } from '../../../../lib/auth/jwtClaims.js';
 
 export async function POST(request) {
   try {
@@ -45,7 +45,7 @@ export async function POST(request) {
 
     let payload;
     try {
-      payload = jwt.verify(token, SECRET);
+      payload = jwt.verify(token, getJwtSecret(), getJwtVerifyOptions());
     } catch (e) {
       return NextResponse.json({ error: 'invalid_token' }, { status: 401 });
     }

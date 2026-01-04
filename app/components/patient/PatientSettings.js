@@ -1,10 +1,15 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 export default function PatientSettings({ onSave }) {
+  const t = useTranslations("patientSettings");
+  const tTheme = useTranslations("theme");
+
   return (
-    <section className="rounded-xl border border-gray-200 bg-white/70 shadow-sm">
-      <header className="flex items-center justify-between border-b border-gray-200 p-4">
-        <h2 className="text-lg font-semibold text-gray-900">إعدادات الحساب</h2>
+    <section className="card-glass rounded-xl border border-(--ui-border) shadow-sm">
+      <header className="flex items-center justify-between border-b border-(--ui-border) p-4">
+        <h2 className="text-lg font-semibold text-(--ui-foreground)">{t("title")}</h2>
       </header>
       <form
         className="space-y-4 p-4"
@@ -15,39 +20,39 @@ export default function PatientSettings({ onSave }) {
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-sm text-gray-700">كلمة المرور الجديدة</label>
-            <input type="password" className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
+            <label className="text-sm text-(--ui-muted-foreground)">{t("fields.newPassword")}</label>
+            <input type="password" className="mt-1 w-full rounded-md border border-(--ui-border) bg-(--ui-surface) px-3 py-2 text-sm text-(--ui-foreground)" />
           </div>
           <div>
-            <label className="text-sm text-gray-700">البريد الإلكتروني</label>
-            <input type="email" className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
+            <label className="text-sm text-(--ui-muted-foreground)">{t("fields.email")}</label>
+            <input type="email" className="mt-1 w-full rounded-md border border-(--ui-border) bg-(--ui-surface) px-3 py-2 text-sm text-(--ui-foreground)" />
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-sm text-gray-700">خصوصية الظهور للطبيب</label>
-            <select className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-              <option>مرئي بالكامل</option>
-              <option>مخفى بعض المعلومات</option>
-              <option>خاص</option>
+            <label className="text-sm text-(--ui-muted-foreground)">{t("fields.doctorVisibility")}</label>
+            <select className="mt-1 w-full rounded-md border border-(--ui-border) bg-(--ui-surface) px-3 py-2 text-sm text-(--ui-foreground)">
+              <option>{t("visibility.full")}</option>
+              <option>{t("visibility.partial")}</option>
+              <option>{t("visibility.private")}</option>
             </select>
           </div>
           <div>
-            <label className="text-sm text-gray-700">اللغة والمظهر</label>
+            <label className="text-sm text-(--ui-muted-foreground)">{t("fields.languageAppearance")}</label>
             <div className="mt-1 flex gap-2">
-              <select className="w-1/2 rounded-md border border-gray-300 px-3 py-2 text-sm">
-                <option>العربية</option>
-                <option>English</option>
+              <select className="w-1/2 rounded-md border border-(--ui-border) bg-(--ui-surface) px-3 py-2 text-sm text-(--ui-foreground)">
+                <option>{t("language.arabic")}</option>
+                <option>{t("language.english")}</option>
               </select>
-              <select className="w-1/2 rounded-md border border-gray-300 px-3 py-2 text-sm">
-                <option>فاتح</option>
-                <option>داكن</option>
+              <select className="w-1/2 rounded-md border border-(--ui-border) bg-(--ui-surface) px-3 py-2 text-sm text-(--ui-foreground)">
+                <option>{tTheme("mode.light")}</option>
+                <option>{tTheme("mode.dark")}</option>
               </select>
             </div>
           </div>
         </div>
         <div className="pt-2">
-          <button className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">حفظ</button>
+          <button className="btn-gradient rounded-md px-4 py-2 text-sm text-white">{t("actions.save")}</button>
         </div>
       </form>
     </section>

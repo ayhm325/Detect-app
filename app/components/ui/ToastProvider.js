@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useLocale, useTranslations } from "next-intl";
 
 const ToastContext = createContext(null);
 
@@ -52,6 +53,8 @@ export function useToast() {
 // ToastContainer: يُعرض بعد تحميل العميل فقط
 export function ToastContainer({ toasts, removeToast }) {
   const [mounted, setMounted] = useState(false);
+  const locale = useLocale();
+  const dir = locale === "ar" ? "rtl" : "ltr";
 
   useEffect(() => {
     // Calling setState here is intentional: wait until client hydration completes.
@@ -64,7 +67,7 @@ export function ToastContainer({ toasts, removeToast }) {
   return createPortal(
     <div
       className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"
-      dir="rtl"
+      dir={dir}
     >
       {(toasts || []).map((toast) => (
         <Toast key={toast.id} {...toast} onClose={() => removeToast(toast.id)} />
@@ -77,9 +80,11 @@ export function ToastContainer({ toasts, removeToast }) {
 // ----------------------------------------
 // Toast individual
 function Toast({ id, message, type, onClose }) {
+  const t = useTranslations("ui");
+
   const types = {
     success: {
-      bg: "bg-gradient-to-r from-green-500 to-green-600",
+      bg: "bg-(--ui-success) text-(--ui-success-foreground)",
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -87,7 +92,7 @@ function Toast({ id, message, type, onClose }) {
       ),
     },
     error: {
-      bg: "bg-gradient-to-r from-red-500 to-red-600",
+      bg: "bg-(--ui-danger) text-(--ui-danger-foreground)",
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -95,7 +100,7 @@ function Toast({ id, message, type, onClose }) {
       ),
     },
     warning: {
-      bg: "bg-gradient-to-r from-yellow-500 to-yellow-600",
+      bg: "bg-(--ui-warning) text-(--ui-warning-foreground)",
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -108,7 +113,7 @@ function Toast({ id, message, type, onClose }) {
       ),
     },
     info: {
-      bg: "bg-gradient-to-r from-blue-500 to-blue-600",
+      bg: "bg-(--ui-info) text-(--ui-info-foreground)",
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -121,15 +126,15 @@ function Toast({ id, message, type, onClose }) {
 
   return (
     <div
-      className={`${config.bg} text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 min-w-75 max-w-md pointer-events-auto animate-fadeIn`}
+      className={`${config.bg} px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 min-w-75 max-w-md pointer-events-auto animate-fadeIn`}
       role="alert"
     >
       <div className="shrink-0">{config.icon}</div>
       <p className="flex-1 font-semibold text-sm">{message}</p>
       <button
         onClick={onClose}
-        className="shrink-0 hover:bg-white/20 rounded-full p-1 transition-colors"
-        aria-label="إغلاق"
+        className="shrink-0 rounded-full p-1 transition-colors hover:bg-(--color-neutral)/10"
+        aria-label={t("aria.close")}
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -13,15 +13,16 @@ import { useTheme } from "../theme-provider";
 function ThemeToggleButton() {
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
+  const t = useTranslations("navbar");
 
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="group relative p-3 rounded-full bg-linear-to-br from-yellow-100 to-red-100 dark:from-yellow-900/50 dark:to-red-900/50 hover:scale-110 transition-all shadow-lg"
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className="group relative p-3 rounded-full bg-(--ui-surface-2) border border-(--ui-border) hover:scale-110 transition-all shadow-lg"
+      aria-label={isDark ? t("theme.switchToLightAria") : t("theme.switchToDarkAria")}
     >
       {isDark ? (
-        <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+        <svg className="w-5 h-5 text-(--ui-ring)" fill="currentColor" viewBox="0 0 20 20">
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -29,7 +30,7 @@ function ThemeToggleButton() {
           />
         </svg>
       ) : (
-        <svg className="w-5 h-5 text-yellow-800" fill="currentColor" viewBox="0 0 20 20">
+        <svg className="w-5 h-5 text-(--ui-ring)" fill="currentColor" viewBox="0 0 20 20">
           <path d="M17.293 13.293A8 8 0 016.707 2.707a8 8 0 1010.586 10.586z" />
         </svg>
       )}
@@ -78,14 +79,15 @@ export default function Navbar() {
           animation: spin-slow 200s linear infinite;
         }
       ` }} />
-      <nav className="w-full flex items-center justify-between py-2 px-4 lg:px-12 relative z-50 overflow-hidden">
+      <nav className="w-full flex items-center justify-between py-2 px-4 lg:px-12 relative z-50 overflow-hidden text-(--ui-foreground)">
         {/* خلفية المجرة المتحركة */}
         <div className="galaxy-bg absolute inset-0 -z-10 pointer-events-none">
-          <div className="absolute inset-0 bg-linear-to-br from-zinc-950 via-amber-950/50 to-red-950/80" />
+          <div className="absolute inset-0 bg-(--ui-surface)" />
+          <div className="absolute inset-0 brand-gradient opacity-15" />
           <div className="absolute inset-0 opacity-50">
-            <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-yellow-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
-            <div className="absolute top-0 -right-1/4 w-1/2 h-1/2 bg-red-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-2000" />
-            <div className="absolute -bottom-1/4 left-1/3 w-1/2 h-1/2 bg-amber-600 rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-4000" />
+            <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-(--color-primary-500) rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
+            <div className="absolute top-0 -right-1/4 w-1/2 h-1/2 bg-(--color-accent-500) rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-2000" />
+            <div className="absolute -bottom-1/4 left-1/3 w-1/2 h-1/2 bg-(--color-secondary-500) rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-4000" />
           </div>
         </div>
 
@@ -102,20 +104,20 @@ export default function Navbar() {
           >
             <defs>
               <linearGradient id="lungGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#FCD34D" /> {/* yellow-300 */}
-                <stop offset="100%" stopColor="#F87171" /> {/* red-400 */}
+                <stop offset="0%" stopColor="var(--color-bright-500)" />
+                <stop offset="100%" stopColor="var(--color-primary-500)" />
               </linearGradient>
             </defs>
           </svg>
           <div className="flex flex-col">
             <div className="flex items-center gap-1">
-              <span className="text-xl" aria-label="Lung icon">🫁</span>
-              <span className="font-black text-2xl bg-linear-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">
-                {t("brand", { defaultValue: "PneumoDetect" })}
+              <span className="text-xl" aria-label={t("logoIconAria")}>🫁</span>
+              <span className="font-black text-2xl brand-gradient-text">
+                {t("brand")}
               </span>
             </div>
-            <div className="text-xs text-yellow-600/80 dark:text-yellow-400/80 font-semibold mt-0.5">
-              {t("navTagline", { defaultValue: "Advanced Medical AI" })}
+            <div className="text-xs text-(--ui-muted-foreground) font-semibold mt-0.5">
+              {t("navTagline")}
             </div>
           </div>
         </a>
@@ -125,20 +127,20 @@ export default function Navbar() {
           <ThemeToggleButton />
           <button
             onClick={handleSwitchLocale}
-            className="px-5 py-2.5 rounded-full font-bold bg-linear-to-r from-yellow-400 to-red-500 text-white hover:scale-105 transition"
-            aria-label={t("langSwitchAria", { defaultValue: "Switch language" })}
+            className="px-5 py-2.5 rounded-full font-bold btn-gradient hover:scale-105 transition"
+            aria-label={t("langSwitchAria")}
           >
-            {t("langSwitch", { defaultValue: "EN" })}
+            {t("langSwitch")}
           </button>
         </div>
 
         {/* زر القائمة للموبايل */}
         <button
-          className="lg:hidden p-2 rounded-lg bg-linear-to-br from-yellow-100 to-red-100 dark:from-yellow-900/50 dark:to-red-900/50 absolute right-4 top-1/2 -translate-y-1/2"
+          className="lg:hidden p-2 rounded-lg bg-(--ui-surface-2) border border-(--ui-border) absolute right-4 top-1/2 -translate-y-1/2"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
+          aria-label={t("menuToggleAria")}
         >
-          <svg className="w-6 h-6 text-yellow-800 dark:text-yellow-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-6 h-6 text-(--ui-foreground)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {mobileMenuOpen ? (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             ) : (
@@ -149,18 +151,18 @@ export default function Navbar() {
 
         {/* قائمة الموبايل */}
         {mobileMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b shadow-xl">
+          <div className="lg:hidden absolute top-full left-0 w-full bg-(--ui-surface) backdrop-blur-md border-b border-(--ui-border) shadow-xl">
             <ul className="flex flex-col p-4 gap-3">
               {!isHome && (
                 <li>
                   <Link
                     href={homeHref}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-yellow-800 dark:text-yellow-200"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-(--ui-foreground)"
                   >
                     {/* يمكنك استبدال هذه الأيقونة إذا أردت */}
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                    {t("home", { defaultValue: "الرئيسية" })}
+                    {t("home")}
                   </Link>
                 </li>
               )}
@@ -173,9 +175,9 @@ export default function Navbar() {
                     handleSwitchLocale();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-3 rounded-xl font-bold bg-linear-to-r from-yellow-400 to-red-500 text-white"
+                  className="w-full px-4 py-3 rounded-xl font-bold btn-gradient"
                 >
-                  {t("langSwitch", { defaultValue: "EN" })}
+                  {t("langSwitch")}
                 </button>
               </li>
             </ul>

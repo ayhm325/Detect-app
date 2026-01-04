@@ -25,7 +25,7 @@ export default function LogoutSidebarItem() {
   };
 
   return (
-    <button onClick={handleLogout} className="py-2 px-4 rounded text-red-600 hover:bg-red-50 dark:hover:bg-zinc-800 font-medium block w-full text-right">
+    <button onClick={handleLogout} className="py-2 px-4 rounded text-(--ui-danger) hover:bg-(--ui-danger)/10 font-medium block w-full text-right">
       Logout
     </button>
   );

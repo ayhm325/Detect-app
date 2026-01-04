@@ -1,4 +1,7 @@
+"use client";
+
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 function isImageUrl(url) {
   if (!url || typeof url !== 'string') return false;
@@ -9,6 +12,7 @@ function isImageUrl(url) {
 }
 
 export default function ChatMessage({ message, isDoctor }) {
+  const t = useTranslations('adminChat');
   const fileUrl = message.fileUrl || message.file?.url || null;
   const mime = message.mimeType || message.file?.type || null;
   const maybeImage = (fileUrl && mime && mime.startsWith('image/')) || isImageUrl(message.text) || (fileUrl && /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(fileUrl));
@@ -16,11 +20,17 @@ export default function ChatMessage({ message, isDoctor }) {
 
   return (
     <div className={`flex ${isDoctor ? 'justify-end' : 'justify-start'} mb-2`}>
-      <div className={`max-w-xs px-4 py-2 rounded-xl shadow ${isDoctor ? 'bg-yellow-100 text-yellow-800' : 'bg-zinc-100 text-zinc-700'}`}>
+      <div
+        className={`max-w-xs rounded-2xl border border-(--ui-border) px-4 py-2 ${
+          isDoctor
+            ? 'bg-(--ui-surface-2) text-foreground'
+            : 'bg-(--ui-surface) text-foreground'
+        }`}
+      >
         {imageUrl ? (
           <Image
             src={imageUrl}
-            alt="attachment"
+            alt={t('attachment')}
             width={400}
             height={300}
             className="max-w-full h-auto rounded"
@@ -29,7 +39,7 @@ export default function ChatMessage({ message, isDoctor }) {
         ) : (
           message.text
         )}
-        <div className="text-xs text-zinc-400 mt-1">{message.time}</div>
+        <div className="mt-1 text-xs text-(--ui-muted-2)">{message.time}</div>
       </div>
     </div>
   );

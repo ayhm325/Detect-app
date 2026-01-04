@@ -1,7 +1,7 @@
 .summary {
-  background: #fff;
+  background: var(--ui-surface);
   border-radius: 10px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  box-shadow: var(--shadow-lift);
   padding: 24px;
   margin-bottom: 18px;
 }
@@ -19,9 +19,9 @@
 .value {
   font-size: 22px;
   font-weight: bold;
-  color: #222;
+  color: var(--ui-foreground);
 }
 .label {
   font-size: 15px;
-  color: #888;
+  color: var(--ui-muted-2);
 }

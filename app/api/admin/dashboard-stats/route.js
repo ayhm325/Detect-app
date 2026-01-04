@@ -1,6 +1,15 @@
 import prisma from "../../../../lib/prismaClient";
+import { withRBAC } from "../../../../lib/auth/withRBAC";
+import { rateLimit } from "../../../../lib/security/rateLimiter";
+import { logAudit } from "../../../../lib/security/auditLogger";
 
-export async function GET() {
+export const GET = withRBAC(async (request, user) => {
+  const rl = await rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/admin/dashboard-stats" } });
+    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
   try {
     // تحديد بداية ونهاية اليوم
     const startOfToday = new Date();
@@ -8,53 +17,24 @@ export async function GET() {
     const endOfToday = new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
-    const [totalUsers, doctors, patients, todayScans, totalScans, allUsers, allDoctors, allPatients, allMedicalRecords] = await Promise.all([
+    const [totalUsers, doctors, patients, todayScans, totalScans] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { role: "doctor" } }),
       prisma.user.count({ where: { role: "patient" } }),
       prisma.medicalRecord.count({ where: { createdAt: { gte: startOfToday, lte: endOfToday } } }),
       prisma.medicalRecord.count(),
-      prisma.user.findMany(),
-      prisma.doctor.findMany({
-        include: {
-          user: {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-              createdAt: true,
-            }
-          }
-        }
-      }),
-      prisma.user.findMany({ where: { role: "patient" } }),
-      prisma.medicalRecord.findMany({ where: { createdAt: { gte: startOfToday, lte: endOfToday } } }),
     ]);
 
-    // Debug log for new doctor structure
-    console.log("--- فحص الإحصائيات ---");
-    console.log({ totalUsers, doctors, patients, todayScans });
-    console.log("كل المستخدمين:", allUsers);
-    console.log("الأطباء (Doctor table):", allDoctors);
-    console.log("المرضى:", allPatients);
-    console.log("كل السجلات الطبية (اليوم):", allMedicalRecords);
-    console.log("----------------------");
-
+    logAudit({ event: "admin_dashboard_stats", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { totalUsers, doctors, patients, todayScans, totalScans } });
     return Response.json({
       totalUsers,
       doctors,
       patients,
       todayScans,
       totalScans,
-      debug: {
-        allUsers,
-        allDoctors, // now contains licenseNumber, phone, and user info
-        allPatients,
-        allMedicalRecords
-      }
     });
   } catch (error) {
-    console.error("خطأ في جلب الإحصائيات:", error);
+    logAudit({ event: "admin_dashboard_stats_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error?.message } });
     return Response.json({ error: "حدث خطأ أثناء جلب الإحصائيات" }, { status: 500 });
   }
-}
+}, ["admin"]);

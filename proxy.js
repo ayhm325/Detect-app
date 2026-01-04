@@ -1,6 +1,6 @@
-
 import { NextResponse } from 'next/server';
-const SECRET = process.env.JWT_SECRET || 'your-secret';
+import { getJwtSecret } from './lib/auth/jwtSecret.js';
+const DEBUG_PROXY = process.env.DEBUG_PROXY === '1';
 
 function base64urlDecodeToString(b64url) {
   // Replace URL-safe chars
@@ -32,6 +32,28 @@ async function verifyHMAC256(token, secret) {
   return payloadJson;
 }
 
+function validateJwtClaims(payload) {
+  const now = Math.floor(Date.now() / 1000);
+  if (payload && typeof payload.nbf === 'number' && payload.nbf > now) {
+    throw new Error('Token not active');
+  }
+  if (payload && typeof payload.exp === 'number' && payload.exp <= now) {
+    throw new Error('Token expired');
+  }
+
+  const issuer = process.env.JWT_ISSUER;
+  if (issuer && payload?.iss !== issuer) {
+    throw new Error('Invalid issuer');
+  }
+
+  const audience = process.env.JWT_AUDIENCE;
+  if (audience) {
+    const aud = payload?.aud;
+    const ok = Array.isArray(aud) ? aud.includes(audience) : aud === audience;
+    if (!ok) throw new Error('Invalid audience');
+  }
+}
+
 const locales = ['en', 'ar'];
 const protectedRoutes = [
   { path: /^\/admin/, roles: ['admin'] },
@@ -39,7 +61,7 @@ const protectedRoutes = [
   { path: /^\/patient/, roles: ['patient'] },
 ];
 
-export async function middleware(request) {
+export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
   // Exclude Next.js internals, static files, and public assets
@@ -72,13 +94,13 @@ export async function middleware(request) {
     // allow empty api root to continue
     // Proceed to protected route lookup using cleanPath
     // Prevent access to empty API root
-    if (cleanPath === '/' ) return NextResponse.next();
+    if (cleanPath === '/') return NextResponse.next();
     // Attach cleaned path to a local var used below via re-assignment
     request.nextUrl.pathname = pathname; // keep original
     // set variable in scope for later use
     var _cleanPath = cleanPath;
     // Only check protected routes (will look at _cleanPath)
-    const routeApi = protectedRoutes.find(r => r.path.test(_cleanPath));
+    const routeApi = protectedRoutes.find((r) => r.path.test(_cleanPath));
     if (!routeApi) return NextResponse.next();
     // extract token and run RBAC logic below using _cleanPath
     // (fall through to the main auth logic and use _cleanPath where needed)
@@ -103,14 +125,16 @@ export async function middleware(request) {
 
   // Only check protected routes (use normalized path for API)
   const effectiveCleanPath = isApi ? _cleanPath : cleanPath;
-  const route = protectedRoutes.find(r => r.path.test(effectiveCleanPath));
+  const route = protectedRoutes.find((r) => r.path.test(effectiveCleanPath));
   if (!route) return NextResponse.next();
 
   // Get JWT from cookie
   const token = request.cookies.get('token')?.value;
   try {
-    // Debug: log token presence for E2E troubleshooting
-    console.log('[middleware] path=', pathname, 'cleanPath=', effectiveCleanPath, 'token=', Boolean(token));
+    if (DEBUG_PROXY) {
+      // Debug: log token presence for troubleshooting
+      console.log('[proxy] path=', pathname, 'cleanPath=', effectiveCleanPath, 'token=', Boolean(token));
+    }
   } catch (e) {}
   if (!token) {
     if (isApi) {
@@ -155,22 +179,26 @@ export async function middleware(request) {
           }
         }
       } catch (e2) {
-        console.warn('[middleware] fallback is-revoked check failed', e2 && e2.message);
+        console.warn('[proxy] fallback is-revoked check failed', e2 && e2.message);
       }
     } else {
-      console.warn('[middleware] is-revoked check error', e && e.message);
+      console.warn('[proxy] is-revoked check error', e && e.message);
     }
   }
   // Security: Lightweight gate for authentication. Distinguishes API vs UI routes.
   // API returns JSON 401/403, UI uses redirects. No inline RBAC.
   let user;
   try {
-    user = await verifyHMAC256(token, SECRET);
-      try {
-      console.log('[middleware] jwt.verify success, role=', user?.role);
+    const secret = getJwtSecret();
+    user = await verifyHMAC256(token, secret);
+    validateJwtClaims(user);
+    try {
+      if (DEBUG_PROXY) console.log('[proxy] jwt.verify success, role=', user?.role);
     } catch (e) {}
   } catch (err) {
-    try { console.log('[middleware] jwt.verify error:', err && err.message); } catch (e) {}
+    try {
+      if (DEBUG_PROXY) console.log('[proxy] jwt.verify error:', err && err.message);
+    } catch (e) {}
     if (isApi) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     } else {

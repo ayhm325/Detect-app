@@ -9,11 +9,27 @@ Usage:
 """
 from playwright.sync_api import sync_playwright
 import time
+import urllib.request
+import urllib.error
 
 URL = "http://127.0.0.1:8080"
 OUT = "netron_screenshot.png"
 
+
+def _server_reachable(url: str, timeout_s: float = 1.5) -> bool:
+    try:
+        with urllib.request.urlopen(url, timeout=timeout_s) as resp:
+            return 200 <= getattr(resp, "status", 200) < 500
+    except (urllib.error.URLError, ValueError):
+        return False
+
 def main():
+    if not _server_reachable(URL):
+        print(f"Netron server is not reachable at {URL}.")
+        print("Start it first, then re-run this script. Example:")
+        print(r"  .venv\Scripts\python -m netron resnet18.onnx --host 127.0.0.1 --port 8080")
+        raise SystemExit(2)
+
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page(viewport={'width': 1600, 'height': 1200})

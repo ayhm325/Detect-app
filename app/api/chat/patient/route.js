@@ -49,7 +49,7 @@ import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
 
 export const GET = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/chat/patient" } });
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -61,7 +61,23 @@ export const GET = withRBAC(async (request, user) => {
     const chats = await prisma.chat.findMany({
       where: { patientId: patient.id },
       include: {
-        doctor: { include: { user: true } },
+        doctor: {
+          select: {
+            userId: true,
+            phone: true,
+            clinic: true,
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+                isActive: true,
+                role: true,
+                createdAt: true,
+              },
+            },
+          },
+        },
         messages: { orderBy: { createdAt: "desc" }, take: 1 },
       },
       orderBy: { updatedAt: "desc" },

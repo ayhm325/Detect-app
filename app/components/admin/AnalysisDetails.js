@@ -1,20 +1,17 @@
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
+import { useTranslations } from "next-intl";
 
 export default function AnalysisDetails({ analysis, onClose }) {
-  const { locale } = useLocale();
-  const tr = locale === "ar" ? ar.adminAnalysis : en.adminAnalysis;
-  const detailsTr = tr.detailsModal || {};
+  const t = useTranslations("analysisDetails");
+  const tCommon = useTranslations("adminCommon");
 
   if (!analysis) return null;
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-yellow-100 max-w-md mx-auto mt-8">
-      <h3 className="font-bold text-xl mb-4 text-yellow-700">{detailsTr.title || "تفاصيل التحليل"}</h3>
-      <div className="mb-2"><span className="font-bold">{detailsTr.patientInfo || "اسم المريض:"}</span> {analysis.patientName}</div>
-      <div className="mb-2"><span className="font-bold">{detailsTr.date || "تاريخ التحليل:"}</span> {analysis.date}</div>
-      <div className="mb-2"><span className="font-bold">{detailsTr.status || "الحالة:"}</span> {analysis.status}</div>
-      <button className="mt-6 px-6 py-2 rounded-full bg-yellow-400 text-white font-bold" onClick={onClose}>{detailsTr.close || (locale === "ar" ? "إغلاق" : "Close")}</button>
+    <div className="card-glass rounded-2xl p-8 border border-(--ui-border) max-w-md mx-auto mt-8">
+      <h3 className="font-bold text-xl mb-4 text-(--ui-foreground)">{t("title")}</h3>
+      <div className="mb-2 text-(--ui-foreground)"><span className="font-bold">{t("patientNameLabel")}</span> {analysis.patientName}</div>
+      <div className="mb-2 text-(--ui-foreground)"><span className="font-bold">{t("dateLabel")}</span> {analysis.date}</div>
+      <div className="mb-2 text-(--ui-foreground)"><span className="font-bold">{t("statusLabel")}</span> {analysis.status}</div>
+      <button className="btn-gradient mt-6 px-6 py-2 rounded-full font-bold" onClick={onClose}>{tCommon("close")}</button>
     </div>
   );
 }

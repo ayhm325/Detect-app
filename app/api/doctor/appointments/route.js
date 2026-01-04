@@ -5,7 +5,7 @@ import { logAudit } from "../../../../lib/security/auditLogger";
 
 // GET /api/doctor/appointments
 export const GET = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/doctor/appointments" } });
     return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -15,15 +15,21 @@ export const GET = withRBAC(async (request, user) => {
     const appointments = await prisma.appointment.findMany({
       where: { doctorId: user.id, isDeleted: false },
       include: {
-        patient: { select: { id: true, fullName: true, email: true } },
-        doctor: { include: { user: true } },
+        patient: { select: { id: true, fullName: true, email: true, phone: true } },
+        doctor: {
+          select: {
+            userId: true,
+            phone: true,
+            user: { select: { id: true, fullName: true, email: true } },
+          },
+        },
       },
       orderBy: { scheduledAt: "asc" },
     });
     const out = appointments.map((a) => ({
       id: a.id,
       patient: a.patient ? { id: a.patient.id, name: a.patient.fullName, email: a.patient.email, phone: a.patient.phone || null } : null,
-      doctor: a.doctor ? { id: a.doctor.id, name: a.doctor.user?.fullName || null, phone: a.doctor.phone || null } : null,
+      doctor: a.doctor ? { id: a.doctor.userId, name: a.doctor.user?.fullName || null, phone: a.doctor.phone || null } : null,
       scheduledAt: a.scheduledAt,
       status: a.status,
       reason: a.reason,
@@ -42,6 +48,11 @@ export const GET = withRBAC(async (request, user) => {
 
 // POST /api/doctor/appointments
 export const POST = withRBAC(async (request, user) => {
+  const rl = await rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "POST /api/doctor/appointments" } });
+    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
   try {
     const body = await request.json();
     const { patientId, scheduledAt, reason, phone, type } = body || {};
@@ -58,8 +69,11 @@ export const POST = withRBAC(async (request, user) => {
     if (type === "online") {
       locationValue = "عن بعد";
     } else {
-      const doctorProfile = await prisma.doctor.findUnique({ where: { userId: user.id }, include: { user: true } });
-      locationValue = body.location || (doctorProfile && (doctorProfile.clinic || doctorProfile.user?.address)) || null;
+      const doctorProfile = await prisma.doctor.findUnique({
+        where: { userId: user.id },
+        select: { clinic: true },
+      });
+      locationValue = body.location || (doctorProfile && doctorProfile.clinic) || null;
     }
 
     // create appointment for the current doctor

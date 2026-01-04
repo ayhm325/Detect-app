@@ -19,17 +19,14 @@ import {
   FaEdit,
   FaTrash,
 } from "react-icons/fa";
-import useLocale from "../../../hooks/useLocale";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function DoctorAppointmentsPage() {
   const { showToast, ToastContainer } = useToast();
-  const { locale } = useLocale();
+  const locale = useLocale();
   const t = useTranslations("doctorAppointments");
+  const ui = useTranslations("ui");
 
-  // ...existing code...
-  // Replace all labels.X with t("key")
-  // For example: t("title"), t("subtitle"), t("addButton"), t("toast.addSoon"), t("stats.total"), t("filters.all"), t("types.online"), t("actions.confirm"), t("statuses.confirmed")
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("list"); // list or calendar
@@ -61,7 +58,7 @@ export default function DoctorAppointmentsPage() {
     setPatientsLoading(true);
     try {
       const res = await fetch("/api/doctor/patients");
-      if (!res.ok) throw new Error("Failed to fetch patients");
+      if (!res.ok) throw new Error(t("errors.fetchPatientsFailed"));
       const data = await res.json();
       // patients returned as array of patient records
       const mapped = (data || []).map((p) => ({ id: p.id, fullName: p.fullName || p.user?.fullName || p.email, phone: p.phone || "" }));
@@ -78,24 +75,24 @@ export default function DoctorAppointmentsPage() {
     setLoading(true);
     try {
       const res = await fetch("/api/doctor/appointments");
-      if (!res.ok) throw new Error("Failed to fetch appointments");
+      if (!res.ok) throw new Error(t("errors.fetchAppointmentsFailed"));
       const data = await res.json();
       const mapped = (data.appointments || []).map((a) => ({
         id: a.id,
-        patientName: a.patient?.name || "-",
+        patientName: a.patient?.name || ui("placeholder"),
         date: a.scheduledAt,
-        time: a.scheduledAt ? new Date(a.scheduledAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG", { hour: "2-digit", minute: "2-digit" }) : "-",
+        time: a.scheduledAt ? new Date(a.scheduledAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG", { hour: "2-digit", minute: "2-digit" }) : ui("placeholder"),
         type: a.type || "clinic",
         status: a.status || "pending",
-        phone: a.doctor?.phone || a.patient?.phone || "-",
-        reason: a.reason || "-",
+        phone: a.doctor?.phone || a.patient?.phone || ui("placeholder"),
+        reason: a.reason || ui("placeholder"),
         patientReason: a.patientReason || "",
-        location: a.type === "online" ? (a.location || "عن بعد") : (a.location || "العيادة")
+        location: a.type === "online" ? (a.location || t("types.online")) : (a.location || t("types.clinic"))
       }));
       setAppointments(mapped);
       setLoading(false);
     } catch (err) {
-      setError(err.message);
+      setError(err?.message || t("errors.fetchAppointmentsFailed"));
       setLoading(false);
     }
   }
@@ -103,7 +100,7 @@ export default function DoctorAppointmentsPage() {
   async function createAppointment(e) {
     e.preventDefault();
     if (!bookPatientId || !bookDate || !bookTime) {
-      showToast(t("toast.fillRequired", { defaultValue: "Please fill required fields" }), "error");
+      showToast(t("toast.fillRequired"), "error");
       return;
     }
     const scheduledAt = new Date(`${bookDate}T${bookTime}`);
@@ -116,15 +113,15 @@ export default function DoctorAppointmentsPage() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        showToast(err.error || t("toast.error", { defaultValue: "Failed to create appointment" }), "error");
+        showToast(err.error || t("toast.error"), "error");
         return;
       }
-      showToast(t("toast.created", { defaultValue: "Appointment created" }), "success");
+      showToast(t("toast.created"), "success");
       setShowAddModal(false);
       setBookPatientId(""); setBookDate(""); setBookTime(""); setBookType("clinic"); setBookReason("");
       await fetchAppointments();
     } catch (err) {
-      showToast(t("toast.error", { defaultValue: "Failed to create appointment" }), "error");
+      showToast(t("toast.error"), "error");
     }
   }
 
@@ -153,14 +150,14 @@ export default function DoctorAppointmentsPage() {
     setAppointments(
       appointments.map((apt) => (apt.id === id ? { ...apt, status: "confirmed" } : apt))
     );
-          showToast(t("toast.confirm"), "success");
+    showToast(t("toast.confirm"), "success");
   };
 
   const handleCancel = (id) => {
     setAppointments(
       appointments.map((apt) => (apt.id === id ? { ...apt, status: "cancelled" } : apt))
     );
-          showToast(t("toast.cancel"), "info");
+    showToast(t("toast.cancel"), "info");
   };
 
   const handleDelete = async (id) => {
@@ -168,13 +165,13 @@ export default function DoctorAppointmentsPage() {
       const res = await fetch(`/api/doctor/appointments/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        showToast(err.error || t("toast.error", { defaultValue: "Failed to delete appointment" }), "error");
+        showToast(err.error || t("toast.error"), "error");
         return;
       }
       setAppointments(appointments.filter((apt) => apt.id !== id));
       showToast(t("toast.delete"), "success");
     } catch (err) {
-      showToast(t("toast.error", { defaultValue: "Failed to delete appointment" }), "error");
+      showToast(t("toast.error"), "error");
     }
   };
 
@@ -182,16 +179,16 @@ export default function DoctorAppointmentsPage() {
     let label, color;
     if (status === "confirmed" || status === "completed") {
       label = t("statuses.confirmed");
-      color = "bg-green-100 text-green-700 border-green-200";
+      color = "bg-(--ui-success-bg) text-(--ui-success-foreground) border-(--ui-success-border)";
     } else if (status === "pending") {
       label = t("statuses.pending");
-      color = "bg-orange-100 text-orange-700 border-orange-200";
+      color = "bg-(--ui-warning-bg) text-(--ui-warning-foreground) border-(--ui-warning-border)";
     } else if (status === "cancelled") {
       label = t("statuses.cancelled");
-      color = "bg-red-100 text-red-700 border-red-200";
+      color = "bg-(--ui-danger-bg) text-(--ui-danger-foreground) border-(--ui-danger-border)";
     } else {
       label = t("statuses.pending");
-      color = "bg-gray-100 text-gray-700 border-gray-200";
+      color = "bg-(--ui-surface-2)/60 text-(--ui-muted-foreground) border-(--ui-border)";
     }
     return (
       <span className={`rounded-full border px-3 py-1 text-xs font-medium ${color}`}>
@@ -201,9 +198,9 @@ export default function DoctorAppointmentsPage() {
   };
 
   const getStatusIcon = (status) => {
-    if (status === "confirmed" || status === "completed") return <FaCheckCircle className="text-green-600" />;
-    if (status === "pending") return <FaHourglassHalf className="text-orange-600" />;
-    return <FaTimesCircle className="text-red-600" />;
+    if (status === "confirmed" || status === "completed") return <FaCheckCircle className="text-(--ui-success)" />;
+    if (status === "pending") return <FaHourglassHalf className="text-(--ui-warning)" />;
+    return <FaTimesCircle className="text-(--ui-danger)" />;
   };
 
   if (loading) {
@@ -211,7 +208,7 @@ export default function DoctorAppointmentsPage() {
       <DoctorLayout>
         <ToastContainer />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-lg text-gray-500">{t("loading", { defaultValue: "Loading appointments..." })}</div>
+          <div className="text-lg text-(--ui-muted-foreground)">{t("loading")}</div>
         </div>
       </DoctorLayout>
     );
@@ -222,7 +219,7 @@ export default function DoctorAppointmentsPage() {
       <DoctorLayout>
         <ToastContainer />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-lg text-red-500">{t("error", { defaultValue: "Error loading appointments:" })} {error}</div>
+          <div className="text-lg text-(--ui-danger)">{t("error")} {error}</div>
         </div>
       </DoctorLayout>
     );
@@ -232,21 +229,17 @@ export default function DoctorAppointmentsPage() {
     <DoctorLayout>
       <ToastContainer />
       <div
-        className={`min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6 text-gray-900 dark:text-gray-100
-        [&_div.bg-white]:dark:bg-zinc-900 [&_div.bg-white]:dark:border-zinc-800
-        [&_p.text-gray-900]:dark:text-white [&_p.text-gray-600]:dark:text-gray-300 [&_p.text-gray-500]:dark:text-gray-400
-        [&_span.text-gray-900]:dark:text-white [&_span.text-gray-600]:dark:text-gray-300
-        [&_input.bg-white]:dark:bg-zinc-900 [&_input.border-gray-300]:dark:border-zinc-700 [&_input.text-gray-900]:dark:text-gray-100`}
+        className="min-h-screen bg-(--ui-surface-2) p-6 text-(--ui-foreground)"
       >
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <FaCalendarAlt className="text-blue-600" />
+              <h1 className="text-3xl font-bold text-(--ui-foreground) flex items-center gap-3">
+                <FaCalendarAlt className="text-(--ui-info)" />
                       {t("title")}
               </h1>
-                <p className="mt-2 text-gray-600">{t("subtitle")}</p>
+                <p className="mt-2 text-(--ui-muted-foreground)">{t("subtitle")}</p>
             </div>
 
             <button
@@ -254,7 +247,7 @@ export default function DoctorAppointmentsPage() {
                 setShowAddModal(true);
                       showToast(t("toast.addSoon"), "info");
               }}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex items-center gap-2 rounded-lg btn-gradient px-4 py-2 font-medium text-white transition-all focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/40"
             >
               <FaPlus />
                     {t("addButton")}
@@ -263,71 +256,71 @@ export default function DoctorAppointmentsPage() {
 
           {/* Stats Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                        <p className="text-sm text-gray-600">{t("stats.total")}</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">{stats.total}</p>
+                        <p className="text-sm text-(--ui-muted-foreground)">{t("stats.total")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{stats.total}</p>
                 </div>
-                <FaCalendarAlt className="text-3xl text-blue-600" />
+                <FaCalendarAlt className="text-3xl text-(--ui-info)" />
               </div>
             </div>
 
-            <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                        <p className="text-sm text-gray-600">{t("stats.confirmed")}</p>
-                  <p className="mt-1 text-3xl font-bold text-green-600">{stats.confirmed}</p>
+                        <p className="text-sm text-(--ui-muted-foreground)">{t("stats.confirmed")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-success)">{stats.confirmed}</p>
                 </div>
-                <FaCheckCircle className="text-3xl text-green-600" />
+                <FaCheckCircle className="text-3xl text-(--ui-success)" />
               </div>
             </div>
 
-            <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                        <p className="text-sm text-gray-600">{t("stats.pending")}</p>
-                  <p className="mt-1 text-3xl font-bold text-orange-600">{stats.pending}</p>
+                        <p className="text-sm text-(--ui-muted-foreground)">{t("stats.pending")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-warning)">{stats.pending}</p>
                 </div>
-                <FaHourglassHalf className="text-3xl text-orange-600" />
+                <FaHourglassHalf className="text-3xl text-(--ui-warning)" />
               </div>
             </div>
 
-            <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                        <p className="text-sm text-gray-600">{t("stats.cancelled")}</p>
-                  <p className="mt-1 text-3xl font-bold text-red-600">{stats.cancelled}</p>
+                        <p className="text-sm text-(--ui-muted-foreground)">{t("stats.cancelled")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-danger)">{stats.cancelled}</p>
                 </div>
-                <FaTimesCircle className="text-3xl text-red-600" />
+                <FaTimesCircle className="text-3xl text-(--ui-danger)" />
               </div>
             </div>
           </div>
 
           {/* Filters and Search */}
-          <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+          <div className="rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border)">
             <div className="flex flex-wrap items-center gap-4">
               {/* Search */}
               <div className="flex-1 min-w-62.5">
                 <div className="relative">
-                  <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-(--ui-muted-foreground)" />
                   <input
                     type="text"
                           placeholder={t("searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-10 pl-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) py-2 pr-10 pl-4 text-sm text-(--ui-foreground) placeholder:text-(--ui-muted-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                   />
                 </div>
               </div>
 
               {/* Status Filter */}
               <div className="flex items-center gap-2">
-                <FaFilter className="text-gray-500" />
+                <FaFilter className="text-(--ui-muted-foreground)" />
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-2 text-sm font-medium text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                 >
                         <option value="all">{t("filters.all")}</option>
                         <option value="confirmed">{t("filters.confirmed")}</option>
@@ -341,15 +334,15 @@ export default function DoctorAppointmentsPage() {
           {/* Appointments List */}
           <div className="space-y-4">
             {filteredAppointments.length === 0 ? (
-              <div className="rounded-xl bg-white p-12 text-center shadow-lg border border-gray-100">
-                <FaCalendarAlt className="mx-auto mb-4 text-5xl text-gray-300" />
-                      <p className="text-lg text-gray-600">{t("emptyState")}</p>
+              <div className="rounded-xl card-glass p-12 text-center shadow-(--shadow-soft) border border-(--ui-border)">
+                <FaCalendarAlt className="mx-auto mb-4 text-5xl text-(--ui-muted-foreground)" />
+                      <p className="text-lg text-(--ui-muted-foreground)">{t("emptyState")}</p>
               </div>
             ) : (
               filteredAppointments.map((apt) => (
                 <div
                   key={apt.id}
-                  className="rounded-xl bg-white p-6 shadow-lg border border-gray-100 transition-all hover:shadow-xl"
+                  className="rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border) transition-all hover:shadow-(--shadow-lift)"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     {/* Left Section */}
@@ -357,10 +350,10 @@ export default function DoctorAppointmentsPage() {
                       <div
                         className={`flex h-12 w-12 items-center justify-center rounded-full ${
                           apt.status === "confirmed"
-                            ? "bg-green-100"
+                            ? "bg-(--ui-success-bg)"
                             : apt.status === "pending"
-                            ? "bg-orange-100"
-                            : "bg-red-100"
+                            ? "bg-(--ui-warning-bg)"
+                            : "bg-(--ui-danger-bg)"
                         }`}
                       >
                         {getStatusIcon(apt.status)}
@@ -368,13 +361,13 @@ export default function DoctorAppointmentsPage() {
 
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                          <h3 className="text-lg font-bold text-gray-900">{apt.patientName}</h3>
+                          <h3 className="text-lg font-bold text-(--ui-foreground)">{apt.patientName}</h3>
                           {getStatusBadge(apt.status)}
                         </div>
 
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                        <div className="flex flex-wrap gap-4 text-sm text-(--ui-muted-foreground)">
                           <div className="flex items-center gap-2">
-                            <FaCalendarAlt className="text-blue-600" />
+                            <FaCalendarAlt className="text-(--ui-info)" />
                             {new Date(apt.date).toLocaleDateString(locale === "en" ? "en-US" : "ar-EG", {
                               weekday: "long",
                               year: "numeric",
@@ -383,30 +376,30 @@ export default function DoctorAppointmentsPage() {
                             })}
                           </div>
                           <div className="flex items-center gap-2">
-                            <FaClock className="text-purple-600" />
+                            <FaClock className="text-(--ui-warning)" />
                             {apt.time}
                           </div>
                           <div className="flex items-center gap-2">
                             {apt.type === "online" ? (
-                              <FaVideo className="text-green-600" />
+                              <FaVideo className="text-(--ui-success)" />
                             ) : (
-                              <FaMapMarkerAlt className="text-red-600" />
+                              <FaMapMarkerAlt className="text-(--ui-danger)" />
                             )}
                             {apt.location}
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <FaPhone className="text-blue-600" />
+                        <div className="flex items-center gap-2 text-sm text-(--ui-muted-foreground)">
+                          <FaPhone className="text-(--ui-info)" />
                           {apt.phone}
                         </div>
 
-                        <p className="text-sm text-gray-700">
+                        <p className="text-sm text-(--ui-foreground)">
                           <span className="font-bold">{t("reasonLabel")}</span> {apt.reason}
                         </p>
                         {apt.status === "cancelled" && apt.patientReason && (
-                          <p className="text-sm text-red-700 mt-1">
-                            <span className="font-bold">{t("cancelReasonLabel", { defaultValue: "سبب الإلغاء:" })}</span> {apt.patientReason}
+                          <p className="text-sm text-(--ui-danger) mt-1">
+                            <span className="font-bold">{t("cancelReasonLabel")}</span> {apt.patientReason}
                           </p>
                         )}
                       </div>
@@ -417,27 +410,27 @@ export default function DoctorAppointmentsPage() {
                       {apt.status === "pending" && (
                         <button
                           onClick={() => handleConfirm(apt.id)}
-                          className="flex items-center gap-2 rounded-lg bg-green-900 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-green-700"
+                          className="flex items-center gap-2 rounded-lg bg-(--ui-success) px-4 py-2 text-sm font-bold text-(--ui-success-foreground) transition-all hover:bg-(--ui-success)/90 focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/40"
                         >
                           <FaCheckCircle />
-                                {t("actions.confirm")}
+                          {t("actions.confirm")}
                         </button>
                       )}
                       {apt.status !== "cancelled" && (
                         <button
                           onClick={() => handleCancel(apt.id)}
-                          className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-orange-700"
+                          className="flex items-center gap-2 rounded-lg bg-(--ui-warning) px-4 py-2 text-sm font-bold text-(--ui-warning-foreground) transition-all hover:bg-(--ui-warning)/90 focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/40"
                         >
                           <FaTimesCircle />
-                                {t("actions.cancel")}
+                          {t("actions.cancel")}
                         </button>
                       )}
                       <button
                         onClick={() => handleDelete(apt.id)}
-                        className="flex items-center gap-2 rounded-lg bg-red-900 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-red-700"
+                        className="flex items-center gap-2 rounded-lg bg-(--ui-danger) px-4 py-2 text-sm font-bold text-(--ui-danger-foreground) transition-all hover:bg-(--ui-danger)/90 focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/40"
                       >
                         <FaTrash />
-                              {t("actions.delete")}
+                        {t("actions.delete")}
                       </button>
                     </div>
                   </div>
@@ -449,23 +442,23 @@ export default function DoctorAppointmentsPage() {
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <form onSubmit={createAppointment} className="bg-white dark:bg-slate-800 p-6 rounded-lg w-full max-w-md">
-            <h3 className="text-lg font-bold mb-4">{t("addButton", { defaultValue: "Add New Appointment" })}</h3>
+        <div className="fixed inset-0 bg-(--color-neutral)/50 flex items-center justify-center z-50 p-4">
+          <form onSubmit={createAppointment} className="card-glass border border-(--ui-border) p-6 rounded-lg w-full max-w-md text-(--ui-foreground)">
+            <h3 className="text-lg font-bold mb-4">{t("addButton")}</h3>
 
-            <label className="block mb-2 text-sm">{t("patient", { defaultValue: "Patient" })}</label>
+            <label className="block mb-2 text-sm">{t("patient")}</label>
             <input
-              placeholder={t("searchPlaceholder", { defaultValue: "Search by patient name..." })}
+              placeholder={t("searchPlaceholder")}
               value={patientSearch}
               onChange={(e) => setPatientSearch(e.target.value)}
-              className="w-full p-2 border rounded mb-2"
+              className="w-full p-2 border border-(--ui-border) bg-(--ui-surface) text-(--ui-foreground) rounded mb-2 focus:outline-none focus:ring-2 focus:ring-(--ui-ring)"
             />
             <select
               value={bookPatientId}
               onChange={(e) => setBookPatientId(e.target.value)}
-              className="w-full p-2 border rounded mb-3"
+              className="w-full p-2 border border-(--ui-border) bg-(--ui-surface) text-(--ui-foreground) rounded mb-3 focus:outline-none focus:ring-2 focus:ring-(--ui-ring)"
             >
-              <option value="">{patientsLoading ? t("loading", { defaultValue: "Loading..." }) : t("patient", { defaultValue: "Select patient" })}</option>
+              <option value="">{patientsLoading ? t("form.loadingPatients") : t("form.selectPatientPlaceholder")}</option>
               {patients
                 .filter((p) => (patientSearch ? p.fullName.toLowerCase().includes(patientSearch.toLowerCase()) : true))
                 .map((p) => (
@@ -477,29 +470,29 @@ export default function DoctorAppointmentsPage() {
 
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div>
-                <label className="block mb-2 text-sm">{t("date", { defaultValue: "Date" })}</label>
-                <input type="date" value={bookDate} onChange={(e) => setBookDate(e.target.value)} className="w-full p-2 border rounded" />
+                <label className="block mb-2 text-sm">{t("date")}</label>
+                <input type="date" value={bookDate} onChange={(e) => setBookDate(e.target.value)} className="w-full p-2 border border-(--ui-border) bg-(--ui-surface) text-(--ui-foreground) rounded focus:outline-none focus:ring-2 focus:ring-(--ui-ring)" />
               </div>
               <div>
-                <label className="block mb-2 text-sm">{t("time", { defaultValue: "Time" })}</label>
-                <input type="time" value={bookTime} onChange={(e) => setBookTime(e.target.value)} className="w-full p-2 border rounded" />
+                <label className="block mb-2 text-sm">{t("time")}</label>
+                <input type="time" value={bookTime} onChange={(e) => setBookTime(e.target.value)} className="w-full p-2 border border-(--ui-border) bg-(--ui-surface) text-(--ui-foreground) rounded focus:outline-none focus:ring-2 focus:ring-(--ui-ring)" />
               </div>
             </div>
 
-            <label className="block mb-2 text-sm">{t("types.clinic", { defaultValue: "Type" })}</label>
-            <select value={bookType} onChange={(e) => setBookType(e.target.value)} className="w-full p-2 border rounded mb-3">
-              <option value="clinic">{t("types.clinic", { defaultValue: "Clinic" })}</option>
-              <option value="online">{t("types.online", { defaultValue: "Online" })}</option>
+            <label className="block mb-2 text-sm">{t("form.typeLabel")}</label>
+            <select value={bookType} onChange={(e) => setBookType(e.target.value)} className="w-full p-2 border border-(--ui-border) bg-(--ui-surface) text-(--ui-foreground) rounded mb-3 focus:outline-none focus:ring-2 focus:ring-(--ui-ring)">
+              <option value="clinic">{t("types.clinic")}</option>
+              <option value="online">{t("types.online")}</option>
             </select>
 
-            <label className="block mb-2 text-sm">{t("reasonLabel", { defaultValue: "Reason:" })}</label>
-            <input value={bookReason} onChange={(e) => setBookReason(e.target.value)} className="w-full p-2 border rounded mb-3" />
+            <label className="block mb-2 text-sm">{t("reasonLabel")}</label>
+            <input value={bookReason} onChange={(e) => setBookReason(e.target.value)} className="w-full p-2 border border-(--ui-border) bg-(--ui-surface) text-(--ui-foreground) rounded mb-3 focus:outline-none focus:ring-2 focus:ring-(--ui-ring)" />
 
             {/* phone removed from booking form */}
 
             <div className="flex gap-2 justify-end">
-              <button type="button" onClick={() => setShowAddModal(false)} className="px-4 py-2 rounded border">{t("actions.cancel", { defaultValue: "Cancel" })}</button>
-              <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white">{t("appointments.form.submit", { defaultValue: "Book" })}</button>
+              <button type="button" onClick={() => setShowAddModal(false)} className="px-4 py-2 rounded border border-(--ui-border) bg-(--ui-surface-2) text-(--ui-foreground) hover:bg-(--ui-surface-2)/70">{t("actions.cancel")}</button>
+              <button type="submit" className="btn-gradient px-4 py-2 rounded text-white">{t("appointments.form.submit")}</button>
             </div>
           </form>
         </div>

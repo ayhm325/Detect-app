@@ -2,6 +2,8 @@
 import { useMemo } from "react";
 import { useToast } from "../../../components/ui/Toast";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { formatTime } from "../../../lib/date";
 import {
   FaUserMd,
   FaUsers,
@@ -18,100 +20,72 @@ import {
   FaChartLine,
   FaClipboardList,
 } from "react-icons/fa";
-import useLocale from "../../../hooks/useLocale";
 
 export default function DashboardHome({ serverData = {} }) {
   const { showToast, ToastContainer } = useToast();
   const router = useRouter();
-  const { t, locale } = useLocale();
+  const locale = useLocale();
+  const t = useTranslations("doctorDashboard");
+  const ui = useTranslations("ui");
   const basePrefix = locale === "en" ? "/en" : "/ar";
-  const dd = t.doctorDashboard || {};
+  const placeholder = ui("placeholder");
 
-  const tr = locale === "en"
-    ? {
-        title: "Medical Dashboard",
-        welcome: "Welcome Dr.",
-        stats: {
-          patients: "Total patients",
-          todayAppointments: "Today's appointments",
-          pendingScans: "Pending scans",
-          newMessages: "New messages",
-          changeSince: "since last month",
-        },
-        quickActions: {
-          viewPatients: "View patients",
-          viewPatientsDesc: "Manage your patient list",
-          medicalImages: "Medical images",
-          medicalImagesDesc: "Review radiology exams",
-          appointments: "Appointments",
-          appointmentsDesc: "Manage schedule",
-          chats: "Chats",
-          chatsDesc: "Communicate with patients",
-        },
-        todayAppointments: {
-          title: "Today's appointments",
-          viewAll: "View All",
-          types: { xray: "X-ray", consult: "Consultation", followup: "Follow-up", ct: "CT Scan", clinic: 'Clinic', online: 'Online' },
-          status: { scheduled: 'Scheduled', confirmed: "Confirmed", pending: "Pending", cancelled: 'Cancelled' },
-        },
-        pendingScans: {
-          title: "Pending scans",
-          priority: { high: "High", medium: "Medium", low: "Low" },
-          viewAll: "View all scans",
-        },
-        recentActivityTitle: "Recent activity",
-      }
-    : {
-        title: "لوحة التحكم الطبية",
-        welcome: "مرحباً بك د.",
-        stats: {
-          patients: "إجمالي المرضى",
-          todayAppointments: "مواعيد اليوم",
-          pendingScans: "الفحوصات المعلقة",
-          newMessages: "الرسائل الجديدة",
-          changeSince: "من الشهر الماضي",
-        },
-        quickActions: {
-          viewPatients: "عرض المرضى",
-          viewPatientsDesc: "إدارة قائمة مرضاك",
-          medicalImages: "الصور الطبية",
-          medicalImagesDesc: "مراجعة الأشعة والفحوصات",
-          appointments: "المواعيد",
-          appointmentsDesc: "إدارة جدول المواعيد",
-          chats: "المحادثات",
-          chatsDesc: "التواصل مع المرضى",
-        },
-        todayAppointments: {
-          title: "مواعيد اليوم",
-          viewAll: "عرض الكل",
-          types: { xray: "أشعة", consult: "استشارة", followup: "متابعة", ct: "أشعة مقطعية", clinic: 'العيادة', online: 'أونلاين' },
-          status: { scheduled: 'مجدول', confirmed: "مؤكد", pending: "معلق", cancelled: 'ملغى' },
-        },
-        pendingScans: {
-          title: "فحوصات معلقة",
-          priority: { high: "عالي", medium: "متوسط", low: "منخفض" },
-          viewAll: "عرض جميع الفحوصات",
-        },
-        recentActivityTitle: "النشاط الأخير",
-      };
+  const safeRawObject = (key, fallback = {}) => {
+    try {
+      const val = t.raw(key);
+      return val && typeof val === "object" && !Array.isArray(val) ? val : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const safeRawArray = (key, fallback = []) => {
+    try {
+      const val = t.raw(key);
+      return Array.isArray(val) ? val : fallback;
+    } catch {
+      return fallback;
+    }
+  };
 
   const labels = {
-    title: dd.title || tr.title,
-    welcome: dd.welcome || tr.welcome,
-    stats: { ...tr.stats, ...(dd.stats || {}) },
-    quickActions: { ...tr.quickActions, ...(dd.quickActions || {}) },
+    title: t("title"),
+    welcome: t("welcome"),
+    stats: {
+      patients: t("stats.patients"),
+      todayAppointments: t("stats.todayAppointments"),
+      pendingScans: t("stats.pendingScans"),
+      newMessages: t("stats.newMessages"),
+      changeSince: t("stats.changeSince"),
+    },
+    quickActions: {
+      viewPatients: t("quickActions.viewPatients"),
+      viewPatientsDesc: t("quickActions.viewPatientsDesc"),
+      medicalImages: t("quickActions.medicalImages"),
+      medicalImagesDesc: t("quickActions.medicalImagesDesc"),
+      appointments: t("quickActions.appointments"),
+      appointmentsDesc: t("quickActions.appointmentsDesc"),
+      chats: t("quickActions.chats"),
+      chatsDesc: t("quickActions.chatsDesc"),
+    },
     todayAppointments: {
-      ...tr.todayAppointments,
-      ...(dd.todayAppointments || {}),
-      types: { ...tr.todayAppointments.types, ...(dd.todayAppointments?.types || {}) },
-      status: { ...tr.todayAppointments.status, ...(dd.todayAppointments?.status || {}) },
+      title: t("todayAppointments.title"),
+      viewAll: t("todayAppointments.viewAll"),
+      empty: t("todayAppointments.empty"),
+      types: safeRawObject("todayAppointments.types", {}),
+      status: safeRawObject("todayAppointments.status", {}),
     },
     pendingScans: {
-      ...tr.pendingScans,
-      ...(dd.pendingScans || {}),
-      priority: { ...tr.pendingScans.priority, ...(dd.pendingScans?.priority || {}) },
+      title: t("pendingScans.title"),
+      viewAll: t("pendingScans.viewAll"),
+      priority: safeRawObject("pendingScans.priority", {}),
     },
-    recentActivityTitle: dd.recentActivity?.title || tr.recentActivityTitle,
+    recentActivityTitle: t("recentActivityTitle"),
+    ui: {
+      today: t("ui.today"),
+      yesterday: t("ui.yesterday"),
+      sampleDoctorName: t("ui.sampleDoctorName"),
+    },
   };
 
   const formattedDateRaw = new Date().toLocaleDateString(
@@ -145,9 +119,9 @@ export default function DashboardHome({ serverData = {} }) {
       change: "+12",
       changePercent: "+8.3%",
       icon: FaUsers,
-      color: "bg-blue-500",
-      bgLight: "bg-blue-50",
-      textColor: "text-blue-600",
+      color: "bg-(--ui-info)",
+      bgLight: "bg-(--ui-info-bg)",
+      textColor: "text-(--ui-info)",
       trend: "up",
     },
     {
@@ -156,9 +130,9 @@ export default function DashboardHome({ serverData = {} }) {
       change: "+3",
       changePercent: "+25%",
       icon: FaCalendarAlt,
-      color: "bg-green-500",
-      bgLight: "bg-green-50",
-      textColor: "text-green-600",
+      color: "bg-(--ui-success)",
+      bgLight: "bg-(--ui-success-bg)",
+      textColor: "text-(--ui-success)",
       trend: "up",
     },
     {
@@ -167,9 +141,9 @@ export default function DashboardHome({ serverData = {} }) {
       change: "-2",
       changePercent: "-20%",
       icon: FaXRay,
-      color: "bg-orange-500",
-      bgLight: "bg-orange-50",
-      textColor: "text-orange-600",
+      color: "bg-(--ui-warning)",
+      bgLight: "bg-(--ui-warning-bg)",
+      textColor: "text-(--ui-warning)",
       trend: "down",
     },
     {
@@ -178,71 +152,64 @@ export default function DashboardHome({ serverData = {} }) {
       change: "+5",
       changePercent: "+26%",
       icon: FaComments,
-      color: "bg-purple-500",
-      bgLight: "bg-purple-50",
-      textColor: "text-purple-600",
+      color: "bg-(--ui-info)",
+      bgLight: "bg-(--ui-info-bg)",
+      textColor: "text-(--ui-info)",
       trend: "up",
     },
   ];
 
   // Use appointments provided by the server. If none, show an empty array so UI can display a no-data message.
   const todayAppointments = (serverData.todayAppointments && serverData.todayAppointments.length)
-    ? serverData.todayAppointments.map((a, i) => ({ id: a.id || i, time: new Date(a.time).toLocaleTimeString(locale === 'en' ? 'en-US' : 'ar-EG-u-nu-latn', { hour: '2-digit', minute: '2-digit' }), patient: a.patient, type: a.type || 'consult', status: a.status }))
+    ? serverData.todayAppointments.map((a, i) => ({ id: a.id || i, time: formatTime(a.time, locale === 'en' ? 'en-US' : 'ar-EG-u-nu-latn', placeholder), patient: a.patient, type: a.type || 'consult', status: a.status }))
     : [];
 
-  const defaultRecentActivity = useMemo(() => locale === "en" ? [
-    { id: 1, action: "Reviewed X-ray for Mohammed Ali", time: "10 min ago", icon: FaCheckCircle, color: "text-green-600" },
-    { id: 2, action: "New appointment with Fatima Ahmed", time: "25 min ago", icon: FaCalendarAlt, color: "text-blue-600" },
-    { id: 3, action: "New message from Ahmed Hassan", time: "45 min ago", icon: FaComments, color: "text-purple-600" },
-    { id: 4, action: "Report ready for Sarah Khalid", time: "1 hour ago", icon: FaClipboardList, color: "text-orange-600" },
-  ] : [
-    { id: 1, action: "تم فحص صورة أشعة لـ محمد علي", time: "منذ 10 دقائق", icon: FaCheckCircle, color: "text-green-600" },
-    { id: 2, action: "موعد جديد مع فاطمة أحمد", time: "منذ 25 دقيقة", icon: FaCalendarAlt, color: "text-blue-600" },
-    { id: 3, action: "رسالة جديدة من أحمد حسن", time: "منذ 45 دقيقة", icon: FaComments, color: "text-purple-600" },
-    { id: 4, action: "تقرير جاهز لسارة خالد", time: "منذ ساعة", icon: FaClipboardList, color: "text-orange-600" },
-  ], [locale]);
+  const defaultRecentActivity = useMemo(() => [
+    { id: 1, action: t("recentActivity.defaults.reviewXray"), time: t("recentActivity.times.min10"), icon: FaCheckCircle, color: "text-(--ui-success)" },
+    { id: 2, action: t("recentActivity.defaults.newAppointment"), time: t("recentActivity.times.min25"), icon: FaCalendarAlt, color: "text-(--ui-info)" },
+    { id: 3, action: t("recentActivity.defaults.newMessage"), time: t("recentActivity.times.min45"), icon: FaComments, color: "text-(--ui-info)" },
+    { id: 4, action: t("recentActivity.defaults.reportReady"), time: t("recentActivity.times.hour1"), icon: FaClipboardList, color: "text-(--ui-warning)" },
+  ], [t]);
 
   const recentActivity = (serverData.recentActivity && serverData.recentActivity.length)
-    ? serverData.recentActivity.map((r, i) => ({ id: r.id || i, action: r.action || r.description || '', time: formatDateTime(r.time), icon: FaClipboardList, color: 'text-orange-600' }))
+    ? serverData.recentActivity.map((r, i) => ({ id: r.id || i, action: r.action || r.description || '', time: formatDateTime(r.time), icon: FaClipboardList, color: 'text-(--ui-warning)' }))
     : defaultRecentActivity;
 
-  const pendingScans = useMemo(() => locale === "en" ? [
-    { id: 1, patient: "Omar Hassan", type: "X-Ray", date: "Today", priority: "high" },
-    { id: 2, patient: "Laila Mahmoud", type: "CT Scan", date: "Today", priority: "medium" },
-    { id: 3, patient: "Youssef Ali", type: "MRI", date: "Yesterday", priority: "low" },
-  ] : [
-    { id: 1, patient: "عمر حسن", type: "X-Ray", date: "اليوم", priority: "high" },
-    { id: 2, patient: "ليلى محمود", type: "CT Scan", date: "اليوم", priority: "medium" },
-    { id: 3, patient: "يوسف علي", type: "MRI", date: "أمس", priority: "low" },
-  ], [locale]);
+  const pendingScans = safeRawArray("pendingScans.defaults", []).map((s, i) => {
+    const dateLabel = s.dateKey === "yesterday" ? labels.ui.yesterday : labels.ui.today;
+    const typeLabel = labels.todayAppointments.types?.[s.typeKey] ?? placeholder;
+    return {
+      id: s.id ?? i + 1,
+      patient: s.patient,
+      type: typeLabel,
+      date: dateLabel,
+      priority: s.priority,
+    };
+  });
 
   const quickActions = [
     {
       title: labels.quickActions.viewPatients,
       description: labels.quickActions.viewPatientsDesc,
       icon: FaUsers,
-      color: "from-blue-600 to-blue-500",
       link: `${basePrefix}/doctor/patients`,
     },
     {
       title: labels.quickActions.medicalImages,
       description: labels.quickActions.medicalImagesDesc,
       icon: FaXRay,
-      color: "from-green-600 to-green-500",
       link: `${basePrefix}/doctor/results`,
     },
     {
       title: labels.quickActions.appointments,
       description: labels.quickActions.appointmentsDesc,
       icon: FaCalendarAlt,
-      color: "from-purple-600 to-purple-500",
       link: `${basePrefix}/doctor/appointments`,
     },
     {
       title: labels.quickActions.chats,
       description: labels.quickActions.chatsDesc,
       icon: FaComments,
-      color: "from-orange-600 to-orange-500",
       link: `${basePrefix}/doctor/chat`,
     },
   ];
@@ -254,23 +221,23 @@ export default function DashboardHome({ serverData = {} }) {
   return (
     <>
       <ToastContainer />
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6 text-gray-900 dark:text-gray-100">
+      <div className="min-h-screen bg-(--ui-surface-2) text-(--ui-foreground) p-6">
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                <FaUserMd className="text-blue-600" />
+              <h1 className="text-3xl font-bold text-(--ui-foreground) flex items-center gap-3">
+                <FaUserMd className="text-(--ui-info)" />
                 {labels.title}
               </h1>
-              <p className="mt-2 text-gray-600 dark:text-gray-300">{labels.welcome} {serverData.doctor?.user?.fullName || (locale === "en" ? "Ahmed Mohammed" : "أحمد محمد")} - {formattedDate}</p>
+              <p className="mt-2 text-(--ui-muted-foreground)">{labels.welcome} {serverData.doctor?.user?.fullName || labels.ui.sampleDoctorName} - {formattedDate}</p>
             </div>
             <button
               onClick={() => router.push(`${basePrefix}/doctor/notifications`)}
-              className="relative rounded-lg bg-blue-600 p-3 text-white transition-all hover:bg-blue-700"
+              className="relative rounded-lg btn-gradient p-3 text-white transition-all"
             >
               <FaBell className="text-xl" />
-              <span className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold">
+              <span className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-(--ui-danger) text-xs font-bold text-(--ui-danger-foreground)">
                 {serverData.counts?.newMessages ?? 0}
               </span>
             </button>
@@ -283,7 +250,7 @@ export default function DashboardHome({ serverData = {} }) {
               return (
                 <div
                   key={index}
-                  className="group relative overflow-hidden rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-lg border border-gray-100 dark:border-zinc-800 transition-all hover:shadow-2xl"
+                  className="group relative overflow-hidden rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border) transition-all hover:shadow-(--shadow-lift)"
                 >
                   <div className={`absolute top-0 right-0 h-20 w-20 translate-x-8 -translate-y-8 transform rounded-full ${stat.bgLight} opacity-50 transition-transform group-hover:scale-150`}></div>
                   <div className="relative">
@@ -291,15 +258,15 @@ export default function DashboardHome({ serverData = {} }) {
                       <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.color}`}>
                         <Icon className="text-2xl text-white" />
                       </div>
-                      <div className={`flex items-center gap-1 text-sm font-medium ${stat.trend === "up" ? "text-green-600" : "text-red-600"}`}>
+                      <div className={`flex items-center gap-1 text-sm font-medium ${stat.trend === "up" ? "text-(--ui-success)" : "text-(--ui-danger)"}`}>
                         <FaArrowUp className={stat.trend === "down" ? "rotate-180" : ""} />
                         {stat.changePercent}
                       </div>
                     </div>
                     <div className="mt-4">
-                      <p className="text-sm text-gray-600 dark:text-gray-300">{stat.title}</p>
-                      <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-(--ui-muted-foreground)">{stat.title}</p>
+                      <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{stat.value}</p>
+                      <p className="mt-1 text-xs text-(--ui-muted-foreground)">
                         {stat.change} {labels.stats.changeSince}
                       </p>
                     </div>
@@ -317,7 +284,7 @@ export default function DashboardHome({ serverData = {} }) {
                 <button
                   key={index}
                   onClick={() => handleQuickAction(action.link)}
-                  className={`group rounded-xl bg-linear-to-r ${action.color} p-6 text-white shadow-lg transition-all hover:shadow-2xl hover:scale-105`}
+                  className="group rounded-xl btn-gradient p-6 text-white shadow-(--shadow-soft) transition-all hover:shadow-(--shadow-lift) hover:scale-105"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <Icon className="text-3xl" />
@@ -333,50 +300,50 @@ export default function DashboardHome({ serverData = {} }) {
           {/* Main Content Grid */}
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Today's Appointments */}
-            <div className="lg:col-span-2 rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-lg border border-gray-100 dark:border-zinc-800">
+            <div className="lg:col-span-2 rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <FaCalendarAlt className="text-blue-600" />
+                <h2 className="text-xl font-bold text-(--ui-foreground) flex items-center gap-2">
+                  <FaCalendarAlt className="text-(--ui-info)" />
                   {labels.todayAppointments.title}
                 </h2>
                 <button
                   onClick={() => router.push(`${basePrefix}/doctor/appointments`)}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-sm text-(--ui-info) hover:opacity-90 font-medium"
                 >
                   {labels.todayAppointments.viewAll}
                 </button>
               </div>
               <div className="space-y-3">
                 {todayAppointments.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-gray-200 dark:border-zinc-800 p-6 text-center text-gray-600 dark:text-gray-300">
-                    {locale === 'en' ? 'No appointments for today.' : 'لا توجد مواعيد اليوم'}
+                  <div className="rounded-lg border border-dashed border-(--ui-border) p-6 text-center text-(--ui-muted-foreground)">
+                    {labels.todayAppointments.empty}
                   </div>
                 ) : (
                   todayAppointments.map((apt) => (
                     <div
                       key={apt.id}
-                      className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-zinc-800 p-4 transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
+                      className="flex items-center justify-between rounded-lg border border-(--ui-border) p-4 transition-all hover:bg-(--ui-surface-2)"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
-                          <FaClock className="text-blue-600" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-(--ui-info-bg)">
+                          <FaClock className="text-(--ui-info)" />
                         </div>
                         <div>
-                          <p className="font-bold text-gray-900 dark:text-white">{apt.patient}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">{apt.place || apt.location || labels.todayAppointments.types[apt.type] || apt.type}</p>
+                          <p className="font-bold text-(--ui-foreground)">{apt.patient}</p>
+                          <p className="text-sm text-(--ui-muted-foreground)">{apt.place || apt.location || labels.todayAppointments.types[apt.type] || apt.type}</p>
                         </div>
                       </div>
                       <div className="text-left">
-                        <p className="font-medium text-gray-900 dark:text-white">{apt.time}</p>
+                        <p className="font-medium text-(--ui-foreground)">{apt.time}</p>
                         {(() => {
                           const displayStatus = normalizeStatus(apt.status);
                           const badgeClass = displayStatus === 'confirmed'
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200'
+                            ? 'bg-(--ui-success-bg) text-(--ui-success)'
                             : displayStatus === 'pending'
-                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-200'
+                            ? 'bg-(--ui-warning-bg) text-(--ui-warning)'
                             : displayStatus === 'cancelled'
-                            ? 'bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-200'
-                            : 'bg-gray-100 text-gray-700 dark:bg-gray-900/60 dark:text-gray-200';
+                            ? 'bg-(--ui-danger-bg) text-(--ui-danger)'
+                            : 'bg-(--ui-surface-2) text-(--ui-foreground)';
                           return (
                             <span className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${badgeClass}`}>
                               {labels.todayAppointments.status[displayStatus] || displayStatus}
@@ -391,10 +358,10 @@ export default function DashboardHome({ serverData = {} }) {
             </div>
 
             {/* Pending Scans */}
-            <div className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-lg border border-gray-100 dark:border-zinc-800">
+            <div className="rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <FaXRay className="text-orange-600" />
+                <h2 className="text-xl font-bold text-(--ui-foreground) flex items-center gap-2">
+                  <FaXRay className="text-(--ui-warning)" />
                   {labels.pendingScans.title}
                 </h2>
               </div>
@@ -402,29 +369,29 @@ export default function DashboardHome({ serverData = {} }) {
                 {pendingScans.map((scan) => (
                   <div
                     key={scan.id}
-                    className="rounded-lg border border-gray-200 dark:border-zinc-800 p-4 transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
+                    className="rounded-lg border border-(--ui-border) p-4 transition-all hover:bg-(--ui-surface-2)"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <p className="font-bold text-gray-900 dark:text-white">{scan.patient}</p>
+                      <p className="font-bold text-(--ui-foreground)">{scan.patient}</p>
                       <span
                         className={`rounded-full px-2 py-1 text-xs font-medium ${
                           scan.priority === "high"
-                            ? "bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-200"
+                            ? "bg-(--ui-danger-bg) text-(--ui-danger)"
                             : scan.priority === "medium"
-                            ? "bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-200"
-                            : "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200"
+                            ? "bg-(--ui-warning-bg) text-(--ui-warning)"
+                            : "bg-(--ui-info-bg) text-(--ui-info)"
                         }`}
                       >
                         {labels.pendingScans.priority[scan.priority] || scan.priority}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{scan.type}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{scan.date}</p>
+                    <p className="text-sm text-(--ui-muted-foreground)">{scan.type}</p>
+                    <p className="text-xs text-(--ui-muted-foreground) mt-1">{scan.date}</p>
                   </div>
                 ))}
                 <button
                   onClick={() => router.push(`${basePrefix}/doctor/results`)}
-                  className="w-full rounded-lg bg-orange-600 py-2 text-sm font-medium text-white transition-all hover:bg-orange-700"
+                  className="w-full rounded-lg btn-gradient py-2 text-sm font-medium text-white transition-all"
                 >
                   {labels.pendingScans.viewAll}
                 </button>
@@ -433,10 +400,10 @@ export default function DashboardHome({ serverData = {} }) {
           </div>
 
           {/* Recent Activity */}
-          <div className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-lg border border-gray-100 dark:border-zinc-800">
+          <div className="rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border)">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <FaChartLine className="text-purple-600" />
+              <h2 className="text-xl font-bold text-(--ui-foreground) flex items-center gap-2">
+                <FaChartLine className="text-(--ui-info)" />
                 {labels.recentActivityTitle}
               </h2>
             </div>
@@ -446,17 +413,17 @@ export default function DashboardHome({ serverData = {} }) {
                 return (
                   <div
                     key={activity.id}
-                    className="rounded-lg border border-gray-200 dark:border-zinc-800 p-4 transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
+                    className="rounded-lg border border-(--ui-border) p-4 transition-all hover:bg-(--ui-surface-2)"
                   >
                     <div className="flex items-start gap-3">
                       <div className={`mt-1 ${activity.color}`}>
                         <Icon className="text-xl" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        <p className="text-sm font-medium text-(--ui-foreground) truncate">
                           {activity.action}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{activity.time}</p>
+                        <p className="text-xs text-(--ui-muted-foreground) mt-1">{activity.time}</p>
                       </div>
                     </div>
                   </div>

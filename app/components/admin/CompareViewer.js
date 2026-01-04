@@ -1,16 +1,11 @@
 import Image from "next/image";
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
+import { useTranslations } from "next-intl";
 
 export default function CompareViewer({ images }) {
-  const { locale } = useLocale();
-  const tr = locale === "ar" ? ar.adminAnalysis : en.adminAnalysis;
-  const compareTr = tr.compareViewer || {};
-  const needTwoImages = compareTr.needTwoImages || (locale === "ar" ? "يجب اختيار صورتين للمقارنة." : "You must select two images to compare.");
-  const imageLabel = compareTr.imageLabel || (locale === "ar" ? "صورة" : "Image");
+  const t = useTranslations("compareViewer");
+  const needTwoImages = t("needTwoImages");
 
-  if (!images || images.length < 2) return <div className="text-center text-gray-400 py-4">{needTwoImages}</div>;
+  if (!images || images.length < 2) return <div className="text-center text-(--ui-muted-foreground) py-4">{needTwoImages}</div>;
   return (
     <div className="flex gap-8 justify-center mt-4">
       {images.map((img, idx) => (
@@ -18,13 +13,13 @@ export default function CompareViewer({ images }) {
           <div className="relative w-72 h-80">
             <Image
               src={img}
-              alt={`${imageLabel} ${idx + 1}`}
+              alt={t("imageWithIndex", { index: idx + 1 })}
               fill
               sizes="(min-width: 1024px) 18rem, 60vw"
-              className="object-contain rounded-xl shadow"
+              className="object-contain rounded-xl border border-(--ui-border) bg-(--ui-surface-2)/40"
             />
           </div>
-          <span className="text-sm text-zinc-500">{imageLabel} {idx + 1}</span>
+          <span className="text-sm text-(--ui-muted-foreground)">{t("imageWithIndex", { index: idx + 1 })}</span>
         </div>
       ))}
     </div>

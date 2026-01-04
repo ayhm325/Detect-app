@@ -29,39 +29,51 @@ export default function AnalysisHistoryPage() {
   }, []);
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>Analysis History</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-foreground">Analysis History</h1>
 
-      {isLoading && <div>Loading...</div>}
-      {error && <div style={{ color: '#b91c1c' }}>Error: {error}</div>}
+      {isLoading && <div className="mt-3 text-sm text-(--ui-muted-2)">Loading...</div>}
+      {error && <div className="mt-3 text-sm text-(--ui-danger)">Error: {error}</div>}
 
-      {!isLoading && records.length === 0 && <div>No analysis records found.</div>}
+      {!isLoading && records.length === 0 && (
+        <div className="mt-3 text-sm text-(--ui-muted-2)">No analysis records found.</div>
+      )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px,1fr))', gap: 12, marginTop: 12 }}>
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {records.map((r) => (
-          <div key={r.id} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 12, background: '#fff' }}>
-            <div style={{ display: 'flex', gap: 12 }}>
-              <div style={{ width: 96, height: 96, flex: '0 0 96px' }}>
+          <div key={r.id} className="card-glass rounded-lg border border-(--ui-border) p-3">
+            <div className="flex gap-3">
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-md border border-(--ui-border) bg-(--ui-surface)">
                 {r.imageUrl ? (
                   <Image
                     src={r.imageUrl}
                     alt="thumb"
                     width={96}
                     height={96}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6 }}
+                    className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div style={{ background: '#f3f4f6', width: '100%', height: '100%', borderRadius: 6 }} />
+                  <div className="h-full w-full bg-(--ui-surface-2)" />
                 )}
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <strong>{r.prediction}</strong>
-                  <span style={{ color: '#6b7280' }}>{new Date(r.createdAt).toLocaleString()}</span>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-3">
+                  <strong className="truncate text-foreground">{r.prediction}</strong>
+                  <span className="shrink-0 text-xs text-(--ui-muted-2)">
+                    {new Date(r.createdAt).toLocaleString()}
+                  </span>
                 </div>
-                <div>Confidence: <strong>{Math.round((r.confidence || 0) * 100)}%</strong></div>
-                <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-                  <button onClick={() => setSelected(r)} style={{ padding: '6px 10px', borderRadius: 6 }}>View</button>
+                <div className="mt-1 text-sm text-(--ui-muted-2)">
+                  Confidence: <strong className="text-foreground">{Math.round((r.confidence || 0) * 100)}%</strong>
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    onClick={() => setSelected(r)}
+                    className="btn-gradient rounded-md px-3 py-1.5 text-sm font-semibold text-white"
+                  >
+                    View
+                  </button>
                 </div>
               </div>
             </div>

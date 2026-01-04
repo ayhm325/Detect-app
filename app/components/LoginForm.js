@@ -42,7 +42,7 @@ export default function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "حدث خطأ غير متوقع");
+        setError(data.error || t("auth.login.errors.unexpected"));
         setLoading(false);
         return;
       }
@@ -57,7 +57,7 @@ export default function LoginForm() {
       else if (user.role === "patient") window.location.href = `${basePath}/patient/dashboard`;
       else if (user.role === "admin") window.location.href = `${basePath}/admin/dashboard`;
     } catch (err) {
-      setError("حدث خطأ في الاتصال بالخادم");
+      setError(t("auth.login.errors.serverConnection"));
       setLoading(false);
     }
   };
@@ -71,30 +71,30 @@ export default function LoginForm() {
           style={{ backgroundImage: 'url(/icons/bluelogin.jpg)' }}
         />
         {/* طبقة شفافة لزيادة التباين */}
-        <div className="absolute inset-0 bg-blue-900/40 pointer-events-none" />
+        <div className="absolute inset-0 bg-(--ui-foreground)/40 pointer-events-none" />
       </div>
       
       {/* الفورم المحصور في المنتصف */}
       <div className="relative z-10 w-full max-w-md flex items-center justify-center min-h-[80vh] mx-auto">
         <form
           onSubmit={handleSubmit}
-          className="w-full glass-morph bg-white/20 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 p-8 max-h-[90vh] overflow-y-auto"
+          className="w-full glass-morph bg-(--color-neutral)/20 backdrop-blur-lg rounded-3xl shadow-2xl border border-(--color-neutral)/30 p-8 max-h-[90vh] overflow-y-auto"
         >
           {/* Section 1: Header */}
           <div className="mb-8 flex flex-col items-center gap-4">
-            <div className="inline-block p-4 rounded-full glass-morph bg-white/30 shadow-xl">
+            <div className="inline-block p-4 rounded-full glass-morph bg-(--color-neutral)/30 shadow-xl">
               <FaShield className="text-4xl text-white" />
             </div>
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-white mb-1">{t("auth.login.title") || "تسجيل الدخول"}</h2>
-              <p className="text-white/90 text-base">{t("auth.login.subtitle") || "أدخل بيانات حسابك للمتابعة"}</p>
+              <h2 className="text-3xl font-bold text-white mb-1">{t("auth.login.title")}</h2>
+              <p className="text-white/90 text-base">{t("auth.login.subtitle")}</p>
             </div>
             <div className="flex items-center gap-2 mt-2">
               <Link
                 href={locale === "en" ? "/en" : "/ar"}
-                className="w-10 h-10 flex items-center justify-center rounded-full glass-morph bg-white/30 text-white hover:bg-white/40 shadow-md border border-white/40 transition-all focus:outline-none focus:ring-2 focus:ring-white/40"
-                title={locale === "ar" ? "العودة للرئيسية" : "Back to home"}
-                aria-label={locale === "ar" ? "العودة للرئيسية" : "Back to home"}
+                className="w-10 h-10 flex items-center justify-center rounded-full glass-morph bg-(--color-neutral)/30 text-white hover:bg-(--color-neutral)/40 shadow-md border border-(--color-neutral)/40 transition-all focus:outline-none focus:ring-2 focus:ring-(--color-neutral)/40"
+                title={t("ui.backHomeTitle")}
+                aria-label={t("ui.backHomeTitle")}
                 onClick={e => {
                   const homePath = locale === "en" ? "/en" : "/ar";
                   const current = window.location.pathname;
@@ -118,35 +118,35 @@ export default function LoginForm() {
               <button
                 type="button"
                 onClick={toggleLocale}
-                className="flex items-center gap-2 px-3 py-2 rounded-full glass-morph bg-white/30 text-white hover:bg-white/40 transition-colors font-medium text-sm"
-                title={locale === "ar" ? "Switch to English" : "التبديل للعربية"}
+                className="flex items-center gap-2 px-3 py-2 rounded-full glass-morph bg-(--color-neutral)/30 text-white hover:bg-(--color-neutral)/40 transition-colors font-medium text-sm"
+                title={t("ui.switchLanguageTitle")}
               >
                 <span>🌐</span>
-                <span>{locale === "ar" ? "EN" : "AR"}</span>
+                <span>{t("ui.switchLanguageShort")}</span>
               </button>
             </div>
           </div>
           
           {/* Section 2: Social Login */}
-          <div className="mb-6 pb-6 border-b border-white/20">
+          <div className="mb-6 pb-6 border-b border-(--color-neutral)/20">
             <div className="flex items-center justify-center gap-4">
-              <button type="button" className="flex-1 max-w-40 h-12 rounded-xl glass-morph bg-white/20 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-white/30 flex items-center justify-center gap-2 font-medium border border-white/40" title="Facebook">
-                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 shadow">
-                  <FaFacebook className="text-lg text-white" />
+              <button type="button" className="flex-1 max-w-40 h-12 rounded-xl glass-morph bg-background/15 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-(--ui-border) flex items-center justify-center gap-2 font-medium border border-(--ui-border)" title={t("social.facebook")}>
+                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-(--ui-info) shadow">
+                  <FaFacebook className="text-lg text-(--ui-info-foreground)" />
                 </span>
-                <span className="text-sm">Facebook</span>
+                <span className="text-sm">{t("social.facebook")}</span>
               </button>
-              <button type="button" className="flex-1 max-w-40 h-12 rounded-xl glass-morph bg-white/20 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-white/30 flex items-center justify-center gap-2 font-medium border border-white/40" title="Google">
-                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 shadow">
-                  <FaGoogle className="text-lg text-white" />
+              <button type="button" className="flex-1 max-w-40 h-12 rounded-xl glass-morph bg-background/15 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-(--ui-border) flex items-center justify-center gap-2 font-medium border border-(--ui-border)" title={t("social.google")}>
+                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-(--ui-danger) shadow">
+                  <FaGoogle className="text-lg text-(--ui-danger-foreground)" />
                 </span>
-                <span className="text-sm">Google</span>
+                <span className="text-sm">{t("social.google")}</span>
               </button>
             </div>
             <div className="flex items-center justify-center gap-3 mt-4">
-              <div className="h-px bg-white/30 flex-1"></div>
-              <span className="text-white/90 text-sm font-medium">{t("auth.login.socialDivider") || "أو باستخدام البريد الإلكتروني"}</span>
-              <div className="h-px bg-white/30 flex-1"></div>
+              <div className="h-px bg-(--color-neutral)/30 flex-1"></div>
+              <span className="text-white/90 text-sm font-medium">{t("auth.login.socialDivider")}</span>
+              <div className="h-px bg-(--color-neutral)/30 flex-1"></div>
             </div>
           </div>
           
@@ -154,28 +154,28 @@ export default function LoginForm() {
           <div className="space-y-3">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-3">{t("auth.login.emailLabel") || "البريد الإلكتروني"}</label>
+              <label className="block text-sm font-semibold text-white mb-3">{t("auth.login.emailLabel")}</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-white/30">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-(--color-neutral)/30">
                   <FaEnvelope className="text-white text-lg" />
                 </span>
                 <input
                   type="email"
                   name="email"
-                  placeholder="example@email.com"
+                  placeholder={t("auth.login.emailPlaceholder")}
                   value={form.email}
                   onChange={handleChange}
                   required
-                  className="w-full pl-12 pr-4 py-4 border-2 border-white/30 rounded-xl glass-morph bg-white/20 text-white placeholder:text-white/60 focus:outline-none focus:border-white/50 focus:ring-4 focus:ring-white/20 transition-all text-base"
+                  className="w-full pl-12 pr-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
                 />
               </div>
             </div>
             
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-3">{t("auth.login.passwordLabel") || "كلمة المرور"}</label>
+              <label className="block text-sm font-semibold text-white mb-3">{t("auth.login.passwordLabel")}</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-white/30">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-(--color-neutral)/30">
                   <FaLock className="text-white text-lg" />
                 </span>
                 <input
@@ -185,12 +185,12 @@ export default function LoginForm() {
                   value={form.password}
                   onChange={handleChange}
                   required
-                  className="w-full pl-12 pr-12 py-4 border-2 border-white/30 rounded-xl glass-morph bg-white/20 text-white placeholder:text-white/60 focus:outline-none focus:border-white/50 focus:ring-4 focus:ring-white/20 transition-all text-base"
+                  className="w-full pl-12 pr-12 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-yellow-300 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-(--ui-ring) transition-colors"
                 >
                   {showPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
                 </button>
@@ -200,7 +200,7 @@ export default function LoginForm() {
           
           {/* Error Message */}
           {error && (
-            <div className="bg-red-900/20 backdrop-blur border-2 border-red-800 rounded-xl p-4 text-red-400 text-base flex items-center gap-3 mt-4">
+            <div className="bg-(--ui-danger-bg) backdrop-blur border-2 border-(--ui-danger-border) rounded-xl p-4 text-white text-base flex items-center gap-3 mt-4">
               <span className="text-xl shrink-0">⚠️</span>
               <span className="font-medium">{error}</span>
             </div>
@@ -210,27 +210,27 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-xl bg-linear-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] mt-6"
+            className="w-full py-4 rounded-xl btn-gradient font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] mt-6"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {t("auth.login.loading") || "جاري التحقق..."}
+                <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    {t("auth.login.loading")}
               </span>
             ) : (
-              t("auth.login.ctaPrimary") || "دخول"
+              t("auth.login.ctaPrimary")
             )}
           </button>
           
           {/* Extra Links */}
           <div className="flex flex-col gap-3 text-center text-sm mt-6">
-            <Link href={withLocale("/forgot-password")} className="text-blue-200 hover:text-white font-semibold transition-colors">
-              {t("auth.login.forgot") || "هل نسيت كلمة المرور؟"}
+            <Link href={withLocale("/forgot-password")} className="text-(--ui-info) hover:text-white font-semibold transition-colors">
+              {t("auth.login.forgot")}
             </Link>
-            <div className="text-blue-100">
-              {t("auth.login.noAccount") || "ليس لديك حساب؟"}{" "}
-              <Link href={withLocale("/signup")} className="text-blue-200 hover:text-white font-semibold transition-colors">
-                {t("auth.login.goSignup") || "سجل الآن"}
+            <div className="text-white/80">
+              {t("auth.login.noAccount")}{" "}
+              <Link href={withLocale("/signup")} className="text-(--ui-info) hover:text-white font-semibold transition-colors">
+                {t("auth.login.goSignup")}
               </Link>
             </div>
           </div>

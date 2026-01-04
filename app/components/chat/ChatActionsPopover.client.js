@@ -3,8 +3,24 @@
 import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { FaEllipsisV } from "react-icons/fa";
+import { useTranslations } from "next-intl";
 
-export default function ChatActionsPopover({ onDelete, confirmText = "هل تريد حذف المحادثة؟", confirmYes = "حذف", confirmNo = "إلغاء" }) {
+export default function ChatActionsPopover({
+  onDelete,
+  confirmText,
+  confirmYes,
+  confirmNo,
+  deleteLabel,
+  buttonTitle,
+}) {
+  const t = useTranslations("chat");
+
+  const resolvedConfirmText = confirmText ?? t("confirmDelete.text");
+  const resolvedConfirmYes = confirmYes ?? t("confirmDelete.yes");
+  const resolvedConfirmNo = confirmNo ?? t("confirmDelete.no");
+  const resolvedDeleteLabel = deleteLabel ?? t("actions.deleteConversation");
+  const resolvedButtonTitle = buttonTitle ?? t("actions.more");
+
   const [open, setOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const buttonRef = useRef(null);
@@ -67,20 +83,23 @@ export default function ChatActionsPopover({ onDelete, confirmText = "هل تر�
       ref={popRef}
       style={pos ? { position: "fixed", top: `${pos.top}px`, left: `${pos.left}px`, zIndex: 9999 } : { position: "fixed", visibility: "hidden" }}
     >
-      <div className="w-48 rounded-md bg-white shadow-lg border border-gray-200">
+      <div className="card-glass w-48 rounded-md border border-(--ui-border) shadow-(--shadow-soft)">
         {!confirming ? (
           <button
             onClick={() => setConfirming(true)}
-            className="w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+            className="w-full px-4 py-2 text-right text-sm text-(--ui-danger) hover:bg-(--ui-surface-2)"
           >
-            حذف المحادثة
+            {resolvedDeleteLabel}
           </button>
         ) : (
           <div className="px-4 py-2 text-sm">
-            <div className="mb-2">{confirmText}</div>
+            <div className="mb-2 text-(--ui-foreground)">{resolvedConfirmText}</div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setConfirming(false)} className="px-3 py-1 rounded bg-gray-100 text-sm">
-                {confirmNo}
+              <button
+                onClick={() => setConfirming(false)}
+                className="rounded bg-(--ui-surface-2) px-3 py-1 text-sm text-(--ui-foreground)"
+              >
+                {resolvedConfirmNo}
               </button>
               <button
                 onClick={async () => {
@@ -92,9 +111,9 @@ export default function ChatActionsPopover({ onDelete, confirmText = "هل تر�
                     // caller handles errors
                   }
                 }}
-                className="px-3 py-1 rounded bg-red-600 text-white text-sm"
+                className="rounded bg-(--ui-danger) px-3 py-1 text-sm text-(--ui-danger-foreground)"
               >
-                {confirmYes}
+                {resolvedConfirmYes}
               </button>
             </div>
           </div>
@@ -108,8 +127,8 @@ export default function ChatActionsPopover({ onDelete, confirmText = "هل تر�
       <button
         ref={buttonRef}
         onClick={() => setOpen((v) => !v)}
-        className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-100"
-        title="More"
+        className="rounded-lg p-2 text-(--ui-muted-foreground) transition-all hover:bg-(--ui-surface-2)"
+        title={resolvedButtonTitle}
       >
         <FaEllipsisV />
       </button>

@@ -1,14 +1,7 @@
-Debugger attached.
 Socket.io server listening on port 4500
-socket handshake auth token provided (truncated): eyJhbGciOiJIUzI1NiIs...
-[Socket Auth Success] {
-  socketId: [32m'blZy9a4sg20t-2fIAAAB'[39m,
-  userId: [32m'22ba263f-489f-4238-ba52-8aa6a3b8ed5e'[39m,
-  role: [32m'doctor'[39m
-}
-socket connected blZy9a4sg20t-2fIAAAB user 22ba263f-489f-4238-ba52-8aa6a3b8ed5e
+socket connected kyb-sdG-NlExi-H2AAAB user 22ba263f-489f-4238-ba52-8aa6a3b8ed5e
 [Socket WhoAmI] {
-  socketId: [32m'blZy9a4sg20t-2fIAAAB'[39m,
+  socketId: [32m'kyb-sdG-NlExi-H2AAAB'[39m,
   user: {
     id: [32m'22ba263f-489f-4238-ba52-8aa6a3b8ed5e'[39m,
     role: [32m'doctor'[39m,
@@ -16,7 +9,7 @@ socket connected blZy9a4sg20t-2fIAAAB user 22ba263f-489f-4238-ba52-8aa6a3b8ed5e
   }
 }
 [Socket WhoAmI] {
-  socketId: [32m'blZy9a4sg20t-2fIAAAB'[39m,
+  socketId: [32m'kyb-sdG-NlExi-H2AAAB'[39m,
   user: {
     id: [32m'22ba263f-489f-4238-ba52-8aa6a3b8ed5e'[39m,
     role: [32m'doctor'[39m,
@@ -24,11 +17,11 @@ socket connected blZy9a4sg20t-2fIAAAB user 22ba263f-489f-4238-ba52-8aa6a3b8ed5e
   }
 }
 [Socket WhoAmI] {
-  socketId: [32m'blZy9a4sg20t-2fIAAAB'[39m,
+  socketId: [32m'kyb-sdG-NlExi-H2AAAB'[39m,
   user: {
     id: [32m'22ba263f-489f-4238-ba52-8aa6a3b8ed5e'[39m,
     role: [32m'doctor'[39m,
     email: [32m'eyas@yahoo.com'[39m
   }
 }
-socket blZy9a4sg20t-2fIAAAB joined chat:c57afac3-3b4d-430b-ada2-e210096ce1f8
+socket kyb-sdG-NlExi-H2AAAB joined chat:c57afac3-3b4d-430b-ada2-e210096ce1f8

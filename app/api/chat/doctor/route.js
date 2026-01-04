@@ -4,8 +4,8 @@ export function POST() {
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma from "../../../../lib/prismaClient.js";
-
-const SECRET = process.env.JWT_SECRET || "your-secret-key";
+import { getJwtSecret } from "../../../../lib/auth/jwtSecret.js";
+import { getJwtVerifyOptions } from "../../../../lib/auth/jwtClaims.js";
 
 export async function GET(request) {
   try {
@@ -21,9 +21,7 @@ export async function GET(request) {
     }
     let user;
     try {
-      user = jwt.verify(token, SECRET);
-      // Debug: log decoded token payload to help diagnose role/identity issues
-      console.debug("/api/chat/doctor decoded user:", user);
+      user = jwt.verify(token, getJwtSecret(), getJwtVerifyOptions());
     } catch (e) {
       return NextResponse.json({ error: "invalid_token" }, { status: 401 });
     }

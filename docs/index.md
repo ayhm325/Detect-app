@@ -11,6 +11,7 @@
 - [توثيق مجلد prisma](prisma.md)
 - [توثيق مجلد scripts](scripts.md)
 - [إعداد وتشغيل المشروع](setup.md)
+- [نشر المشروع للإنتاج](deploy.md)
 
 مراجع سريعة:
 

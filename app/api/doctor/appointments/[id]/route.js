@@ -5,7 +5,7 @@ import { rateLimit } from "../../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../../lib/security/auditLogger";
 
 export const DELETE = withRBAC(async (request, user, paramsArg) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "DELETE /api/doctor/appointments/[id]" } });
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });

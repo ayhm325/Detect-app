@@ -7,9 +7,9 @@ export default function Button({ variant = "primary", size = "md", className = "
   };
   const variants = {
     primary: "btn-gradient text-white focus:ring-[var(--color-primary-500)]",
-    secondary: "bg-[var(--color-secondary-500)] text-black hover:bg-[var(--color-secondary-900)] focus:ring-[var(--color-secondary-500)]",
-    ghost: "bg-transparent text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-white/10",
-    outline: "border border-black/10 dark:border-white/20 bg-transparent text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-white/10",
+    secondary: "bg-[var(--color-secondary-500)] text-foreground hover:bg-[var(--color-secondary-900)] focus:ring-[var(--color-secondary-500)]",
+    ghost: "bg-transparent text-foreground hover:bg-(--ui-surface-2)",
+    outline: "border border-(--ui-border) bg-transparent text-foreground hover:bg-(--ui-surface-2)",
   };
   return (
     <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...props}>

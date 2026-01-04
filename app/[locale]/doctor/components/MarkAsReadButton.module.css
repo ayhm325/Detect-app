@@ -1,6 +1,6 @@
 .markReadBtn {
-  background: #38bdf8;
-  color: #fff;
+  background: var(--ui-info);
+  color: var(--ui-info-foreground);
   border: none;
   border-radius: 6px;
   padding: 0.4rem 1rem;
@@ -10,5 +10,5 @@
 }
 
 .markReadBtn:hover {
-  background: #2563eb;
+  background: color-mix(in srgb, var(--ui-info) 85%, var(--color-neutral));
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export default function PatientProfileCard({
   fullName,
@@ -10,44 +11,54 @@ export default function PatientProfileCard({
   healthStatus,
   avatarUrl,
 }) {
-  const displayGender = gender === "male" ? "ذكر" : gender === "female" ? "أنثى" : gender || "—";
+  const t = useTranslations("patient");
+  const ui = useTranslations("ui");
+  const placeholder = ui("placeholder");
+
+  const normalizedGender = typeof gender === "string" ? gender.toLowerCase() : "";
+  const displayGender =
+    normalizedGender === "male"
+      ? t("profile.field.gender.male")
+      : normalizedGender === "female"
+        ? t("profile.field.gender.female")
+        : gender || placeholder;
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white/70 backdrop-blur-sm shadow-sm p-4 md:p-6">
+    <section className="card-glass rounded-xl border border-(--ui-border) backdrop-blur-sm shadow-sm p-4 md:p-6">
       <div className="flex items-start gap-4">
-        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-gray-200 bg-gray-50">
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-(--ui-border) bg-(--ui-surface-2)/40">
           {avatarUrl ? (
-            <Image src={avatarUrl} alt={fullName || "Patient Avatar"} fill className="object-cover" />
+            <Image src={avatarUrl} alt={fullName || t("profile.avatarAlt")} fill className="object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-gray-400">👤</div>
+            <div className="flex h-full w-full items-center justify-center text-(--ui-muted-foreground)">👤</div>
           )}
         </div>
 
         <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
           <div>
-            <div className="text-sm text-gray-500">الاسم الكامل</div>
-            <div className="text-base font-semibold text-gray-900">{fullName || "—"}</div>
+            <div className="text-sm text-(--ui-muted-foreground)">{t("profile.field.fullName")}</div>
+            <div className="text-base font-semibold text-(--ui-foreground)">{fullName || placeholder}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <div className="text-sm text-gray-500">العمر</div>
-              <div className="text-base font-medium text-gray-900">{age ?? "—"}</div>
+              <div className="text-sm text-(--ui-muted-foreground)">{t("profile.field.age")}</div>
+              <div className="text-base font-medium text-(--ui-foreground)">{age ?? placeholder}</div>
             </div>
             <div>
-              <div className="text-sm text-gray-500">الجنس</div>
-              <div className="text-base font-medium text-gray-900">{displayGender}</div>
+              <div className="text-sm text-(--ui-muted-foreground)">{t("profile.field.genderLabel")}</div>
+              <div className="text-base font-medium text-(--ui-foreground)">{displayGender}</div>
             </div>
           </div>
 
           <div>
-            <div className="text-sm text-gray-500">رقم المريض (Patient ID)</div>
-            <div className="font-mono text-base font-medium text-gray-900">{patientId || "—"}</div>
+            <div className="text-sm text-(--ui-muted-foreground)">{t("profile.field.patientNumber")}</div>
+            <div className="font-mono text-base font-medium text-(--ui-foreground)">{patientId || placeholder}</div>
           </div>
 
           <div>
-            <div className="text-sm text-gray-500">الحالة الصحية العامة</div>
-            <HealthStatusBadge status={healthStatus} />
+            <div className="text-sm text-(--ui-muted-foreground)">{t("profile.field.healthStatus")}</div>
+            <HealthStatusBadge status={healthStatus} t={t} />
           </div>
         </div>
       </div>
@@ -55,13 +66,13 @@ export default function PatientProfileCard({
   );
 }
 
-function HealthStatusBadge({ status }) {
+function HealthStatusBadge({ status, t }) {
   const map = {
-    stable: { label: "مستقرة", className: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-    attention: { label: "تحتاج متابعة", className: "bg-amber-50 text-amber-700 ring-amber-200" },
-    critical: { label: "حرجة", className: "bg-red-50 text-red-700 ring-red-200" },
+    stable: { label: t("profile.healthStatus.stable"), className: "bg-(--ui-success)/12 text-(--ui-success-foreground) ring-(--ui-success)/25" },
+    attention: { label: t("profile.healthStatus.attention"), className: "bg-(--ui-warning)/12 text-(--ui-warning-foreground) ring-(--ui-warning)/25" },
+    critical: { label: t("profile.healthStatus.critical"), className: "bg-(--ui-danger)/12 text-(--ui-danger-foreground) ring-(--ui-danger)/25" },
   };
-  const fallback = { label: status || "غير محددة", className: "bg-gray-50 text-gray-700 ring-gray-200" };
+  const fallback = { label: t("profile.healthStatus.unknown"), className: "bg-(--ui-surface-2)/60 text-(--ui-muted-foreground) ring-(--ui-border)" };
   const { label, className } = map[status] || fallback;
 
   return (

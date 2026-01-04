@@ -4,16 +4,16 @@ import React, { useState } from 'react';
 import { FaBell, FaCog, FaSignOutAlt } from 'react-icons/fa';
 import NotificationsDropdown from './NotificationsDropdown';
 import styles from './DoctorTopbar.module.css';
-
-const mockNotifications = [
-  { id: 1, type: 'رسالة جديدة', text: 'وصلتك رسالة من المريض محمد علي', time: '10:05', urgent: false, read: false },
-  { id: 2, type: 'فحص جديد', text: 'تم رفع فحص جديد لسارة يوسف', time: '09:50', urgent: true, read: false },
-  { id: 3, type: 'تنبيه عاجل', text: 'حالة حرجة تم اكتشافها بواسطة الذكاء الاصطناعي', time: '09:30', urgent: true, read: false }
-];
+import { useTranslations } from "next-intl";
 
 export default function DoctorTopbar({ doctorName, profileImage, onLogout }) {
+  const t = useTranslations("doctorTopbar");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState([
+    { id: 1, type: t('mockNotifications.0.type'), text: t('mockNotifications.0.text'), time: '10:05', urgent: false, read: false },
+    { id: 2, type: t('mockNotifications.1.type'), text: t('mockNotifications.1.text'), time: '09:50', urgent: true, read: false },
+    { id: 3, type: t('mockNotifications.2.type'), text: t('mockNotifications.2.text'), time: '09:30', urgent: true, read: false }
+  ]);
 
   const handleMarkAsRead = (id) => {
     setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
@@ -24,7 +24,7 @@ export default function DoctorTopbar({ doctorName, profileImage, onLogout }) {
       <div className={styles.profileSection}>
         <Image
           src={profileImage}
-          alt="صورة الدكتور"
+          alt={t('doctorImageAlt')}
           width={48}
           height={48}
           className={styles.profileImage}
@@ -36,7 +36,7 @@ export default function DoctorTopbar({ doctorName, profileImage, onLogout }) {
         <div style={{ position: 'relative' }}>
           <button
             className={styles.iconBtn}
-            title="الإشعارات"
+            title={t('notificationsTitle')}
             onClick={() => setDropdownOpen(!dropdownOpen)}
           >
             <FaBell />
@@ -49,10 +49,10 @@ export default function DoctorTopbar({ doctorName, profileImage, onLogout }) {
             />
           )}
         </div>
-        <button className={styles.iconBtn} title="الإعدادات">
+        <button className={styles.iconBtn} title={t('settingsTitle')}>
           <FaCog />
         </button>
-        <button className={styles.iconBtn} title="تسجيل خروج" onClick={onLogout}>
+        <button className={styles.iconBtn} title={t('logoutTitle')} onClick={onLogout}>
           <FaSignOutAlt />
         </button>
       </div>

@@ -5,46 +5,64 @@ import PatientQuickViewModal from "../../../doctor/components/PatientQuickViewMo
 import PatientFilters from "../PatientFilters";
 import PatientSearchBar from "../../../doctor/components/PatientSearchBar";
 import Pagination from "../Pagination";
+import { useTranslations } from "next-intl";
 
-const mockPatients = [
-	{
-		id: 1,
-		name: "محمد علي",
-		age: 35,
-		status: "مستقر",
-		lastScanDate: "2025-11-28",
-		profileImage: "/default-patient.png",
-		medicalHistory: "لا يوجد أمراض مزمنة",
-	},
-	{
-		id: 2,
-		name: "سارة يوسف",
-		age: 29,
-		status: "حرج",
-		lastScanDate: "2025-12-01",
-		profileImage: "/default-patient.png",
-		medicalHistory: "سكري، ضغط دم",
-	},
-	// أضف المزيد حسب الحاجة
-];
+function normalizePatientStatusCode(statusLabel, t) {
+	if (!statusLabel) return null;
+	const stable = t("statuses.stable");
+	const critical = t("statuses.critical");
+	const recovering = t("statuses.recovering");
+	const pendingScan = t("filtersForm.statuses.pendingScan");
+
+	if (statusLabel === stable) return "stable";
+	if (statusLabel === critical) return "critical";
+	if (statusLabel === recovering) return "recovering";
+	if (statusLabel === pendingScan) return "pendingScan";
+
+	return null;
+}
 
 export default function PatientsPageContent() {
+	const t = useTranslations("doctorPatients");
+	const ui = useTranslations("ui");
+	const placeholder = ui("placeholder");
+
 	const [search, setSearch] = useState("");
 	const [filters, setFilters] = useState({});
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedPatient, setSelectedPatient] = useState(null);
 	const [quickViewOpen, setQuickViewOpen] = useState(false);
 
-	// تصفية المرضى حسب البحث والفلاتر
-	const filteredPatients = mockPatients.filter((p) => {
-		const matchesSearch = p.name.includes(search);
-		const matchesName = !filters.name || p.name.includes(filters.name);
-		const matchesAge = !filters.age || p.age === Number(filters.age);
-		const matchesStatus = !filters.status || p.status === filters.status;
+	const demoItems = t.raw("items");
+	const patients = Array.isArray(demoItems)
+		? demoItems.map((item, index) => {
+			const statusLabel = item?.status || placeholder;
+			const statusCode = normalizePatientStatusCode(item?.status, t);
+
+			return {
+				id: index + 1,
+				name: item?.name || placeholder,
+				age: item?.age || placeholder,
+				status: statusLabel,
+				statusCode,
+				lastScanDate: item?.lastVisit || placeholder,
+				profileImage: "/default-patient.png",
+				medicalHistory: item?.conditions || placeholder,
+			};
+		})
+		: [];
+
+	const filteredPatients = patients.filter((p) => {
+		const patientName = String(p?.name || "");
+		const patientAge = Number(p?.age);
+
+		const matchesSearch = patientName.includes(search);
+		const matchesName = !filters.name || patientName.includes(filters.name);
+		const matchesAge = !filters.age || patientAge === Number(filters.age);
+		const matchesStatus = !filters.status || p.statusCode === filters.status;
 		return matchesSearch && matchesName && matchesAge && matchesStatus;
 	});
 
-	// تقسيم الصفحات
 	const pageSize = 10;
 	const totalPages = Math.ceil(filteredPatients.length / pageSize);
 	const paginatedPatients = filteredPatients.slice(
@@ -63,7 +81,7 @@ export default function PatientsPageContent() {
 
 	return (
 		<div className="space-y-4">
-			<h1 className="text-2xl font-bold">قائمة المرضى</h1>
+			<h1 className="text-2xl font-bold">{t("title")}</h1>
 			<div className="flex gap-2 items-center">
 				<PatientSearchBar value={search} onChange={setSearch} />
 				<PatientFilters filters={filters} onChange={setFilters} />

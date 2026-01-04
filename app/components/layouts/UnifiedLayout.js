@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function UnifiedLayout({
   children,
@@ -13,9 +14,10 @@ export default function UnifiedLayout({
   overlayWidthRem = 16,
 }) {
   const [overlayOpen, setOverlayOpen] = useState(overlayDefaultOpen);
+  const ui = useTranslations("ui");
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900" dir={rtl ? "rtl" : undefined}>
+    <div className="min-h-screen bg-(--ui-surface) text-(--ui-foreground)" dir={rtl ? "rtl" : undefined}>
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <div className={`py-4 ${overlaySidebar ? "grid gap-4" : "grid gap-4 lg:grid-cols-[18rem,1fr] lg:gap-6"}`}>
           {overlaySidebar ? null : (
@@ -30,14 +32,14 @@ export default function UnifiedLayout({
                 <button
                   type="button"
                   onClick={() => setOverlayOpen((v) => !v)}
-                  className="hidden lg:flex fixed right-2 top-4 z-40 items-center gap-2 rounded-lg border border-gray-200 bg-white/90 px-3 py-1.5 text-sm text-gray-900 shadow-sm hover:bg-white dark:border-slate-700 dark:bg-slate-800/90 dark:text-gray-100"
+                  className="hidden lg:flex fixed right-2 top-4 z-40 items-center gap-2 rounded-lg border border-(--ui-border) bg-(--ui-surface) px-3 py-1.5 text-sm text-(--ui-foreground) shadow-sm hover:bg-(--ui-surface-2)"
                 >
-                  {overlayOpen ? "طي الشريط" : "إظهار الشريط"}
+                  {overlayOpen ? ui("sidebar.hide") : ui("sidebar.show")}
                 </button>
                 {/* Clickable backdrop */}
                 {overlayOpen && (
                   <div
-                    className="hidden lg:block fixed inset-0 z-30 bg-black/10"
+                    className="hidden lg:block fixed inset-0 z-30 bg-(--color-neutral)/10"
                     onClick={() => setOverlayOpen(false)}
                   />
                 )}

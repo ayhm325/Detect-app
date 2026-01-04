@@ -45,12 +45,7 @@ export default function StatsSection() {
     );
   }, []);
 
-  const statsCopy = (t.raw ? t.raw("content.stats")?.cards : null) || [
-    { number: 99.8, suffix: "%", label: "دقة التشخيص", description: "معدل دقة عالي جداً في التشخيص", icon: "🎯" },
-    { number: 15000, suffix: "+", label: "مستخدم نشط", description: "أطباء ومرضى يثقون بنا", icon: "👥" },
-    { number: 75000, suffix: "+", label: "تحليل ناجح", description: "صورة تم تحليلها بنجاح", icon: "📊" },
-    { number: 24, suffix: "/7", label: "دعم متواصل", description: "خدمة على مدار الساعة", icon: "⏰" },
-  ];
+  const statsCopy = (t.raw ? t.raw("content.stats.cards") : null) || [];
 
   const AnimatedNumber = ({ target, suffix }) => {
     const [count, setCount] = useState(0);
@@ -86,14 +81,14 @@ export default function StatsSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative w-full py-20 sm:py-24 bg-linear-to-br from-yellow-500 via-red-500 to-red-700 overflow-hidden"
+      className="relative w-full py-20 sm:py-24 bg-linear-to-br from-(--color-bright-500) via-(--color-primary-500) to-(--color-dark-500) overflow-hidden"
     >
       {/* Animated Background Pattern */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0" style={{
           backgroundImage: `
-            radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
-            radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%)
+            radial-gradient(circle at 20% 50%, color-mix(in srgb, var(--color-background) 20%, transparent) 0%, transparent 50%),
+            radial-gradient(circle at 80% 50%, color-mix(in srgb, var(--color-background) 15%, transparent) 0%, transparent 50%)
           `,
         }} />
       </div>
@@ -103,7 +98,7 @@ export default function StatsSection() {
         {floaters.map((f) => (
           <div
             key={f.id}
-            className="absolute rounded-full bg-white/10 animate-float"
+            className="absolute rounded-full bg-(--color-neutral)/10 animate-float"
             style={{
               width: `${f.width}px`,
               height: `${f.height}px`,
@@ -120,10 +115,10 @@ export default function StatsSection() {
         {/* Section Header */}
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4">
-            {t("content.stats.title", { defaultValue: "أرقام تتحدث عن نفسها" })}
+            {t("content.stats.title")}
           </h2>
           <p className="text-lg text-white/90 max-w-2xl mx-auto">
-            {t("content.stats.subtitle", { defaultValue: "نفخر بإنجازاتنا ونسعى دائماً لتقديم الأفضل" })}
+            {t("content.stats.subtitle")}
           </p>
         </div>
 
@@ -139,7 +134,7 @@ export default function StatsSection() {
               }}
             >
               {/* Card */}
-              <div className="relative h-full p-8 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 hover:bg-white/20 shadow-2xl transform hover:-translate-y-2 hover:scale-105 transition-all duration-300">
+              <div className="relative h-full p-8 card-glass rounded-3xl border border-(--ui-border) hover:bg-(--ui-surface-2)/40 shadow-2xl transform hover:-translate-y-2 hover:scale-105 transition-all duration-300">
                 {/* Icon */}
                 <div className="text-5xl mb-4 transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-300">
                   {stat.icon}
@@ -165,7 +160,7 @@ export default function StatsSection() {
                 </div>
 
                 {/* Decorative Element */}
-                <div className="absolute bottom-0 left-0 w-full h-1 bg-white/30 rounded-b-3xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-(--ui-border) opacity-60 rounded-b-3xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
               </div>
             </div>
           ))}
@@ -173,14 +168,14 @@ export default function StatsSection() {
 
         {/* Bottom CTA */}
         <div className="mt-16 text-center animate-fadeIn" style={{ animationDelay: "0.6s" }}>
-          <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl">
+          <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8 card-glass rounded-3xl border border-(--ui-border) shadow-2xl">
             <div className="text-6xl">🚀</div>
               <div className="text-center sm:text-right">
                 <div className="text-2xl font-black text-white mb-2">
-                  {t("content.stats.ctaTitle", { defaultValue: "انضم إلى آلاف المستخدمين الراضين" })}
+                  {t("content.stats.ctaTitle")}
                 </div>
                 <div className="text-white/90">
-                  {t("content.stats.ctaSubtitle", { defaultValue: "ابدأ تجربتك المجانية اليوم ولا تفوت الفرصة" })}
+                  {t("content.stats.ctaSubtitle")}
                 </div>
             </div>
           </div>

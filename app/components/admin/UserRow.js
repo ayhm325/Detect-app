@@ -1,22 +1,18 @@
 import RolesBadge from "./RolesBadge";
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
+import { useTranslations } from "next-intl";
 
 export default function UserRow({ user, onEdit, onDelete, onDetails }) {
-  const { locale } = useLocale();
-  const tr = locale === "ar" ? ar.adminAnalysis : en.adminAnalysis;
-  const rowTr = tr.usersSection?.row || {};
+  const t = useTranslations("adminUsers");
   return (
-    <tr className="border-t border-zinc-100 hover:bg-yellow-50/40">
+    <tr className="border-t border-(--ui-border) hover:bg-(--ui-surface-2)/60">
       <td className="py-2 px-4 text-center font-bold">{user.id}</td>
       <td className="py-2 px-4 text-center">{user.name}</td>
       <td className="py-2 px-4 text-center">{user.email}</td>
       <td className="py-2 px-4 text-center"><RolesBadge role={user.role} /></td>
       <td className="py-2 px-4 flex items-center justify-center gap-3">
-        <button className="p-2 rounded-full bg-yellow-100 hover:bg-yellow-200 text-yellow-700" title={rowTr.edit || (locale === "ar" ? "تعديل" : "Edit")} onClick={() => onEdit(user)}>{rowTr.edit || (locale === "ar" ? "تعديل" : "Edit")}</button>
-        <button className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-700" title={rowTr.delete || (locale === "ar" ? "حذف" : "Delete")} onClick={() => onDelete(user)}>{rowTr.delete || (locale === "ar" ? "حذف" : "Delete")}</button>
-        <button className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700" title={rowTr.details || (locale === "ar" ? "تفاصيل" : "Details")} onClick={() => onDetails(user)}>{rowTr.details || (locale === "ar" ? "تفاصيل" : "Details")}</button>
+        <button className="p-2 rounded-lg text-(--ui-info) hover:bg-(--ui-info-bg) transition-colors" title={t("actions.edit")} onClick={() => onEdit(user)}>{t("actions.edit")}</button>
+        <button className="p-2 rounded-lg text-(--ui-danger) hover:bg-(--ui-danger-bg) transition-colors" title={t("actions.delete")} onClick={() => onDelete(user)}>{t("actions.delete")}</button>
+        <button className="p-2 rounded-lg text-foreground hover:bg-(--ui-surface-2) transition-colors" title={t("actions.viewDetails")} onClick={() => onDetails(user)}>{t("actions.viewDetails")}</button>
       </td>
     </tr>
   );

@@ -16,10 +16,10 @@ const Toast = ({ message, type = "info", duration = 3000, onClose }) => {
   if (!isVisible) return null;
 
   const bgColor = {
-    success: "bg-green-500 dark:bg-green-600",
-    error: "bg-red-500 dark:bg-red-600",
-    warning: "bg-yellow-500 dark:bg-yellow-600",
-    info: "bg-blue-500 dark:bg-blue-600",
+    success: "bg-(--ui-success) text-(--ui-success-foreground)",
+    error: "bg-(--ui-danger) text-(--ui-danger-foreground)",
+    warning: "bg-(--ui-warning) text-(--ui-warning-foreground)",
+    info: "bg-(--ui-info) text-(--ui-info-foreground)",
   }[type];
 
   const icon = {
@@ -30,12 +30,12 @@ const Toast = ({ message, type = "info", duration = 3000, onClose }) => {
   }[type];
 
   return (
-    <div className={`fixed top-4 right-4 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in-left z-50 max-w-sm`}>
+    <div className={`fixed top-4 right-4 ${bgColor} px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in-left z-50 max-w-sm`}>
       <span className="text-xl font-bold">{icon}</span>
       <p className="text-sm md:text-base">{message}</p>
       <button
         onClick={() => setIsVisible(false)}
-        className="ml-4 text-white hover:opacity-80"
+        className="ml-4 hover:opacity-80"
       >
         ✕
       </button>

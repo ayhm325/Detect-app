@@ -12,7 +12,7 @@ export default function SettingsSidebarItem() {
   const t = useTranslations("doctorSidebar");
 
   return (
-    <Link href={`${basePrefix}/doctor/settings`} className="py-2 px-4 rounded hover:bg-blue-100 dark:hover:bg-zinc-800 font-medium block">
+    <Link href={`${basePrefix}/doctor/settings`} className="py-2 px-4 rounded hover:bg-(--ui-surface-2) font-medium block">
       {t("settings")}
     </Link>
   );

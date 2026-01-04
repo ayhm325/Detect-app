@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import styles from './PasswordChangeForm.module.css';
+import { useTranslations } from 'next-intl';
 
 export default function PasswordChangeForm({ onChange }) {
+  const t = useTranslations('doctorSettings');
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
@@ -16,22 +18,22 @@ export default function PasswordChangeForm({ onChange }) {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <h3>تغيير كلمة المرور</h3>
+      <h3>{t('doctorSettings.change_password')}</h3>
       <input
         type="password"
-        placeholder="كلمة المرور الحالية"
+        placeholder={t('doctorSettings.current_password')}
         value={oldPassword}
         onChange={e => setOldPassword(e.target.value)}
         required
       />
       <input
         type="password"
-        placeholder="كلمة المرور الجديدة"
+        placeholder={t('doctorSettings.new_password')}
         value={newPassword}
         onChange={e => setNewPassword(e.target.value)}
         required
       />
-      <button type="submit">تغيير</button>
+      <button type="submit">{t('doctorSettings.passwordChange.submit')}</button>
     </form>
   );
 }

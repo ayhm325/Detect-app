@@ -34,6 +34,8 @@ export const GET = withRBAC(async (request, user, context) => {
     } else if (user.role === "patient") {
       const patient = await prisma.patient.findUnique({ where: { userId: user.id } });
       if (!patient || patient.id !== chat.patientId) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    } else if (user.role === "admin") {
+      // admins may read any chat
     } else {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
@@ -44,7 +46,7 @@ export const GET = withRBAC(async (request, user, context) => {
     console.error("/api/chat/[chatId]/messages GET error", error);
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
-}, ["doctor", "patient"]);
+}, ["doctor", "patient", "admin"]);
 
 export const POST = withRBAC(async (request, user, context) => {
   const rl = await rateLimit(request);

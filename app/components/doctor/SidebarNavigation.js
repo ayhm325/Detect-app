@@ -8,7 +8,7 @@ import LogoutSidebarItem from "./sidebar/LogoutSidebarItem";
 
 export default function SidebarNavigation() {
   return (
-    <aside className="w-full md:w-60 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 h-full flex flex-col p-4 gap-2">
+    <aside className="w-full md:w-60 bg-(--ui-surface) border-r border-(--ui-border) h-full flex flex-col p-4 gap-2">
       <nav className="flex flex-col gap-2">
         <DashboardSidebarItem />
         <PatientsSidebarItem />

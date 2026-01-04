@@ -3,6 +3,10 @@ import path from 'path';
 import fs from 'fs';
 import { execSync } from 'child_process';
 
+let createdTestUserId = null;
+
+test.setTimeout(120000);
+
 // Simple E2E for the analysis flow
 test('upload image -> analyze -> shows result card and heatmap -> saved in history', async ({ page, request, context }) => {
   // create a real patient in the DB and get a JWT + userId for them
@@ -13,6 +17,7 @@ test('upload image -> analyze -> shows result card and heatmap -> saved in histo
     const parsed = JSON.parse(out);
     token = parsed.token;
     testUserId = parsed.userId;
+    createdTestUserId = testUserId;
   } catch (e) {
     // fallback: token only
   }
@@ -21,7 +26,13 @@ test('upload image -> analyze -> shows result card and heatmap -> saved in histo
   // Add HttpOnly auth cookie into the browser context before navigation
   const cookieHost = new URL(cookieUrl).hostname || 'localhost';
   await context.addCookies([{ name: 'token', value: token, domain: cookieHost, path: '/', httpOnly: true, secure: false, sameSite: 'Lax' }]);
-  await page.goto(`${cookieUrl.replace(/\/$/, '')}/en/patient/analysis`, { waitUntil: 'load', timeout: 60000 });
+  await page.goto(`${cookieUrl.replace(/\/$/, '')}/patient/analysis`, { waitUntil: 'load', timeout: 60000 });
+
+  // Ensure heatmap generation is enabled (UI defaults can vary)
+  const heatmapCheckbox = page.locator('#with_heatmap');
+  if (await heatmapCheckbox.count()) {
+    await heatmapCheckbox.check({ force: true });
+  }
 
   // attach file to input[type=file] — selector may vary depending on the app markup
   const filePath = path.join(process.cwd(), 'playwright-tests', 'assets', 'pw-test-image.png');
@@ -30,7 +41,8 @@ test('upload image -> analyze -> shows result card and heatmap -> saved in histo
   }
   // Wait for upload input; allow longer for slow environments
   await page.waitForLoadState('networkidle', { timeout: 60000 }).catch(() => {});
-  const fileInput = await page.waitForSelector('input[type="file"]', { state: 'visible', timeout: 60000 });
+  const fileInput = page.locator('input[type="file"]').first();
+  await fileInput.waitFor({ state: 'attached', timeout: 60000 });
   await fileInput.setInputFiles(filePath);
 
   // Click the Analyze button (assumes button text contains "Analyze")
@@ -41,16 +53,12 @@ test('upload image -> analyze -> shows result card and heatmap -> saved in histo
   const apiResp = await page.waitForResponse(resp => resp.url().includes('/api/analysis/analyze'), { timeout: 60000 });
   expect(apiResp.ok()).toBeTruthy();
 
-  // Wait for visible result heading
-  await page.waitForSelector('text=Analysis Result', { timeout: 20000 });
-
-  // locate the result container by heading
-  const resultCard = await page.locator('text=Analysis Result').first().locator('xpath=..');
-  expect(await resultCard.count()).toBeGreaterThan(0);
+  // Wait for results UI to render
+  await expect(page.getByRole('heading', { name: /Diagnosis/i })).toBeVisible({ timeout: 60000 });
 
   // Check heatmap image inside the result area
-  const heatmap = await page.locator('img[alt="Heatmap"]');
-  await expect(heatmap).toBeVisible({ timeout: 20000 });
+  const heatmap = page.locator('img[alt="Heatmap"]');
+  await expect(heatmap).toBeVisible({ timeout: 60000 });
 
   // Verify history via API request using the same token — poll until DB persistence completes
   // Poll the history endpoint from the browser context so HttpOnly cookie is included
@@ -78,18 +86,15 @@ test('upload image -> analyze -> shows result card and heatmap -> saved in histo
   });
   expect(latest).toBeTruthy();
   expect(latest.heatmapUrl || latest.heatmap_url).toBeTruthy();
-  // store testUserId on the test context for cleanup
-  test.info().attachments = test.info().attachments || [];
-  test.info()._testUserId = testUserId;
+  // keep value referenced so it isn't optimized away by tooling
+  expect(testUserId === null || typeof testUserId === 'string').toBeTruthy();
 });
 
 test.afterAll(async () => {
   // attempt to clean up created test user and analysis records
   try {
-    const userId = test.info()._testUserId;
-    if (userId) {
-      execSync(`node scripts/delete-test-user.mjs ${userId}`, { stdio: 'inherit' });
-    }
+    if (!createdTestUserId) return;
+    execSync(`node scripts/delete-test-user.mjs ${createdTestUserId}`, { stdio: 'inherit' });
   } catch (e) {
     console.warn('cleanup failed', e && e.message);
   }

@@ -1,33 +1,44 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 export default function SupportCenter() {
+  const t = useTranslations("patient");
+
   return (
-    <section className="rounded-xl border border-gray-200 bg-white/70 shadow-sm">
-      <header className="flex items-center justify-between border-b border-gray-200 p-4">
-        <h2 className="text-lg font-semibold text-gray-900">مركز الدعم</h2>
+    <section className="card-glass rounded-xl border border-(--ui-border) shadow-sm">
+      <header className="flex items-center justify-between border-b border-(--ui-border) p-4">
+        <h2 className="text-lg font-semibold text-(--ui-foreground)">{t("components.supportCenter.title")}</h2>
       </header>
       <div className="grid gap-4 p-4 sm:grid-cols-2">
         <form
-          className="space-y-3 rounded-md border border-gray-200 bg-white p-3"
+          className="space-y-3 rounded-md border border-(--ui-border) bg-(--ui-surface) p-3"
           onSubmit={(e) => {
             e.preventDefault();
-            alert("تم إرسال المشكلة (واجهة فقط)");
+            alert(t("components.supportCenter.alerts.submitted"));
           }}
         >
-          <div className="text-sm font-medium text-gray-900">إرسال مشكلة</div>
-          <input placeholder="العنوان" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
-          <textarea placeholder="الوصف" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" rows={4} />
-          <button className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">إرسال</button>
+          <div className="text-sm font-medium text-(--ui-foreground)">{t("components.supportCenter.form.title")}</div>
+          <input
+            placeholder={t("components.supportCenter.form.subjectPlaceholder")}
+            className="w-full rounded-md border border-(--ui-border) bg-(--ui-surface) px-3 py-2 text-sm text-(--ui-foreground) placeholder:text-(--ui-muted-foreground)"
+          />
+          <textarea
+            placeholder={t("components.supportCenter.form.descriptionPlaceholder")}
+            className="w-full rounded-md border border-(--ui-border) bg-(--ui-surface) px-3 py-2 text-sm text-(--ui-foreground) placeholder:text-(--ui-muted-foreground)"
+            rows={4}
+          />
+          <button className="btn-gradient rounded-md px-4 py-2 text-sm text-white">{t("components.supportCenter.form.submit")}</button>
         </form>
 
-        <div className="space-y-3 rounded-md border border-gray-200 bg-white p-3">
-          <div className="text-sm font-medium text-gray-900">الأسئلة الشائعة</div>
-          <ul className="list-disc space-y-1 pl-4 text-sm text-gray-800">
-            <li>كيف أحمّل صورة أشعة؟</li>
-            <li>كيف أطلب مراجعة من الطبيب؟</li>
-            <li>كيف أعدّل بيانات الحساب؟</li>
+        <div className="space-y-3 rounded-md border border-(--ui-border) bg-(--ui-surface) p-3">
+          <div className="text-sm font-medium text-(--ui-foreground)">{t("components.supportCenter.faq.title")}</div>
+          <ul className="list-disc space-y-1 pl-4 text-sm text-(--ui-muted-foreground)">
+            <li>{t("components.supportCenter.faq.items.uploadXray")}</li>
+            <li>{t("components.supportCenter.faq.items.requestReview")}</li>
+            <li>{t("components.supportCenter.faq.items.editAccount")}</li>
           </ul>
-          <div className="text-sm text-gray-700">حالة الطلبات: قيد التطوير (واجهة فقط)</div>
+          <div className="text-sm text-(--ui-muted-foreground)">{t("components.supportCenter.requestsStatus")}</div>
         </div>
       </div>
     </section>

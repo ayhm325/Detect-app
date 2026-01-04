@@ -6,28 +6,30 @@ export const headers = () => {
   ];
 };
 
-import AdminDashboardWrapper from "../../../components/AdminDashboardWrapper";
-import { useMemo, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useToast, ToastContainer } from "../../../components/ui/ToastProvider";
-import { FaUsers, FaUserMd, FaUserInjured, FaXRay, FaArrowUp, FaArrowDown, FaBell, FaChartLine, FaExclamationTriangle, FaCheckCircle, FaClock } from "react-icons/fa";
-import useLocale from "../../../hooks/useLocale";
+import { useToast } from "../../../components/ui/ToastProvider";
+import { FaUsers, FaUserMd, FaUserInjured, FaXRay, FaArrowUp, FaArrowDown, FaBell, FaChartLine, FaCheckCircle, FaClock } from "react-icons/fa";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { t, locale } = useLocale();
-  const basePrefix = locale === "en" ? "/en" : "/ar";
-  const ad = t.adminDashboard || {};
+  const locale = useLocale();
+  const t = useTranslations("adminDashboard");
+  const ui = useTranslations("ui");
+  const basePrefix = `/${locale}`;
+  const placeholder = ui("placeholder");
 
-  const { showInfo, showSuccess, showError } = useToast();
+  const fetchActivitiesErrorMsg = t("errors.fetchActivities");
+  const fetchPendingApprovalsErrorMsg = t("errors.fetchPendingApprovals");
+
+  const { showSuccess, showError } = useToast();
 
 
   let formattedDate = new Date().toLocaleDateString(locale === "en" ? "en-US" : "ar-EG", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   // جلب الإحصائيات الحقيقية من API
   const [statsData, setStatsData] = useState({ totalUsers: 0, doctors: 0, patients: 0, todayScans: 0, totalScans: 0 });
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [statsError, setStatsError] = useState(null);
 
   // Replace Arabic digits with Western digits if locale is Arabic
   if (locale === "ar") {
@@ -39,35 +41,31 @@ export default function AdminDashboardPage() {
       .then((res) => res.json())
       .then((data) => {
         setStatsData(data);
-        setStatsLoading(false);
       })
-      .catch((err) => {
-        setStatsError("خطأ في جلب الإحصائيات");
-        setStatsLoading(false);
-      });
+      .catch(() => {});
   }, []);
 
   const stats = [
-    { title: ad.stats?.totalUsers || t.adminDashboard?.stats?.totalUsers, value: statsData.totalUsers, change: "", changePercent: "", icon: FaUsers, color: "bg-blue-500", bgLight: "bg-blue-50 dark:bg-blue-900/20", trend: "up" },
-    { title: ad.stats?.doctors || t.adminDashboard?.stats?.doctors, value: statsData.doctors, change: "", changePercent: "", icon: FaUserMd, color: "bg-green-500", bgLight: "bg-green-50 dark:bg-green-900/20", trend: "up" },
-    { title: ad.stats?.patients || t.adminDashboard?.stats?.patients, value: statsData.patients, change: "", changePercent: "", icon: FaUserInjured, color: "bg-purple-500", bgLight: "bg-purple-50 dark:bg-purple-900/20", trend: "up" },
-    { title: ad.stats?.todayScans || t.adminDashboard?.stats?.todayScans, value: statsData.todayScans, change: "", changePercent: "", icon: FaXRay, color: "bg-orange-500", bgLight: "bg-orange-50 dark:bg-orange-900/20", trend: "down" },
-    { title: ad.stats?.totalScansAll || t.adminDashboard?.stats?.totalScansAll, value: statsData.totalScans, change: "", changePercent: "", icon: FaXRay, color: "bg-cyan-500", bgLight: "bg-cyan-50 dark:bg-cyan-900/20", trend: "up" },
+    { title: t("stats.totalUsers"), value: statsData.totalUsers, change: "", changePercent: "", icon: FaUsers, trend: "up" },
+    { title: t("stats.doctors"), value: statsData.doctors, change: "", changePercent: "", icon: FaUserMd, trend: "up" },
+    { title: t("stats.patients"), value: statsData.patients, change: "", changePercent: "", icon: FaUserInjured, trend: "up" },
+    { title: t("stats.todayScans"), value: statsData.todayScans, change: "", changePercent: "", icon: FaXRay, trend: "down" },
+    { title: t("stats.totalScansAll"), value: statsData.totalScans, change: "", changePercent: "", icon: FaXRay, trend: "up" },
   ];
 
   const quickActions = [
-    { title: ad.quickActions?.users?.title || t.adminDashboard?.quickActions?.users?.title, description: ad.quickActions?.users?.desc || t.adminDashboard?.quickActions?.users?.desc, icon: "👥", gradient: "from-yellow-500 to-red-500", action: () => router.push(`${basePrefix}/admin/users`) },
-    { title: ad.quickActions?.doctors?.title || t.adminDashboard?.quickActions?.doctors?.title, description: ad.quickActions?.doctors?.desc || t.adminDashboard?.quickActions?.doctors?.desc, icon: "👨‍⚕️", gradient: "from-yellow-400 to-orange-500", action: () => router.push(`${basePrefix}/admin/doctors`) },
-    { title: ad.quickActions?.patients?.title || t.adminDashboard?.quickActions?.patients?.title, description: ad.quickActions?.patients?.desc || t.adminDashboard?.quickActions?.patients?.desc, icon: "🏥", gradient: "from-red-500 to-red-600", action: () => router.push(`${basePrefix}/admin/patients`) },
+    { title: t("quickActions.users.title"), description: t("quickActions.users.desc"), icon: "👥", action: () => router.push(`${basePrefix}/admin/users`) },
+    { title: t("quickActions.doctors.title"), description: t("quickActions.doctors.desc"), icon: "👨‍⚕️", action: () => router.push(`${basePrefix}/admin/doctors`) },
+    { title: t("quickActions.patients.title"), description: t("quickActions.patients.desc"), icon: "🏥", action: () => router.push(`${basePrefix}/admin/patients`) },
     // analysis quick action removed because page was deleted
   ];
 
   // معلومات النظام الحقيقية
   const [systemStatusData, setSystemStatusData] = useState({
-    serverUptime: "-",
-    responseTime: "-",
-    memoryUsage: "-",
-    dbSize: "-"
+    serverUptime: placeholder,
+    responseTime: placeholder,
+    memoryUsage: placeholder,
+    dbSize: placeholder
   });
   useEffect(() => {
     fetch("/api/admin/system-status")
@@ -76,10 +74,10 @@ export default function AdminDashboardPage() {
       .catch(() => {});
   }, []);
   const systemStatus = [
-    { label: ad.systemStatus?.serverUptime || t.adminDashboard?.systemStatus?.serverUptime, value: systemStatusData.serverUptime, status: "success", icon: FaCheckCircle },
-    { label: ad.systemStatus?.responseTime || t.adminDashboard?.systemStatus?.responseTime, value: systemStatusData.responseTime, status: "success", icon: FaClock },
-    { label: ad.systemStatus?.memoryUsage || t.adminDashboard?.systemStatus?.memoryUsage, value: systemStatusData.memoryUsage, status: "success", icon: FaCheckCircle },
-    { label: ad.systemStatus?.dbSize || t.adminDashboard?.systemStatus?.dbSize, value: systemStatusData.dbSize, status: "success", icon: FaCheckCircle }
+    { label: t("systemStatus.serverUptime"), value: systemStatusData.serverUptime, status: "success", icon: FaCheckCircle },
+    { label: t("systemStatus.responseTime"), value: systemStatusData.responseTime, status: "success", icon: FaClock },
+    { label: t("systemStatus.memoryUsage"), value: systemStatusData.memoryUsage, status: "success", icon: FaCheckCircle },
+    { label: t("systemStatus.dbSize"), value: systemStatusData.dbSize, status: "success", icon: FaCheckCircle }
   ];
 
   // جلب النشاطات الحقيقية من API
@@ -96,10 +94,10 @@ export default function AdminDashboardPage() {
         setActivitiesLoading(false);
       })
       .catch(() => {
-        setActivitiesError("خطأ في جلب النشاطات");
+        setActivitiesError(fetchActivitiesErrorMsg);
         setActivitiesLoading(false);
       });
-  }, []);
+  }, [fetchActivitiesErrorMsg]);
 
   // الطلبات المعلقة الحقيقية (الأطباء غير الموافق عليهم)
   const [pendingApprovals, setPendingApprovals] = useState([]);
@@ -118,36 +116,35 @@ export default function AdminDashboardPage() {
             .filter((doc) => doc.status === "pending")
             .map((doc) => ({
               id: doc.user?.id || doc.userId || doc.id,
-              fullName: doc.user?.fullName || "—",
-              email: doc.user?.email || "—",
+              fullName: doc.user?.fullName || placeholder,
+              email: doc.user?.email || placeholder,
               createdAt: doc.user?.createdAt || null,
               licenseNumber: doc.licenseNumber,
               phone: doc.phone
             }));
-          console.log("[Dashboard] Pending Approvals (frontend):", pending);
           setPendingApprovals(pending);
         } else {
           setPendingApprovals([]);
         }
       } catch {
-        setPendingError("خطأ في جلب الطلبات المعلقة");
+        setPendingError(fetchPendingApprovalsErrorMsg);
       } finally {
         setPendingLoading(false);
       }
     };
     fetchPendingApprovals();
-  }, []);
+  }, [fetchPendingApprovalsErrorMsg, placeholder]);
 
   const getStatusColor = (status) => {
     switch (status) {
       case "success":
-        return "text-green-600 dark:text-green-400";
+        return "text-(--ui-success)";
       case "warning":
-        return "text-orange-600 dark:text-orange-400";
+        return "text-(--ui-warning)";
       case "error":
-        return "text-red-600 dark:text-red-400";
+        return "text-(--ui-danger)";
       default:
-        return "text-gray-600 dark:text-gray-400";
+        return "text-(--ui-muted-2)";
     }
   };
 
@@ -167,19 +164,19 @@ export default function AdminDashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-              {ad.title || t.adminDashboard?.title} 👨‍💼
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+              {t("title")} 👨‍💼
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">{formattedDate}</p>
+            <p className="text-(--ui-muted-2) mt-2">{formattedDate}</p>
           </div>
           <button
             onClick={() => router.push(`${basePrefix}/admin/notifications`)}
-            className="relative p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg hover:shadow-xl transition-shadow"
-            title={ad.notifications || t.adminDashboard?.notifications}
+            className="relative p-3 card-glass rounded-full border border-(--ui-border) shadow-(--shadow-soft) hover:shadow-(--shadow-lift) transition-shadow"
+            title={t("notifications")}
           >
-            <FaBell className="text-xl text-gray-700 dark:text-gray-300" />
+            <FaBell className="text-xl text-(--ui-muted-2)" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+              <span className="absolute -top-1 -right-1 bg-(--ui-danger) text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                 {unreadCount}
               </span>
             )}
@@ -191,21 +188,21 @@ export default function AdminDashboardPage() {
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700 hover:shadow-xl transition-shadow w-full"
+              className="card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border) hover:shadow-(--shadow-lift) transition-shadow w-full"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg ${stat.bgLight}`}>
-                  <stat.icon className={`text-2xl ${stat.color.replace('bg-', 'text-')}`} />
+                <div className="p-3 rounded-lg brand-gradient shadow-(--shadow-soft)">
+                  <stat.icon className="text-2xl text-white" />
                 </div>
-                <div className={`flex items-center gap-1 text-sm ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`flex items-center gap-1 text-sm ${stat.trend === 'up' ? 'text-(--ui-success)' : 'text-(--ui-danger)'}`}>
                   {stat.trend === 'up' ? <FaArrowUp /> : <FaArrowDown />}
                   <span>{stat.changePercent}</span>
                 </div>
               </div>
-              <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-2">
+              <h3 className="text-(--ui-muted-2) text-sm font-medium mb-2">
                 {stat.title}
               </h3>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
+              <p className="text-3xl font-bold text-foreground">
                 {stat.value}
               </p>
               {/* تم حذف جملة (من الشهر الماضي) */}
@@ -215,19 +212,21 @@ export default function AdminDashboardPage() {
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{ad.quickActions?.title || t.adminDashboard?.quickActionsTitle}</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-6">{t("quickActionsTitle")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickActions.map((action, index) => (
               <button
                 key={index}
                 onClick={action.action}
-                className={`bg-linear-to-br ${action.gradient} text-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all hover:scale-105 group`}
+                className="card-glass text-foreground rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border) hover:shadow-(--shadow-lift) transition-all hover:-translate-y-0.5 group text-left"
               >
-                <div className="text-4xl mb-3">{action.icon}</div>
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl brand-gradient text-white text-2xl shadow-(--shadow-soft) mb-3">
+                  {action.icon}
+                </div>
                 <h3 className="text-lg font-bold mb-2">{action.title}</h3>
-                <p className="text-sm opacity-90">{action.description}</p>
-                <div className="mt-4 flex items-center gap-2 opacity-80 group-hover:gap-3 transition-all">
-                  <span className="text-sm">{ad.quickActions?.more || t.adminDashboard?.more}</span>
+                <p className="text-sm text-(--ui-muted-2)">{action.description}</p>
+                <div className="mt-4 flex items-center gap-2 text-(--ui-muted-2) group-hover:gap-3 transition-all">
+                  <span className="text-sm">{t("more")}</span>
                   <span className="group-hover:-translate-x-1 transition-transform">{locale === "en" ? "→" : "←"}</span>
                 </div>
               </button>
@@ -237,20 +236,20 @@ export default function AdminDashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* System Status */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
+          <div className="card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border)">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{ad.systemStatus?.title || t.adminDashboard?.systemStatusTitle}</h2>
-              <FaChartLine className="text-2xl text-blue-500" />
+              <h2 className="text-xl font-bold text-foreground">{t("systemStatusTitle")}</h2>
+              <FaChartLine className="text-2xl text-(--ui-info)" />
             </div>
             <div className="space-y-4">
               {systemStatus.map((item, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-(--ui-surface-2) rounded-lg border border-(--ui-border)"
                 >
                   <div className="flex items-center gap-3">
                     <item.icon className={getStatusColor(item.status)} />
-                    <span className="text-gray-900 dark:text-white font-medium">{item.label}</span>
+                    <span className="text-foreground font-medium">{item.label}</span>
                   </div>
                   <span className={`font-bold ${getStatusColor(item.status)}`}>
                     {item.value}
@@ -261,41 +260,41 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Pending Approvals */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
+          <div className="card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border)">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{ad.pendingApprovals?.title || t.adminDashboard?.pendingApprovalsTitle}</h2>
-              <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-3 py-1 rounded-full text-sm font-bold">
-                {pendingLoading ? "..." : pendingApprovals.length}
+              <h2 className="text-xl font-bold text-foreground">{t("pendingApprovalsTitle")}</h2>
+              <span className="bg-(--ui-warning-bg) text-(--ui-warning) border border-(--ui-warning-border) px-3 py-1 rounded-full text-sm font-bold">
+                {pendingLoading ? t("pendingApprovals.loading") : pendingApprovals.length}
               </span>
             </div>
             {pendingError && (
-              <div className="text-red-600 dark:text-red-400 mb-4">{pendingError}</div>
+              <div className="text-(--ui-danger) mb-4">{pendingError}</div>
             )}
             <div className="space-y-3">
               {pendingLoading ? (
-                <div className="text-gray-500 dark:text-gray-400">جاري التحميل...</div>
+                <div className="text-(--ui-muted-2)">{t("pendingApprovals.loading")}</div>
               ) : pendingApprovals.length === 0 ? (
-                <div className="text-gray-500 dark:text-gray-400">لا توجد طلبات معلقة حالياً</div>
+                <div className="text-(--ui-muted-2)">{t("pendingApprovals.empty")}</div>
               ) : (
                 <>
                   {pendingApprovals.map((approval, idx) => (
                     <div
                       key={approval.id || idx}
-                      className="p-4 bg-gray-50 dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-700 hover:shadow-md transition-shadow mb-2"
+                      className="p-4 bg-(--ui-surface-2) rounded-lg border border-(--ui-border) hover:shadow-(--shadow-soft) transition-shadow mb-2"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h3 className="font-bold text-gray-900 dark:text-white">{locale === "en" ? "Doctor registration request" : "طلب تسجيل طبيب"}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            <b>ID:</b> {approval.id?.toString() || "-"} <br/>
-                            <b>Name:</b> {approval.fullName || "-"} <br/>
-                            <b>Email:</b> {approval.email || "-"} <br/>
-                            <b>License:</b> {approval.licenseNumber || "-"} <br/>
-                            <b>Phone:</b> {approval.phone || "-"} <br/>
-                            <b>Created:</b> {approval.createdAt ? new Date(approval.createdAt).toLocaleString(locale === "en" ? "en-US" : "ar-EG") : "-"}
+                          <h3 className="font-bold text-foreground">{t("pendingApprovals.requestTitle")}</h3>
+                          <p className="text-sm text-(--ui-muted-2)">
+                            <b>{t("pendingApprovals.fields.id")}</b> {approval.id?.toString() || placeholder} <br/>
+                            <b>{t("pendingApprovals.fields.name")}</b> {approval.fullName || placeholder} <br/>
+                            <b>{t("pendingApprovals.fields.email")}</b> {approval.email || placeholder} <br/>
+                            <b>{t("pendingApprovals.fields.license")}</b> {approval.licenseNumber || placeholder} <br/>
+                            <b>{t("pendingApprovals.fields.phone")}</b> {approval.phone || placeholder} <br/>
+                            <b>{t("pendingApprovals.fields.created")}</b> {approval.createdAt ? new Date(approval.createdAt).toLocaleString(locale === "en" ? "en-US" : "ar-EG") : placeholder}
                           </p>
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">{approval.createdAt ? new Date(approval.createdAt).toLocaleDateString(locale === "en" ? "en-US" : "ar-EG") : "-"}</span>
+                        <span className="text-xs text-(--ui-muted-2)">{approval.createdAt ? new Date(approval.createdAt).toLocaleDateString(locale === "en" ? "en-US" : "ar-EG") : placeholder}</span>
                       </div>
                       <div className="flex gap-2 mt-3">
                         <button
@@ -306,11 +305,11 @@ export default function AdminDashboardPage() {
                               body: JSON.stringify({ id: approval.id, status: "active" })
                             });
                             setPendingApprovals((prev) => prev.filter((d) => d.id !== approval.id));
-                            showSuccess(ad.toast?.approved || t.adminDashboard?.toast?.approved);
+                            showSuccess(t("toast.approved"));
                           }}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm transition-colors"
+                          className="flex-1 btn-gradient px-3 py-2 rounded-lg text-sm transition-colors"
                         >
-                          {ad.pendingApprovals?.approve || tr.pendingApprovals.approve}
+                          {t("pendingApprovals.approve")}
                         </button>
                         <button
                           onClick={async () => {
@@ -320,11 +319,11 @@ export default function AdminDashboardPage() {
                               body: JSON.stringify({ id: approval.id, status: "banned" })
                             });
                             setPendingApprovals((prev) => prev.filter((d) => d.id !== approval.id));
-                            showError(ad.toast?.rejected || t.adminDashboard?.toast?.rejected);
+                            showError(t("toast.rejected"));
                           }}
-                          className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm transition-colors"
+                          className="flex-1 bg-(--ui-danger) hover:opacity-90 text-white px-3 py-2 rounded-lg text-sm transition-colors"
                         >
-                          {ad.pendingApprovals?.reject || tr.pendingApprovals.reject}
+                          {t("pendingApprovals.reject")}
                         </button>
                       </div>
                     </div>
@@ -334,33 +333,33 @@ export default function AdminDashboardPage() {
             </div>
             <button
               onClick={() => router.push(`${basePrefix}/admin/doctors?pending=1`)}
-              className="w-full mt-4 text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
+              className="w-full mt-4 text-(--ui-info) hover:underline text-sm font-medium"
             >
-              {ad.pendingApprovals?.viewAll || t.adminDashboard?.pendingApprovals?.viewAll}
+              {t("pendingApprovals.viewAll")}
             </button>
           </div>
         </div>
 
         {/* Recent Activities */}
-        <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">{ad.recentActivity?.title || t.adminDashboard?.recentActivityTitle}</h2>
+        <div className="mt-8 card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border)">
+          <h2 className="text-xl font-bold text-foreground mb-6">{t("recentActivity.title")}</h2>
           <div className="space-y-4">
             {activitiesLoading ? (
-              <div className="text-gray-500 dark:text-gray-400">جاري تحميل النشاطات...</div>
+              <div className="text-(--ui-muted-2)">{t("recentActivity.loading")}</div>
             ) : activitiesError ? (
-              <div className="text-red-600 dark:text-red-400">{activitiesError}</div>
+              <div className="text-(--ui-danger)">{activitiesError}</div>
             ) : recentActivities.length === 0 ? (
-              <div className="text-gray-500 dark:text-gray-400">لا توجد نشاطات حديثة</div>
+              <div className="text-(--ui-muted-2)">{t("recentActivity.empty")}</div>
             ) : (
               recentActivities.map((activity) => (
                 <div
                   key={activity.id}
-                  className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-slate-900 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                  className="flex items-center gap-4 p-3 bg-(--ui-surface-2) rounded-lg border border-(--ui-border) hover:bg-(--ui-surface) transition-colors"
                 >
                   <div className="text-3xl">📝</div>
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900 dark:text-white">{activity.description}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(activity.createdAt).toLocaleString(locale === "en" ? "en-US" : "ar-EG")}</p>
+                    <p className="font-medium text-foreground">{activity.description}</p>
+                    <p className="text-sm text-(--ui-muted-2)">{new Date(activity.createdAt).toLocaleString(locale === "en" ? "en-US" : "ar-EG")}</p>
                   </div>
                 </div>
               ))

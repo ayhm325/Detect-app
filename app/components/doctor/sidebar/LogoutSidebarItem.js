@@ -12,7 +12,7 @@ export default function LogoutSidebarItem() {
   const t = useTranslations("doctorSidebar");
 
   return (
-    <Link href={`${basePrefix}/doctor/logout`} className="py-2 px-4 rounded text-red-600 hover:bg-red-50 dark:hover:bg-zinc-800 font-medium block">
+    <Link href={`${basePrefix}/doctor/logout`} className="py-2 px-4 rounded text-(--ui-danger) hover:bg-(--ui-danger-bg) font-medium block">
       {t("logout")}
     </Link>
   );

@@ -1,7 +1,7 @@
 .card {
-  background: #fff;
+  background: var(--ui-surface);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-soft);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -20,7 +20,7 @@
   height: 64px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #38bdf8;
+  border: 2px solid var(--ui-ring);
 }
 
 .name {
@@ -29,7 +29,7 @@
 }
 
 .specialization {
-  color: #2563eb;
+  color: var(--ui-info);
   font-size: 1rem;
   display: flex;
   align-items: center;
@@ -37,7 +37,7 @@
 }
 
 .online {
-  color: #22c55e;
+  color: var(--ui-success);
   font-size: 0.95rem;
   display: flex;
   align-items: center;
@@ -45,7 +45,7 @@
 }
 
 .offline {
-  color: #f43f5e;
+  color: var(--ui-danger);
   font-size: 0.95rem;
   display: flex;
   align-items: center;
@@ -58,12 +58,12 @@
   flex-direction: column;
   gap: 0.5rem;
   font-size: 0.95rem;
-  color: #555;
+  color: var(--ui-muted-2);
 }
 
 .editBtn {
-  background: #2563eb;
-  color: #fff;
+  background: var(--ui-info);
+  color: var(--ui-info-foreground);
   border: none;
   border-radius: 6px;
   padding: 0.5rem 1.25rem;
@@ -74,5 +74,5 @@
 }
 
 .editBtn:hover {
-  background: #1746a2;
+  background: color-mix(in srgb, var(--ui-info) 80%, var(--color-neutral));
 }

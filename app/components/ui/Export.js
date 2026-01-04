@@ -1,10 +1,11 @@
 "use client";
 import React from "react";
 import { FaDownload } from "react-icons/fa";
+import { useTranslations } from "next-intl";
 
-export const exportToCSV = (data, filename = "export") => {
+export const exportToCSV = (data, filename = "export", { emptyMessage } = {}) => {
   if (!data || data.length === 0) {
-    alert("لا توجد بيانات للتصدير");
+    if (emptyMessage) alert(emptyMessage);
     return;
   }
 
@@ -31,9 +32,9 @@ export const exportToCSV = (data, filename = "export") => {
   URL.revokeObjectURL(url);
 };
 
-export const exportToJSON = (data, filename = "export") => {
+export const exportToJSON = (data, filename = "export", { emptyMessage } = {}) => {
   if (!data || data.length === 0) {
-    alert("لا توجد بيانات للتصدير");
+    if (emptyMessage) alert(emptyMessage);
     return;
   }
 
@@ -49,21 +50,23 @@ export const exportToJSON = (data, filename = "export") => {
 
 // مكون Export Button
 const ExportButton = ({ data, filename = "export", format = "csv" }) => {
+  const t = useTranslations("ui");
+
   const handleExport = () => {
     if (format === "csv") {
-      exportToCSV(data, filename);
+      exportToCSV(data, filename, { emptyMessage: t("export.noData") });
     } else if (format === "json") {
-      exportToJSON(data, filename);
+      exportToJSON(data, filename, { emptyMessage: t("export.noData") });
     }
   };
 
   return (
     <button
       onClick={handleExport}
-      className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+      className="inline-flex items-center gap-2 px-4 py-2 bg-(--ui-success) hover:bg-(--ui-success)/90 text-(--ui-success-foreground) rounded-lg transition"
     >
       <FaDownload size={14} />
-      تنزيل {format.toUpperCase()}
+      {t("export.download")} {format.toUpperCase()}
     </button>
   );
 };

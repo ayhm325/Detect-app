@@ -9,12 +9,12 @@ const Spinner = ({ size = "md", fullScreen = false }) => {
   }[size];
 
   const spinner = (
-    <div className={`${sizeClass} rounded-full animate-spin`} style={{ borderStyle: 'solid', borderColor: 'rgba(59,130,246,0.15)', borderTopColor: '#4f46e5' }} />
+    <div className={`${sizeClass} rounded-full animate-spin border-(--ui-ring)/20 border-t-(--ui-ring)`} />
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 bg-black/20 dark:bg-black/40 flex items-center justify-center z-40">
+      <div className="fixed inset-0 bg-(--ui-foreground)/20 flex items-center justify-center z-40">
         {spinner}
       </div>
     );
@@ -25,15 +25,17 @@ const Spinner = ({ size = "md", fullScreen = false }) => {
 
 export default Spinner;
 
-// مكون Overlay محسّن
-export const LoadingOverlay = ({ show = false, message = "جاري التحميل..." }) => {
+// Improved Overlay component
+export const LoadingOverlay = ({ show = false, message = "" }) => {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 dark:bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-8 flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
-        <p className="text-gray-700 dark:text-gray-300 font-medium text-center">{message}</p>
+    <div className="fixed inset-0 bg-(--ui-foreground)/30 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-(--ui-surface) border border-(--ui-border) rounded-xl shadow-2xl p-8 flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-(--ui-ring)/20 border-t-(--ui-ring) rounded-full animate-spin" />
+        {message ? (
+          <p className="text-(--ui-foreground) font-medium text-center">{message}</p>
+        ) : null}
       </div>
     </div>
   );

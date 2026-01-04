@@ -1,21 +1,24 @@
 import React from 'react';
 import styles from './AvailabilitySettings.module.css';
+import { useTranslations } from 'next-intl';
 
 export default function AvailabilitySettings({ value, onChange }) {
+  const t = useTranslations('doctorSettings');
+
   return (
     <div className={styles.availability}>
-      <h3>ساعات العمل والتوافر</h3>
+      <h3>{t('doctorSettings.availability.header')}</h3>
       <label>
-        أيام العمل:
+        {t('doctorSettings.availability.workDays')}:
         <input
           type="text"
           value={value.days || ''}
           onChange={e => onChange({ ...value, days: e.target.value })}
-          placeholder="مثال: الأحد - الخميس"
+          placeholder={t('doctorSettings.availability.exampleDays')}
         />
       </label>
       <label>
-        وقت البداية:
+        {t('doctorSettings.availability.startTime')}:
         <input
           type="time"
           value={value.start || ''}
@@ -23,7 +26,7 @@ export default function AvailabilitySettings({ value, onChange }) {
         />
       </label>
       <label>
-        وقت النهاية:
+        {t('doctorSettings.availability.endTime')}:
         <input
           type="time"
           value={value.end || ''}

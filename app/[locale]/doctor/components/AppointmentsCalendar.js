@@ -3,10 +3,14 @@ import AppointmentCard from './AppointmentCard';
 import AddAppointmentModal from './AddAppointmentModal';
 import AppointmentFilters from './AppointmentFilters';
 import styles from './AppointmentsCalendar.module.css';
-
-const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+import { useTranslations } from 'next-intl';
 
 export default function AppointmentsCalendar({ appointments, onAdd, onEdit, filters, onFilterChange }) {
+  const t = useTranslations('doctorAppointments');
+  const daysRaw = t.raw('calendar.days');
+  const days = Array.isArray(daysRaw)
+    ? daysRaw
+    : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
 
@@ -29,8 +33,8 @@ export default function AppointmentsCalendar({ appointments, onAdd, onEdit, filt
   return (
     <div className={styles.calendar}>
       <div className={styles.header}>
-        <h2>تقويم المواعيد</h2>
-        <button onClick={() => { setSelectedAppointment(null); setModalOpen(true); }}>إضافة موعد</button>
+        <h2>{t('calendar.title')}</h2>
+        <button onClick={() => { setSelectedAppointment(null); setModalOpen(true); }}>{t('calendar.addAppointment')}</button>
       </div>
       <AppointmentFilters filters={filters} onChange={onFilterChange} />
       <div className={styles.weekView}>

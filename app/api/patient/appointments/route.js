@@ -23,7 +23,7 @@ function getTokenFromRequest(request) {
 }
 
 export const GET = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/patient/appointments" } });
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -39,7 +39,23 @@ export const GET = withRBAC(async (request, user) => {
     } catch (e) {
       appointments = await prisma.appointment.findMany({
         where: { patientId: patient.id, isDeleted: false },
-        include: { doctor: { include: { user: true } } },
+        include: {
+          doctor: {
+            select: {
+              userId: true,
+              phone: true,
+              clinic: true,
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          patient: { select: { id: true, fullName: true, phone: true } },
+        },
         orderBy: { scheduledAt: "asc" }
       });
     }
@@ -47,14 +63,14 @@ export const GET = withRBAC(async (request, user) => {
     const out = appointments.map((a) => ({
       id: a.id,
       patient: a.patient ? { id: a.patient.id, name: a.patient.fullName, phone: a.patient.phone || null } : null,
-      doctor: a.doctor ? { id: a.doctor.id, name: a.doctor.user?.fullName || a.doctor.user?.displayName || null, phone: a.doctor.phone || null, user: a.doctor.user || null, clinic: a.doctor?.clinic || null } : null,
+      doctor: a.doctor ? { id: a.doctor.userId, name: a.doctor.user?.fullName || null, phone: a.doctor.phone || null, user: a.doctor.user || null, clinic: a.doctor?.clinic || null } : null,
       doctorId: a.doctorId,
       scheduledAt: a.scheduledAt,
       status: a.status,
       reason: a.reason,
       type: a.type || "clinic",
       // try several possible location sources: appointment.location, doctor's clinic, doctor's user.address
-      location: a.location || (a.doctor && (a.doctor.clinic || a.doctor.user?.address)) || null,
+      location: a.location || (a.doctor && a.doctor.clinic) || null,
       createdAt: a.createdAt
     }));
 
@@ -67,7 +83,7 @@ export const GET = withRBAC(async (request, user) => {
 }, ["patient"]);
 
 export const POST = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "POST /api/patient/appointments" } });
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });

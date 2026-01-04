@@ -16,7 +16,7 @@ export default function FuturisticStars() {
       y: 620 + (idx % 4) * 20,
       width: 60 + (idx % 5) * 12,
       height: 45 + (idx % 6) * 8,
-      color: ['#00fff7', '#7f00ff', '#ff00ea'][idx % 3],
+      color: ['var(--color-secondary-500)', 'var(--color-accent-500)', 'var(--color-primary-500)'][idx % 3],
       opacity: 0.12 + (idx % 3) * 0.04,
     }));
 
@@ -30,12 +30,12 @@ export default function FuturisticStars() {
         <defs>
           {/* This gradient is now used for the stars to give them a soft glow */}
           <radialGradient id="starGlow" cx="50%" cy="50%" r="80%" fx="50%" fy="50%" gradientTransform="rotate(0)">
-            <stop offset="0%" stopColor="#00fff7" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#7f00ff" stopOpacity="0.05" />
+            <stop offset="0%" stopColor="var(--color-secondary-500)" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="var(--color-accent-500)" stopOpacity="0.05" />
           </radialGradient>
           <linearGradient id="cityGlow" x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0%" stopColor="#7f00ff" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="#00fff7" stopOpacity="0.1" />
+            <stop offset="0%" stopColor="var(--color-accent-500)" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="var(--color-secondary-500)" stopOpacity="0.1" />
           </linearGradient>
         </defs>
 

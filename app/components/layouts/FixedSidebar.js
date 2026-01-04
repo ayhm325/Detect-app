@@ -3,12 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function FixedSidebar({ items = [], userRole = "patient" }) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const locale = pathname?.startsWith("/en") ? "en" : "ar";
+  const locale = useLocale();
+  const ui = useTranslations("ui");
+  const navbar = useTranslations("navbar");
 
   const buildPath = (targetLocale, path = pathname || "/") => {
     const clean = path.replace(/^\/(en|ar)/, "");
@@ -24,24 +27,25 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
     <>
       {/* Fixed Sidebar Container */}
       <div
-        className={`fixed left-0 top-0 h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 shadow-2xl transition-all duration-300 z-50 ${
+        className={`fixed left-0 top-0 h-screen bg-(--ui-surface) text-(--ui-foreground) border-r border-(--ui-border) shadow-2xl transition-all duration-300 z-50 ${
           collapsed ? "w-20" : "w-64"
         }`}
       >
+        <div className="absolute inset-0 -z-10 brand-gradient opacity-10" />
         {/* Header with Logo and Toggle */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-700">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-(--ui-border)">
           {!collapsed && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-400 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">DX</span>
+              <div className="w-8 h-8 rounded-lg btn-gradient flex items-center justify-center">
+                <span className="text-white font-bold text-sm">{navbar("brandShort")}</span>
               </div>
-              <span className="text-white font-bold text-lg hidden lg:inline">PneumoDetect</span>
+              <span className="font-bold text-lg hidden lg:inline brand-gradient-text">{navbar("brand")}</span>
             </div>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-300 hover:text-white"
-            title={collapsed ? "فتح الشريط" : "إغلاق الشريط"}
+            className="p-2 hover:bg-(--ui-surface-2) rounded-lg transition-colors text-(--ui-muted-foreground) hover:text-(--ui-foreground)"
+            title={collapsed ? ui("sidebar.expand") : ui("sidebar.collapse")}
           >
             {collapsed ? "→" : "←"}
           </button>
@@ -59,7 +63,7 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
                   <button
                     key="logout"
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-red-500/20 transition-all group"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-(--ui-muted-foreground) hover:text-(--ui-foreground) hover:bg-(--ui-danger-bg) transition-all group"
                     title={collapsed ? item.label : ""}
                   >
                     <span className="text-lg shrink-0">{item.icon}</span>
@@ -74,8 +78,8 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all group ${
                     isActive
-                      ? "bg-linear-to-r from-blue-600 to-blue-500 text-white shadow-lg"
-                      : "text-slate-300 hover:text-white hover:bg-slate-700/50"
+                      ? "btn-gradient text-white shadow-lg"
+                      : "text-(--ui-muted-foreground) hover:text-(--ui-foreground) hover:bg-(--ui-surface-2)"
                   }`}
                   title={collapsed ? item.label : ""}
                 >
@@ -89,9 +93,9 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
 
         {/* Footer Info */}
         {!collapsed && (
-          <div className="border-t border-slate-700 p-3 text-xs text-slate-400 space-y-1">
-            <div className="text-slate-500">الإصدار: 1.0</div>
-            <div className="text-slate-500">الحالة: متصل ✓</div>
+          <div className="border-t border-(--ui-border) p-3 text-xs text-(--ui-muted-foreground) space-y-1">
+            <div className="text-(--ui-muted-foreground)">{ui("footer.version")}</div>
+            <div className="text-(--ui-muted-foreground)">{ui("footer.statusOnline")}</div>
           </div>
         )}
       </div>

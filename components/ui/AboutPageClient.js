@@ -8,14 +8,12 @@ import { usePathname, useRouter } from "next/navigation";
 
 export default function AboutPageClient() {
   const t = useTranslations("about");
+  const ui = useTranslations("ui");
   const locale = useLocale();
   const dir = locale === "ar" ? "rtl" : "ltr";
-  // Use direct import for valuesList to avoid INVALID_MESSAGE error
-  let values = locale === "ar" ? aboutAr.valuesList || [] : aboutEn.valuesList || [];
-  // Use direct import for stats array to avoid INVALID_MESSAGE error
-  let stats = locale === "ar" ? aboutAr.stats || [] : aboutEn.stats || [];
-  // Use direct import for techList array to avoid INVALID_MESSAGE error
-  let techList = locale === "ar" ? aboutAr.techList || [] : aboutEn.techList || [];
+  let values = locale === "ar" ? aboutAr.valuesList : aboutEn.valuesList;
+  let stats = locale === "ar" ? aboutAr.stats : aboutEn.stats;
+  let techList = locale === "ar" ? aboutAr.techList : aboutEn.techList;
 
   const router = useRouter();
   const pathname = usePathname();
@@ -40,9 +38,9 @@ export default function AboutPageClient() {
             <button
               onClick={toggleLocale}
               className="px-4 py-2 rounded-full bg-gray-200 dark:bg-zinc-800 text-gray-800 dark:text-gray-100 font-semibold shadow hover:bg-gray-300 dark:hover:bg-zinc-700 transition-colors"
-              aria-label={locale === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+              aria-label={locale === "ar" ? ui("language.switchToEnglish") : ui("language.switchToArabic")}
             >
-              {locale === "ar" ? "English" : "العربية"}
+              {locale === "ar" ? ui("language.english") : ui("language.arabic")}
             </button>
           </div>
           <h1 className="text-4xl font-bold text-center mb-4">
@@ -83,7 +81,7 @@ export default function AboutPageClient() {
             ))}
           </div>
 
-          <h2 className="text-2xl font-bold text-center mb-6">{t("statsTitle", { defaultValue: "Key Stats" })}</h2>
+          <h2 className="text-2xl font-bold text-center mb-6">{t("statsTitle")}</h2>
           <div className="flex flex-wrap justify-center gap-6 mb-10">
             {stats.map((stat, idx) => (
               <div key={idx} className="bg-yellow-50 dark:bg-zinc-900 rounded-xl p-4 shadow text-center min-w-25">
@@ -95,7 +93,7 @@ export default function AboutPageClient() {
 
           <div className="flex justify-center mt-8">
             <Link href={`/${locale}`} className="px-6 py-2 rounded-full bg-yellow-500 text-white font-semibold shadow hover:bg-yellow-600 transition-colors">
-              {locale === "ar" ? "العودة إلى الرئيسية" : "Back to Home"}
+              {t("backToHome")}
             </Link>
           </div>
         </div>

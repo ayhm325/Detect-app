@@ -33,8 +33,8 @@ export default function AnimatedWaves() {
       <svg className="absolute left-0 bottom-0 w-full h-40" viewBox="0 0 1440 160" fill="none" style={{zIndex:1}}>
         <defs>
           <linearGradient id="wave1" x1="0" y1="0" x2="1440" y2="160" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#FFD600" stopOpacity="0.95" />
-            <stop offset="1" stopColor="#FF1744" stopOpacity="0.7" />
+            <stop stopColor="var(--color-bright-500)" stopOpacity="0.95" />
+            <stop offset="1" stopColor="var(--color-primary-500)" stopOpacity="0.7" />
           </linearGradient>
         </defs>
         <motion.path
@@ -44,7 +44,7 @@ export default function AnimatedWaves() {
         />
         <motion.path
           d={getLinePath()}
-          stroke="#FF1744"
+          stroke="var(--color-primary-500)"
           strokeWidth="3"
           fill="none"
           opacity="0.38"
@@ -54,7 +54,7 @@ export default function AnimatedWaves() {
       <svg className="absolute right-0 top-0 w-1/2 h-32" viewBox="0 0 720 128" fill="none" style={{zIndex:1}}>
         <motion.path
           d={getTopLinePath()}
-          stroke="#FFD600"
+          stroke="var(--color-bright-500)"
           strokeWidth="2.5"
           fill="none"
           opacity="0.33"

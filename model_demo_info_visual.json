@@ -819,5 +819,8 @@
   ],
   "device": "cpu",
   "dtype": "torch.float32",
-  "_visualization_error": "Visualization failed: Command '[WindowsPath('dot'), '-Kdot', '-Tsvg', '-O', 'model_graph']' returned non-zero exit status 1. [stderr: b'Warning: model_graph:4: string ran past end of line\\r\\nError: model_graph:5: syntax error near line 5\\r\\ncontext:  >>>  ( <<< 1, 1000)\" fillcolor=darkolivegreen1]\\r\\nWarning: model_graph:5: string ran past end of line\\r\\n']"
+  "_visualization": {
+    "rendered": true,
+    "path": "C:\\Users\\user\\Desktop\\Detect-app-scripts\\reports\\model_graph.svg"
+  }
 }

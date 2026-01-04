@@ -1,18 +1,20 @@
 import React from 'react';
 import styles from './Pagination.module.css';
+import { useTranslations } from 'next-intl';
 
 export default function Pagination({ currentPage, totalPages, onPageChange }) {
+  const t = useTranslations('doctorCommon');
   if (totalPages <= 1) return null;
   return (
     <div className={styles.pagination}>
       <button disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)}>
-        السابق
+        {t('pagination.previous')}
       </button>
       <span>
-        صفحة {currentPage} من {totalPages}
+        {t('pagination.pageXofY', { currentPage, totalPages })}
       </span>
       <button disabled={currentPage === totalPages} onClick={() => onPageChange(currentPage + 1)}>
-        التالي
+        {t('pagination.next')}
       </button>
     </div>
   );

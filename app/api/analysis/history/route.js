@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { isTokenRevoked } from '../../../../lib/auth/revocation.server.js';
 import { getAnalysisHistory, deleteAnalysisResult } from '../../../../services/analysisResult.service.js';
-
-const SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { getJwtSecret } from '../../../../lib/auth/jwtSecret.js';
 
 export async function GET(request) {
   try {
@@ -24,7 +23,7 @@ export async function GET(request) {
 
     let payload;
     try {
-      payload = jwt.verify(token, SECRET);
+      payload = jwt.verify(token, getJwtSecret());
     } catch (e) {
       return NextResponse.json({ error: 'invalid_token' }, { status: 401 });
     }
@@ -63,7 +62,7 @@ export async function DELETE(request) {
 
     let payload;
     try {
-      payload = jwt.verify(token, SECRET);
+      payload = jwt.verify(token, getJwtSecret());
     } catch (e) {
       return NextResponse.json({ error: 'invalid_token' }, { status: 401 });
     }

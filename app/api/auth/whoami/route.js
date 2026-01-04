@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { isTokenRevoked } from '../../../../lib/auth/revocation.server';
-const SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { getJwtSecret } from '../../../../lib/auth/jwtSecret.js';
 
 export async function GET(request) {
   try {
@@ -24,7 +24,7 @@ export async function GET(request) {
 
     let user;
     try {
-      user = jwt.verify(token, SECRET);
+      user = jwt.verify(token, getJwtSecret());
     } catch (e) {
       return NextResponse.json({ error: 'invalid_token' }, { status: 401 });
     }

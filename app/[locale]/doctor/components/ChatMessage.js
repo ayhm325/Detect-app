@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './ChatMessage.module.css';
+import { useTranslations } from 'next-intl';
 
 function isImageUrl(url) {
   if (!url || typeof url !== 'string') return false;
@@ -16,6 +17,8 @@ function isImageUrl(url) {
 }
 
 export default function ChatMessage({ message, patient }) {
+  const t = useTranslations('doctorChat');
+
   const isDoctor = message.sender === 'doctor';
   const fileUrl = message.fileUrl || message.file?.url || null;
   const mime = message.mimeType || message.file?.type || null;
@@ -24,26 +27,27 @@ export default function ChatMessage({ message, patient }) {
   const imageUrl = fileUrl || (maybeImage && message.text);
 
   return (
-    <div className={isDoctor ? styles.doctorMsg : styles.patientMsg}>
-      {!isDoctor && (
+    <div className={`${styles.message} ${isDoctor ? styles.doctor : ''}`}>
+      {!isDoctor && patient?.profileImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={patient.profileImage}
-          alt={patient.name}
-          width={36}
-          height={36}
+          alt={patient?.name || t('patientFallbackName')}
+          width={28}
+          height={28}
           className={styles.avatar}
         />
-      )}
+      ) : null}
 
-      {imageUrl ? (
-        <div className={styles.attachment}>
-          <img src={imageUrl} alt="attachment" className={styles.image} />
-        </div>
-      ) : (
-        <span className={styles.text}>{message.text}</span>
-      )}
-
-      <span className={styles.time}>{message.time}</span>
+      <div className={styles.bubble}>
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={imageUrl} alt={t('imageAlt')} className={styles.image} />
+        ) : (
+          <span>{message.text}</span>
+        )}
+        <div className={styles.time}>{message.time}</div>
+      </div>
     </div>
   );
 }

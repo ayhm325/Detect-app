@@ -11,41 +11,41 @@ export default function PatientNotificationsPage() {
   const [filter, setFilter] = useState("all");
   const t = useTranslations("notifications");
   const labels = {
-    pageTitle: t("pageTitle", { defaultValue: "Notifications" }),
-    unreadCount: (...args) => t("unreadCount", { defaultValue: "Unread", unread: args[0], total: args[1] }),
-    allRead: (...args) => t("allRead", { defaultValue: "All Read", total: args[0] }),
-    filterAll: t("filterAll", { defaultValue: "All" }),
-    filterUnread: t("filterUnread", { defaultValue: "Unread" }),
-    filterRead: t("filterRead", { defaultValue: "Read" }),
-    markAllRead: t("markAllRead", { defaultValue: "Mark all as read" }),
-    deleteAll: t("deleteAll", { defaultValue: "Delete all" }),
-    markAsRead: t("markAsRead", { defaultValue: "Mark as read" }),
-    markAsUnread: t("markAsUnread", { defaultValue: "Mark as unread" }),
-    deleteNotification: t("deleteNotification", { defaultValue: "Delete notification" }),
-    typeAppointment: t("typeAppointment", { defaultValue: "Appointment" }),
-    typeResult: t("typeResult", { defaultValue: "Result" }),
-    typeMessage: t("typeMessage", { defaultValue: "Message" }),
-    typeReminder: t("typeReminder", { defaultValue: "Reminder" }),
-    typeSystem: t("typeSystem", { defaultValue: "System" }),
-    noUnread: t("noUnread", { defaultValue: "No unread notifications" }),
-    noRead: t("noRead", { defaultValue: "No read notifications" }),
-    noNotifications: t("noNotifications", { defaultValue: "No notifications" }),
-    statsTotal: t("statsTotal", { defaultValue: "Total" }),
-    statsUnread: t("statsUnread", { defaultValue: "Unread" }),
-    statsRead: t("statsRead", { defaultValue: "Read" }),
+    pageTitle: t("pageTitle"),
+    unreadCount: (...args) => t("unreadCount", { unread: args[0], total: args[1] }),
+    allRead: (...args) => t("allRead", { total: args[0] }),
+    filterAll: t("filterAll"),
+    filterUnread: t("filterUnread"),
+    filterRead: t("filterRead"),
+    markAllRead: t("markAllRead"),
+    deleteAll: t("deleteAll"),
+    markAsRead: t("markAsRead"),
+    markAsUnread: t("markAsUnread"),
+    deleteNotification: t("deleteNotification"),
+    typeAppointment: t("typeAppointment"),
+    typeResult: t("typeResult"),
+    typeMessage: t("typeMessage"),
+    typeReminder: t("typeReminder"),
+    typeSystem: t("typeSystem"),
+    noUnread: t("noUnread"),
+    noRead: t("noRead"),
+    noNotifications: t("noNotifications"),
+    statsTotal: t("statsTotal"),
+    statsUnread: t("statsUnread"),
+    statsRead: t("statsRead"),
     toast: {
-      notificationDeleted: t("notificationDeleted", { defaultValue: "Notification deleted" }),
-      allDeleted: t("allDeleted", { defaultValue: "All deleted" }),
-      markedRead: t("markedRead", { defaultValue: "Marked as read" }),
-      allMarkedRead: t("allMarkedRead", { defaultValue: "All marked as read" }),
-      markedUnread: t("markedUnread", { defaultValue: "Marked as unread" })
+      notificationDeleted: t("notificationDeleted"),
+      allDeleted: t("allDeleted"),
+      markedRead: t("markedRead"),
+      allMarkedRead: t("allMarkedRead"),
+      markedUnread: t("markedUnread")
     },
-    confirmDeleteAll: t("confirmDeleteAll", { defaultValue: "Confirm delete all" }),
-    timeMinutesAgo: (mins) => t("timeMinutesAgo", { mins, defaultValue: `Minutes ago: ${mins}` }),
-    timeHourAgo: () => t("timeHourAgo", { defaultValue: "An hour ago" }),
-    timeHoursAgo: (hours) => t("timeHoursAgo", { hours, defaultValue: `Hours ago: ${hours}` }),
-    timeDaysAgo: (days) => t("timeDaysAgo", { days, defaultValue: `Days ago: ${days}` }),
-    timeJustNow: () => t("timeJustNow", { defaultValue: "Just now" }),
+    confirmDeleteAll: t("confirmDeleteAll"),
+    timeMinutesAgo: (mins) => t("timeMinutesAgo", { mins }),
+    timeHourAgo: () => t("timeHourAgo"),
+    timeHoursAgo: (hours) => t("timeHoursAgo", { hours }),
+    timeDaysAgo: (days) => t("timeDaysAgo", { days }),
+    timeJustNow: () => t("timeJustNow"),
     // ...add all other keys as needed...
   };
   // ...existing code...
@@ -129,13 +129,13 @@ export default function PatientNotificationsPage() {
 
   const getTypeBadgeColor = (type) => {
     const colors = {
-      appointment: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-      result: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-      message: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-      reminder: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-      system: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+      appointment: "bg-(--ui-info-bg) text-(--ui-foreground) border border-(--ui-info-border)",
+      result: "bg-(--ui-success-bg) text-(--ui-foreground) border border-(--ui-success-border)",
+      message: "bg-(--ui-info-bg) text-(--ui-foreground) border border-(--ui-info-border)",
+      reminder: "bg-(--ui-warning-bg) text-(--ui-foreground) border border-(--ui-warning-border)",
+      system: "bg-(--ui-warning-bg) text-(--ui-foreground) border border-(--ui-warning-border)"
     };
-    return colors[type] || "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400";
+    return colors[type] || "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border)";
   };
 
   const getTypeLabel = (type) => {
@@ -153,19 +153,19 @@ export default function PatientNotificationsPage() {
   const totalCount = notifications.length;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-8 px-4">
+    <div className="min-h-screen bg-(--ui-surface) text-(--ui-foreground) py-8 px-4">
       <ToastContainer />
       
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{labels.pageTitle}</h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <h1 className="text-4xl font-bold text-(--ui-foreground) mb-2">{labels.pageTitle}</h1>
+            <p className="text-(--ui-muted-foreground)">
               {unreadCount > 0 ? labels.unreadCount(unreadCount, totalCount) : labels.allRead(totalCount)}
             </p>
           </div>
-          <FaBell size={32} className="text-green-600 dark:text-green-400" />
+          <FaBell size={32} className="text-(--ui-success)" />
         </div>
 
         {/* Filter Tabs */}
@@ -174,8 +174,8 @@ export default function PatientNotificationsPage() {
             onClick={() => setFilter("all")}
             className={`px-4 py-2 rounded-lg transition ${
               filter === "all"
-                ? "bg-green-600 text-white dark:bg-green-600"
-                : "bg-gray-200 dark:bg-slate-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-slate-600"
+                ? "bg-(--ui-success) text-(--ui-success-foreground)"
+                : "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border) hover:bg-(--ui-surface-2)"
             }`}
           >
             {labels.filterAll} ({totalCount})
@@ -184,8 +184,8 @@ export default function PatientNotificationsPage() {
             onClick={() => setFilter("unread")}
             className={`px-4 py-2 rounded-lg transition ${
               filter === "unread"
-                ? "bg-green-600 text-white dark:bg-green-600"
-                : "bg-gray-200 dark:bg-slate-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-slate-600"
+                ? "bg-(--ui-success) text-(--ui-success-foreground)"
+                : "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border) hover:bg-(--ui-surface-2)"
             }`}
           >
             {labels.filterUnread} ({unreadCount})
@@ -194,8 +194,8 @@ export default function PatientNotificationsPage() {
             onClick={() => setFilter("read")}
             className={`px-4 py-2 rounded-lg transition ${
               filter === "read"
-                ? "bg-green-600 text-white dark:bg-green-600"
-                : "bg-gray-200 dark:bg-slate-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-slate-600"
+                ? "bg-(--ui-success) text-(--ui-success-foreground)"
+                : "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border) hover:bg-(--ui-surface-2)"
             }`}
           >
             {labels.filterRead} ({notifications.filter(n => n.read).length})
@@ -207,7 +207,7 @@ export default function PatientNotificationsPage() {
           <button
             onClick={handleMarkAllAsRead}
             disabled={unreadCount === 0}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 text-white rounded-lg transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-(--ui-success) hover:bg-(--ui-success)/90 disabled:opacity-50 text-(--ui-success-foreground) rounded-lg transition"
           >
             <FaCheckDouble size={14} />
             {labels.markAllRead}
@@ -215,7 +215,7 @@ export default function PatientNotificationsPage() {
           <button
             onClick={handleDeleteAll}
             disabled={totalCount === 0}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 text-white rounded-lg transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-(--ui-danger) hover:bg-(--ui-danger)/90 disabled:opacity-50 text-(--ui-danger-foreground) rounded-lg transition"
           >
             <FaTrash size={14} />
             {labels.deleteAll}
@@ -225,9 +225,9 @@ export default function PatientNotificationsPage() {
         {/* Notifications List */}
         <div className="space-y-4">
           {filteredNotifications.length === 0 ? (
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-12 text-center">
-              <FaBell size={48} className="mx-auto mb-4 text-gray-400 dark:text-gray-600" />
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
+            <div className="card-glass border border-(--ui-border) rounded-xl p-12 text-center">
+              <FaBell size={48} className="mx-auto mb-4 text-(--ui-muted-foreground)" />
+              <p className="text-(--ui-muted-foreground) text-lg">
                 {filter === "unread" ? labels.noUnread : 
                  filter === "read" ? labels.noRead : 
                  labels.noNotifications}
@@ -237,31 +237,31 @@ export default function PatientNotificationsPage() {
             filteredNotifications.map((notif) => (
               <div
                 key={notif.id}
-                className={`bg-white dark:bg-slate-800 rounded-xl shadow p-6 border-l-4 transition hover:shadow-lg ${
-                  notif.read 
-                    ? "border-l-gray-400 dark:border-l-slate-600" 
-                    : "border-l-green-600 dark:border-l-green-400"
-                } ${!notif.read ? "bg-green-50 dark:bg-green-900/10" : ""}`}
+                className={`card-glass border border-(--ui-border) rounded-xl p-6 border-l-4 transition hover:shadow-lg ${
+                  notif.read
+                    ? "border-l-(--ui-border)"
+                    : "border-l-(--ui-success)"
+                } ${!notif.read ? "bg-(--ui-success-bg)" : ""}`}
               >
                 <div className="flex items-start justify-between gap-4">
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <span className="text-2xl">{getTypeIcon(notif.type)}</span>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <h3 className="text-lg font-semibold text-(--ui-foreground)">
                         {notif.title}
                       </h3>
                       <span className={`px-3 py-1 text-xs font-medium rounded-full ${getTypeBadgeColor(notif.type)}`}>
                         {getTypeLabel(notif.type)}
                       </span>
                       {!notif.read && (
-                        <div className="w-3 h-3 bg-green-600 rounded-full ml-auto shrink-0"></div>
+                        <div className="w-3 h-3 bg-(--ui-success) rounded-full ml-auto shrink-0"></div>
                       )}
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400 mb-2">
+                    <p className="text-(--ui-muted-foreground) mb-2">
                       {notif.message}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-500">
+                    <p className="text-sm text-(--ui-muted-foreground)">
                       {notif.time}
                     </p>
                   </div>
@@ -272,7 +272,7 @@ export default function PatientNotificationsPage() {
                       <button
                         onClick={() => handleMarkAsRead(notif.id)}
                         title={labels.markAsRead}
-                        className="p-2 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition"
+                        className="p-2 text-(--ui-success) hover:bg-(--ui-success-bg) rounded-lg transition"
                       >
                         <FaCheck size={18} />
                       </button>
@@ -280,7 +280,7 @@ export default function PatientNotificationsPage() {
                       <button
                         onClick={() => handleMarkAsUnread(notif.id)}
                         title={labels.markAsUnread}
-                        className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition"
+                        className="p-2 text-(--ui-muted-foreground) hover:bg-(--ui-surface-2)/60 rounded-lg transition"
                       >
                         <FaCheck size={18} />
                       </button>
@@ -288,7 +288,7 @@ export default function PatientNotificationsPage() {
                     <button
                       onClick={() => handleDelete(notif.id)}
                       title={labels.deleteNotification}
-                      className="p-2 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition"
+                      className="p-2 text-(--ui-danger) hover:bg-(--ui-danger-bg) rounded-lg transition"
                     >
                       <FaTrash size={18} />
                     </button>
@@ -302,17 +302,17 @@ export default function PatientNotificationsPage() {
         {/* Stats */}
         {totalCount > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6 border-t-4 border-blue-600 dark:border-blue-500">
-              <h4 className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">{labels.statsTotal}</h4>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalCount}</p>
+            <div className="card-glass border border-(--ui-border) rounded-xl p-6 border-t-4 border-t-(--ui-info)">
+              <h4 className="text-(--ui-muted-foreground) text-sm font-medium mb-2">{labels.statsTotal}</h4>
+              <p className="text-3xl font-bold text-(--ui-foreground)">{totalCount}</p>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6 border-t-4 border-yellow-600 dark:border-yellow-500">
-              <h4 className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">{labels.statsUnread}</h4>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{unreadCount}</p>
+            <div className="card-glass border border-(--ui-border) rounded-xl p-6 border-t-4 border-t-(--ui-warning)">
+              <h4 className="text-(--ui-muted-foreground) text-sm font-medium mb-2">{labels.statsUnread}</h4>
+              <p className="text-3xl font-bold text-(--ui-foreground)">{unreadCount}</p>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-6 border-t-4 border-green-600 dark:border-green-500">
-              <h4 className="text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">{labels.statsRead}</h4>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{notifications.filter(n => n.read).length}</p>
+            <div className="card-glass border border-(--ui-border) rounded-xl p-6 border-t-4 border-t-(--ui-success)">
+              <h4 className="text-(--ui-muted-foreground) text-sm font-medium mb-2">{labels.statsRead}</h4>
+              <p className="text-3xl font-bold text-(--ui-foreground)">{notifications.filter(n => n.read).length}</p>
             </div>
           </div>
         )}

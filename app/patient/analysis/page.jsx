@@ -2,33 +2,31 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import AnalysisDetailsModal from "../../../components/analysis/AnalysisDetailsModal";
-
-// Minimal translation stub — replace with real i18n
-const t = (s) => s;
+import { useTranslations } from "next-intl";
 
 // Modern confidence bar with gradient + glow
-function ConfidenceBar({ confidence = 0 }) {
+function ConfidenceBar({ confidence = 0, label, labelTitle }) {
   const pct = Math.round((Number(confidence) || 0) * 100);
   const gradient =
     pct >= 75
-      ? "from-emerald-400 via-green-400 to-emerald-500"
+      ? "from-(--ui-success) to-(--ui-ring)"
       : pct >= 50
-      ? "from-amber-300 via-yellow-300 to-amber-400"
-      : "from-rose-400 via-red-400 to-rose-500";
+      ? "from-(--ui-warning) to-(--ui-ring)"
+      : "from-(--ui-danger) to-(--ui-ring)";
 
   return (
     <div>
-      <div className="w-full bg-white/30 dark:bg-black/20 rounded-full h-4 overflow-hidden shadow-inner border border-white/10">
+      <div className="w-full bg-(--ui-surface-2)/40 rounded-full h-4 overflow-hidden shadow-inner border border-(--ui-border)">
         <div
-          className={`h-4 rounded-full bg-linear-to-r ${gradient} transition-all duration-700 ease-out shadow-[0_4px_18px_rgba(99,102,241,0.12)]`}
+          className={`h-4 rounded-full bg-linear-to-r ${gradient} transition-all duration-700 ease-out shadow-(--shadow-soft)`}
           style={{ width: `${pct}%` }}
           aria-hidden
         />
       </div>
-      <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
-        <span className="font-medium text-slate-900">{pct}%</span>
-        <span className="text-slate-500" title={t("AI confidence score")}>
-          {t("Confidence")}
+      <div className="mt-2 flex items-center justify-between text-sm text-(--ui-muted-foreground)">
+        <span className="font-medium text-(--ui-foreground)">{pct}%</span>
+        <span className="text-(--ui-muted-foreground)" title={labelTitle}>
+          {label}
         </span>
       </div>
     </div>
@@ -36,6 +34,8 @@ function ConfidenceBar({ confidence = 0 }) {
 }
 
 export default function AnalysisPage() {
+  const t = useTranslations("patient");
+
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,11 +52,23 @@ export default function AnalysisPage() {
   const [resultsVisible, setResultsVisible] = useState(false);
   const [withHeatmap, setWithHeatmap] = useState(false);
 
+  const resetUploadUi = () => {
+    setIsLoading(false);
+    setUploadProgress(null);
+    setUploadLoaded(null);
+    setUploadTotal(null);
+    setUploadStartTime(null);
+  };
+
   // Image selection
   const handleImageChange = (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    if (xhrRef.current) xhrRef.current.abort();
+    if (xhrRef.current) {
+      xhrRef.current.abort();
+      xhrRef.current = null;
+      resetUploadUi();
+    }
     setSelectedImage(file);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(URL.createObjectURL(file));
@@ -69,17 +81,15 @@ export default function AnalysisPage() {
     setPreviewUrl(null);
     setError(null);
     if (xhrRef.current) xhrRef.current.abort();
+    xhrRef.current = null;
+    resetUploadUi();
   };
 
   const handleCancelUpload = () => {
     if (xhrRef.current) xhrRef.current.abort();
     xhrRef.current = null;
-    setIsLoading(false);
-    setUploadProgress(null);
-    setUploadLoaded(null);
-    setUploadTotal(null);
-    setUploadStartTime(null);
-    setError(t("Upload canceled"));
+    resetUploadUi();
+    setError(t("analysis.errors.uploadCanceled"));
   };
 
   // cancel on navigation/unload
@@ -178,7 +188,7 @@ export default function AnalysisPage() {
         setUploadLoaded(null);
         setUploadTotal(null);
         setUploadStartTime(null);
-        setError(t("Network error during upload"));
+        setError(t("analysis.errors.networkUpload"));
       };
 
       xhr.send(formData);
@@ -204,18 +214,18 @@ export default function AnalysisPage() {
   };
 
   return (
-    <div className="min-h-[85vh] py-14 bg-linear-to-br from-indigo-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-black">
-      <div className="max-w-7xl mx-auto p-8 backdrop-blur-sm bg-white/75 dark:bg-slate-900/65 rounded-3xl shadow-2xl border border-white/30">
+    <div className="min-h-[85vh] py-14 bg-(--ui-surface) text-(--ui-foreground)">
+      <div className="max-w-7xl mx-auto p-8 card-glass rounded-3xl">
         <header className="flex items-start justify-between gap-6 mb-8">
           <div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-indigo-600 via-pink-500 to-rose-500">
-              {t("AI Medical Image Analysis")}
+            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight brand-gradient-text">
+              {t("analysis.title")}
             </h1>
-            <p className="mt-2 text-base text-slate-600">{t("Upload an image to get AI-powered diagnostic insights")}</p>
+            <p className="mt-2 text-base text-(--ui-muted-foreground)">{t("analysis.subtitle")}</p>
           </div>
           <div className="text-right">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-linear-to-r from-white/50 to-white/30 shadow-sm border border-white/20">
-              <span className="text-sm text-slate-700">{t("Quick AI")}</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-(--ui-surface-2)/40 shadow-sm border border-(--ui-border)">
+              <span className="text-sm text-(--ui-muted-foreground)">{t("analysis.badge")}</span>
             </div>
           </div>
         </header>
@@ -237,7 +247,7 @@ export default function AnalysisPage() {
               checked={withHeatmap}
               onChange={(e) => setWithHeatmap(e.target.checked)}
             />
-            <span className="text-sm">Include Heatmap</span>
+            <span className="text-sm text-(--ui-muted-foreground)">{t("analysis.controls.includeHeatmap")}</span>
           </label>
           
           {/* controlled state for heatmap checkbox (defaults false) */}
@@ -245,17 +255,17 @@ export default function AnalysisPage() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-linear-to-r from-violet-600 to-fuchsia-600 text-white text-lg font-semibold shadow-xl hover:scale-105 transition-transform"
+            className="inline-flex items-center gap-3 px-5 py-3 rounded-xl btn-gradient text-lg font-semibold shadow-xl hover:scale-105 transition-transform"
           >
-            📁 {t("Choose Image")}
+            📁 {t("analysis.controls.chooseImage")}
           </button>
 
           {previewUrl && (
             <button
               onClick={handleRemoveImage}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-rose-500 text-white hover:bg-rose-600 shadow-lg text-lg"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-(--ui-danger) text-(--ui-danger-foreground) hover:opacity-90 shadow-lg text-lg"
             >
-              ✖ {t("Remove")}
+              ✖ {t("analysis.controls.remove")}
             </button>
           )}
         </div>
@@ -264,21 +274,21 @@ export default function AnalysisPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Preview + Heatmap side by side */}
           <div>
-            <div className="rounded-3xl overflow-hidden border border-white/10 shadow-lg bg-linear-to-br from-sky-50 to-emerald-50 dark:from-slate-800 dark:to-slate-900 transition-transform duration-300 hover:scale-[1.01]">
+            <div className="rounded-3xl overflow-hidden card-glass transition-transform duration-300 hover:scale-[1.01]">
               <div className="p-4">
                 {previewUrl ? (
                   <div className="relative w-full hover:scale-105 transition-transform duration-300" style={{ paddingBottom: "75%" }}>
-                    <Image src={previewUrl} alt={t("Selected image preview")} fill className="object-cover absolute inset-0 rounded-xl" unoptimized />
+                    <Image src={previewUrl} alt={t("analysis.preview.alt") } fill className="object-cover absolute inset-0 rounded-xl" unoptimized />
                   </div>
                 ) : (
-                  <div className="w-full h-60 flex items-center justify-center bg-gray-50 text-slate-400">
-                    {t("No image selected")}
+                  <div className="w-full h-60 flex items-center justify-center bg-(--ui-surface-2)/40 text-(--ui-muted-foreground)">
+                    {t("analysis.preview.noneSelected")}
                   </div>
                 )}
               </div>
 
               <div className="p-4 flex items-center justify-between">
-                <div className="text-base text-slate-700 truncate">{selectedImage ? `${selectedImage.name}` : t("No file")}</div>
+                <div className="text-base text-(--ui-muted-foreground) truncate">{selectedImage ? `${selectedImage.name}` : t("analysis.preview.noFile")}</div>
                 <div className="flex gap-3">                  
                 </div>
               </div>
@@ -289,31 +299,31 @@ export default function AnalysisPage() {
               disabled={!selectedImage || isLoading}
               className={`mt-5 w-full py-4 rounded-3xl text-white text-xl font-bold transition-transform shadow-xl ${
                 isLoading
-                  ? "bg-linear-to-r from-slate-400 to-slate-500 cursor-not-allowed"
-                  : "bg-linear-to-r from-sky-500 via-emerald-400 to-emerald-600 hover:scale-105"
+                  ? "bg-(--ui-muted-2) text-(--ui-foreground) opacity-70 cursor-not-allowed"
+                  : "btn-gradient hover:scale-105"
               }`}
             >
-              {isLoading ? "Analyzing…" : "Analyze Image"}
+              {isLoading ? t("analysis.actions.analyzing") : t("analysis.actions.analyze")}
             </button>
 
             {uploadProgress !== null && (
               <div className="mt-4">
-                <div className="relative w-full h-10 bg-white/30 rounded-2xl overflow-hidden border border-white/20">
+                <div className="relative w-full h-10 bg-(--ui-surface-2)/40 rounded-2xl overflow-hidden border border-(--ui-border)">
                   <div
-                    className="absolute top-0 left-0 h-full bg-linear-to-r from-emerald-400 via-amber-300 to-rose-400 transition-all duration-500"
+                    className="absolute top-0 left-0 h-full bg-linear-to-r from-(--ui-success) via-(--ui-warning) to-(--ui-danger) transition-all duration-500"
                     style={{ width: `${uploadProgress}%` }}
                     role="progressbar"
                     aria-valuenow={uploadProgress}
                     aria-valuemin={0}
                     aria-valuemax={100}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white drop-shadow-sm">
-                    {uploadProgress}% • {formatMB(uploadLoaded)} MB / {formatMB(uploadTotal)} MB {formatEta() && `• ETA: ${formatEta()}`}
+                  <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-(--ui-foreground) drop-shadow-sm">
+                    {uploadProgress}% • {formatMB(uploadLoaded)} MB / {formatMB(uploadTotal)} MB {formatEta() && `• ${t("analysis.progress.etaLabel")}: ${formatEta()}`}
                   </div>
                 </div>
                 <div className="mt-2 text-right">
-                  <button onClick={handleCancelUpload} className="text-xs text-rose-600 underline">
-                    {t("Cancel upload")}
+                  <button onClick={handleCancelUpload} className="text-xs text-(--ui-danger) underline">
+                    {t("analysis.actions.cancelUpload")}
                   </button>
                 </div>
               </div>
@@ -324,13 +334,13 @@ export default function AnalysisPage() {
           <div className={`space-y-4 transition-all duration-700 ease-out transform ${resultsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
             {analysisResult && (analysisResult.heatmap_url || analysisResult.heatmapUrl) && (
               <div className="mb-2">
-                <h3 className="text-md font-semibold mb-2">{t("Heatmap")}</h3>
-                <div className="rounded-3xl overflow-hidden border border-white/10 shadow-sm bg-white/50 p-4">
+                <h3 className="text-md font-semibold mb-2">{t("analysis.results.heatmap")}</h3>
+                <div className="rounded-3xl overflow-hidden card-glass shadow-sm p-4">
                   <button type="button" onClick={() => setShowModal(true)} style={{ border: 'none', padding: 0, background: 'transparent' }} className="block w-full">
                     <div className="relative" style={{ paddingBottom: '75%' }}>
                       <Image
                         src={analysisResult.heatmap_url ?? analysisResult.heatmapUrl}
-                        alt={t("Heatmap")}
+                        alt={t("analysis.results.heatmap")}
                         fill
                         className="object-cover rounded-xl absolute inset-0"
                         unoptimized
@@ -340,30 +350,34 @@ export default function AnalysisPage() {
                 </div>
               </div>
             )}
-            {error && <p className="text-red-600 font-medium">{error}</p>}
+            {error && <p className="text-(--ui-danger) font-medium">{error}</p>}
 
             {analysisResult && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className={`p-6 rounded-3xl shadow-xl hover:scale-102 hover:shadow-2xl transition-transform duration-300 ${analysisResult?.needs_review ? 'bg-linear-to-br from-amber-50 to-white border border-amber-200' : (String(analysisResult.prediction).toLowerCase().includes("normal") ? "bg-linear-to-br from-emerald-50 to-white border border-emerald-200" : "bg-linear-to-br from-rose-50 to-white border border-rose-200")}`}>
+                <div className={`p-6 rounded-3xl shadow-xl hover:scale-102 hover:shadow-2xl transition-transform duration-300 ${analysisResult?.needs_review ? 'bg-(--ui-warning-bg) border border-(--ui-warning-border)' : (String(analysisResult.prediction).toLowerCase().includes("normal") ? "bg-(--ui-success-bg) border border-(--ui-success-border)" : "bg-(--ui-danger-bg) border border-(--ui-danger-border)")}`}>
                   <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-semibold mb-3 text-slate-900 dark:text-sky-600">{t("Diagnosis")}</h2>
+                    <h2 className="text-2xl font-semibold mb-3 text-(--ui-foreground)">{t("analysis.results.diagnosis")}</h2>
                     {analysisResult?.needs_review && (
-                      <span className="ml-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-semibold border border-amber-200">
-                        ⚠ {t('Needs Radiologist Review')}
+                      <span className="ml-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-(--ui-warning-bg) text-(--ui-foreground) text-sm font-semibold border border-(--ui-warning-border)">
+                        ⚠ {t("analysis.results.needsReview")}
                       </span>
                     )}
                   </div>
 
-                  <p className="text-slate-900 text-lg font-semibold">{analysisResult.display_label ?? analysisResult.prediction}</p>
-                  <p className="text-sm text-slate-700 mt-3">{t("Model:")} {analysisResult.model_version ?? "unknown"} • {t("Inference Time:")} {analysisResult.inference_time_ms ?? 0} ms</p>
-                  {savedToHistory && <p className="text-emerald-700 mt-3">{t("Saved to history")}</p>}
+                  <p className="text-(--ui-foreground) text-lg font-semibold">{analysisResult.display_label ?? analysisResult.prediction}</p>
+                  <p className="text-sm text-(--ui-muted-foreground) mt-3">{t("analysis.results.modelLabel")} {analysisResult.model_version ?? t("analysis.results.unknown")} • {t("analysis.results.inferenceTimeLabel")} {analysisResult.inference_time_ms ?? 0} ms</p>
+                  {savedToHistory && <p className="text-(--ui-success) mt-3">{t("analysis.results.savedToHistory")}</p>}
                 </div>
 
-                <div className="p-6 rounded-3xl shadow-xl bg-linear-to-br from-sky-50 to-white hover:scale-102 transition-transform duration-300">
-                  <h2 className="text-2xl font-semibold mb-3 text-slate-800 dark:text-sky-600">{t("Confidence")}</h2>
-                  <ConfidenceBar confidence={analysisResult.confidence} />
+                <div className="p-6 rounded-3xl shadow-xl card-glass hover:scale-102 transition-transform duration-300">
+                  <h2 className="text-2xl font-semibold mb-3 text-(--ui-foreground)">{t("analysis.results.confidence")}</h2>
+                  <ConfidenceBar
+                    confidence={analysisResult.confidence}
+                    label={t("analysis.results.confidence")}
+                    labelTitle={t("analysis.results.confidenceTitle")}
+                  />
                   {analysisResult.explanation && (
-                    <p className="mt-4 text-slate-700 text-sm"><strong>{t("Explanation")}:</strong> {analysisResult.explanation}</p>
+                    <p className="mt-4 text-(--ui-muted-foreground) text-sm"><strong>{t("analysis.results.explanationLabel")}:</strong> {analysisResult.explanation}</p>
                   )}
                 </div>
               </div>
@@ -371,9 +385,9 @@ export default function AnalysisPage() {
 
             {analysisResult && !(analysisResult.heatmap_url || analysisResult.heatmapUrl) && (
               <div className="mt-2">
-                <h1 className="text-md font-semibold mb-2">{t("Heatmap")}</h1>
-                <div className="w-full h-72 rounded-3xl border border-dashed border-white/10 flex items-center justify-center bg-white/30">
-                  <span className="text-slate-800 text-lg">{t("No heatmap available")}</span>
+                <h1 className="text-md font-semibold mb-2">{t("analysis.results.heatmap")}</h1>
+                <div className="w-full h-72 rounded-3xl border border-dashed border-(--ui-border) flex items-center justify-center bg-(--ui-surface-2)/40">
+                  <span className="text-(--ui-muted-foreground) text-lg">{t("analysis.results.noHeatmap")}</span>
                 </div>
               </div>
             )}

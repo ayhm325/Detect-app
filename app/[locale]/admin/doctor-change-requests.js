@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 // جلب جميع الطلبات (ليست فقط المعلقة) من API
-export function useDoctorChangeRequests() {
+export function useDoctorChangeRequests(refreshKey = 0) {
   const [requests, setRequests] = useState([]);
   useEffect(() => {
     fetch('/api/admin/doctor-change-requests?all=1')
@@ -25,43 +25,33 @@ export function useDoctorChangeRequests() {
         }
       })
       .catch(() => setRequests([]));
-  }, []);
+  }, [refreshKey]);
   return requests;
 }
 
 
 // الموافقة على الطلب
 export async function approveDoctorChangeRequest(id) {
-  try {
-    const res = await fetch('/api/admin/doctor-change-requests', {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, action: 'approve' })
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'خطأ غير معروف');
-    return true;
-  } catch (e) {
-    alert('فشل الموافقة: ' + (e.message || 'خطأ في الاتصال'));
-    return false;
-  }
+  const res = await fetch('/api/admin/doctor-change-requests', {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, action: 'approve' })
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error || 'UNKNOWN_ERROR');
+  return true;
 }
 
 // رفض الطلب
 export async function rejectDoctorChangeRequest(id) {
-  try {
-    const res = await fetch('/api/admin/doctor-change-requests', {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, action: 'reject' })
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'خطأ غير معروف');
-    return true;
-  } catch (e) {
-    alert('فشل الرفض: ' + (e.message || 'خطأ في الاتصال'));
-    return false;
-  }
+  const res = await fetch('/api/admin/doctor-change-requests', {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, action: 'reject' })
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error || 'UNKNOWN_ERROR');
+  return true;
 }

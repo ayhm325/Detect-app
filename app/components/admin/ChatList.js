@@ -2,11 +2,15 @@ export default function ChatList({ chats, onSelect }) {
   return (
     <ul className="space-y-3">
       {chats.map(chat => (
-        <li key={chat.id} className="flex items-center gap-3 p-3 rounded-xl bg-white shadow cursor-pointer hover:bg-yellow-50" onClick={() => onSelect(chat)}>
-          <span className="font-bold text-zinc-700">{chat.doctor}</span>
-          <span className="mx-2 text-zinc-400">→</span>
-          <span className="font-bold text-zinc-700">{chat.patient}</span>
-          <span className="ml-auto text-xs text-zinc-400">{chat.lastMsg}</span>
+        <li
+          key={chat.id}
+          className="card-glass flex items-center gap-3 p-3 rounded-xl border border-(--ui-border) cursor-pointer hover:bg-(--ui-surface-2)/60"
+          onClick={() => onSelect(chat)}
+        >
+          <span className="font-bold text-(--ui-foreground)">{chat.doctor}</span>
+          <span className="mx-2 text-(--ui-muted-foreground)">→</span>
+          <span className="font-bold text-(--ui-foreground)">{chat.patient}</span>
+          <span className="ml-auto text-xs text-(--ui-muted-foreground)">{chat.lastMsg}</span>
         </li>
       ))}
     </ul>

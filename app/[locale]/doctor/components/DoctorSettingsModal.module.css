@@ -4,18 +4,19 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.3);
+  background: color-mix(in srgb, var(--color-neutral) 30%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 .content {
-  background: #fff;
-  border-radius: 8px;
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
   padding: 32px;
   min-width: 340px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+  border: 1px solid var(--ui-border);
+  box-shadow: var(--shadow-lift);
   position: relative;
 }
 .closeBtn {
@@ -31,12 +32,12 @@
   font-size: 20px;
   font-weight: bold;
   margin-bottom: 18px;
-  color: #222;
+  color: var(--color-text);
 }
 .saveBtn {
   padding: 8px 18px;
-  background: #0070f3;
-  color: #fff;
+  background: var(--ui-info);
+  color: var(--ui-info-foreground);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -44,5 +45,5 @@
   margin-top: 18px;
 }
 .saveBtn:hover {
-  background: #005bb5;
+  background: color-mix(in srgb, var(--ui-info) 85%, var(--color-neutral));
 }

@@ -12,7 +12,7 @@ export default function FixedSidebarLayout({
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-(--ui-surface) text-(--ui-foreground)">
       {/* Fixed Sidebar */}
       <FixedSidebar items={sidebarItems} userRole={userRole} collapsed={collapsed} />
 

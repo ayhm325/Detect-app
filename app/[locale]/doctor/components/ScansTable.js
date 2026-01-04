@@ -1,18 +1,23 @@
+"use client";
+
 import React from 'react';
 import ScanCard from './ScanCard';
 import styles from './ScansTable.module.css';
+import { useTranslations } from "next-intl";
 
 export default function ScansTable({ scans, onView, onCompare, onAnnotate }) {
+  const t = useTranslations("doctorResults");
+
   return (
     <table className={styles.table}>
       <thead>
         <tr>
-          <th>رقم الفحص</th>
-          <th>التاريخ</th>
-          <th>النوع</th>
-          <th>ملخص الذكاء الاصطناعي</th>
-          <th>مقارنة</th>
-          <th>إجراءات</th>
+          <th>{t("table.scanNumber")}</th>
+          <th>{t("table.date")}</th>
+          <th>{t("table.scanType")}</th>
+          <th>{t("table.aiSummary")}</th>
+          <th>{t("table.comparison")}</th>
+          <th>{t("table.actions")}</th>
         </tr>
       </thead>
       <tbody>
@@ -22,11 +27,11 @@ export default function ScansTable({ scans, onView, onCompare, onAnnotate }) {
             <td>{scan.date}</td>
             <td>{scan.type}</td>
             <td>{scan.aiSummary}</td>
-            <td>{scan.comparisonAvailable ? "نعم" : "لا"}</td>
+            <td>{scan.comparisonAvailable ? t("table.yes") : t("table.no")}</td>
             <td>
-              <button onClick={() => onView(scan)}>عرض</button>
-              <button onClick={() => onCompare(scan)}>مقارنة</button>
-              <button onClick={() => onAnnotate(scan)}>تعليق توضيحي</button>
+              <button onClick={() => onView(scan)}>{t("table.buttons.view")}</button>
+              <button onClick={() => onCompare(scan)}>{t("table.buttons.compare")}</button>
+              <button onClick={() => onAnnotate(scan)}>{t("table.buttons.annotate")}</button>
             </td>
           </tr>
         ))}

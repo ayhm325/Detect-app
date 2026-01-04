@@ -7,7 +7,7 @@ import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
 
 export const GET = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/admin/users" } });
     return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -20,8 +20,13 @@ export const GET = withRBAC(async (request, user) => {
       },
       orderBy: { createdAt: 'desc' },
     });
+    // Never return password hashes to the client.
+    const safeUsers = users.map((u) => {
+      const { password: _pw, ...rest } = u;
+      return rest;
+    });
     logAudit({ event: "admin_users_listed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { count: users.length } });
-    return Response.json(users);
+    return Response.json(safeUsers);
   } catch (error) {
     logAudit({ event: "admin_users_list_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error.message } });
     return Response.json({ error: "Internal error" }, { status: 500 });
@@ -29,7 +34,7 @@ export const GET = withRBAC(async (request, user) => {
 }, ["admin"]);
 
 export const POST = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "POST /api/admin/users" } });
     return Response.json({ error: "Rate limit exceeded" }, { status: 429 });

@@ -1,5 +1,8 @@
+"use client";
+
 import Input from "@/app/components/ui/Input";
 import Button from "./Button";
+import { useTranslations } from "next-intl";
 
 export default function TableToolbar({
   search,
@@ -9,13 +12,15 @@ export default function TableToolbar({
   actions = [],
   className = "",
 }) {
+  const t = useTranslations("ui");
+
   return (
     <div className={`flex flex-wrap items-center justify-between gap-3 mb-4 ${className}`}>
       <div className="flex items-center gap-2">
         <Input
           value={search}
           onChange={(e) => onSearch?.(e.target.value)}
-          placeholder="بحث..."
+          placeholder={t("search.placeholder")}
           className="w-64"
         />
         {filters?.length > 0 && (
@@ -25,7 +30,7 @@ export default function TableToolbar({
                 key={idx}
                 value={f.value}
                 onChange={(e) => onFilterChange?.(idx, e.target.value)}
-                className="h-10 rounded-md border border-black/10 dark:border-white/20 bg-white dark:bg-zinc-900 px-3 text-sm"
+                className="h-10 rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-foreground) px-3 text-sm"
               >
                 {f.options.map((opt) => (
                   <option key={opt} value={opt}>{opt}</option>

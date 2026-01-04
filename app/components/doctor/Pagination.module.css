@@ -7,8 +7,8 @@
 }
 
 .pagination button {
-  background: #2563eb;
-  color: #fff;
+  background: var(--ui-info);
+  color: var(--ui-info-foreground);
   border: none;
   border-radius: 6px;
   padding: 0.4rem 1.2rem;
@@ -18,12 +18,12 @@
 }
 
 .pagination button:disabled {
-  background: #e5e7eb;
-  color: #888;
+  background: var(--ui-surface-2);
+  color: var(--ui-muted-2);
   cursor: not-allowed;
 }
 
 .pagination span {
   font-size: 1rem;
-  color: #333;
+  color: var(--ui-foreground);
 }

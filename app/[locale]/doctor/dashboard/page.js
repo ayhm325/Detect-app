@@ -9,20 +9,22 @@ import prisma from "../../../../lib/prismaClient.js";
 import DoctorDashboardWrapper from "../../../components/DoctorDashboardWrapper";
 import DoctorLayout from "../DoctorLayout";
 import DashboardHome from "./DashboardHome";
-
-const SECRET = process.env.JWT_SECRET || "your-secret-key";
+import { getJwtSecret } from "../../../../lib/auth/jwtSecret.js";
+import { getJwtVerifyOptions } from "../../../../lib/auth/jwtClaims.js";
+import { getTranslations } from "next-intl/server";
 
 export default async function DoctorDashboard({ params }) {
   const resolvedParams = typeof params?.then === 'function' ? await params : params;
-  const locale = resolvedParams?.locale || "ar";
-  const basePrefix = locale === "en" ? "/en" : "/ar";
+  const locale = resolvedParams?.locale;
+  const basePrefix = `/${locale}`;
+  const tNav = await getTranslations({ locale, namespace: "navigation" });
 
   // read token from cookies and verify
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   let user = null;
   try {
-    if (token) user = jwt.verify(token, SECRET);
+    if (token) user = jwt.verify(token, getJwtSecret(), getJwtVerifyOptions());
   } catch (e) {
     user = null;
   }
@@ -50,19 +52,29 @@ export default async function DoctorDashboard({ params }) {
     ]);
 
     serverData = {
-      doctor: doctor || null,
+      doctor: doctor ?? null,
       counts: {
-        patients: patientsCount || 0,
-        todayAppointments: todayAppointmentsCount || 0,
-        pendingScans: pendingScansCount || 0,
-        newMessages: unreadNotificationsCount || 0,
+        patients: patientsCount ?? 0,
+        todayAppointments: todayAppointmentsCount ?? 0,
+        pendingScans: pendingScansCount ?? 0,
+        newMessages: unreadNotificationsCount ?? 0,
       },
-      todayAppointments: todayAppointmentsList.map(a => ({ id: a.id, time: a.scheduledAt, patient: a.patient?.fullName || a.patientId, type: a.type || 'consultation', status: a.status })),
-      recentActivity: recentActivity.map(r => ({ id: r.id, action: r.description, time: r.createdAt })),
+      todayAppointments: todayAppointmentsList.map((a) => ({
+        id: a.id,
+        time: a.scheduledAt,
+        patient: a.patient?.fullName ?? a.patientId,
+        type: a.type ?? null,
+        status: a.status,
+      })),
+      recentActivity: recentActivity.map((r) => ({
+        id: r.id,
+        action: r.description,
+        time: r.createdAt,
+      })),
     };
   }
 
-  const breadcrumbs = [{ label: locale === "en" ? "Home" : "الرئيسية", href: `${basePrefix}/doctor/dashboard` }];
+  const breadcrumbs = [{ label: tNav("home"), href: `${basePrefix}/doctor/dashboard` }];
 
   return (
     <DoctorDashboardWrapper>

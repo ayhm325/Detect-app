@@ -247,17 +247,39 @@ def summarize_model(
                 if gv_out is None:
                     summary["_visualization_error"] = "Could not find a tensor output to visualize."
                 else:
-                    # create graph and save
-                    # Avoid passing the full params dict (names) to torchviz/graphviz
-                    # because parameter names can include characters that break DOT syntax.
-                    # Passing None produces a cleaner graph without per-parameter labels.
+                    # create graph but sanitize DOT labels before rendering. Some
+                    # module/shape/param labels contain characters that break
+                    # Graphviz DOT syntax on Windows; to be robust we remove
+                    # inline label attributes from the DOT source before render.
                     graph = make_dot(gv_out, params=None)
-                    # save in multiple formats if possible
-                    svg_path = viz_path + ".svg"
-                    pdf_path = viz_path + ".pdf"
-                    graph.format = "svg"
-                    graph.render(filename=viz_path, cleanup=True)
-                    summary["_visualization"] = {"rendered": True, "path": os.path.abspath(svg_path)}
+                    try:
+                        dot_src = graph.source
+                        # Remove label attributes entirely to avoid syntax errors.
+                        # This preserves node connectivity while dropping textual labels.
+                        import re
+                        sanitized = re.sub(r'label\s*=\s*"[^"]*"', '', dot_src)
+                        # Render sanitized DOT using graphviz.Source
+                        try:
+                            from graphviz import Source
+                            s = Source(sanitized)
+                            s.format = 'svg'
+                            s.render(filename=viz_path, cleanup=True)
+                            svg_path = viz_path + '.svg'
+                            summary["_visualization"] = {"rendered": True, "path": os.path.abspath(svg_path)}
+                        except Exception:
+                            # fallback: write sanitized dot to file and try system dot
+                            dot_file = viz_path + '.dot'
+                            with open(dot_file, 'w', encoding='utf-8') as f:
+                                f.write(sanitized)
+                            # attempt to call dot to render svg
+                            try:
+                                import subprocess
+                                subprocess.check_call(['dot', '-Tsvg', dot_file, '-o', viz_path + '.svg'])
+                                summary["_visualization"] = {"rendered": True, "path": os.path.abspath(viz_path + '.svg')}
+                            except Exception as e:
+                                summary["_visualization_error"] = f"Sanitized render failed: {e}"
+                    except Exception as e:
+                        summary["_visualization_error"] = f"Failed to sanitize/prepare DOT: {e}"
             except Exception as e:
                 summary["_visualization_error"] = f"Visualization failed: {e}"
 

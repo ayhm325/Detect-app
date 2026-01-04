@@ -7,12 +7,12 @@ export default function AnalysisCompareTool({ leftImage, rightImage, comments })
   const [slider, setSlider] = useState(50);
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white/70 shadow-sm">
-      <header className="flex items-center justify-between border-b border-gray-200 p-4">
-        <h2 className="text-lg font-semibold text-gray-900">أداة مقارنة الصور</h2>
+    <section className="card-glass rounded-xl border border-(--ui-border) shadow-sm">
+      <header className="flex items-center justify-between border-b border-(--ui-border) p-4">
+        <h2 className="text-lg font-semibold text-(--ui-foreground)">أداة مقارنة الصور</h2>
       </header>
       <div className="p-4">
-        <div className="relative mx-auto h-80 max-w-3xl overflow-hidden rounded-lg border border-gray-200 bg-black">
+        <div className="relative mx-auto h-80 max-w-3xl overflow-hidden rounded-lg border border-(--ui-border) bg-(--color-neutral)">
           {/* صورة اليسار */}
           {leftImage && (
             <Image
@@ -48,13 +48,13 @@ export default function AnalysisCompareTool({ leftImage, rightImage, comments })
           />
         </div>
         {comments && (
-          <div className="mt-4 rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-800">
-            <div className="mb-1 text-gray-600">تعليقات الطبيب</div>
+          <div className="mt-4 rounded-md border border-(--ui-border) bg-(--ui-surface-2)/40 p-3 text-sm text-(--ui-foreground)">
+            <div className="mb-1 text-(--ui-muted-foreground)">تعليقات الطبيب</div>
             <div>{comments}</div>
           </div>
         )}
         <div className="mt-3">
-          <button className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-700">حفظ المقارنة</button>
+          <button className="btn-gradient rounded-md px-3 py-1.5 text-sm text-white">حفظ المقارنة</button>
         </div>
       </div>
     </section>

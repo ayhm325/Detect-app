@@ -4,14 +4,15 @@ import React from 'react';
 import { FaHome, FaUserInjured, FaXRay, FaComments, FaCalendarAlt, FaChartBar, FaBell, FaCog } from 'react-icons/fa';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import styles from './DoctorSidebar.module.css';
 
 export default function DoctorSidebar({ active }) {
   const pathname = usePathname();
-  const locale = pathname?.startsWith('/en') ? 'en' : 'ar';
+  const localeValue = useLocale();
+  const locale = localeValue || (pathname?.startsWith('/en') ? 'en' : 'ar');
   const basePrefix = locale === 'en' ? '/en' : '/ar';
 
-  const { useTranslations } = require('next-intl');
   const t = useTranslations('doctorSidebar');
   const navItems = [
     { label: t('dashboard'), icon: <FaHome />, href: `${basePrefix}/doctor/dashboard` },

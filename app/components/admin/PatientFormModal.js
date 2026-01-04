@@ -90,30 +90,30 @@ function PatientFormModal() {
   /* ================= Helpers ================= */
   const statusClass = (s) =>
     s === "confirmed"
-      ? "bg-green-100 text-green-700"
-      : "bg-orange-100 text-orange-700";
+      ? "bg-(--ui-success-bg) text-(--ui-success-foreground)"
+      : "bg-(--ui-warning-bg) text-(--ui-warning-foreground)";
 
   /* ================= Render ================= */
   return (
     <>
       <ToastContainer />
 
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-6">
+      <div className="min-h-screen bg-(--ui-surface) p-6 text-(--ui-foreground)">
         {/* Header */}
         <div className="flex justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold">
               {t("dashboard.welcome")} 👋
             </h1>
-            <p className="text-gray-500 mt-2">{todayDate}</p>
+            <p className="text-(--ui-muted-foreground) mt-2">{todayDate}</p>
           </div>
 
           <button
             onClick={() => router.push(`${basePrefix}/patient/notifications`)}
-            className="relative p-3 bg-white dark:bg-slate-800 rounded-full shadow"
+            className="relative p-3 rounded-full border border-(--ui-border) bg-(--ui-surface) hover:bg-(--ui-surface-2)/60"
           >
             <FaBell />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+            <span className="absolute -top-1 -right-1 bg-(--ui-danger) text-(--ui-danger-foreground) text-xs w-5 h-5 flex items-center justify-center rounded-full">
               3
             </span>
           </button>
@@ -122,16 +122,16 @@ function PatientFormModal() {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((s, i) => (
-            <div key={i} className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+            <div key={i} className="card-glass p-6 rounded-xl border border-(--ui-border)">
               <div className="flex justify-between mb-3">
-                <s.icon className="text-2xl text-blue-500" />
+                <s.icon className="text-2xl text-(--ui-info)" />
                 {s.trend && (
-                  <span className="text-green-600 flex items-center gap-1">
+                  <span className="text-(--ui-success) flex items-center gap-1">
                     <FaArrowUp /> {s.change}
                   </span>
                 )}
               </div>
-              <p className="text-gray-500">{s.title}</p>
+              <p className="text-(--ui-muted-foreground)">{s.title}</p>
               <p className="text-3xl font-bold">{s.value}</p>
             </div>
           ))}

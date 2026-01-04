@@ -10,6 +10,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+
+    // Local tooling / non-app code:
+    ".venv/**",
+    "python_model/venv/**",
+    "**/__pycache__/**",
   ]),
 ]);
 

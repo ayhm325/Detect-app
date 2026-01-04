@@ -8,7 +8,7 @@ import { logAudit } from "../../../../lib/security/auditLogger";
 
 
 export const GET = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/patient/results" } });
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -23,8 +23,15 @@ export const GET = withRBAC(async (request, user) => {
       records = await getMedicalRecordsForPatient(patient.id);
     } catch (e) {
       records = await prisma.medicalRecord.findMany({
-        where: { patientId: patient.id, isDeleted: false },
-        include: { doctor: { include: { user: true } } },
+        where: { patientId: patient.id },
+        include: {
+          doctor: {
+            select: {
+              userId: true,
+              user: { select: { id: true, fullName: true, email: true } },
+            },
+          },
+        },
         orderBy: { createdAt: "desc" }
       });
     }
@@ -44,7 +51,7 @@ export const GET = withRBAC(async (request, user) => {
       aiResult: r.aiResult || null,
       confidenceScore: r.confidenceScore || null,
       createdAt: r.createdAt,
-      doctor: r.doctor?.user ? { id: r.doctor.id, name: r.doctor.user.displayName } : null
+      doctor: r.doctor?.user ? { id: r.doctor.userId, name: r.doctor.user.fullName || null } : null
     }));
 
     logAudit({ event: "patient_results_viewed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { count: out.length } });

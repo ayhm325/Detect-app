@@ -1,10 +1,14 @@
+"use client";
+
 import React, { useState } from 'react';
 import Image from 'next/image';
 import ScanThumbnails from './ScanThumbnails';
 import ScanAnnotations from './ScanAnnotations';
 import styles from './ScanViewer.module.css';
+import { useTranslations } from "next-intl";
 
 export default function ScanViewer({ scan, images, annotations, onClose }) {
+  const t = useTranslations("doctorResults");
   const [selectedImage, setSelectedImage] = useState(images[0]);
   const [zoom, setZoom] = useState(1);
 
@@ -14,16 +18,16 @@ export default function ScanViewer({ scan, images, annotations, onClose }) {
   return (
     <div className={styles.overlay}>
       <div className={styles.viewer}>
-        <button className={styles.closeBtn} onClick={onClose}>إغلاق</button>
-        <h2>عارض الفحص: {scan.type}</h2>
+        <button className={styles.closeBtn} onClick={onClose}>{t("scanViewer.close")}</button>
+        <h2>{t("scanViewer.title", { type: scan.type })}</h2>
         <div className={styles.controls}>
-          <button onClick={handleZoomIn}>تكبير</button>
-          <button onClick={handleZoomOut}>تصغير</button>
+          <button onClick={handleZoomIn}>{t("scanViewer.zoomIn")}</button>
+          <button onClick={handleZoomOut}>{t("scanViewer.zoomOut")}</button>
         </div>
         <div className={`${styles.imageContainer} relative`} style={{ transform: `scale(${zoom})` }}>
           <Image
             src={selectedImage}
-            alt="صورة الفحص"
+            alt={t("scanViewer.imageAlt")}
             fill
             sizes="90vw"
             className={styles.image}

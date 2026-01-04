@@ -1,8 +1,16 @@
 import prisma from '../../../../../lib/prismaClient';
+import { withRBAC } from '../../../../../lib/auth/withRBAC';
+import { rateLimit } from '../../../../../lib/security/rateLimiter';
+import { logAudit } from '../../../../../lib/security/auditLogger';
 
-export async function PATCH(req, { params }) {
-  // In Next.js app routes, `params` may be a Promise — await it before use
-  const resolvedParams = typeof params?.then === 'function' ? await params : params;
+export const PATCH = withRBAC(async (request, user, context) => {
+  const rl = await rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "PATCH /api/admin/patients/[id]" } });
+    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
+  const resolvedParams = typeof context?.params?.then === 'function' ? await context.params : context?.params;
   const { id } = resolvedParams || {};
   if (!id) {
     return new Response(JSON.stringify({ error: 'Missing patient id' }), { status: 400 });
@@ -25,7 +33,7 @@ export async function PATCH(req, { params }) {
 
   let body;
   try {
-    body = await req.json();
+    body = await request.json();
   } catch (e) {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 });
   }
@@ -80,12 +88,25 @@ export async function PATCH(req, { params }) {
     // Return updated patient with included user
     const patientWithUser = await prisma.patient.findUnique({
       where: { id },
-      include: { user: true },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            role: true,
+            isActive: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
     });
 
+    logAudit({ event: "admin_patient_updated", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { patientId: id } });
     return new Response(JSON.stringify(patientWithUser), { status: 200 });
   } catch (error) {
-    console.error('Error updating patient:', error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    logAudit({ event: "admin_patient_update_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { patientId: id, error: error?.message } });
+    return new Response(JSON.stringify({ error: 'Server error' }), { status: 500 });
   }
-}
+}, ["admin"]);

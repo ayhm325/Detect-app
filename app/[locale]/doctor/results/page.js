@@ -24,14 +24,15 @@ import {
   FaPrint,
   FaShare,
 } from "react-icons/fa";
-import useLocale from "../../../hooks/useLocale";
 import { formatDate } from "../../../lib/date";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function DoctorResultsPage() {
   const { showToast, ToastContainer } = useToast();
-  const { locale } = useLocale();
+  const locale = useLocale();
   const t = useTranslations("doctorResults");
+  const ui = useTranslations("ui");
+  const placeholder = ui("placeholder");
 
   // ...existing code...
   // Replace all labels.X with t("key")
@@ -52,22 +53,41 @@ export default function DoctorResultsPage() {
   useEffect(() => {
     fetch("/api/doctor/results")
       .then(async (res) => {
-        if (!res.ok) throw new Error("Failed to fetch results");
+        if (!res.ok) throw new Error(t("errors.fetchResultsFailed"));
         const data = await res.json();
         // Transform API data to match UI expectations
-        const mapped = (data.records || []).map((r) => ({
-          id: r.id,
-          patientName: r.patient?.name || "-",
-          patientId: r.patient?.id || "-",
-          type: r.title || "X-Ray",
-          bodyPart: t("bodyPart", { defaultValue: "Chest" }),
-          date: r.createdAt,
-          time: r.createdAt,
-          status: "completed", // Assume completed for now
-          aiSummary: r.aiResult || t("aiSummary", { defaultValue: "No AI summary" }),
-          thumbnail: r.imageUrl || "/icons/xray-placeholder.png",
-          findings: r.aiResult ? [{ type: "ai", text: r.aiResult }] : [],
-        }));
+        const inferTypeKey = (rawTitle) => {
+          if (!rawTitle || typeof rawTitle !== "string") return null;
+          const title = rawTitle.toLowerCase();
+          if (title.includes("ct")) return "ct";
+          if (title.includes("mri")) return "mri";
+          if (title.includes("ultra")) return "ultrasound";
+          if (title.includes("x-ray") || title.includes("xray")) return "xray";
+          return null;
+        };
+
+        const mapped = (data.records || []).map((r) => {
+          const inferredTypeKey = inferTypeKey(r.title);
+          const typeKey = inferredTypeKey ?? "xray";
+          const typeLabel = inferredTypeKey
+            ? t(`scanTypes.${inferredTypeKey}`)
+            : (r.title || t("scanTypes.xray"));
+
+          return {
+            id: r.id,
+            patientName: r.patient?.name || placeholder,
+            patientId: r.patient?.id || placeholder,
+            typeKey,
+            typeLabel,
+            bodyPart: t("defaults.bodyPart"),
+            date: r.createdAt,
+            time: r.createdAt,
+            status: "completed", // Assume completed for now
+            aiSummary: r.aiResult || t("defaults.noAiSummary"),
+            thumbnail: r.imageUrl || "/icons/xray-placeholder.png",
+            findings: r.aiResult ? [{ type: "ai", text: r.aiResult }] : [],
+          };
+        });
         setScans(mapped);
         setLoading(false);
       })
@@ -75,7 +95,7 @@ export default function DoctorResultsPage() {
         setError(err.message);
         setLoading(false);
       });
-  }, [t]);
+  }, [t, placeholder]);
 
   const stats = {
     total: scans.length,
@@ -94,13 +114,13 @@ export default function DoctorResultsPage() {
 
   const filteredScans = scans
     .filter((scan) => {
-      if (filterType !== "all" && scan.type !== filterType) return false;
+      if (filterType !== "all" && scan.typeKey !== filterType) return false;
       if (filterStatus !== "all" && scan.status !== filterStatus) return false;
       if (searchQuery) {
         return (
           (scan.patientName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
           (scan.patientId || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (scan.type || "").toLowerCase().includes(searchQuery.toLowerCase())
+          (scan.typeLabel || "").toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
       return true;
@@ -129,9 +149,9 @@ export default function DoctorResultsPage() {
 
   const getStatusBadge = (status) => {
     const config = {
-      completed: { label: t("statuses.completed"), color: "bg-green-100 text-green-700 border-green-200", icon: FaCheckCircle },
-      pending: { label: t("statuses.pending"), color: "bg-orange-100 text-orange-700 border-orange-200", icon: FaHourglassHalf },
-      urgent: { label: t("statuses.urgent"), color: "bg-red-100 text-red-700 border-red-200", icon: FaExclamationTriangle },
+      completed: { label: t("statuses.completed"), color: "bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)", icon: FaCheckCircle },
+      pending: { label: t("statuses.pending"), color: "bg-(--ui-warning-bg) text-(--ui-warning) border-(--ui-warning-border)", icon: FaHourglassHalf },
+      urgent: { label: t("statuses.urgent"), color: "bg-(--ui-danger-bg) text-(--ui-danger) border-(--ui-danger-border)", icon: FaExclamationTriangle },
     };
     const c = config[status] || config.pending;
     const Icon = c.icon;
@@ -143,14 +163,14 @@ export default function DoctorResultsPage() {
     );
   };
 
-  const getTypeIcon = (type) => {
+  const getTypeIcon = (typeKey) => {
     const typeConfig = {
-      "X-Ray": { icon: "🩻", color: "bg-blue-100 text-blue-700" },
-      "CT Scan": { icon: "🔬", color: "bg-purple-100 text-purple-700" },
-      "MRI": { icon: "🧲", color: "bg-green-100 text-green-700" },
-      "Ultrasound": { icon: "📡", color: "bg-orange-100 text-orange-700" },
+      xray: { icon: "🩻", color: "bg-(--ui-info-bg) text-(--ui-info)" },
+      ct: { icon: "🔬", color: "bg-(--ui-info-bg) text-(--ui-info)" },
+      mri: { icon: "🧲", color: "bg-(--ui-success-bg) text-(--ui-success)" },
+      ultrasound: { icon: "📡", color: "bg-(--ui-warning-bg) text-(--ui-warning)" },
     };
-    const config = typeConfig[type] || typeConfig["X-Ray"];
+    const config = typeConfig[typeKey] || typeConfig.xray;
     return (
       <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${config.color} text-xl`}>
         {config.icon}
@@ -163,7 +183,7 @@ export default function DoctorResultsPage() {
       <DoctorLayout>
         <ToastContainer />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-lg text-gray-500">{t("loading", { defaultValue: "Loading results..." })}</div>
+          <div className="text-lg text-(--ui-muted-foreground)">{t("loading")}</div>
         </div>
       </DoctorLayout>
     );
@@ -174,7 +194,7 @@ export default function DoctorResultsPage() {
       <DoctorLayout>
         <ToastContainer />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-lg text-red-500">{t("error", { defaultValue: "Error loading results:" })} {error}</div>
+          <div className="text-lg text-(--ui-danger)">{t("error")} {error}</div>
         </div>
       </DoctorLayout>
     );
@@ -184,80 +204,76 @@ export default function DoctorResultsPage() {
     <DoctorLayout>
       <ToastContainer />
       <div
-        className={`min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6 text-gray-900 dark:text-gray-100
-        [&_div.bg-white]:dark:bg-zinc-900 [&_div.bg-white]:dark:border-zinc-800
-        [&_p.text-gray-900]:dark:text-white [&_p.text-gray-600]:dark:text-gray-300 [&_p.text-gray-500]:dark:text-gray-400
-        [&_span.text-gray-900]:dark:text-white [&_span.text-gray-600]:dark:text-gray-300
-        [&_input.bg-white]:dark:bg-zinc-900 [&_input.border-gray-300]:dark:border-zinc-700 [&_input.text-gray-900]:dark:text-gray-100`}
+        className="min-h-screen bg-(--ui-surface-2) text-(--ui-foreground) p-6"
       >
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <FaXRay className="text-blue-600" />
+              <h1 className="text-3xl font-bold text-(--ui-foreground) flex items-center gap-3">
+                <FaXRay className="text-(--ui-info)" />
                 {t("title")}
               </h1>
-              <p className="mt-2 text-gray-600">{t("subtitle")}</p>
+              <p className="mt-2 text-(--ui-muted-foreground)">{t("subtitle")}</p>
             </div>
           </div>
 
           {/* Stats Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{t("stats.total", { defaultValue: "Total scans" })}</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">{stats.total}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.total")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{stats.total}</p>
                 </div>
-                <FaXRay className="text-3xl text-blue-600" />
+                <FaXRay className="text-3xl text-(--ui-info)" />
               </div>
             </div>
 
-            <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{t("stats.completed", { defaultValue: "Completed" })}</p>
-                  <p className="mt-1 text-3xl font-bold text-green-600">{stats.completed}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.completed")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-success)">{stats.completed}</p>
                 </div>
-                <FaCheckCircle className="text-3xl text-green-600" />
+                <FaCheckCircle className="text-3xl text-(--ui-success)" />
               </div>
             </div>
 
-            <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{t("stats.pending", { defaultValue: "Under review" })}</p>
-                  <p className="mt-1 text-3xl font-bold text-orange-600">{stats.pending}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.pending")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-warning)">{stats.pending}</p>
                 </div>
-                <FaHourglassHalf className="text-3xl text-orange-600" />
+                <FaHourglassHalf className="text-3xl text-(--ui-warning)" />
               </div>
             </div>
 
-            <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{t("stats.today", { defaultValue: "Today" })}</p>
-                  <p className="mt-1 text-3xl font-bold text-blue-600">{stats.today}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.today")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-info)">{stats.today}</p>
                 </div>
-                <FaCalendarAlt className="text-3xl text-blue-600" />
+                <FaCalendarAlt className="text-3xl text-(--ui-info)" />
               </div>
             </div>
           </div>
 
           {/* Filters */}
-          <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+          <div className="card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border)">
             <div className="flex flex-wrap items-center gap-4">
               {/* Search */}
               <div className="flex-1 min-w-62.5">
                 <div className="relative">
-                  <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-(--ui-muted-foreground)" />
                   <input
                     type="text"
-                    placeholder={t("searchPlaceholder", { defaultValue: "Search by patient name or ID..." })}
+                    placeholder={t("searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-10 pl-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) py-2 pr-10 pl-4 text-sm text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                   />
                 </div>
               </div>
@@ -266,11 +282,11 @@ export default function DoctorResultsPage() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-2 text-sm font-medium text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
               >
-                <option value="all">{t("filters.allStatuses", { defaultValue: "All statuses" })}</option>
-                <option value="completed">{t("status.completed", { defaultValue: "Completed" })}</option>
-                <option value="pending">{t("status.pending", { defaultValue: "Under review" })}</option>
+                <option value="all">{t("filters.allStatuses")}</option>
+                <option value="completed">{t("status.completed")}</option>
+                <option value="pending">{t("status.pending")}</option>
               </select>
             </div>
           </div>
@@ -280,25 +296,25 @@ export default function DoctorResultsPage() {
             {filteredScans.map((scan, idx) => (
               <div
                 key={`${scan.id ?? 'scan'}-${idx}`}
-                className="group rounded-xl bg-white p-6 shadow-lg border border-gray-100 transition-all hover:shadow-2xl"
+                className="group card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border) transition-all hover:shadow-(--shadow-lift)"
               >
                 {/* Header */}
                 <div className="mb-4 flex items-start justify-between">
-                  {getTypeIcon(scan.type)}
+                  {getTypeIcon(scan.typeKey)}
                   {getStatusBadge(scan.status)}
                 </div>
 
                 {/* Patient Info */}
                 <div className="mb-4 space-y-2">
-                  <h3 className="text-lg font-bold text-gray-900">{scan.patientName}</h3>
-                  <p className="text-sm text-gray-600">{t("patientId")} {scan.patientId}</p>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <h3 className="text-lg font-bold text-(--ui-foreground)">{scan.patientName}</h3>
+                  <p className="text-sm text-(--ui-muted-foreground)">{t("patientId")} {scan.patientId}</p>
+                  <div className="flex items-center gap-4 text-sm text-(--ui-muted-foreground)">
                     <div className="flex items-center gap-1">
-                      <FaCalendarAlt className="text-blue-600" />
-                      {formatDate(scan.date, locale)}
+                      <FaCalendarAlt className="text-(--ui-info)" />
+                      {formatDate(scan.date, locale, ui("placeholder"))}
                     </div>
                     <div className="flex items-center gap-1">
-                      <FaClock className="text-purple-600" />
+                      <FaClock className="text-(--ui-info)" />
                       {scan.time}
                     </div>
                   </div>
@@ -307,19 +323,19 @@ export default function DoctorResultsPage() {
                 {/* Scan Details */}
                 <div className="mb-4 space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">{t("type")}</span>
-                    <span className="text-sm text-gray-600">{scan.type}</span>
+                    <span className="text-sm font-medium text-(--ui-foreground)">{t("type")}</span>
+                    <span className="text-sm text-(--ui-muted-foreground)">{scan.typeLabel}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">{t("bodyPart")}</span>
-                    <span className="text-sm text-gray-600">{scan.bodyPart}</span>
+                    <span className="text-sm font-medium text-(--ui-foreground)">{t("bodyPart")}</span>
+                    <span className="text-sm text-(--ui-muted-foreground)">{scan.bodyPart}</span>
                   </div>
                 </div>
 
                 {/* AI Summary */}
-                <div className="mb-4 rounded-lg bg-blue-50 border border-blue-200 p-3">
-                  <p className="text-xs font-medium text-blue-900 mb-1">{t("aiSummary")}</p>
-                  <p className="text-sm text-blue-800">{scan.aiSummary}</p>
+                <div className="mb-4 rounded-lg bg-(--ui-info-bg) border border-(--ui-info-border) p-3">
+                  <p className="text-xs font-medium text-(--ui-info) mb-1">{t("aiSummary")}</p>
+                  <p className="text-sm text-(--ui-foreground)">{scan.aiSummary}</p>
                 </div>
 
                 {/* Findings */}
@@ -330,10 +346,10 @@ export default function DoctorResultsPage() {
                         key={idx}
                         className={`text-xs px-2 py-1 rounded ${
                           finding.type === "normal"
-                            ? "bg-green-50 text-green-700"
+                            ? "bg-(--ui-success-bg) text-(--ui-success)"
                             : finding.type === "warning"
-                            ? "bg-orange-50 text-orange-700"
-                            : "bg-blue-50 text-blue-700"
+                            ? "bg-(--ui-warning-bg) text-(--ui-warning)"
+                            : "bg-(--ui-info-bg) text-(--ui-info)"
                         }`}
                       >
                         • {finding.text}
@@ -346,21 +362,21 @@ export default function DoctorResultsPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleViewScan(scan)}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-lg btn-gradient px-4 py-2 text-sm font-medium text-white transition-all"
                   >
                     <FaEye />
                     {t("actions.view")}
                   </button>
                   <button
                     onClick={() => handleDownload(scan)}
-                    className="flex items-center justify-center rounded-lg bg-gray-100 px-3 py-2 text-gray-700 transition-all hover:bg-gray-200"
+                    className="flex items-center justify-center rounded-lg bg-(--ui-surface-2) border border-(--ui-border) px-3 py-2 text-(--ui-foreground) transition-all hover:bg-(--ui-surface-2)/70"
                     title={t("actions.download")}
                   >
                     <FaDownload />
                   </button>
                   <button
                     onClick={() => handlePrint(scan)}
-                    className="flex items-center justify-center rounded-lg bg-gray-100 px-3 py-2 text-gray-700 transition-all hover:bg-gray-200"
+                    className="flex items-center justify-center rounded-lg bg-(--ui-surface-2) border border-(--ui-border) px-3 py-2 text-(--ui-foreground) transition-all hover:bg-(--ui-surface-2)/70"
                     title={t("actions.print")}
                   >
                     <FaPrint />
@@ -371,9 +387,9 @@ export default function DoctorResultsPage() {
           </div>
 
           {filteredScans.length === 0 && (
-            <div className="rounded-xl bg-white p-12 text-center shadow-lg border border-gray-100">
-              <FaXRay className="mx-auto mb-4 text-5xl text-gray-300" />
-              <p className="text-lg text-gray-600">{t("emptyState", { defaultValue: "No results found." })}</p>
+            <div className="card-glass rounded-xl p-12 text-center shadow-(--shadow-soft) border border-(--ui-border)">
+              <FaXRay className="mx-auto mb-4 text-5xl text-(--ui-muted-foreground) opacity-50" />
+              <p className="text-lg text-(--ui-muted-foreground)">{t("emptyState")}</p>
             </div>
           )}
         </div>
@@ -381,41 +397,41 @@ export default function DoctorResultsPage() {
 
       {/* Image Viewer Modal */}
       {viewerOpen && selectedScan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
-          <div className={`relative bg-white rounded-xl shadow-2xl overflow-hidden ${isFullscreen ? "w-full h-full" : "max-w-5xl w-full max-h-[90vh]"}`}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-(--color-neutral)/90 p-4">
+          <div className={`relative card-glass rounded-xl shadow-(--shadow-lift) overflow-hidden border border-(--ui-border) ${isFullscreen ? "w-full h-full" : "max-w-5xl w-full max-h-[90vh]"}`}>
             {/* Viewer Header */}
-            <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 p-4">
+            <div className="flex items-center justify-between border-b border-(--ui-border) bg-(--ui-surface) p-4">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{selectedScan.patientName}</h2>
-                <p className="text-sm text-gray-600">
-                  {selectedScan.type} - {selectedScan.bodyPart}
+                <h2 className="text-xl font-bold text-(--ui-foreground)">{selectedScan.patientName}</h2>
+                <p className="text-sm text-(--ui-muted-foreground)">
+                  {selectedScan.typeLabel} - {selectedScan.bodyPart}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsFullscreen(!isFullscreen)}
-                  className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-200"
-                  title={isFullscreen ? (locale === "en" ? "Exit fullscreen" : "تصغير") : (locale === "en" ? "Fullscreen" : "ملء الشاشة")}
+                  className="rounded-lg p-2 text-(--ui-muted-foreground) transition-all hover:bg-(--ui-surface-2)"
+                  title={isFullscreen ? t("viewer.exitFullscreen") : t("viewer.fullscreen")}
                 >
                   {isFullscreen ? <FaCompress /> : <FaExpand />}
                 </button>
                 <button
                   onClick={() => handleDownload(selectedScan)}
-                  className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-200"
+                  className="rounded-lg p-2 text-(--ui-muted-foreground) transition-all hover:bg-(--ui-surface-2)"
                   title={t("actions.download")}
                 >
                   <FaDownload />
                 </button>
                 <button
                   onClick={() => handleShare(selectedScan)}
-                  className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-200"
-                  title={locale === "en" ? "Share" : "مشاركة"}
+                  className="rounded-lg p-2 text-(--ui-muted-foreground) transition-all hover:bg-(--ui-surface-2)"
+                  title={t("actions.share")}
                 >
                   <FaShare />
                 </button>
                 <button
                   onClick={() => setViewerOpen(false)}
-                  className="rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-200"
+                  className="rounded-lg p-2 text-(--ui-muted-foreground) transition-all hover:bg-(--ui-surface-2)"
                   title={t("actions.close")}
                 >
                   <FaTimes />
@@ -425,7 +441,7 @@ export default function DoctorResultsPage() {
 
             {/* Viewer Content */}
             <div className="p-6 overflow-y-auto" style={{ maxHeight: isFullscreen ? "calc(100vh - 80px)" : "70vh" }}>
-              <div className="mb-6 relative w-full overflow-hidden rounded-lg border border-gray-300 aspect-video bg-black">
+              <div className="mb-6 relative w-full overflow-hidden rounded-lg border border-(--ui-border) aspect-video bg-(--color-neutral)">
                 <Image
                   src={selectedScan.thumbnail}
                   alt={selectedScan.patientName}
@@ -436,28 +452,28 @@ export default function DoctorResultsPage() {
               </div>
 
               {/* AI Analysis */}
-              <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 mb-4">
-                <h3 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+              <div className="rounded-lg bg-(--ui-info-bg) border border-(--ui-info-border) p-4 mb-4">
+                <h3 className="font-bold text-(--ui-info) mb-2 flex items-center gap-2">
                   <FaFileAlt />
                   {t("viewer.aiAnalysis")}
                 </h3>
-                <p className="text-blue-800">{selectedScan.aiSummary}</p>
+                <p className="text-(--ui-foreground)">{selectedScan.aiSummary}</p>
               </div>
 
               {/* Findings */}
               {selectedScan.findings.length > 0 && (
-                <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
-                  <h3 className="font-bold text-gray-900 mb-3">{t("viewer.findings")}:</h3>
+                <div className="rounded-lg bg-(--ui-surface-2) border border-(--ui-border) p-4">
+                  <h3 className="font-bold text-(--ui-foreground) mb-3">{t("viewer.findings")}: </h3>
                   <div className="space-y-2">
                     {selectedScan.findings.map((finding, idx) => (
                       <div
                         key={idx}
                         className={`p-3 rounded-lg ${
                           finding.type === "normal"
-                            ? "bg-green-50 border border-green-200"
+                            ? "bg-(--ui-success-bg) border border-(--ui-success-border)"
                             : finding.type === "warning"
-                            ? "bg-orange-50 border border-orange-200"
-                            : "bg-blue-50 border border-blue-200"
+                            ? "bg-(--ui-warning-bg) border border-(--ui-warning-border)"
+                            : "bg-(--ui-info-bg) border border-(--ui-info-border)"
                         }`}
                       >
                         <p className="text-sm font-medium">{finding.text}</p>

@@ -3,8 +3,10 @@ import PasswordChangeForm from './PasswordChangeForm';
 import AvailabilitySettings from './AvailabilitySettings';
 import NotificationSettings from './NotificationSettings';
 import styles from './DoctorSettingsModal.module.css';
+import { useTranslations } from 'next-intl';
 
 export default function DoctorSettingsModal({ open, onClose, doctor, onSave }) {
+  const t = useTranslations('doctorSettings');
   const [settings, setSettings] = useState({ ...doctor });
 
   if (!open) return null;
@@ -21,13 +23,13 @@ export default function DoctorSettingsModal({ open, onClose, doctor, onSave }) {
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <h2>إعدادات الدكتور</h2>
+        <h2>{t('doctorSettings.title')}</h2>
         <AvailabilitySettings value={settings.availability} onChange={v => handleChange('availability', v)} />
         <NotificationSettings value={settings.notifications} onChange={v => handleChange('notifications', v)} />
         <PasswordChangeForm onChange={v => handleChange('password', v)} />
         <div className={styles.actions}>
-          <button onClick={handleSave}>حفظ</button>
-          <button onClick={onClose}>إلغاء</button>
+          <button onClick={handleSave}>{t('doctorSettings.save_changes')}</button>
+          <button onClick={onClose}>{t('doctorSettings.cancel')}</button>
         </div>
       </div>
     </div>

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma from "../../../../lib/prismaClient.js";
-
-const SECRET = process.env.JWT_SECRET || "your-secret-key";
+import { getJwtSecret } from "../../../../lib/auth/jwtSecret.js";
+import { getJwtVerifyOptions } from "../../../../lib/auth/jwtClaims.js";
 
 export async function DELETE(request, context) {
   try {
@@ -26,7 +26,7 @@ export async function DELETE(request, context) {
     }
     let user;
     try {
-      user = jwt.verify(token, SECRET);
+      user = jwt.verify(token, getJwtSecret(), getJwtVerifyOptions());
     } catch (e) {
       return NextResponse.json({ error: "invalid_token" }, { status: 401 });
     }
@@ -40,6 +40,8 @@ export async function DELETE(request, context) {
     } else if (user.role === "patient") {
       const patient = await prisma.patient.findUnique({ where: { userId: user.id } });
       if (!patient || patient.id !== chat.patientId) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    } else if (user.role === "admin") {
+      // admins may delete any chat
     } else {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }

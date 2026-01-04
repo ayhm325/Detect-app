@@ -20,8 +20,7 @@ function generateUUID() {
 import { isTokenRevoked } from '../../../../lib/auth/revocation.server.js';
 import { runInference } from '../../../../ai/inference/inference.service.js';
 import { saveAnalysisResult } from '../../../../services/analysisResult.service.js';
-
-const SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { getJwtSecret } from '../../../../lib/auth/jwtSecret.js';
 
 export async function POST(request) {
   try {
@@ -47,8 +46,7 @@ export async function POST(request) {
 
     let payload;
     try {
-      console.log('/api/analysis/analyze: verifying token prefix', String(token).slice(0,12), 'secret-prefix', String(SECRET).slice(0,12));
-      payload = jwt.verify(token, SECRET);
+      payload = jwt.verify(token, getJwtSecret());
     } catch (e) {
       console.error('/api/analysis/analyze: token verify failed', e && e.message);
       return NextResponse.json({ error: 'invalid_token' }, { status: 401 });

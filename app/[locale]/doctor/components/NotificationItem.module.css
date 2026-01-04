@@ -2,16 +2,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f8fafc;
+  background: var(--ui-surface);
   border-radius: 8px;
   padding: 0.75rem 1rem;
   margin-bottom: 0.5rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: var(--shadow-soft);
 }
 
 .urgent {
-  border-left: 4px solid #f43f5e;
-  background: #fff0f3;
+  border-left: 4px solid var(--ui-danger);
+  background: var(--ui-danger-bg);
 }
 
 .content {
@@ -22,16 +22,16 @@
 
 .type {
   font-size: 0.95rem;
-  color: #2563eb;
+  color: var(--ui-info);
   font-weight: bold;
 }
 
 .text {
   font-size: 1rem;
-  color: #333;
+  color: var(--ui-foreground);
 }
 
 .time {
   font-size: 0.85rem;
-  color: #888;
+  color: var(--ui-muted-2);
 }

@@ -1,17 +1,25 @@
 "use client";
 import React, { useState } from "react";
-import DoctorSettingsModal from "../../../doctor/components/DoctorSettingsModal";
-import ErrorBoundary from "../../../doctor/components/ErrorBoundary";
-import SkeletonLoader from "../../../doctor/components/SkeletonLoader";
-import ConfirmationDialog from "../../../doctor/components/ConfirmationDialog";
-
-const initialDoctor = {
-  availability: { days: "الأحد - الخميس", start: "08:00", end: "16:00" },
-  notifications: { email: true, sms: false, inApp: true },
-  password: ""
-};
+import DoctorSettingsModal from "../../../[locale]/doctor/components/DoctorSettingsModal";
+import ErrorBoundary from "../../../[locale]/doctor/components/ErrorBoundary";
+import SkeletonLoader from "../../../[locale]/doctor/components/SkeletonLoader";
+import ConfirmationDialog from "../../../[locale]/doctor/components/ConfirmationDialog";
+import { useTranslations } from "next-intl";
 
 export default function SettingsPageContent() {
+  const t = useTranslations("doctorSettings");
+  const ui = useTranslations("ui");
+
+  const initialDoctor = {
+    availability: {
+      days: t("doctorSettings.demo.availabilityDays"),
+      start: "08:00",
+      end: "16:00",
+    },
+    notifications: { email: true, sms: false, inApp: true },
+    password: "",
+  };
+
   const [modalOpen, setModalOpen] = useState(false);
   const [doctor, setDoctor] = useState(initialDoctor);
   const [loading, setLoading] = useState(false);
@@ -30,14 +38,17 @@ export default function SettingsPageContent() {
   };
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary fallbackMessage={ui("errors.unexpected")}>
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold">إعدادات الحساب</h1>
-        <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => setModalOpen(true)}>
-          فتح نافذة الإعدادات
+        <h1 className="text-2xl font-bold text-(--ui-foreground)">{t("doctorSettings.title")}</h1>
+        <button className="px-4 py-2 btn-gradient rounded" onClick={() => setModalOpen(true)}>
+          {t("doctorSettings.demo.openModal")}
         </button>
-        <button className="px-4 py-2 bg-red-500 text-white rounded" onClick={handleSensitiveAction}>
-          إجراء حساس (مثال حذف الحساب)
+        <button
+          className="px-4 py-2 rounded bg-(--ui-danger) text-(--ui-danger-foreground) hover:opacity-90"
+          onClick={handleSensitiveAction}
+        >
+          {t("doctorSettings.demo.sensitiveAction")}
         </button>
         {loading && <SkeletonLoader height={32} count={2} />}
         <DoctorSettingsModal
@@ -48,7 +59,7 @@ export default function SettingsPageContent() {
         />
         <ConfirmationDialog
           open={showConfirm}
-          message="هل أنت متأكد من تنفيذ هذا الإجراء الحساس؟"
+          message={t("doctorSettings.demo.confirmSensitiveActionMessage")}
           onConfirm={() => { setShowConfirm(false); /* تنفيذ الإجراء */ }}
           onCancel={() => setShowConfirm(false)}
         />

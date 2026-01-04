@@ -5,7 +5,7 @@ import { logAudit } from "../../../../lib/security/auditLogger";
 
 // GET /api/doctor/results
 export const GET = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/doctor/results" } });
     return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -16,7 +16,12 @@ export const GET = withRBAC(async (request, user) => {
       where: { doctorId: user.id },
       include: {
         patient: { select: { id: true, fullName: true, email: true } },
-        doctor: { include: { user: true } },
+        doctor: {
+          select: {
+            userId: true,
+            user: { select: { id: true, fullName: true, email: true } },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -28,7 +33,7 @@ export const GET = withRBAC(async (request, user) => {
       confidenceScore: r.confidenceScore || null,
       createdAt: r.createdAt,
       patient: r.patient ? { id: r.patient.id, name: r.patient.fullName, email: r.patient.email } : null,
-      doctor: r.doctor?.user ? { id: r.doctor.id, name: r.doctor.user.fullName } : null
+      doctor: r.doctor?.user ? { id: r.doctor.userId, name: r.doctor.user.fullName || null } : null
     }));
     logAudit({ event: "doctor_results_viewed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { count: out.length } });
     return Response.json({ records: out }, { status: 200 });

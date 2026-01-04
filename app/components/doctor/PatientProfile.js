@@ -12,8 +12,8 @@ export default function PatientProfile() {
     lastXray: { url: "/window.svg", result: "Pneumonia", confidence: "92%" },
   };
   return (
-    <aside className="w-full md:w-96 bg-white dark:bg-zinc-900 rounded-xl shadow p-6">
-      <h3 className="text-lg font-bold mb-2 text-black dark:text-zinc-50">Patient Profile</h3>
+    <aside className="w-full md:w-96 bg-(--ui-surface) rounded-xl shadow p-6 border border-(--ui-border)">
+      <h3 className="text-lg font-bold mb-2 text-(--ui-foreground)">Patient Profile</h3>
       <div className="mb-2">Name: {patient.name}</div>
       <div className="mb-2">Age: {patient.age}</div>
       <div className="mb-2 font-semibold">Analysis History:</div>
@@ -31,7 +31,7 @@ export default function PatientProfile() {
         className="w-32 h-32 object-contain mb-2"
       />
       <div>Result: {patient.lastXray.result} ({patient.lastXray.confidence})</div>
-      <button className="mt-4 w-full py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Upload New X-Ray</button>
+      <button className="mt-4 w-full py-2 rounded btn-gradient font-semibold">Upload New X-Ray</button>
     </aside>
   );
 }

@@ -2,46 +2,42 @@
 
 import React from "react";
 import { FaComments } from "react-icons/fa";
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
+import { useTranslations } from "next-intl";
 
 export default function RecentChatsClient() {
-  const { locale } = useLocale();
-  const tr = locale === "ar" ? ar.adminAnalysis : en.adminAnalysis;
-  const chatsTr = tr.recentChats || {};
-  const title = chatsTr.title || (locale === "ar" ? "الدردشات الأخيرة" : "Recent Chats");
+  const t = useTranslations("adminDashboard");
+  const title = t("demoChats.title");
   const chats = [
     {
       id: 1,
-      doctor: chatsTr.doctor1 || (locale === "ar" ? "د. محمد سالم" : "Dr. Mohamed Salem"),
-      patient: chatsTr.patient1 || (locale === "ar" ? "منى عبد الله" : "Mona Abdullah"),
-      lastMsg: chatsTr.lastMsg1 || (locale === "ar" ? "تم إرسال النتائج." : "Results sent."),
+      doctor: t("demoChats.items.doctor1"),
+      patient: t("demoChats.items.patient1"),
+      lastMsg: t("demoChats.items.lastMsg1"),
     },
     {
       id: 2,
-      doctor: chatsTr.doctor2 || (locale === "ar" ? "د. ليلى حسن" : "Dr. Laila Hassan"),
-      patient: chatsTr.patient2 || (locale === "ar" ? "سعيد حسن" : "Saeed Hassan"),
-      lastMsg: chatsTr.lastMsg2 || (locale === "ar" ? "يرجى رفع صورة الأشعة." : "Please upload the X-ray image."),
+      doctor: t("demoChats.items.doctor2"),
+      patient: t("demoChats.items.patient2"),
+      lastMsg: t("demoChats.items.lastMsg2"),
     },
     {
       id: 3,
-      doctor: chatsTr.doctor3 || (locale === "ar" ? "د. سامي يوسف" : "Dr. Sami Youssef"),
-      patient: chatsTr.patient3 || (locale === "ar" ? "هالة يوسف" : "Hala Youssef"),
-      lastMsg: chatsTr.lastMsg3 || (locale === "ar" ? "تمت مراجعة الحالة." : "Case reviewed."),
+      doctor: t("demoChats.items.doctor3"),
+      patient: t("demoChats.items.patient3"),
+      lastMsg: t("demoChats.items.lastMsg3"),
     },
   ];
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-red-100 mt-8">
-      <h3 className="font-bold text-lg mb-4 text-red-700">{title}</h3>
+    <div className="card-glass rounded-2xl p-6 border border-(--ui-border) mt-8">
+      <h3 className="font-bold text-lg mb-4 text-(--ui-foreground)">{title}</h3>
       <ul className="space-y-3">
         {chats.map(chat => (
-          <li key={chat.id} className="flex items-center gap-2 text-zinc-700">
-            <FaComments className="text-yellow-400" />
+          <li key={chat.id} className="flex items-center gap-2 text-(--ui-foreground)">
+            <FaComments className="text-(--ui-muted-foreground)" />
             <span className="font-bold">{chat.doctor}</span>
-            <span className="mx-2 text-zinc-400">→</span>
+            <span className="mx-2 text-(--ui-muted-foreground)">→</span>
             <span className="font-bold">{chat.patient}</span>
-            <span className="ml-2 text-xs text-zinc-400">{chat.lastMsg}</span>
+            <span className="ml-2 text-xs text-(--ui-muted-foreground)">{chat.lastMsg}</span>
           </li>
         ))}
       </ul>

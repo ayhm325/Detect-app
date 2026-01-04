@@ -24,7 +24,7 @@
   inset: 0;
   background: linear-gradient(120deg,
     transparent 0%,
-    rgba(255,255,255,var(--opacity-sheen)) 15%,
+    rgb(from var(--ui-foreground) r g b / var(--opacity-sheen)) 15%,
     transparent 30%
   );
   background-size: 200% 100%;
@@ -90,10 +90,10 @@
 
 @keyframes glowPulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--ui-info) 50%, transparent);
   }
   50% {
-    box-shadow: 0 0 40px rgba(6, 182, 212, 0.8);
+    box-shadow: 0 0 40px color-mix(in srgb, var(--ui-info) 80%, transparent);
   }
 }
 

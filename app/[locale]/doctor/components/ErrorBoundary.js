@@ -16,7 +16,12 @@ export default class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      return <div className="p-4 bg-red-100 text-red-700">حدث خطأ غير متوقع. يرجى إعادة تحميل الصفحة.</div>;
+      const fallbackMessage = this.props.fallbackMessage;
+      return (
+        <div className="rounded-lg border border-(--ui-danger-border) bg-(--ui-danger-bg) p-4 text-(--ui-danger)">
+          {fallbackMessage}
+        </div>
+      );
     }
     return this.props.children;
   }

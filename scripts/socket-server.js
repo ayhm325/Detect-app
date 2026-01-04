@@ -17,9 +17,12 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import Redis from 'ioredis';
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prismaClient.js';
+import { getJwtSecret } from '../lib/auth/jwtSecret.js';
+import { getJwtVerifyOptions } from '../lib/auth/jwtClaims.js';
 
 const PORT = process.env.SOCKET_PORT ? Number(process.env.SOCKET_PORT) : 4000;
-const SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const SECRET = getJwtSecret();
+const DEBUG_SOCKET = process.env.DEBUG_SOCKET === '1';
 
 const app = express();
 const server = http.createServer(app);
@@ -57,10 +60,8 @@ io.use(async (socket, next) => {
     // Prefer token passed in handshake auth (client may send dev token)
     let token = socket.handshake.auth && socket.handshake.auth.token;
     const cookieHeader = socket.handshake.headers?.cookie;
-    if (token) {
-      console.log('socket handshake auth token provided (truncated):', token.length > 20 ? token.slice(0,20) + '...' : token);
-    } else if (cookieHeader) {
-      console.log('socket handshake cookie header present (truncated):', cookieHeader.slice(0,100));
+    if (DEBUG_SOCKET) {
+      console.log('[socket] auth token provided:', Boolean(token), 'cookie header present:', Boolean(cookieHeader));
     }
     if (!token) {
       // fallback: parse cookie header
@@ -68,13 +69,13 @@ io.use(async (socket, next) => {
       token = cookies.token;
     }
     if (!token) return next(new Error('unauthenticated'));
-    const user = jwt.verify(token, SECRET);
-    console.log('[Socket Auth Success]', { socketId: socket.id, userId: user && user.id, role: user && user.role });
+    const user = jwt.verify(token, SECRET, getJwtVerifyOptions());
+    if (DEBUG_SOCKET) console.log('[socket] auth success', { socketId: socket.id, userId: user && user.id, role: user && user.role });
     // attach minimal user info
     socket.user = { id: user.id, role: user.role, email: user.email };
     return next();
   } catch (err) {
-    console.warn('[Socket Auth Failed]', { socketId: socket.id, err: err && err.message });
+    if (DEBUG_SOCKET) console.warn('[socket] auth failed', { socketId: socket.id, err: err && err.message });
     return next(new Error('invalid_token'));
   }
 });

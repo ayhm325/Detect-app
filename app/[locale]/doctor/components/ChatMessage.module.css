@@ -12,24 +12,33 @@
   height: 28px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid #ddd;
+  border: 1px solid var(--ui-border);
 }
 .bubble {
-  background: #e6f0ff;
-  color: #222;
-  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-accent-100) 70%, var(--color-background));
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ui-border);
   padding: 8px 14px;
   font-size: 15px;
   max-width: 320px;
   word-break: break-word;
 }
 .doctor .bubble {
-  background: #0070f3;
-  color: #fff;
+  background: var(--ui-info);
+  color: var(--ui-info-foreground);
+  border-color: transparent;
 }
 .time {
   font-size: 12px;
-  color: #888;
+  color: var(--ui-muted);
   margin-top: 4px;
   margin-right: 6px;
+}
+
+.image {
+  display: block;
+  max-width: 320px;
+  height: auto;
+  border-radius: var(--radius-md);
 }

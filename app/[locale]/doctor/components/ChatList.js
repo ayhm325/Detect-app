@@ -1,11 +1,13 @@
 import React from 'react';
 import Image from 'next/image';
 import styles from './ChatList.module.css';
+import { useTranslations } from 'next-intl';
 
 export default function ChatList({ chats, selectedId, onSelect }) {
+  const t = useTranslations('doctorChat');
   return (
     <aside className={styles.list}>
-      <h3>المرضى</h3>
+      <h3>{t('patientsTitle')}</h3>
       <ul>
         {chats.map(chat => (
           <li

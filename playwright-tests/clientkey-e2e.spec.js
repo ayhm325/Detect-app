@@ -8,23 +8,23 @@ const prisma = prismaDefault.default ?? prismaDefault;
 test.setTimeout(120000);
 
 test('clientKey idempotency: socket send (no ack) then HTTP fallback', async ({ page, context }) => {
-  // 1) find a chat and patient user; create minimal fixture if not present
+  // 1) find a chat and patient user; create minimal fixture if not present or incomplete
   let chat = await prisma.chat.findFirst();
-  if (!chat) {
+  let patientUser = null;
+  if (chat) {
+    const patient = await prisma.patient.findUnique({ where: { id: chat.patientId } });
+    patientUser = patient && patient.userId ? await prisma.user.findUnique({ where: { id: patient.userId } }) : null;
+  }
+  if (!chat || !patientUser) {
     // create doctor user + doctor
     const doctorUser = await prisma.user.create({ data: { email: `e2e-doctor-${Date.now()}@example.com`, password: 'changeme', fullName: 'E2E Doctor', role: 'doctor', isActive: true } });
     const doctor = await prisma.doctor.create({ data: { userId: doctorUser.id, phone: `05${Math.floor(100000000 + Math.random() * 899999999)}`, licenseNumber: `LIC-${Math.floor(Math.random() * 100000)}`, status: 'active' } });
     // create patient user + patient
-    const patientUser = await prisma.user.create({ data: { email: `e2e-patient-${Date.now()}@example.com`, password: 'changeme', fullName: 'E2E Patient', role: 'patient', isActive: true } });
+    patientUser = await prisma.user.create({ data: { email: `e2e-patient-${Date.now()}@example.com`, password: 'changeme', fullName: 'E2E Patient', role: 'patient', isActive: true } });
     const patient = await prisma.patient.create({ data: { userId: patientUser.id, fullName: patientUser.fullName, email: patientUser.email, doctorId: doctor.userId, phone: `05${Math.floor(100000000 + Math.random() * 899999999)}`, status: 'active' } });
     chat = await prisma.chat.create({ data: { doctorId: doctor.userId, patientId: patient.id } });
   }
   const chatId = chat.id;
-
-  // find patient user email for this chat
-  const patient = await prisma.patient.findUnique({ where: { id: chat.patientId } });
-  const patientUser = patient && patient.userId ? await prisma.user.findUnique({ where: { id: patient.userId } }) : null;
-  if (!patientUser) throw new Error('No patient user for chat');
 
   // 2) generate dev token for patient
   const token = execSync(`node ${path.join('scripts','create-dev-token.mjs')} ${patientUser.email}`, { encoding: 'utf8' }).trim();

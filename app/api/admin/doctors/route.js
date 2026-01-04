@@ -4,13 +4,13 @@ import { logAudit } from "../../../../lib/security/auditLogger";
 // ...existing code...
 
 export const POST = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "POST /api/admin/doctors" } });
     return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
   try {
-    const { name, email, phone, licenseNumber, status } = await request.json();
+    const { name, email, phone, licenseNumber, status, password } = await request.json();
     if (!name || !email || !phone || !licenseNumber || !status) {
       return Response.json({ error: "يرجى تعبئة جميع الحقول" }, { status: 400 });
     }
@@ -18,12 +18,23 @@ export const POST = withRBAC(async (request, user) => {
     if (existingUser) {
       return Response.json({ error: "البريد الإلكتروني مستخدم بالفعل" }, { status: 400 });
     }
+
+    const defaultPassword = process.env.DEFAULT_DOCTOR_PASSWORD;
+    const rawPassword = password || defaultPassword || (process.env.NODE_ENV === 'development' ? 'doctor123' : null);
+    if (!rawPassword) {
+      return Response.json({ error: "Missing password (set DEFAULT_DOCTOR_PASSWORD in production)" }, { status: 400 });
+    }
+
+    const bcryptMod = await import('bcrypt');
+    const bcrypt = bcryptMod?.default || bcryptMod;
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
     const userCreated = await prisma.user.create({
       data: {
         fullName: name,
         email,
         role: "doctor",
-        password: "$2a$10$wQ8QnQwQ8QnQwQ8QnQwQ8uQ8QnQwQ8QnQwQ8QnQwQ8QnQwQ8QnQW", // bcrypt hash for 'doctor123'
+        password: hashedPassword,
         isActive: true // دائماً نشط عند الإنشاء
       }
     });
@@ -57,7 +68,7 @@ import prisma from "../../../../lib/prismaClient";
 
 
 export const GET = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/admin/doctors" } });
     return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -93,7 +104,7 @@ export const GET = withRBAC(async (request, user) => {
 
 
 export const PATCH = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "PATCH /api/admin/doctors" } });
     return Response.json({ error: "Rate limit exceeded" }, { status: 429 });

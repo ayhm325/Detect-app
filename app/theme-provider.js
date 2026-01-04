@@ -7,10 +7,31 @@ const STORAGE_KEY = "app-theme";
 // Create context FIRST before using it
 const ThemeContext = createContext({ theme: "light", setTheme: () => {} });
 
+function normalizeTheme(value, fallback = "light") {
+  return value === "dark" || value === "light" ? value : fallback;
+}
+
 export function ThemeProvider({ children, defaultTheme = "light" }) {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(() => normalizeTheme(defaultTheme, "light"));
+  const [hasMounted, setHasMounted] = useState(false);
+
+  // Reconcile stored theme AFTER hydration to avoid server/client render mismatch.
+  // This also prevents overwriting the pre-hydration <html> theme script.
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored === "dark" || stored === "light") {
+        setTheme(stored);
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setHasMounted(true);
+    }
+  }, []);
 
   useEffect(() => {
+    if (!hasMounted) return;
     const root = document.documentElement;
     // Sync explicit theme classes to override prefers-color-scheme media queries
     if (theme === "dark") {
@@ -29,7 +50,7 @@ export function ThemeProvider({ children, defaultTheme = "light" }) {
     } catch {
       /* ignore */
     }
-  }, [theme]);
+  }, [theme, hasMounted]);
 
   const value = useMemo(() => ({ theme, setTheme }), [theme]);
 

@@ -5,7 +5,7 @@ import { logAudit } from "../../../../lib/security/auditLogger";
 
 // GET /api/doctor/patients
 export const GET = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/doctor/patients" } });
     return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -14,7 +14,17 @@ export const GET = withRBAC(async (request, user) => {
     // جلب المرضى النشطين المرتبطين بالطبيب الحالي فقط
     const patients = await prisma.patient.findMany({
       where: { status: 'active', doctorId: user.id },
-      include: { user: true },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            createdAt: true,
+            isActive: true,
+          },
+        },
+      },
       orderBy: { fullName: 'asc' },
     });
     logAudit({ event: "doctor_patients_listed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { count: patients.length } });

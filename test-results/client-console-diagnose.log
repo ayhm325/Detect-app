@@ -1,40 +1,17 @@
-[log] [Fast Refresh] done in 5344ms
-[log] [Fast Refresh] rebuilding
-[log] [Fast Refresh] done in 4091ms
-[log] [Fast Refresh] rebuilding
-[log] [Fast Refresh] done in 334ms
-[log] [Fast Refresh] rebuilding
-[log] [Fast Refresh] done in 796ms
-[log] [Fast Refresh] rebuilding
-[log] [Fast Refresh] done in 6703ms
 [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [log] [HMR] connected
 [log] [DIAG] no_global_socket no socket object found
-[startGroup] [Socket Identity Check]
-[log] expectedUserId (from JWT): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
-[log] info.id (from server): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
-[log] full info from server: {id: 22ba263f-489f-4238-ba52-8aa6a3b8ed5e, role: doctor, email: eyas@yahoo.com}
-[log] jwtToken (short): eyJhbGciOiJIUzI1NiIs
-[endGroup] console.groupEnd
-[startGroup] [Socket Identity Check]
-[log] expectedUserId (from JWT): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
-[log] info.id (from server): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
-[log] full info from server: {id: 22ba263f-489f-4238-ba52-8aa6a3b8ed5e, role: doctor, email: eyas@yahoo.com}
-[log] jwtToken (short): eyJhbGciOiJIUzI1NiIs
-[endGroup] console.groupEnd
 [log] [Fast Refresh] rebuilding
-[log] [Fast Refresh] done in 415ms
 [log] [DIAG] attached listeners attached
 [log] [DIAG] me {"id":"22ba263f-489f-4238-ba52-8aa6a3b8ed5e","role":"doctor","email":"eyas@yahoo.com"}
-[startGroup] [Socket Identity Check]
-[log] expectedUserId (from JWT): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
-[log] info.id (from server): 22ba263f-489f-4238-ba52-8aa6a3b8ed5e string
-[log] full info from server: {id: 22ba263f-489f-4238-ba52-8aa6a3b8ed5e, role: doctor, email: eyas@yahoo.com}
-[log] jwtToken (short): eyJhbGciOiJIUzI1NiIs
-[endGroup] console.groupEnd
+[log] [DIAG] me {"id":"22ba263f-489f-4238-ba52-8aa6a3b8ed5e","role":"doctor","email":"eyas@yahoo.com"}
+[log] [Fast Refresh] done in 720ms
+[log] [DIAG] me {"id":"22ba263f-489f-4238-ba52-8aa6a3b8ed5e","role":"doctor","email":"eyas@yahoo.com"}
+[error] Failed to load resource: the server responded with a status of 400 (Bad Request)
+[warning] Image with src "/uploads/1767181829762-Screenshot_2025-12-31_142940.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[warning] Image with src "/uploads/1767123958875-person4_bacteria_14.jpeg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[warning] Image with src "/uploads/1767124049540-person23_bacteria_83.jpeg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
 [log] [Fast Refresh] rebuilding
-[log] [Fast Refresh] done in 1226ms
+[log] [Fast Refresh] done in 840ms
 [log] [Fast Refresh] rebuilding
-[log] [Fast Refresh] done in 135ms
-[log] [Fast Refresh] rebuilding
-[log] [Fast Refresh] done in 108ms
+[log] [Fast Refresh] done in 183ms

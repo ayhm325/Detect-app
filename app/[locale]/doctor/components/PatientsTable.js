@@ -1,16 +1,19 @@
 import React from 'react';
 import PatientCard from './PatientCard';
 import styles from './PatientsTable.module.css';
+import { useTranslations } from 'next-intl';
 
 export default function PatientsTable({ patients, onView, onChat }) {
+  const t = useTranslations('doctorPatients');
+
   return (
     <table className={styles.table}>
       <thead>
         <tr>
-          <th>الاسم</th>
-          <th>آخر فحص</th>
-          <th>الحالة</th>
-          <th>إجراءات</th>
+          <th>{t('table.headers.name')}</th>
+          <th>{t('table.headers.lastScan')}</th>
+          <th>{t('table.headers.status')}</th>
+          <th>{t('table.headers.actions')}</th>
         </tr>
       </thead>
       <tbody>
@@ -20,8 +23,8 @@ export default function PatientsTable({ patients, onView, onChat }) {
             <td>{patient.lastScanDate}</td>
             <td>{patient.status}</td>
             <td>
-              <button className={styles.actionButton} onClick={() => onView(patient)}>عرض</button>
-              <button className={styles.actionButton} onClick={() => onChat(patient)}>محادثة</button>
+              <button className={styles.actionButton} onClick={() => onView(patient)}>{t('actions.view')}</button>
+              <button className={styles.actionButton} onClick={() => onChat(patient)}>{t('actions.chat')}</button>
             </td>
           </tr>
         ))}

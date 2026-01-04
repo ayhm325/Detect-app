@@ -72,6 +72,11 @@ npx next build
 npx next start
 ```
 
+## النشر للإنتاج (مختصر)
+
+- متغيرات إلزامية: `NODE_ENV=production`, `DATABASE_URL`, `JWT_SECRET` (>= 32)
+- دليل النشر المختصر: [docs/deploy.md](docs/deploy.md)
+
 ## السكربتات المهمة وصعوبتها/سبب وجودها
 - `scripts/create-dev-token.mjs` و `scripts/create-test-doctor.js` : لتسهيل إعداد بيئة التطوير ببيانات تجريبية.
 - `scripts/insert-message.mjs` و `scripts/list-chats.mjs` : أدوات إدارة دردشة للمطور أو للصيانة.

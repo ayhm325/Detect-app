@@ -6,6 +6,8 @@ import { useLocale, useTranslations } from "next-intl";
 export default function Footer() {
   const locale = useLocale();
   const t = useTranslations('footer');
+  const ui = useTranslations('ui');
+  const navbar = useTranslations('navbar');
   const year = new Date().getFullYear();
 
   const withLocale = (path) => {
@@ -16,25 +18,13 @@ export default function Footer() {
 
   const homeHref = withLocale("/");
 
-  // ضمان أن quickLinks و supportLinks دائمًا مصفوفة
-  const quickLinks = [
-    { label: t("home", { defaultValue: locale === "en" ? "Home" : "الرئيسية" }), href: "/" },
-    { label: locale === "en" ? "About" : "من نحن", href: "/about" },
-    { label: locale === "en" ? "Services" : "الخدمات", href: "/services" },
-    { label: locale === "en" ? "Blog" : "المدونة", href: "/blog" },
-  ];
-
-  const supportLinks = [
-    { label: locale === "en" ? "FAQ" : "الأسئلة الشائعة", href: "/faq" },
-    { label: t("contactPage.title", { defaultValue: locale === "en" ? "Contact" : "اتصل بنا" }), href: "/contact" },
-    { label: t("privacyPage.title", { defaultValue: locale === "en" ? "Privacy" : "سياسة الخصوصية" }), href: "/privacy" },
-    { label: t("termsPage.title", { defaultValue: locale === "en" ? "Terms" : "الشروط والأحكام" }), href: "/terms" },
-  ];
+  const quickLinks = t.raw("quickLinks");
+  const supportLinks = t.raw("supportLinks");
 
   return (
-    <footer className="relative w-full bg-zinc-900 dark:bg-zinc-950 text-white overflow-hidden">
+    <footer className="relative w-full bg-(--ui-surface) text-(--ui-foreground) overflow-hidden border-t border-(--ui-border)">
       {/* Top Gradient Line */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-yellow-400 via-red-400 to-red-600" />
+      <div className="absolute top-0 left-0 w-full h-1 brand-gradient" />
 
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
@@ -42,10 +32,10 @@ export default function Footer() {
           className="absolute inset-0"
           style={{
             backgroundImage: `
-              linear-gradient(45deg, rgba(251, 191, 36, 0.1) 25%, transparent 25%),
-              linear-gradient(-45deg, rgba(239, 68, 68, 0.1) 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, rgba(251, 191, 36, 0.1) 75%),
-              linear-gradient(-45deg, transparent 75%, rgba(239, 68, 68, 0.1) 75%)
+              linear-gradient(45deg, color-mix(in srgb, var(--ui-ring) 18%, transparent) 25%, transparent 25%),
+              linear-gradient(-45deg, color-mix(in srgb, var(--ui-info) 18%, transparent) 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, color-mix(in srgb, var(--ui-ring) 18%, transparent) 75%),
+              linear-gradient(-45deg, transparent 75%, color-mix(in srgb, var(--ui-info) 18%, transparent) 75%)
             `,
             backgroundSize: "40px 40px",
           }}
@@ -58,30 +48,28 @@ export default function Footer() {
           <div className="space-y-4">
             <Link href={homeHref} className="inline-flex items-center gap-3 group">
               <div className="relative">
-                <div className="absolute inset-0 bg-linear-to-br from-yellow-400 to-red-600 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
-                <div className="relative w-12 h-12 bg-linear-to-br from-yellow-400 to-red-600 rounded-xl flex items-center justify-center">
-                  <span className="text-3xl" aria-label="Lung icon">🫁</span>
+                <div className="absolute inset-0 brand-gradient rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
+                <div className="relative w-12 h-12 brand-gradient rounded-xl flex items-center justify-center">
+                  <span className="text-3xl" aria-label={ui('aria.lungIcon')}>🫁</span>
                 </div>
               </div>
-              <span className="text-2xl font-black bg-linear-to-r from-yellow-400 to-red-600 bg-clip-text text-transparent">
-                {t("brand", { defaultValue: "Detect AI" })}
+              <span className="text-2xl font-black brand-gradient-text">
+                {t("brand")}
               </span>
             </Link>
-            <p className="text-sm text-zinc-400 leading-relaxed">
-              {t("footer.description", {
-                defaultValue: "نظام متطور للتشخيص الطبي بالذكاء الاصطناعي. نوفر لك أدق النتائج بأسرع وقت ممكن.",
-              })}
+            <p className="text-sm text-(--ui-muted-foreground) leading-relaxed">
+              {t("footer.description")}
             </p>
             <div className="flex gap-3">
               {[
-                { icon: "📘", label: "Facebook" },
-                { icon: "🐦", label: "Twitter" },
-                { icon: "📷", label: "Instagram" },
-                { icon: "💼", label: "LinkedIn" },
+                { icon: "📘", label: t("social.facebook") },
+                { icon: "🐦", label: t("social.twitter") },
+                { icon: "📷", label: t("social.instagram") },
+                { icon: "💼", label: t("social.linkedin") },
               ].map((social, i) => (
                 <button
                   key={i}
-                  className="w-10 h-10 rounded-lg bg-zinc-800 hover:bg-linear-to-br hover:from-yellow-500 hover:to-red-600 flex items-center justify-center transform hover:scale-110 transition-all duration-300"
+                  className="w-10 h-10 rounded-lg bg-(--ui-surface-2) border border-(--ui-border) hover:bg-(--ui-surface) flex items-center justify-center transform hover:scale-110 transition-all duration-300"
                   aria-label={social.label}
                 >
                   <span className="text-xl">{social.icon}</span>
@@ -92,17 +80,17 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-white">
-              {t("quickLinksHeading", { defaultValue: locale === "en" ? "Quick Links" : "روابط سريعة" })}
+            <h3 className="text-lg font-bold mb-4 text-(--ui-foreground)">
+              {t("quickLinksHeading")}
             </h3>
             <ul className="space-y-2">
               {quickLinks.map((link, i) => (
                 <li key={i}>
                   <Link
                     href={withLocale(link.href)}
-                    className="text-zinc-400 hover:text-yellow-400 transition-colors duration-300 text-sm flex items-center gap-2 group"
+                    className="text-(--ui-muted-foreground) hover:text-(--ui-ring) transition-colors duration-300 text-sm flex items-center gap-2 group"
                   >
-                    <span className="w-0 h-0.5 bg-yellow-400 group-hover:w-4 transition-all duration-300" />
+                    <span className="w-0 h-0.5 bg-(--ui-ring) group-hover:w-4 transition-all duration-300" />
                     {link.label}
                   </Link>
                 </li>
@@ -112,17 +100,17 @@ export default function Footer() {
 
           {/* Support Links */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-white">
-              {t("supportHeading", { defaultValue: locale === "en" ? "Support" : "الدعم" })}
+            <h3 className="text-lg font-bold mb-4 text-(--ui-foreground)">
+              {t("supportHeading")}
             </h3>
             <ul className="space-y-2">
               {supportLinks.map((link, i) => (
                 <li key={i}>
                   <Link
                     href={withLocale(link.href)}
-                    className="text-zinc-400 hover:text-red-400 transition-colors duration-300 text-sm flex items-center gap-2 group"
+                    className="text-(--ui-muted-foreground) hover:text-(--ui-ring) transition-colors duration-300 text-sm flex items-center gap-2 group"
                   >
-                    <span className="w-0 h-0.5 bg-red-400 group-hover:w-4 transition-all duration-300" />
+                    <span className="w-0 h-0.5 bg-(--ui-ring) group-hover:w-4 transition-all duration-300" />
                     {link.label}
                   </Link>
                 </li>
@@ -132,17 +120,17 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-white">
-              {t("contactHeading", { defaultValue: locale === "en" ? "Contact" : "تواصل معنا" })}
+            <h3 className="text-lg font-bold mb-4 text-(--ui-foreground)">
+              {t("contactHeading")}
             </h3>
-            <ul className="space-y-3 text-sm text-zinc-400">
+            <ul className="space-y-3 text-sm text-(--ui-muted-foreground)">
               <li className="flex items-start gap-3">
                 <span className="text-xl">📧</span>
                 <div>
-                  <div className="text-white font-semibold mb-1">
-                    {t("footer.contact.emailLabel", { defaultValue: "البريد الإلكتروني" })}
+                  <div className="text-(--ui-foreground) font-semibold mb-1">
+                    {t("footer.contact.emailLabel")}
                   </div>
-                  <a href="mailto:info@detect-ai.com" className="hover:text-yellow-400 transition-colors">
+                  <a href="mailto:info@detect-ai.com" className="hover:text-(--ui-ring) transition-colors">
                     info@detect-ai.com
                   </a>
                 </div>
@@ -150,10 +138,10 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <span className="text-xl">📱</span>
                 <div>
-                  <div className="text-white font-semibold mb-1">
-                    {t("footer.contact.phoneLabel", { defaultValue: "الهاتف" })}
+                  <div className="text-(--ui-foreground) font-semibold mb-1">
+                    {t("footer.contact.phoneLabel")}
                   </div>
-                  <a href="tel:+966123456789" className="hover:text-yellow-400 transition-colors" dir="ltr">
+                  <a href="tel:+966123456789" className="hover:text-(--ui-ring) transition-colors" dir="ltr">
                     +966 12 345 6789
                   </a>
                 </div>
@@ -161,10 +149,10 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <span className="text-xl">📍</span>
                 <div>
-                  <div className="text-white font-semibold mb-1">
-                    {t("footer.contact.addressLabel", { defaultValue: "العنوان" })}
+                  <div className="text-(--ui-foreground) font-semibold mb-1">
+                    {t("footer.contact.addressLabel")}
                   </div>
-                  <p>{t("footer.contact.address", { defaultValue: "أربد، المملكة الأردنية الهاشمية" })}</p>
+                  <p>{t("footer.contact.address")}</p>
                 </div>
               </li>
             </ul>
@@ -172,28 +160,28 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="py-6 border-t border-zinc-800">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
+        <div className="py-6 border-t border-(--ui-border)">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-(--ui-muted-foreground)">
             <div className="flex items-center gap-2">
               <span>
-                {t("footer.copyright", { defaultValue: `© ${year} جميع الحقوق محفوظة`, year })}
+                {t("footer.copyright", { year })}
               </span>
               <span className="hidden sm:inline">•</span>
-              <span className="text-yellow-400 font-semibold">PneumoDetect</span>
+              <span className="brand-gradient-text font-semibold">{navbar("brand")}</span>
             </div>
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span>{t("footer.serviceStatus", { defaultValue: "الخدمة متاحة" })}</span>
+                <span className="w-2 h-2 bg-(--ui-success) rounded-full animate-pulse" />
+                <span>{t("footer.serviceStatus")}</span>
               </div>
-              <div className="text-zinc-400">{t("footer.madeIn", { defaultValue: "Made with ❤️ in Irbed" })}</div>
+              <div className="text-(--ui-muted-foreground)">{t("footer.madeIn")}</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute bottom-0 left-0 w-full h-px bg-linear-to-r from-transparent via-yellow-500/50 to-transparent" />
+      <div className="absolute bottom-0 left-0 w-full h-px bg-linear-to-r from-transparent via-(--ui-border-strong) to-transparent" />
     </footer>
   );
 }

@@ -1,7 +1,10 @@
 import BackgroundWrapper from './BackgroundWrapper';
 import HoloButton from './HoloButton';
+import { getTranslations } from 'next-intl/server';
 
-export default function Hero() {
+export default async function Hero() {
+  const t = await getTranslations('holoDemo');
+
   return (
     <BackgroundWrapper intensity="mid">
       <div className="mx-auto max-w-5xl px-6 py-24 text-center">
@@ -14,14 +17,12 @@ export default function Hero() {
             color: 'transparent'
           }}
         >
-          منصة تحليلات الأشعة – تجربة هولوجرام مبهرة
+          {t('hero.title')}
         </h1>
-        <p className="mt-4 text-lg md:text-xl text-background/90">
-          واجهة حديثة سريعة، صُممت حول ألوان العلامة وتأثيرات زجاجية وهولوجرام.
-        </p>
+        <p className="mt-4 text-lg md:text-xl text-background/90">{t('hero.description')}</p>
         <div className="mt-8 flex items-center justify-center gap-4">
-          <HoloButton variant="primary">ابدأ الآن</HoloButton>
-          <HoloButton variant="outline">تعرّف أكثر</HoloButton>
+          <HoloButton variant="primary">{t('hero.primaryCta')}</HoloButton>
+          <HoloButton variant="outline">{t('hero.secondaryCta')}</HoloButton>
         </div>
       </div>
     </BackgroundWrapper>

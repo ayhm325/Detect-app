@@ -20,59 +20,46 @@ export default function PatientLayout({ children }) {
   const basePath = locale === "en" ? "/en" : "/ar";
   const t = useTranslations("patient");
 
-  // Safe translation helper: next-intl throws when a key is missing for a locale.
-  // Use this to return a fallback string when translations are not present.
-  const safeT = (key, fallback) => {
-    try {
-      const v = t(key);
-      // If the translation function returns the key itself, treat as missing
-      if (typeof v === 'string' && v === key) return fallback;
-      return v;
-    } catch (e) {
-      return fallback;
-    }
-  };
-
   // Patient navigation items with translation
   const patientNavItems = [
     {
       href: `${basePath}/patient/dashboard`,
-      label: safeT("nav.home", locale === 'ar' ? 'الرئيسية' : 'Home'),
+      label: t("nav.home"),
       icon: "🏠",
     },
     {
       href: `${basePath}/patient/appointments`,
-      label: safeT("nav.appointments", locale === 'ar' ? 'المواعيد' : 'Appointments'),
+      label: t("nav.appointments"),
       icon: "📅",
     },
     {
       href: `${basePath}/patient/analysis`,
-      label: safeT("nav.analysis", locale === 'ar' ? 'التحاليل' : 'Analysis'),
+      label: t("nav.analysis"),
       icon: "🔬",
     },
     {
       href: `${basePath}/patient/analysis/history`,
-      label: safeT("nav.history", locale === 'ar' ? 'التاريخ' : 'History'),
+      label: t("nav.history"),
       icon: "📜",
     },
     {
       href: `${basePath}/patient/results`,
-      label: safeT("nav.results", locale === 'ar' ? 'النتائج' : 'Results'),
+      label: t("nav.results"),
       icon: "📄",
     },
     {
       href: `${basePath}/patient/chat`,
-      label: safeT("nav.chat", locale === 'ar' ? 'الدردشة' : 'Chat'),
+      label: t("nav.chat"),
       icon: "💬",
     },
     {
       href: `${basePath}/patient/profile`,
-      label: safeT("nav.profile", locale === 'ar' ? 'الملف' : 'Profile'),
+      label: t("nav.profile"),
       icon: "👤",
     },
     {
       href: "__logout__",
-      label: safeT("nav.logout", locale === 'ar' ? 'تسجيل الخروج' : 'Logout'),
+      label: t("nav.logout"),
       icon: "🚪",
     },
   ];
@@ -88,30 +75,30 @@ export default function PatientLayout({ children }) {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex" dir={locale === "ar" ? "rtl" : "ltr"}>
+      <div className="min-h-screen bg-(--ui-surface) text-(--ui-foreground) flex" dir={locale === "ar" ? "rtl" : "ltr"}>
         {/* Fixed Sidebar */}
         <div
-          className={`fixed ${locale === "ar" ? "right-0" : "left-0"} top-0 h-screen bg-linear-to-b from-gray-50 via-white to-gray-100 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 shadow-2xl transition-all duration-300 z-50 ${
+          className={`fixed ${locale === "ar" ? "right-0 border-l" : "left-0 border-r"} top-0 h-screen bg-(--ui-surface) shadow-2xl transition-all duration-300 z-50 border-(--ui-border) ${
             collapsed ? "w-20" : "w-64"
           }`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-slate-700">
+          <div className="flex items-center justify-between h-16 px-4 border-b border-(--ui-border)">
             {!collapsed && (
               <div className="flex items-center gap-2">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-linear-to-br from-yellow-400 to-red-600 rounded-full blur opacity-40" />
-                  <div className="relative flex items-center justify-center w-10 h-10 bg-linear-to-br from-yellow-400 via-red-400 to-red-600 rounded-full shadow-lg">
+                  <div className="absolute inset-0 bg-(--ui-ring) rounded-full blur opacity-30" />
+                  <div className="relative flex items-center justify-center w-10 h-10 btn-gradient rounded-full shadow-lg">
                     <span className="text-xl" aria-label="Lung icon">🫁</span>
                   </div>
                 </div>
-                <span className="font-black text-lg bg-linear-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">{safeT("brand", locale === 'ar' ? 'تطبيق التحاليل' : 'Analysis App')}</span>
+                <span className="font-black text-lg brand-gradient-text">{t("brand")}</span>
               </div>
             )}
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="p-2 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white"
-              title={collapsed ? (locale === "ar" ? "فتح الشريط" : "Expand sidebar") : (locale === "ar" ? "إغلاق الشريط" : "Collapse sidebar")}
+              className="p-2 hover:bg-(--ui-surface-2)/50 rounded-lg transition-colors text-(--ui-muted-foreground) hover:text-(--ui-foreground)"
+              title={collapsed ? t("layout.sidebar.expandTitle") : t("layout.sidebar.collapseTitle")}
             >
               {collapsed ? "←" : "→"}
             </button>
@@ -139,7 +126,7 @@ export default function PatientLayout({ children }) {
                     <button
                       key="logout"
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-red-100 dark:hover:bg-red-500/20 transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-(--ui-muted-foreground) hover:text-(--ui-foreground) hover:bg-(--ui-danger-bg) transition-all"
                       title={collapsed ? item.label : ""}
                     >
                       <span className="text-lg shrink-0">{item.icon}</span>
@@ -154,8 +141,8 @@ export default function PatientLayout({ children }) {
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                       isActive
-                        ? "bg-linear-to-r from-yellow-500 to-red-500 text-white shadow-lg"
-                        : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-700/50"
+                        ? "btn-gradient text-white"
+                        : "text-(--ui-muted-foreground) hover:text-(--ui-foreground) hover:bg-(--ui-surface-2)/50"
                     }`}
                     title={collapsed ? item.label : ""}
                   >
@@ -168,28 +155,28 @@ export default function PatientLayout({ children }) {
               {/* Theme toggle */}
               <button
                 onClick={() => setTheme(isDark ? "light" : "dark")}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-700/50 transition-all w-full"
-                title={collapsed ? (isDark ? safeT("theme.light", locale === 'ar' ? 'وضع فاتح' : 'Light theme') : safeT("theme.dark", locale === 'ar' ? 'وضع داكن' : 'Dark theme')) : ""}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-(--ui-muted-foreground) hover:text-(--ui-foreground) hover:bg-(--ui-surface-2)/50 transition-all w-full"
+                title={collapsed ? (isDark ? t("theme.light") : t("theme.dark")) : ""}
               >
                 <span className="text-lg shrink-0">{isDark ? "☀️" : "🌙"}</span>
-                {!collapsed && <span className="text-sm font-medium">{isDark ? safeT("theme.light", locale === 'ar' ? 'وضع فاتح' : 'Light theme') : safeT("theme.dark", locale === 'ar' ? 'وضع داكن' : 'Dark theme')}</span>}
+                {!collapsed && <span className="text-sm font-medium">{isDark ? t("theme.light") : t("theme.dark")}</span>}
               </button>
               <button
                 onClick={toggleLocale}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-all w-full"
-                title={collapsed ? "تبديل اللغة" : ""}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-(--ui-muted-foreground) hover:text-(--ui-foreground) hover:bg-(--ui-surface-2)/50 transition-all w-full"
+                title={collapsed ? t("layout.localeSwitch.title") : ""}
               >
                 <span className="text-lg shrink-0">🌐</span>
-                {!collapsed && <span className="text-sm font-medium">{locale === "ar" ? "English" : "العربية"}</span>}
+                {!collapsed && <span className="text-sm font-medium">{t("layout.localeSwitch.label")}</span>}
               </button>
             </div>
           </nav>
 
           {/* Footer */}
           {!collapsed && (
-            <div className="border-t border-gray-200 dark:border-zinc-700 p-3 text-xs text-gray-500 dark:text-zinc-400 space-y-1">
-              <div>{safeT("version", "v1.0.0")}</div>
-              <div>{safeT("status", locale === 'ar' ? 'الاتصال بخادم' : 'Server status')}</div>
+            <div className="border-t border-(--ui-border) p-3 text-xs text-(--ui-muted-foreground) space-y-1">
+              <div>{t("version")}</div>
+              <div>{t("status")}</div>
             </div>
           )}
         </div>

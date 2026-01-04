@@ -1,12 +1,9 @@
 import Input from "@/app/components/ui/Input";
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
+import { useTranslations } from "next-intl";
 
 export default function SearchBar({ value, onChange, placeholder }) {
-  const { locale } = useLocale();
-  const tr = locale === "ar" ? ar.adminAnalysis : en.adminAnalysis;
-  const searchPlaceholder = placeholder || tr.filters?.searchPlaceholder || (locale === "ar" ? "بحث..." : "Search...");
+  const t = useTranslations("adminCommon");
+  const searchPlaceholder = placeholder || t("searchPlaceholder");
   return (
     <div className="my-2">
       <Input

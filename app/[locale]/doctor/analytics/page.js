@@ -2,7 +2,7 @@
 
 import DoctorLayout from "../DoctorLayout";
 import { useToast } from "../../../components/ui/Toast";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   FaUserInjured,
   FaXRay,
@@ -13,14 +13,14 @@ import {
   FaArrowUp,
   FaArrowDown,
   FaDownload,
-  FaFilter,
   FaEye,
 } from "react-icons/fa";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
   export default function Page() {
     const { showToast, ToastContainer } = useToast();
     const t = useTranslations("doctorAnalytics");
+    const locale = useLocale();
     const [timeRange, setTimeRange] = useState("week");
     const [selectedMetric, setSelectedMetric] = useState("patients");
   
@@ -85,21 +85,17 @@ import { useTranslations } from "next-intl";
       <DoctorLayout>
         <ToastContainer />
         <div
-          className={`min-h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6 text-gray-900 dark:text-gray-100
-          [&_div.bg-white]:dark:bg-zinc-900 [&_div.bg-white]:dark:border-zinc-800
-          [&_p.text-gray-900]:dark:text-white [&_p.text-gray-600]:dark:text-gray-300 [&_p.text-gray-500]:dark:text-gray-400
-          [&_span.text-gray-900]:dark:text-white [&_span.text-gray-600]:dark:text-gray-300
-          [&_input.bg-white]:dark:bg-zinc-900 [&_input.border-gray-300]:dark:border-zinc-700 [&_input.text-gray-900]:dark:text-gray-100`}
+          className="min-h-screen bg-(--ui-surface-2) p-6 text-(--ui-foreground)"
         >
           <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <FaChartLine className="text-blue-600" />
+              <h1 className="flex items-center gap-3 text-3xl font-bold text-(--ui-foreground)">
+                <FaChartLine className="text-(--ui-info)" />
                 {t("title")}
               </h1>
-              <p className="mt-2 text-gray-600">{t("subtitle")}</p>
+              <p className="mt-2 text-(--ui-muted-foreground)">{t("subtitle")}</p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -107,7 +103,7 @@ import { useTranslations } from "next-intl";
               <select
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value)}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-2 text-sm font-medium text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)"
               >
                 <option value="week">{t("timeRange.week")}</option>
                 <option value="month">{t("timeRange.month")}</option>
@@ -116,7 +112,7 @@ import { useTranslations } from "next-intl";
 
               <button
                 onClick={handleExport}
-                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="btn-gradient flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-(--ui-ring)"
               >
                 <FaDownload />
                 {t("export")}
@@ -127,14 +123,14 @@ import { useTranslations } from "next-intl";
           {/* Stats Cards */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {/* Total Patients */}
-            <div className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg border border-gray-100 transition-all hover:shadow-xl">
-              <div className="absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 transform rounded-full bg-blue-500 opacity-10 transition-transform group-hover:scale-150"></div>
+            <div className="card-glass group relative overflow-hidden rounded-xl border border-(--ui-border) p-6 shadow-(--shadow-soft) transition-all hover:shadow-(--shadow-lift)">
+              <div className="absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 transform rounded-full bg-(--ui-info)/10 transition-transform group-hover:scale-150"></div>
               <div className="relative">
                 <div className="flex items-center justify-between">
-                  <FaUserInjured className="text-4xl text-blue-600" />
+                  <FaUserInjured className="text-4xl text-(--ui-info)" />
                   <div
                     className={`flex items-center gap-1 text-sm font-medium ${
-                      currentStats.patients.percentage > 0 ? "text-green-600" : "text-red-600"
+                      currentStats.patients.percentage > 0 ? "text-(--ui-success)" : "text-(--ui-danger)"
                     }`}
                   >
                     {currentStats.patients.percentage > 0 ? <FaArrowUp /> : <FaArrowDown />}
@@ -142,24 +138,24 @@ import { useTranslations } from "next-intl";
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-gray-600">{da.stats?.patients || "Total Patients"}</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">{currentStats.patients.current}</p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    {da.stats?.previous || "Previous"}: {currentStats.patients.previous}
+                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.patients")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{currentStats.patients.current}</p>
+                  <p className="mt-1 text-xs text-(--ui-muted-foreground)">
+                    {t("stats.previous")}: {currentStats.patients.previous}
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Total Scans */}
-            <div className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg border border-gray-100 transition-all hover:shadow-xl">
-              <div className="absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 transform rounded-full bg-purple-500 opacity-10 transition-transform group-hover:scale-150"></div>
+            <div className="card-glass group relative overflow-hidden rounded-xl border border-(--ui-border) p-6 shadow-(--shadow-soft) transition-all hover:shadow-(--shadow-lift)">
+              <div className="absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 transform rounded-full bg-(--ui-info)/10 transition-transform group-hover:scale-150"></div>
               <div className="relative">
                 <div className="flex items-center justify-between">
-                  <FaXRay className="text-4xl text-purple-600" />
+                  <FaXRay className="text-4xl text-(--ui-info)" />
                   <div
                     className={`flex items-center gap-1 text-sm font-medium ${
-                      currentStats.scans.percentage > 0 ? "text-green-600" : "text-red-600"
+                      currentStats.scans.percentage > 0 ? "text-(--ui-success)" : "text-(--ui-danger)"
                     }`}
                   >
                     {currentStats.scans.percentage > 0 ? <FaArrowUp /> : <FaArrowDown />}
@@ -167,22 +163,22 @@ import { useTranslations } from "next-intl";
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-gray-600">{da.stats?.scans || "Total Scans"}</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">{currentStats.scans.current}</p>
-                  <p className="mt-1 text-xs text-gray-500">السابق: {currentStats.scans.previous}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.scans")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{currentStats.scans.current}</p>
+                  <p className="mt-1 text-xs text-(--ui-muted-foreground)">{t("stats.previous")}: {currentStats.scans.previous}</p>
                 </div>
               </div>
             </div>
 
             {/* Completed */}
-            <div className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg border border-gray-100 transition-all hover:shadow-xl">
-              <div className="absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 transform rounded-full bg-green-500 opacity-10 transition-transform group-hover:scale-150"></div>
+            <div className="card-glass group relative overflow-hidden rounded-xl border border-(--ui-border) p-6 shadow-(--shadow-soft) transition-all hover:shadow-(--shadow-lift)">
+              <div className="absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 transform rounded-full bg-(--ui-success)/10 transition-transform group-hover:scale-150"></div>
               <div className="relative">
                 <div className="flex items-center justify-between">
-                  <FaCheckCircle className="text-4xl text-green-600" />
+                  <FaCheckCircle className="text-4xl text-(--ui-success)" />
                   <div
                     className={`flex items-center gap-1 text-sm font-medium ${
-                      currentStats.completed.percentage > 0 ? "text-green-600" : "text-red-600"
+                      currentStats.completed.percentage > 0 ? "text-(--ui-success)" : "text-(--ui-danger)"
                     }`}
                   >
                     {currentStats.completed.percentage > 0 ? <FaArrowUp /> : <FaArrowDown />}
@@ -190,24 +186,24 @@ import { useTranslations } from "next-intl";
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-gray-600">{da.stats?.completed || "Completed"}</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">{currentStats.completed.current}</p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    السابق: {currentStats.completed.previous}
+                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.completed")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{currentStats.completed.current}</p>
+                  <p className="mt-1 text-xs text-(--ui-muted-foreground)">
+                    {t("stats.previous")}: {currentStats.completed.previous}
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Pending */}
-            <div className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg border border-gray-100 transition-all hover:shadow-xl">
-              <div className="absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 transform rounded-full bg-orange-500 opacity-10 transition-transform group-hover:scale-150"></div>
+            <div className="card-glass group relative overflow-hidden rounded-xl border border-(--ui-border) p-6 shadow-(--shadow-soft) transition-all hover:shadow-(--shadow-lift)">
+              <div className="absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 transform rounded-full bg-(--ui-warning)/10 transition-transform group-hover:scale-150"></div>
               <div className="relative">
                 <div className="flex items-center justify-between">
-                  <FaClock className="text-4xl text-orange-600" />
+                  <FaClock className="text-4xl text-(--ui-warning)" />
                   <div
                     className={`flex items-center gap-1 text-sm font-medium ${
-                      currentStats.pending.percentage < 0 ? "text-green-600" : "text-red-600"
+                      currentStats.pending.percentage < 0 ? "text-(--ui-success)" : "text-(--ui-danger)"
                     }`}
                   >
                     {currentStats.pending.percentage < 0 ? <FaArrowDown /> : <FaArrowUp />}
@@ -215,9 +211,9 @@ import { useTranslations } from "next-intl";
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-gray-600">{da.stats?.pending || "Pending"}</p>
-                  <p className="mt-1 text-3xl font-bold text-gray-900">{currentStats.pending.current}</p>
-                  <p className="mt-1 text-xs text-gray-500">السابق: {currentStats.pending.previous}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.pending")}</p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{currentStats.pending.current}</p>
+                  <p className="mt-1 text-xs text-(--ui-muted-foreground)">{t("stats.previous")}: {currentStats.pending.previous}</p>
                 </div>
               </div>
             </div>
@@ -226,57 +222,57 @@ import { useTranslations } from "next-intl";
           {/* Charts Section */}
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Patient Distribution Chart */}
-            <div className="lg:col-span-2 rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+            <div className="card-glass lg:col-span-2 rounded-xl border border-(--ui-border) p-6 shadow-(--shadow-soft)">
               <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <FaCalendarAlt className="text-blue-600" />
-                  {da.chart?.patientDistribution || "Patient Distribution This Week"}
+                <h2 className="flex items-center gap-2 text-xl font-bold text-(--ui-foreground)">
+                  <FaCalendarAlt className="text-(--ui-info)" />
+                  {t("chart.patientDistribution")}
                 </h2>
               </div>
 
               <div className="space-y-4">
                 {patientChartData.map((item, index) => (
                   <div key={index} className="flex items-center gap-4">
-                    <div className="w-20 text-sm font-medium text-gray-700">{item.day}</div>
+                    <div className="w-20 text-sm font-medium text-(--ui-foreground)">{item.day}</div>
                     <div className="flex-1">
-                      <div className="relative h-10 rounded-lg bg-gray-100">
+                      <div className="relative h-10 rounded-lg bg-(--ui-surface)">
                         <div
-                          className={`absolute right-0 top-0 h-full rounded-lg ${item.color} flex items-center justify-end px-3 transition-all duration-500`}
+                          className="absolute right-0 top-0 flex h-full items-center justify-end rounded-lg bg-(--ui-info) px-3 transition-all duration-500"
                           style={{ width: `${(item.value / maxValue) * 100}%` }}
                         >
                           {item.value > 0 && (
-                            <span className="text-sm font-bold text-white">{item.value}</span>
+                            <span className="text-sm font-bold text-(--ui-info-foreground)">{item.value}</span>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="w-12 text-sm text-gray-600">{item.value} {locale === "en" ? "patients" : "مريض"}</div>
+                    <div className="w-12 text-sm text-(--ui-muted-foreground)">{item.value} {t("units.patients")}</div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Scan Types Distribution */}
-            <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
-              <h2 className="mb-6 text-xl font-bold text-gray-900 flex items-center gap-2">
-                <FaXRay className="text-purple-600" />
-                {da.scanTypes?.title || "Scan Type Distribution"}
+            <div className="card-glass rounded-xl border border-(--ui-border) p-6 shadow-(--shadow-soft)">
+              <h2 className="mb-6 flex items-center gap-2 text-xl font-bold text-(--ui-foreground)">
+                <FaXRay className="text-(--ui-info)" />
+                {t("scanTypesTitle")}
               </h2>
 
               <div className="space-y-4">
                 {scanTypes.map((scan, index) => (
                   <div key={index}>
                   <div className="mb-2 flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">{scan.label}</span>
-                      <span className="text-sm font-bold text-gray-900">{scan.count}</span>
+                      <span className="text-sm font-medium text-(--ui-foreground)">{scan.label}</span>
+                      <span className="text-sm font-bold text-(--ui-foreground)">{scan.count}</span>
                     </div>
-                    <div className="relative h-3 rounded-full bg-gray-100">
+                    <div className="relative h-3 rounded-full bg-(--ui-surface)">
                       <div
-                        className={`absolute right-0 top-0 h-full rounded-full ${scan.color} transition-all duration-500`}
+                        className="absolute right-0 top-0 h-full rounded-full bg-(--ui-info) transition-all duration-500"
                         style={{ width: `${scan.percentage}%` }}
                       ></div>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">{scan.percentage}% {da.scanTypes?.percentage || "of total"}</p>
+                    <p className="mt-1 text-xs text-(--ui-muted-foreground)">{scan.percentage}% {t("scanTypesOfTotal")}</p>
                   </div>
                 ))}
               </div>
@@ -284,45 +280,45 @@ import { useTranslations } from "next-intl";
           </div>
 
           {/* Recent Activity */}
-          <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
-            <h2 className="mb-6 text-xl font-bold text-gray-900 flex items-center gap-2">
-              <FaClock className="text-blue-600" />
-              {da.recentActivity?.title || "Recent Activity"}
+          <div className="card-glass rounded-xl border border-(--ui-border) p-6 shadow-(--shadow-soft)">
+            <h2 className="mb-6 flex items-center gap-2 text-xl font-bold text-(--ui-foreground)">
+              <FaClock className="text-(--ui-info)" />
+              {t("recentActivityTitle")}
             </h2>
 
             <div className="space-y-3">
               {recentActivity.map((activity, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between rounded-lg border border-gray-200 p-4 transition-all hover:bg-gray-50"
+                  className="flex items-center justify-between rounded-lg border border-(--ui-border) p-4 transition-all hover:bg-(--ui-surface-2)"
                 >
                   <div className="flex items-center gap-4">
                     <div
                       className={`flex h-10 w-10 items-center justify-center rounded-full ${
                         activity.status === "completed"
-                          ? "bg-green-100"
+                          ? "bg-(--ui-success-bg)"
                           : activity.status === "pending"
-                          ? "bg-orange-100"
+                          ? "bg-(--ui-warning-bg)"
                           : activity.status === "sent"
-                          ? "bg-blue-100"
-                          : "bg-purple-100"
+                          ? "bg-(--ui-info-bg)"
+                          : "bg-(--ui-info-bg)"
                       }`}
                     >
                       {activity.status === "completed" ? (
-                        <FaCheckCircle className="text-green-600" />
+                        <FaCheckCircle className="text-(--ui-success)" />
                       ) : activity.status === "pending" ? (
-                        <FaClock className="text-orange-600" />
+                        <FaClock className="text-(--ui-warning)" />
                       ) : (
-                        <FaEye className="text-blue-600" />
+                        <FaEye className="text-(--ui-info)" />
                       )}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{activity.actionLabel}</p>
-                      <p className="text-sm text-gray-600">{activity.patient}</p>
+                      <p className="font-medium text-(--ui-foreground)">{activity.actionLabel}</p>
+                      <p className="text-sm text-(--ui-muted-foreground)">{activity.patient}</p>
                     </div>
                   </div>
                   <div className="text-left">
-                    <p className="text-sm text-gray-500">{activity.time}</p>
+                    <p className="text-sm text-(--ui-muted-foreground)">{activity.time}</p>
                   </div>
                 </div>
               ))}

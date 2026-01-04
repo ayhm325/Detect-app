@@ -74,11 +74,17 @@
 				"panel": "dedicated",
 				"clear": true
 			},
-			"dependsOn": ["Dev: Next.js", "Dev: Socket server"]
+			"dependsOn": [
+				"Dev: Next.js",
+				"Dev: Socket server"
+			]
 		},
 		{
 			"label": "Dev: Next.js + Socket",
-			"dependsOn": ["Dev: Next.js", "Dev: Socket server"],
+			"dependsOn": [
+				"Dev: Next.js",
+				"Dev: Socket server"
+			],
 			"dependsOrder": "parallel"
 		},
 		{
@@ -101,7 +107,110 @@
 				"kind": "test",
 				"isDefault": false
 			},
-			"dependsOn": ["Dev: Next.js", "Dev: Socket server"]
+			"dependsOn": [
+				"Dev: Next.js",
+				"Dev: Socket server"
+			]
+		},
+		{
+			"label": "CI: Lint",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"lint"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "CI: Test",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"test"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "CI: Build",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "CI: Build (verify)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Verify: Build clean",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "CI: Lint (post-hardening)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"lint"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "CI: Test (post-hardening)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"test"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Verify: Lint",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"lint"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Verify: Test",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"test"
+			],
+			"isBackground": false,
+			"problemMatcher": []
 		}
 	]
 }

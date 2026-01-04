@@ -1,18 +1,22 @@
+"use client";
+
 import React from "react";
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
+import { useTranslations } from "next-intl";
 
 export default function Modal({ open, onClose, children }) {
-  const { locale } = useLocale();
-  const tr = locale === "ar" ? ar.adminAnalysis : en.adminAnalysis;
-  const closeLabel = tr.analysisPage?.buttons?.close || tr.analysisSection?.buttons?.close || tr.buttons?.close || (locale === "ar" ? "إغلاق" : "Close");
+  const t = useTranslations("adminCommon");
+  const closeLabel = t("close");
   if (!open) return null;
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded shadow-lg min-w-75">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-(--color-neutral)/40 p-4">
+      <div className="w-full min-w-75 max-w-xl rounded-2xl border border-(--ui-border) bg-(--ui-surface) p-6">
         {children}
-        <button onClick={onClose} className="mt-4 px-4 py-2 bg-red-500 text-white rounded">{closeLabel}</button>
+        <button
+          onClick={onClose}
+          className="mt-4 rounded-xl border border-(--ui-danger-border) bg-(--ui-danger) px-4 py-2 text-sm font-semibold text-(--ui-danger-foreground) hover:opacity-90"
+        >
+          {closeLabel}
+        </button>
       </div>
     </div>
   );

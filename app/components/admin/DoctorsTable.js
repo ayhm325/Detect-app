@@ -1,19 +1,19 @@
 
 import { FaUserMd, FaUserPlus } from "react-icons/fa";
-import SpecialtyBadge from "./SpecialtyBadge";
 import Button from "../ui/Button";
 import { Table, THead, TRow, TH, TD } from "../ui/Table";
 import Pagination from "../ui/Pagination";
 
 import { useTranslations } from "next-intl";
 
-export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onAdd, onApprove, onReject, page = 1, pageCount = 1, onPageChange }) {
+export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onAdd, page = 1, pageCount = 1, onPageChange }) {
   const t = useTranslations("doctorsTable");
+  const ui = useTranslations("ui");
   return (
     <div className="mt-8">
       <Table>
         <THead>
-          <TRow className="bg-linear-to-r from-yellow-100 via-red-100/40 to-white dark:from-zinc-800 dark:via-zinc-800/60 dark:to-zinc-900">
+          <TRow className="bg-(--ui-surface-2) border-b border-(--ui-border)">
             <TH className="py-3 px-4 text-center">#</TH>
             <TH className="py-3 px-4 text-center">{t("name")}</TH>
             <TH className="py-3 px-4 text-center">{t("license")}</TH>
@@ -25,16 +25,16 @@ export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onA
         <tbody>
           {doctors.map((doctor, i) => {
             const name = doctor.user?.fullName || doctor.name;
-            const email = doctor.user?.email || doctor.email;
+            const email = doctor.user?.email || doctor.email || ui("placeholder");
             // Handle both possible shapes: top-level or inside doctor.user
-            const licenseNumber = doctor.licenseNumber || doctor.user?.licenseNumber || "—";
-            const phone = doctor.phone || doctor.user?.phone || "—";
+            const licenseNumber = doctor.licenseNumber || doctor.user?.licenseNumber || ui("placeholder");
+            const phone = doctor.phone || doctor.user?.phone || ui("placeholder");
             return (
-              <TRow key={doctor.id || doctor.userId} className="hover:bg-yellow-50/40 dark:hover:bg-zinc-800/40">
+              <TRow key={doctor.id || doctor.userId} className="hover:bg-(--ui-surface-2)/60 transition-colors">
                 <TD className="py-2 px-4 text-center font-bold">{i + 1}</TD>
                 <TD className="py-2 px-4 text-center">
                   <span className="inline-flex items-center gap-2 justify-center">
-                    <FaUserMd className="text-yellow-600" />{name}
+                    <FaUserMd className="text-(--ui-muted-2)" />{name}
                   </span>
                 </TD>
                 <TD className="py-2 px-4 text-center">{licenseNumber}</TD>
@@ -43,8 +43,8 @@ export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onA
                 <TD className="py-2 px-4">
                   <div className="flex items-center justify-center gap-2 flex-wrap">
                     <Button variant="ghost" className="px-3 py-2" title={t("edit")} onClick={() => onEdit(doctor)}>{t("edit")}</Button>
-                    <Button variant="ghost" className="px-3 py-2 text-red-700" title={t("delete")} onClick={() => onDelete(doctor)}>{t("delete")}</Button>
-                    <Button variant="ghost" className="px-3 py-2 text-blue-700" title={t("details")} onClick={() => onDetails(doctor)}>{t("details")}</Button>
+                    <Button variant="ghost" className="px-3 py-2 text-(--ui-danger)" title={t("delete")} onClick={() => onDelete(doctor)}>{t("delete")}</Button>
+                    <Button variant="ghost" className="px-3 py-2 text-(--ui-info)" title={t("details")} onClick={() => onDetails(doctor)}>{t("details")}</Button>
                   </div>
                 </TD>
               </TRow>

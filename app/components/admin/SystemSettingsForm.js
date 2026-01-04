@@ -1,18 +1,24 @@
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import Input from "../ui/Input";
+import Button from "../ui/Button";
 
 export default function SystemSettingsForm({ onSave }) {
-  const { locale } = useLocale();
-  const tr = locale === "ar" ? ar.adminAnalysis : en.adminAnalysis;
-  const settingsTr = tr.systemSettingsForm || {};
+  const t = useTranslations("adminSettings");
+  const [systemName, setSystemName] = useState(t("defaults.systemName"));
   return (
-    <form className="max-w-2xl mx-auto mt-10 bg-white rounded-3xl shadow-xl border-2 border-yellow-100 p-8 flex flex-col gap-8" onSubmit={e => {e.preventDefault(); onSave && onSave();}}>
+    <form className="max-w-2xl mx-auto mt-10 card-glass rounded-3xl border border-(--ui-border) p-8 flex flex-col gap-8" onSubmit={e => {e.preventDefault(); onSave && onSave({ systemName });}}>
       <div className="flex flex-col gap-2">
-        <label className="font-bold text-zinc-700">{settingsTr.systemNameLabel || (locale === "ar" ? "اسم النظام" : "System Name")}</label>
-        <input type="text" className="rounded-xl border border-zinc-200 px-4 py-3" placeholder={settingsTr.systemNamePlaceholder || (locale === "ar" ? "مثال: نظام إدارة الأشعة" : "e.g. Radiology Management System") } defaultValue={settingsTr.systemNameDefault || (locale === "ar" ? "نظام إدارة الأشعة" : "Radiology Management System")} />
+        <label className="font-bold text-(--ui-muted)">{t("labels.systemName.label")}</label>
+        <Input type="text" className="h-12 rounded-xl px-4" placeholder={t("defaults.systemName")} value={systemName} onChange={e => setSystemName(e.target.value)} />
       </div>
-      <button type="submit" className="mt-2 px-8 py-4 rounded-full bg-yellow-500 text-white font-bold text-lg shadow">{settingsTr.saveButton || (locale === "ar" ? "حفظ الإعدادات" : "Save Settings")}</button>
+      <div className="mt-2">
+        <Button type="submit" size="lg" className="w-full rounded-xl py-4 text-lg">
+          {t("actions.save")}
+        </Button>
+      </div>
     </form>
   );
 }

@@ -10,7 +10,7 @@ export default function AdminShell({ children }) {
   // Sidebar width: collapsed = 5rem (80px), expanded = 16rem (256px)
   const sidebarWidth = collapsed ? 80 : 256;
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-background text-foreground">
       <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <main
         className="transition-all duration-300 p-6 w-full"

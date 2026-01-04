@@ -1,7 +1,7 @@
 .sidebar {
   width: 220px;
-  background: #f8fafc;
-  border-right: 1px solid #e5e7eb;
+  background: var(--ui-surface);
+  border-right: 1px solid var(--ui-border);
   min-height: 100vh;
   padding: 2rem 1rem;
   display: flex;
@@ -22,16 +22,16 @@
 .icon {
   font-size: 1.25rem;
   margin-left: 0.5rem;
-  color: #2563eb;
+  color: var(--ui-info);
 }
 
 .label {
   font-size: 1rem;
-  color: #333;
+  color: var(--ui-foreground);
 }
 
 .active {
-  background: #e0e7ff;
+  background: var(--ui-info-bg);
   border-radius: 6px;
 }
 
@@ -47,5 +47,5 @@
 }
 
 .sidebar a:hover {
-  background: #dbeafe;
+  background: var(--ui-surface-2);
 }

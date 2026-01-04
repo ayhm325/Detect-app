@@ -5,25 +5,47 @@ import { rateLimit } from "../../../lib/security/rateLimiter";
 import { logAudit } from "../../../lib/security/auditLogger";
 
 // GET /api/doctor-change-requests
-export async function GET() {
+export const GET = withRBAC(async (request, user) => {
+  const rl = await rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/doctor-change-requests" } });
+    return NextResponse.json({ success: false, error: "Rate limit exceeded" }, { status: 429 });
+  }
   try {
     const doctors = await prisma.doctor.findMany({
       where: { status: { in: ['active', 'pending'] } },
-      include: { user: true },
+      select: {
+        userId: true,
+        status: true,
+        phone: true,
+        clinic: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            isActive: true,
+            role: true,
+            createdAt: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'asc' }
     });
+    logAudit({ event: "doctor_change_doctors_listed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { count: doctors.length } });
     return NextResponse.json({ success: true, doctors });
   } catch (error) {
-    console.error('GET /api/doctor-change-requests error', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    logAudit({ event: "doctor_change_doctors_list_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error.message } });
+    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
-}
+}, ["patient"]);
 
 
 
 // POST /api/doctor-change-requests
 export const POST = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "POST /api/doctor-change-requests" } });
     return NextResponse.json({ success: false, error: "Rate limit exceeded" }, { status: 429 });

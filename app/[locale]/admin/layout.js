@@ -2,8 +2,8 @@ import AdminLayout from "./AdminLayout";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import crypto from "crypto";
-
-const SECRET = process.env.JWT_SECRET || "your-secret";
+import { getJwtSecret } from "../../../lib/auth/jwtSecret.js";
+import { getJwtAudience, getJwtIssuer } from "../../../lib/auth/jwtClaims.js";
 
 function base64urlToBase64(b64url) {
   return b64url.replace(/-/g, "+").replace(/_/g, "/");
@@ -15,6 +15,7 @@ function verifyToken(token) {
   if (parts.length !== 3) return null;
   const [headerB64, payloadB64, sigB64] = parts;
   const data = `${headerB64}.${payloadB64}`;
+  const SECRET = getJwtSecret();
   const expected = crypto
     .createHmac('sha256', SECRET)
     .update(data)
@@ -25,6 +26,18 @@ function verifyToken(token) {
   if (expected !== sigB64) return null;
   try {
     const payloadJson = JSON.parse(Buffer.from(base64urlToBase64(payloadB64), 'base64').toString('utf8'));
+    const now = Math.floor(Date.now() / 1000);
+    if (typeof payloadJson?.nbf === 'number' && payloadJson.nbf > now) return null;
+    if (typeof payloadJson?.exp === 'number' && payloadJson.exp <= now) return null;
+
+    const issuer = getJwtIssuer();
+    if (issuer && payloadJson?.iss !== issuer) return null;
+    const audience = getJwtAudience();
+    if (audience) {
+      const aud = payloadJson?.aud;
+      const ok = Array.isArray(aud) ? aud.includes(audience) : aud === audience;
+      if (!ok) return null;
+    }
     return payloadJson;
   } catch (e) {
     return null;

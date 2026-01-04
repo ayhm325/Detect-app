@@ -1,21 +1,22 @@
-
-import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 import ForgotPasswordForm from "../../components/ForgotPasswordForm";
 
-export const metadata = {
-  title: "Reset Password - Detect AI",
-  description: "Reset your password to access your Detect AI account",
-  openGraph: {
-    title: "Reset Password - Detect AI",
-    description: "Reset your password to access your Detect AI account",
-    type: "website",
-  },
-};
+export async function generateMetadata({ params }) {
+  const locale = params?.locale;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return {
+    title: t("forgotPassword.title"),
+    description: t("forgotPassword.description"),
+    openGraph: {
+      title: t("forgotPassword.openGraph.title"),
+      description: t("forgotPassword.openGraph.description"),
+      type: "website",
+    },
+  };
+}
 
-export default async function ForgotPasswordPage() {
-  const headerList = await headers();
-  const rawPath = headerList.get("x-forwarded-uri") || headerList.get("referer") || "/";
-  const locale = rawPath.startsWith("/en") ? "en" : "ar";
+export default async function ForgotPasswordPage({ params }) {
+  const locale = params?.locale;
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
@@ -34,7 +35,7 @@ export default async function ForgotPasswordPage() {
         justifyContent: 'center',
       }}
     >
-      <div className="bg-white/80 dark:bg-zinc-900/80 rounded-2xl shadow-lg p-8 w-full max-w-md flex items-center justify-center" style={{margin: 0}}>
+      <div className="card-glass rounded-2xl p-8 w-full max-w-md flex items-center justify-center" style={{margin: 0}}>
         <ForgotPasswordForm />
       </div>
     </div>

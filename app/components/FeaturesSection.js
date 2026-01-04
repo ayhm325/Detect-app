@@ -9,30 +9,30 @@ export default function FeaturesSection() {
   // ...existing code...
   // Use t("key") for all feature text, remove any hardcoded text
   const featureCopy = {
-    title: t("title", { defaultValue: "مميزات النظام" }),
-    subtitle: t("subtitle", { defaultValue: "نوفر لك أفضل التقنيات الحديثة في مجال التشخيص الطبي" }),
+    title: t("title"),
+    subtitle: t("subtitle"),
     items: [
       {
         icon: "/icons/ai.svg",
-        title: t("item1.title", { defaultValue: "ذكاء اصطناعي متطور" }),
-        desc: t("item1.desc", { defaultValue: "تقنية AI حديثة لتحليل دقيق" }),
+        title: t("item1.title"),
+        desc: t("item1.desc"),
       },
       {
         icon: "/icons/xray.svg",
-        title: t("item2.title", { defaultValue: "تحليل الأشعة" }),
-        desc: t("item2.desc", { defaultValue: "فحص شامل للصور الطبية" }),
+        title: t("item2.title"),
+        desc: t("item2.desc"),
       },
       {
         icon: "/icons/result.svg",
-        title: t("item3.title", { defaultValue: "نتائج فورية" }),
-        desc: t("item3.desc", { defaultValue: "احصل على التشخيص خلال ثوان" }),
+        title: t("item3.title"),
+        desc: t("item3.desc"),
       },
     ],
     extras: [
-      { icon: "🔒", title: t("extra1.title", { defaultValue: "أمان عالي" }), desc: t("extra1.desc", { defaultValue: "حماية كاملة لبياناتك الطبية" }) },
-      { icon: "⚡", title: t("extra2.title", { defaultValue: "سرعة فائقة" }), desc: t("extra2.desc", { defaultValue: "معالجة سريعة للصور والنتائج" }) },
-      { icon: "📊", title: t("extra3.title", { defaultValue: "تقارير مفصلة" }), desc: t("extra3.desc", { defaultValue: "تقارير طبية شاملة ودقيقة" }) },
-      { icon: "🌐", title: t("extra4.title", { defaultValue: "متوفر دائماً" }), desc: t("extra4.desc", { defaultValue: "خدمة 24/7 على مدار الساعة" }) },
+      { icon: "🔒", title: t("extra1.title"), desc: t("extra1.desc") },
+      { icon: "⚡", title: t("extra2.title"), desc: t("extra2.desc") },
+      { icon: "📊", title: t("extra3.title"), desc: t("extra3.desc") },
+      { icon: "🌐", title: t("extra4.title"), desc: t("extra4.desc") },
     ],
   };
   const particles = useMemo(
@@ -43,7 +43,12 @@ export default function FeaturesSection() {
         height: 4 + ((i + 1) % 4) * 1.2,
         left: (i * 13 + 7) % 100,
         top: (i * 17 + 11) % 100,
-        background: i % 3 === 0 ? "rgba(251, 191, 36, 0.6)" : i % 3 === 1 ? "rgba(245, 158, 11, 0.6)" : "rgba(239, 68, 68, 0.6)",
+        background:
+          i % 3 === 0
+            ? "color-mix(in srgb, var(--ui-ring) 60%, transparent)"
+            : i % 3 === 1
+              ? "color-mix(in srgb, var(--ui-warning) 60%, transparent)"
+              : "color-mix(in srgb, var(--ui-info) 60%, transparent)",
         animationDuration: 15 + (i % 5) * 1.5,
         animationDelay: (i % 4) * 0.6,
       })),
@@ -51,21 +56,21 @@ export default function FeaturesSection() {
   );
 
   return (
-    <section className="relative w-full py-20 sm:py-24 bg-linear-to-br from-yellow-50 via-amber-50 to-red-50 dark:bg-linear-to-br dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 overflow-hidden">
+    <section className="relative w-full py-20 sm:py-24 bg-(--ui-surface) text-(--ui-foreground) overflow-hidden">
       {/* Holographic Animated Background */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
         {/* Moving Holographic Gradients */}
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-0 left-0 w-125 h-125 bg-linear-to-br from-yellow-400/40 via-amber-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '20s' }} />
-          <div className="absolute top-1/4 right-0 w-150 h-150 bg-linear-to-bl from-red-400/40 via-orange-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '25s', animationDelay: '2s' }} />
-          <div className="absolute bottom-0 left-1/3 w-137.5 h-137.5 bg-linear-to-tr from-amber-400/40 via-yellow-400/30 to-transparent rounded-full blur-3xl animate-float" style={{ animationDuration: '22s', animationDelay: '4s' }} />
+          <div className="absolute top-0 left-0 w-125 h-125 bg-(--ui-ring)/15 rounded-full blur-3xl animate-float" style={{ animationDuration: '20s' }} />
+          <div className="absolute top-1/4 right-0 w-150 h-150 bg-(--ui-info)/15 rounded-full blur-3xl animate-float" style={{ animationDuration: '25s', animationDelay: '2s' }} />
+          <div className="absolute bottom-0 left-1/3 w-137.5 h-137.5 bg-(--ui-success)/15 rounded-full blur-3xl animate-float" style={{ animationDuration: '22s', animationDelay: '4s' }} />
         </div>
 
         {/* Holographic Grid Pattern */}
         <div className="absolute inset-0 opacity-20" style={{
           backgroundImage: `
-            linear-gradient(90deg, rgba(251, 191, 36, 0.1) 1px, transparent 1px),
-            linear-gradient(0deg, rgba(239, 68, 68, 0.1) 1px, transparent 1px)
+            linear-gradient(90deg, color-mix(in srgb, var(--ui-ring) 14%, transparent) 1px, transparent 1px),
+            linear-gradient(0deg, color-mix(in srgb, var(--ui-info) 14%, transparent) 1px, transparent 1px)
           `,
           backgroundSize: '80px 80px',
           animation: 'gridMove 30s linear infinite'
@@ -75,9 +80,9 @@ export default function FeaturesSection() {
         <div className="absolute inset-0 opacity-40">
           <div className="absolute inset-0" style={{
             backgroundImage: `
-              radial-gradient(circle at 25% 25%, rgba(251, 191, 36, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 75% 75%, rgba(239, 68, 68, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.1) 0%, transparent 60%)
+              radial-gradient(circle at 25% 25%, color-mix(in srgb, var(--ui-ring) 18%, transparent) 0%, transparent 50%),
+              radial-gradient(circle at 75% 75%, color-mix(in srgb, var(--ui-info) 18%, transparent) 0%, transparent 50%),
+              radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--ui-warning) 14%, transparent) 0%, transparent 60%)
             `,
           }} />
         </div>
@@ -105,13 +110,13 @@ export default function FeaturesSection() {
         <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="holoGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style={{ stopColor: '#FBBF24', stopOpacity: 0.8 }}>
+              <stop offset="0%" style={{ stopColor: 'var(--ui-ring)', stopOpacity: 0.8 }}>
                 <animate attributeName="offset" values="0;1;0" dur="10s" repeatCount="indefinite" />
               </stop>
-              <stop offset="50%" style={{ stopColor: '#F59E0B', stopOpacity: 0.5 }}>
+              <stop offset="50%" style={{ stopColor: 'var(--ui-warning)', stopOpacity: 0.5 }}>
                 <animate attributeName="offset" values="0.5;1;0.5" dur="10s" repeatCount="indefinite" />
               </stop>
-              <stop offset="100%" style={{ stopColor: '#EF4444', stopOpacity: 0.8 }}>
+              <stop offset="100%" style={{ stopColor: 'var(--ui-info)', stopOpacity: 0.8 }}>
                 <animate attributeName="offset" values="1;0;1" dur="10s" repeatCount="indefinite" />
               </stop>
             </linearGradient>
@@ -129,36 +134,32 @@ export default function FeaturesSection() {
         {/* Section Header */}
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4">
-            <span className="bg-linear-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">
-              {featureCopy.title || "مميزات النظام"}
+            <span className="brand-gradient-text">
+              {featureCopy.title}
             </span>
           </h2>
-          <p className="text-lg text-yellow-800/80 dark:text-yellow-200/80 max-w-2xl mx-auto">
-            {featureCopy.subtitle || "نوفر لك أفضل التقنيات الحديثة في مجال التشخيص الطبي"}
+          <p className="text-lg text-(--ui-muted-foreground) max-w-2xl mx-auto">
+            {featureCopy.subtitle}
           </p>
         </div>
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {(featureCopy.items || [
-            { icon: "/icons/ai.svg", title: "ذكاء اصطناعي متطور", desc: "تقنية AI حديثة لتحليل دقيق" },
-            { icon: "/icons/xray.svg", title: "تحليل الأشعة", desc: "فحص شامل للصور الطبية" },
-            { icon: "/icons/result.svg", title: "نتائج فورية", desc: "احصل على التشخيص خلال ثوان" },
-          ]).map((feature, i) => (
+          {featureCopy.items.map((feature, i) => (
             <div
               key={i}
               className="group relative animate-fadeIn"
               style={{ animationDelay: `${i * 0.1}s` }}
             >
               {/* Glow Effect */}
-              <div className="absolute -inset-1 bg-linear-to-r from-yellow-400 to-red-600 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500" />
+              <div className="absolute -inset-1 brand-gradient rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500" />
               
               {/* Card */}
-              <div className="relative h-full p-8 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-xl rounded-3xl border border-yellow-200/50 dark:border-yellow-600/30 shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300">
+              <div className="relative h-full p-8 card-glass rounded-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300">
                 {/* Icon Container */}
                 <div className="relative mb-6 inline-flex">
-                  <div className="absolute inset-0 bg-linear-to-br from-yellow-400 to-red-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
-                  <div className="relative w-20 h-20 flex items-center justify-center bg-linear-to-br from-yellow-100 to-red-100 dark:from-yellow-900/50 dark:to-red-900/50 rounded-2xl shadow-xl group-hover:scale-110 transition-transform duration-300">
+                  <div className="absolute inset-0 brand-gradient rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
+                  <div className="relative w-20 h-20 flex items-center justify-center bg-(--ui-surface-2) border border-(--ui-border) rounded-2xl shadow-xl group-hover:scale-110 transition-transform duration-300">
                     <Image 
                       src={feature.icon} 
                       alt={feature.title} 
@@ -170,17 +171,17 @@ export default function FeaturesSection() {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl sm:text-2xl font-bold mb-3 bg-linear-to-r from-yellow-700 to-red-700 bg-clip-text text-transparent">
+                <h3 className="text-xl sm:text-2xl font-bold mb-3 brand-gradient-text">
                   {feature.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-yellow-900/80 dark:text-yellow-100/80 text-base leading-relaxed">
+                <p className="text-(--ui-muted-foreground) text-base leading-relaxed">
                   {feature.desc}
                 </p>
 
                 {/* Decorative Element */}
-                <div className="absolute bottom-0 left-0 w-full h-1 bg-linear-to-r from-yellow-400 via-red-400 to-transparent rounded-b-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute bottom-0 left-0 w-full h-1 brand-gradient rounded-b-3xl opacity-0 group-hover:opacity-60 transition-opacity duration-300" />
               </div>
             </div>
           ))}
@@ -188,24 +189,19 @@ export default function FeaturesSection() {
 
         {/* Additional Features List */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn" style={{ animationDelay: "0.4s" }}>
-          {(featureCopy.extras || [
-            { icon: "🔒", title: "أمان عالي", desc: "حماية كاملة لبياناتك الطبية" },
-            { icon: "⚡", title: "سرعة فائقة", desc: "معالجة سريعة للصور والنتائج" },
-            { icon: "📊", title: "تقارير مفصلة", desc: "تقارير طبية شاملة ودقيقة" },
-            { icon: "🌐", title: "متوفر دائماً", desc: "خدمة 24/7 على مدار الساعة" },
-          ]).map((item, i) => (
+          {featureCopy.extras.map((item, i) => (
             <div
               key={i}
-              className="group flex items-start gap-4 p-6 bg-linear-to-r from-yellow-50 to-red-50 dark:from-zinc-800 dark:to-zinc-800 rounded-2xl border border-yellow-200/50 dark:border-yellow-600/20 hover:shadow-lg transition-all duration-300"
+              className="group flex items-start gap-4 p-6 card-glass rounded-2xl hover:shadow-lg transition-all duration-300"
             >
               <div className="text-4xl shrink-0 transform group-hover:scale-110 transition-transform">
                 {item.icon}
               </div>
               <div className="flex-1">
-                <h4 className="text-lg font-bold text-yellow-800 dark:text-yellow-200 mb-1">
+                <h4 className="text-lg font-bold text-(--ui-foreground) mb-1">
                   {item.title}
                 </h4>
-                <p className="text-sm text-yellow-700/80 dark:text-yellow-300/80">
+                <p className="text-sm text-(--ui-muted-foreground)">
                   {item.desc}
                 </p>
               </div>

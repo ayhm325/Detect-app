@@ -29,10 +29,10 @@ export default function UploadXRay() {
     setTimeout(() => setLoading(false), 2000);
   };
   return (
-    <section className="w-full bg-white dark:bg-zinc-900 rounded-xl shadow p-6 mt-4 flex flex-col items-center">
-      <h3 className="text-lg font-bold mb-4 text-black dark:text-zinc-50">Upload X-Ray</h3>
+    <section className="w-full bg-(--ui-surface) rounded-xl shadow p-6 mt-4 flex flex-col items-center border border-(--ui-border)">
+      <h3 className="text-lg font-bold mb-4 text-(--ui-foreground)">Upload X-Ray</h3>
       <div
-        className="w-full max-w-xs h-40 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded flex items-center justify-center mb-4 cursor-pointer bg-zinc-50 dark:bg-zinc-800"
+        className="w-full max-w-xs h-40 border-2 border-dashed border-(--ui-border) rounded flex items-center justify-center mb-4 cursor-pointer bg-(--ui-surface-2)"
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
         onClick={() => inputRef.current.click()}
@@ -40,7 +40,7 @@ export default function UploadXRay() {
         {preview ? (
           <Image src={preview} alt="Preview" width={144} height={144} className="h-36 object-contain" />
         ) : (
-          <span className="text-zinc-400">Drag & Drop or Click to Upload</span>
+          <span className="text-(--ui-muted-foreground)">Drag & Drop or Click to Upload</span>
         )}
         <input
           type="file"
@@ -53,7 +53,7 @@ export default function UploadXRay() {
       <button
         onClick={handleAnalyze}
         disabled={!file || loading}
-        className="w-full py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+        className="w-full py-2 rounded btn-gradient font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading ? "Analyzing..." : "Analyze"}
       </button>

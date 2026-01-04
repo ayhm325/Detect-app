@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   font-size: 1rem;
-  color: #555;
+  color: var(--ui-muted-2);
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
@@ -21,11 +21,11 @@
 
 .separator {
   margin: 0 0.5rem;
-  color: #aaa;
+  color: var(--ui-muted-2);
 }
 
 .breadcrumbs a {
-  color: #2563eb;
+  color: var(--ui-info);
   text-decoration: none;
 }
 

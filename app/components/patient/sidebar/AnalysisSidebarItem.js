@@ -9,7 +9,7 @@ export default function AnalysisSidebarItem() {
   const basePrefix = locale === "en" ? "/en" : "/ar";
 
   return (
-    <Link href={`${basePrefix}/patient/analysis`} className="py-2 px-4 rounded hover:bg-blue-100 dark:hover:bg-zinc-800 font-medium block">
+    <Link href={`${basePrefix}/patient/analysis`} className="py-2 px-4 rounded hover:bg-(--ui-surface-2)/60 font-medium block text-(--ui-foreground)">
       Analysis
     </Link>
   );

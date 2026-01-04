@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import prisma from "./prismaClient";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { getJwtSecret } from "../../../lib/auth/jwtSecret.js";
+import { applyJwtClaimsToSignOptions } from "../../../lib/auth/jwtClaims.js";
 
 // تخزين مؤقت لمحاولات الدخول (ذاكرة السيرفر فقط)
 const loginAttempts = new Map();
@@ -36,7 +38,9 @@ export async function POST(request) {
       }
       return NextResponse.json({ error: "المستخدم غير موجود" }, { status: 404 });
     }
-    console.log("[login] user found:", { id: user.id, email: user.email, isActive: user.isActive, doctorActive: user.doctor?.isActive });
+    if (process.env.DEBUG_AUTH === '1') {
+      console.log("[login] user found:", { id: user.id, email: user.email, isActive: user.isActive, doctorActive: user.doctor?.isActive });
+    }
     if (user.role === "doctor") {
       if (!user.doctor || user.doctor.status !== "active") {
         return NextResponse.json({ error: "حسابك قيد المراجعة من الإدارة" }, { status: 403 });
@@ -84,7 +88,7 @@ export async function POST(request) {
     const { password: _, ...userData } = user;
 
     // توليد JWT
-    const SECRET = process.env.JWT_SECRET || 'your-secret-key';
+    const SECRET = getJwtSecret();
     const token = jwt.sign(
       {
         id: user.id,
@@ -93,7 +97,7 @@ export async function POST(request) {
         fullName: user.fullName,
       },
       SECRET,
-      { expiresIn: '2h' } // صلاحية التوكن ساعتان فقط
+      applyJwtClaimsToSignOptions({ expiresIn: '2h' }) // صلاحية التوكن ساعتان فقط
     );
 
     // تخزين JWT في HttpOnly Cookie

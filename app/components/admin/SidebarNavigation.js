@@ -1,3 +1,4 @@
+"use client";
 
 import Image from "next/image";
 import React from "react";
@@ -19,14 +20,16 @@ export default function SidebarNavigation() {
   const isDark = theme === "dark";
   const { locale, switchLocale } = useLocale();
   const t = useTranslations("adminSidebar.ui");
+  const ui = useTranslations("ui");
+  const navbar = useTranslations("navbar");
   return (
-    <aside className={`w-full md:w-60 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 h-full flex flex-col p-4 gap-2`} dir={locale === "ar" ? "rtl" : "ltr"}>
+    <aside className={`w-full md:w-60 bg-(--color-background) border-r border-(--ui-border) h-full flex flex-col p-4 gap-2`} dir={locale === "ar" ? "rtl" : "ltr"}>
       {/* شعار PneumoDetect مع أيقونة الرئتين */}
       <div className="flex items-center gap-2 mb-4">
-        <div className="relative flex items-center justify-center w-10 h-10 bg-linear-to-br from-yellow-400 via-red-400 to-red-600 rounded-full shadow-lg">
-          <span className="text-xl" aria-label="Lung icon">🫁</span>
+        <div className="relative flex items-center justify-center w-10 h-10 brand-gradient rounded-full">
+          <span className="text-xl" aria-label={ui("aria.lungIcon")}>🫁</span>
         </div>
-        <span className="font-black text-lg bg-linear-to-r from-yellow-600 via-red-500 to-red-700 bg-clip-text text-transparent">PneumoDetect</span>
+        <span className="font-black text-lg brand-gradient-text">{navbar("brand")}</span>
       </div>
       <nav className="flex flex-col gap-2">
         <DashboardSidebarItem />
@@ -39,7 +42,7 @@ export default function SidebarNavigation() {
         <SettingsSidebarItem />
         <button
           onClick={() => setTheme(isDark ? "light" : "dark")}
-          className="flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-zinc-700 dark:text-zinc-200 hover:bg-yellow-50 dark:hover:bg-zinc-800 transition group"
+          className="flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-(--color-text) hover:bg-(--ui-surface) transition group"
           title={t(isDark ? "themeLight" : "themeDark")}
         >
           <span className="text-xl">{isDark ? "☀️" : "🌙"}</span>
@@ -47,11 +50,11 @@ export default function SidebarNavigation() {
         </button>
         <button
           onClick={switchLocale}
-          className="flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-zinc-700 dark:text-zinc-200 hover:bg-yellow-50 dark:hover:bg-zinc-800 transition group"
-          title={t(locale === "ar" ? "switchToEn" : "switchTo")}
+          className="flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-(--color-text) hover:bg-(--ui-surface) transition group"
+          title={t("localeSwitchLabel")}
         >
           <span className="text-xl">🌐</span>
-          <span className="text-base font-bold">{t(locale === "ar" ? "switchToEn" : "switchTo")}</span>
+          <span className="text-base font-bold">{t("localeSwitchLabel")}</span>
         </button>
         <LogoutSidebarItem />
       </nav>

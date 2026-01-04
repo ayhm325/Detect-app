@@ -1,24 +1,21 @@
+"use client";
+
 import { useState } from "react";
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
+import { useTranslations } from "next-intl";
 
 export default function RolePermissionsEditor() {
-  const { locale } = useLocale();
-  const tr = locale === "ar" ? ar.adminAnalysis : en.adminAnalysis;
-  const permTr = tr.rolePermissionsEditor || {};
-  const roles = permTr.roles || (locale === "ar"
-    ? ["أدمن", "طبيب", "مريض"]
-    : ["Admin", "Doctor", "Patient"]);
-  const permissions = permTr.permissions || (locale === "ar"
-    ? ["قراءة", "كتابة", "تعديل", "حذف"]
-    : ["Read", "Write", "Edit", "Delete"]);
-  const defaultPerms = permTr.defaultPerms || {
-    [roles[0]]: permissions,
-    [roles[1]]: permissions.slice(0, 3),
-    [roles[2]]: [permissions[0]]
+  const t = useTranslations("adminSettings");
+
+  const roles = ["admin", "doctor", "patient"];
+  const permissions = ["read", "write", "edit", "delete"];
+
+  const defaultPerms = {
+    admin: permissions,
+    doctor: ["read", "write", "edit"],
+    patient: ["read"],
   };
-  const [selectedRole, setSelectedRole] = useState(roles[0]);
+
+  const [selectedRole, setSelectedRole] = useState("admin");
   const [rolePerms, setRolePerms] = useState(defaultPerms);
 
   const togglePerm = (perm) => {
@@ -34,16 +31,20 @@ export default function RolePermissionsEditor() {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-yellow-100 max-w-xl mx-auto mt-8">
-      <h3 className="font-bold text-xl mb-4 text-yellow-700">{permTr.title || (locale === "ar" ? "تعديل صلاحيات الدور" : "Edit Role Permissions")}</h3>
-      <select className="mb-4 px-4 py-2 border rounded" value={selectedRole} onChange={e => setSelectedRole(e.target.value)}>
-        {roles.map(role => <option key={role} value={role}>{role}</option>)}
+    <div className="card-glass rounded-2xl p-8 border border-(--ui-border) max-w-xl mx-auto mt-8">
+      <h3 className="font-bold text-xl mb-4 text-(--ui-foreground)">{t("rolePermissionsEditor.title")}</h3>
+      <select
+        className="mb-4 w-full px-4 py-2 rounded-xl border border-(--ui-border) bg-(--ui-surface) text-(--ui-foreground) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring)"
+        value={selectedRole}
+        onChange={e => setSelectedRole(e.target.value)}
+      >
+        {roles.map(role => <option key={role} value={role}>{t(`rolePermissionsEditor.roles.${role}`)}</option>)}
       </select>
       <div className="flex gap-4 flex-wrap">
         {permissions.map(perm => (
-          <label key={perm} className="flex items-center gap-2">
+          <label key={perm} className="flex items-center gap-2 text-(--ui-foreground)">
             <input type="checkbox" checked={rolePerms[selectedRole].includes(perm)} onChange={() => togglePerm(perm)} />
-            {perm}
+            {t(`rolePermissionsEditor.permissions.${perm}`)}
           </label>
         ))}
       </div>

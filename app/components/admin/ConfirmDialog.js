@@ -1,23 +1,31 @@
+"use client";
+
 import React from "react";
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
+import { useTranslations } from "next-intl";
 
 export default function ConfirmDialog({ open, onConfirm, onCancel, message }) {
-  const { locale } = useLocale();
-  const tr = locale === "ar" ? ar.adminAnalysis : en.adminAnalysis;
-  const confirmTr = tr.confirmDialog || {};
-  const msg = message || confirmTr.message || (locale === "ar" ? "هل أنت متأكد؟" : "Are you sure?");
-  const confirmLabel = confirmTr.confirm || (locale === "ar" ? "تأكيد" : "Confirm");
-  const cancelLabel = confirmTr.cancel || (locale === "ar" ? "إلغاء" : "Cancel");
+  const t = useTranslations("doctorCommon");
+  const msg = message || t("confirmDialog.defaultMessage");
+  const confirmLabel = t("confirmDialog.confirm");
+  const cancelLabel = t("confirmDialog.cancel");
   if (!open) return null;
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded shadow-lg min-w-75">
-        <p className="mb-4">{msg}</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-(--color-neutral)/40 p-4">
+      <div className="w-full min-w-75 max-w-md rounded-2xl border border-(--ui-border) bg-(--ui-surface) p-6">
+        <p className="mb-4 text-foreground">{msg}</p>
         <div className="flex gap-4">
-          <button onClick={onConfirm} className="px-4 py-2 bg-green-500 text-white rounded">{confirmLabel}</button>
-          <button onClick={onCancel} className="px-4 py-2 bg-gray-300 rounded">{cancelLabel}</button>
+          <button
+            onClick={onConfirm}
+            className="rounded-xl border border-(--ui-success-border) bg-(--ui-success) px-4 py-2 text-sm font-semibold text-(--ui-success-foreground) hover:opacity-90"
+          >
+            {confirmLabel}
+          </button>
+          <button
+            onClick={onCancel}
+            className="rounded-xl border border-(--ui-border) bg-(--ui-surface-2) px-4 py-2 text-sm font-semibold text-foreground hover:opacity-90"
+          >
+            {cancelLabel}
+          </button>
         </div>
       </div>
     </div>

@@ -1,7 +1,15 @@
 import os from "os";
-import prisma from "../dashboard-stats/prismaClient";
+import prisma from "../../../../lib/prismaClient";
+import { withRBAC } from "../../../../lib/auth/withRBAC";
+import { rateLimit } from "../../../../lib/security/rateLimiter";
+import { logAudit } from "../../../../lib/security/auditLogger";
 
-export async function GET() {
+export const GET = withRBAC(async (request, user) => {
+  const rl = await rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/admin/system-status" } });
+    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
   try {
     // مدة تشغيل الخادم بالثواني
     const uptimeSeconds = process.uptime();
@@ -28,14 +36,23 @@ export async function GET() {
     // تحويل BigInt إلى Number بشكل آمن
     const dbSizeMB = (Number(dbSizeBytes) / 1024 / 1024).toFixed(2) + " MB";
 
-    return Response.json({
+    const payload = {
       serverUptime: uptime,
       responseTime,
       memoryUsage: `${usedMB}MB / ${totalMB}MB (${memoryPercent})`,
       dbSize: dbSizeMB
-    });
+    };
+
+    logAudit({ event: "admin_system_status_viewed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: payload });
+    return Response.json(payload);
   } catch (error) {
-    console.error("System Status API Error:", error);
-    return Response.json({ error: "حدث خطأ أثناء جلب حالة النظام", details: String(error) }, { status: 500 });
+    logAudit({ event: "admin_system_status_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error?.message } });
+    return Response.json(
+      {
+        error: "حدث خطأ أثناء جلب حالة النظام",
+        ...(process.env.NODE_ENV !== "production" ? { details: String(error) } : {}),
+      },
+      { status: 500 }
+    );
   }
-}
+}, ["admin"]);

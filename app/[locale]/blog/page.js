@@ -1,68 +1,71 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import arBlog from "../../locales/ar/blog.json";
-import enBlog from "../../locales/en/blog.json";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function BlogPage() {
   const router = useRouter();
-  const pathname = usePathname();
-  // Detect locale from path
-  const locale = pathname.split("/")[1] === "ar" ? "ar" : "en";
-  const t = locale === "ar" ? arBlog : enBlog;
-  const posts = t.posts || [];
+  const locale = useLocale();
+  const t = useTranslations("blog");
+  const ui = useTranslations("ui");
+  const placeholder = ui("placeholder");
+
+  const posts = t.raw("posts");
+
+  const safeText = (value) => {
+    const v = String(value || "").trim();
+    return v ? v : placeholder;
+  };
+
   const toggleLocale = () => {
     const newLocale = locale === "ar" ? "en" : "ar";
-    const segments = pathname.split("/");
-    if (segments[1] === "ar" || segments[1] === "en") {
-      segments[1] = newLocale;
-    } else {
-      segments.splice(1, 0, newLocale);
-    }
-    router.push(segments.join("/"));
+    router.push(`/${newLocale}/blog`);
   };
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center py-20"
+      className="flex min-h-screen items-center justify-center bg-cover bg-center py-20"
       style={{
         backgroundImage: 'url(/icons/blog.jpg)',
       }}
     >
-      <div className="w-full max-w-4xl mx-auto px-4 p-8 rounded-3xl shadow-2xl backdrop-blur-md bg-white/60 dark:bg-zinc-900/60 border border-white/30 dark:border-zinc-700/40 relative z-10">
-        <div className="flex justify-end mb-4">
+      <div className="card-glass relative z-10 mx-auto w-full max-w-4xl rounded-3xl border border-(--ui-border) bg-(--ui-surface)/60 p-8 px-4 backdrop-blur-md shadow-(--shadow-lift)">
+        <div className="mb-4 flex justify-end">
           <button
             onClick={toggleLocale}
-            className="px-4 py-2 rounded-full bg-gray-200 dark:bg-zinc-800 text-gray-800 dark:text-gray-100 font-semibold shadow hover:bg-gray-300 dark:hover:bg-zinc-700 transition-colors"
-            aria-label={locale === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+            className="rounded-full bg-(--ui-surface-2) px-4 py-2 font-semibold text-(--ui-foreground) shadow-(--shadow-soft) transition-colors hover:bg-(--ui-surface)"
+            aria-label={t("languageToggleAria")}
           >
-            {locale === "ar" ? "English" : "العربية"}
+            {t("languageToggleLabel")}
           </button>
         </div>
-        <h1 className="text-4xl font-bold mb-6 text-yellow-600 dark:text-yellow-300 text-center">{t.title}</h1>
-        <p className="text-lg text-gray-700 dark:text-gray-300 mb-12 text-center max-w-2xl mx-auto">
-          {t.description}
+        <h1 className="mb-6 text-center text-4xl font-bold text-(--ui-warning)">{t("title")}</h1>
+        <p className="mx-auto mb-12 max-w-2xl text-center text-lg text-(--ui-muted-foreground)">
+          {t("description")}
         </p>
-        <div className="grid gap-8 mb-12">
+        <div className="mb-12 grid gap-8">
           {posts.map((post, idx) => (
-            <div key={idx} className="bg-yellow-50/60 dark:bg-zinc-800/60 rounded-2xl p-6 shadow-lg hover:scale-[1.02] transition-transform animate-fadeIn backdrop-blur-sm border border-white/20 dark:border-zinc-700/30">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
-                <h2 className="text-2xl font-bold text-yellow-700 dark:text-yellow-200 mb-2 md:mb-0">{post.title}</h2>
-                <span className="text-sm text-gray-500 dark:text-gray-400">{post.date}</span>
+            <div
+              key={idx}
+              className="card-glass animate-fadeIn rounded-2xl border border-(--ui-border) bg-(--ui-surface)/60 p-6 backdrop-blur-sm shadow-(--shadow-soft) transition-transform hover:scale-[1.02]"
+            >
+              <div className="mb-2 flex flex-col md:flex-row md:items-center md:justify-between">
+                <h2 className="mb-2 text-2xl font-bold text-(--ui-warning) md:mb-0">{safeText(post?.title)}</h2>
+                <span className="text-sm text-(--ui-muted-foreground)">{safeText(post?.date)}</span>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">{post.excerpt}</p>
-              <button className="text-yellow-600 dark:text-yellow-300 font-semibold hover:underline cursor-not-allowed" disabled>
-                قريباً
+              <p className="mb-2 text-sm text-(--ui-muted-foreground)">{safeText(post?.excerpt)}</p>
+              <button className="cursor-not-allowed font-semibold text-(--ui-warning) hover:underline" disabled>
+                {t("comingSoon")}
               </button>
             </div>
           ))}
         </div>
         <div className="flex justify-center">
           <Link
-            href="/ar"
-            className="inline-block px-6 py-3 rounded-full bg-yellow-500 text-white font-semibold shadow-md hover:bg-yellow-600 transition-colors"
+            href={`/${locale}`}
+            className="inline-block rounded-full bg-(--ui-warning) px-6 py-3 font-semibold text-(--ui-warning-foreground) shadow-(--shadow-soft) transition-opacity hover:opacity-90"
           >
-            العودة إلى الرئيسية
+            {t("backHome")}
           </Link>
         </div>
       </div>

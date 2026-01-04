@@ -1,9 +1,10 @@
 .card {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ui-border);
+  box-shadow: var(--shadow-soft);
   padding: 18px;
   margin-bottom: 16px;
   min-width: 220px;
@@ -11,33 +12,33 @@
 .patient {
   font-size: 16px;
   font-weight: bold;
-  color: #222;
+  color: var(--color-text);
   margin-bottom: 6px;
 }
 .date {
   font-size: 14px;
-  color: #888;
+  color: var(--ui-muted);
   margin-bottom: 4px;
 }
 .time {
   font-size: 14px;
-  color: #888;
+  color: var(--ui-muted);
   margin-bottom: 8px;
 }
 .status {
   font-size: 13px;
-  color: #0070f3;
+  color: var(--color-accent-500);
   margin-bottom: 10px;
 }
 .editBtn {
   padding: 6px 14px;
-  background: #0070f3;
-  color: #fff;
+  background: var(--ui-info);
+  color: var(--ui-info-foreground);
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
 }
 .editBtn:hover {
-  background: #005bb5;
+  background: color-mix(in srgb, var(--ui-info) 85%, var(--color-neutral));
 }

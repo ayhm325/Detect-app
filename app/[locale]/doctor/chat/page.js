@@ -3,11 +3,10 @@
 
 import DoctorLayout from "../DoctorLayout";
 import { useToast } from "../../../components/ui/Toast";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import useSocket from "../../../components/chat/useSocket.client";
 import ChatActionsPopover from "../../../components/chat/ChatActionsPopover.client";
 import { useRouter } from "next/navigation";
-import useLocale from "../../../hooks/useLocale";
 import {
   FaComments,
   FaSearch,
@@ -21,18 +20,24 @@ import {
   FaFilePdf,
   FaFileAlt,
 } from "react-icons/fa";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
+import { formatTime } from "../../../lib/date";
 
 export default function Page() {
   const { showToast, ToastContainer } = useToast();
   const t = useTranslations("doctorChat");
-  const safeT = (key, fallback) => {
-    try { return t(key); } catch (e) { return fallback; }
-  };
+  const ui = useTranslations("ui");
 
   const router = useRouter();
-  const { locale } = useLocale();
+  const locale = useLocale();
+
+  const placeholder = ui("placeholder");
+  const dateLocale = locale === "ar" ? "ar-EG" : "en-US";
+  const formatMsgTime = useCallback(
+    (value) => formatTime(value, dateLocale, placeholder),
+    [dateLocale, placeholder]
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
@@ -49,6 +54,7 @@ export default function Page() {
   const socket = useSocket();
   const typingTimeoutRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const loadedMessagesRef = useRef(new Set());
 
   // Fetch JWT token on mount
   useEffect(() => {
@@ -88,14 +94,6 @@ export default function Page() {
       const onMe = (info) => {
         try {
           const actualId = info && info.id;
-          // log detailed debug info for diagnosis (type + value)
-          console.group('[Socket Identity Check]');
-          console.log('expectedUserId (from JWT):', expectedUserId, typeof expectedUserId);
-          console.log('info.id (from server):', actualId, typeof actualId);
-          console.log('full info from server:', info);
-          try { console.log('jwtToken (short):', jwtToken && jwtToken.slice(0,20)); } catch(e) {}
-          console.groupEnd();
-
           if (!info || !actualId) return;
           // compare as strings to avoid type mismatch false-negatives
           if (expectedUserId && String(actualId) !== String(expectedUserId)) {
@@ -140,7 +138,7 @@ export default function Page() {
         const messageId = msg.id ?? msg._id ?? msg.messageId ?? null;
         const clientKey = msg.clientKey ?? msg.client_key ?? null;
 
-        const mapped = { ...msg, id: messageId || msg.id, chatId, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString() };
+        const mapped = { ...msg, id: messageId || msg.id, chatId, time: formatMsgTime(msg.createdAt) };
 
         if (!chatId) {
           console.warn('[onMessage] received message without chatId - ignoring', msg);
@@ -177,7 +175,6 @@ export default function Page() {
 
     const offPresence = socket.onPresence(({ userId, online }) => {
       setConversations((cs) => cs.map((c) => (c.patientId === userId ? { ...c, online } : c)));
-      let offConnErr = null;
     });
 
     const offUpdate = socket.onMessageUpdate((upd) => {
@@ -196,7 +193,6 @@ export default function Page() {
         setMessagesMap((m) => {
           const chatEntries = Object.keys(m).reduce((acc, k) => ({ ...acc, [k]: m[k].map(msg => msg.id === info.messageId ? { ...msg, status: 'read' } : msg) }), {});
           return { ...m, ...chatEntries };
-        try { offConnErr && offConnErr(); } catch (e) {}
         });
       } catch (e) { console.error('message_read handler', e); }
     });
@@ -230,22 +226,22 @@ export default function Page() {
       try {
         const res = await fetch("/api/chat/doctor", { credentials: "include" });
         if (res.status === 403) {
-          showToast("ليس لديك إذن لعرض هذه الصفحة — جاري إعادة التوجيه.", "error");
+          showToast(t("forbiddenRedirectToast"), "error");
           router.push(`/${locale}/patient/chat`);
           return;
         }
         const data = await res.json();
         if (!res.ok) {
-          showToast(data.error || "خطأ في جلب المحادثات", "error");
+          showToast(data.error || t("fetchConversationsError"), "error");
           return;
         }
 
         const convs = (data.chats || []).map((c) => ({
           id: String(c.id),
           patientId: c.patient?.id ? String(c.patient.id) : null,
-          patientName: c.patient?.fullName || "مريض",
+          patientName: c.patient?.fullName || t("patientFallbackName"),
           lastMessage: c.messages?.[0]?.text || "",
-          lastMessageTime: c.messages?.[0]?.createdAt ? new Date(c.messages[0].createdAt).toLocaleTimeString() : "",
+          lastMessageTime: formatMsgTime(c.messages?.[0]?.createdAt),
           unreadCount: 0,
           online: false,
           avatar: "👨",
@@ -260,14 +256,14 @@ export default function Page() {
         setAllPatients(patients);
       } catch (e) {
         console.error(e);
-        showToast("خطأ في جلب البيانات", "error");
+        showToast(t("fetchDataError"), "error");
       } finally {
         if (mounted) setLoadingChats(false);
       }
     }
     loadChatsAndPatients();
     return () => { mounted = false; };
-  }, [locale, router, showToast]);
+  }, [locale, router, showToast, t, formatMsgTime]);
 
   const patientIdToConversation = useMemo(() => {
     const map = {};
@@ -281,7 +277,81 @@ export default function Page() {
   }, [allPatients, searchQuery]);
 
   const currentChat = selectedChat ? conversations.find((c) => c.id === selectedChat) : null;
-  const currentMessages = selectedChat ? messagesMap[selectedChat] || [] : [];
+  const currentMessages = useMemo(() => {
+    return selectedChat ? (messagesMap[selectedChat] || []) : [];
+  }, [selectedChat, messagesMap]);
+
+  const lastMessageKey = useMemo(() => {
+    const last = currentMessages[currentMessages.length - 1];
+    if (!last) return "";
+    return String(last.id || last.clientKey || last.createdAt || last.time || currentMessages.length);
+  }, [currentMessages]);
+
+  // Auto-scroll to bottom when messages change (send/receive)
+  useEffect(() => {
+    if (!selectedChat) return;
+    const id = setTimeout(() => {
+      try {
+        const el = messagesContainerRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+      } catch (e) {}
+    }, 0);
+    return () => clearTimeout(id);
+  }, [selectedChat, lastMessageKey]);
+
+  // Load message history for the selected chat (so refresh doesn't clear messages)
+  useEffect(() => {
+    if (!selectedChat) return;
+    const chatKey = String(selectedChat);
+    if (loadedMessagesRef.current.has(chatKey)) return;
+
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch(`/api/chat/${chatKey}/messages`, {
+          credentials: "include",
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          // Avoid spamming toasts; log for debugging
+          console.warn("Failed to load chat messages", res.status, data);
+          return;
+        }
+
+        const mapped = (data.messages || []).map((msg) => ({
+          ...msg,
+          time: formatMsgTime(msg.createdAt),
+        }));
+
+        loadedMessagesRef.current.add(chatKey);
+        setMessagesMap((m) => {
+          const existing = m[chatKey] || [];
+          if (!existing.length) return { ...m, [chatKey]: mapped };
+          const merged = [...mapped];
+          for (const ex of existing) {
+            if (ex?.id && merged.some((x) => x?.id === ex.id)) continue;
+            if (ex?.clientKey && merged.some((x) => x?.clientKey === ex.clientKey)) continue;
+            merged.push(ex);
+          }
+          return { ...m, [chatKey]: merged };
+        });
+
+        // scroll to bottom after hydration
+        setTimeout(() => {
+          try {
+            const el = messagesContainerRef.current;
+            if (el) el.scrollTop = el.scrollHeight;
+          } catch (e) {}
+        }, 0);
+      } catch (e) {
+        if (e?.name === "AbortError") return;
+        console.error("Failed to load messages", e);
+      }
+    })();
+
+    return () => controller.abort();
+  }, [selectedChat, formatMsgTime]);
 
   // Keep socket subscribed to the currently selected chat room so doctors
   // receive patient messages in real time. Leave previous room when switching.
@@ -305,7 +375,7 @@ export default function Page() {
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedChat) {
-      showToast("الرسالة فارغة", "error");
+      showToast(t("emptyMessage"), "error");
       return;
     }
     const chatKey = String(selectedChat);
@@ -316,7 +386,7 @@ export default function Page() {
       sender: "doctor",
       text: messageInput,
       status: "sent",
-      time: new Date().toLocaleTimeString(),
+      time: formatMsgTime(new Date().toISOString()),
       clientKey: tempId
     };
     setMessagesMap((m) => ({ ...m, [chatKey]: [...(m[chatKey] || []), tempMsg] }));
@@ -336,12 +406,12 @@ export default function Page() {
               if (res.message && list.some(x => (res.message.id && x.id === res.message.id) || (res.message.clientKey && x.clientKey === res.message.clientKey))) {
                 return { ...m, [chatKey]: list };
               }
-              return { ...m, [chatKey]: [...list, { ...res.message, time: res.message.createdAt ? new Date(res.message.createdAt).toLocaleTimeString() : "" }] };
+              return { ...m, [chatKey]: [...list, { ...res.message, time: formatMsgTime(res.message.createdAt) }] };
             });
-            showToast("تم إرسال الرسالة", "success");
+            showToast(t("messageSent"), "success");
           } else {
             removeTemp();
-            showToast(res?.error || "خطأ عند إرسال الرسالة", "error");
+            showToast(res?.error || t("errorSendMessage"), "error");
           }
         });
       } else {
@@ -354,21 +424,21 @@ export default function Page() {
         const data = await res.json();
         if (!res.ok) {
           removeTemp();
-          showToast(data.error || "خطأ عند إرسال الرسالة", "error");
+          showToast(data.error || t("errorSendMessage"), "error");
           return;
         }
         const res2 = await fetch(`/api/chat/${chatKey}/messages`, { credentials: "include" });
         const refreshed = await res2.json();
         if (res2.ok) {
-          const mapped = (refreshed.messages || []).map((msg) => ({ ...msg, time: msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : "" }));
+          const mapped = (refreshed.messages || []).map((msg) => ({ ...msg, time: formatMsgTime(msg.createdAt) }));
           setMessagesMap((m) => ({ ...m, [chatKey]: mapped }));
         }
-        showToast("تم إرسال الرسالة", "success");
+        showToast(t("messageSent"), "success");
       }
     } catch (e) {
       console.error(e);
       removeTemp();
-      showToast("خطأ في الاتصال", "error");
+      showToast(t("connectionError"), "error");
     }
   };
 
@@ -381,7 +451,7 @@ export default function Page() {
       if (!file || !selectedChat) return;
       // Create temp message for optimistic UI and retry support
       const tempId = `tmpfile-${Date.now()}`;
-      const tempMsg = { id: tempId, chatId: selectedChat, sender: 'doctor', status: 'sent', time: new Date().toLocaleTimeString(), clientKey: tempId, file };
+      const tempMsg = { id: tempId, chatId: selectedChat, sender: 'doctor', status: 'sent', time: formatMsgTime(new Date().toISOString()), clientKey: tempId, file };
       setMessagesMap((m) => ({ ...m, [selectedChat]: [...(m[selectedChat] || []), tempMsg] }));
       try {
         // Initialize upload (returns an upload URL + key)
@@ -430,7 +500,7 @@ export default function Page() {
         const compData = await compRes.json();
         if (!compRes.ok || !compData?.url) {
           setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).map(mm => mm.id === tempId ? { ...mm, status: 'failed' } : mm) }));
-          showToast(compData?.error || 'فشل إنهاء الرفع', 'error');
+          showToast(compData?.error || t('uploadCompleteFailed'), 'error');
           return;
         }
         // Send message containing the file metadata via socket (fallback to HTTP)
@@ -444,9 +514,9 @@ export default function Page() {
                   if (res.message && list.some(x => (res.message.id && x.id === res.message.id) || (res.message.clientKey && x.clientKey === res.message.clientKey))) {
                     return { ...m, [selectedChat]: list };
                   }
-                  return { ...m, [selectedChat]: [...list, { ...res.message, time: res.message.createdAt ? new Date(res.message.createdAt).toLocaleTimeString() : "" }] };
+                  return { ...m, [selectedChat]: [...list, { ...res.message, time: formatMsgTime(res.message.createdAt) }] };
                 });
-                showToast('تم إرسال الملف بنجاح', 'success');
+                showToast(t('fileSent'), 'success');
                 setUploadProgress({ uploading: false, percent: 0, filename: null });
               } else {
                 // fallback to HTTP POST
@@ -455,16 +525,16 @@ export default function Page() {
                   if (!msgRes.ok) {
                     setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).map(mm => mm.id === tempId ? { ...mm, status: 'failed' } : mm) }));
                     const err = await msgRes.json().catch(() => ({}));
-                    showToast(err.error || 'فشل إرسال الرسالة مع الملف', 'error');
+                    showToast(err.error || t('errorSendMessageWithFile'), 'error');
                     return;
                   }
                   const res2 = await fetch(`/api/chat/${selectedChat}/messages`, { credentials: 'include' });
                   if (res2.ok) {
                     const refreshed = await res2.json();
-                    const mapped = (refreshed.messages || []).map((m) => ({ ...m, time: m.createdAt ? new Date(m.createdAt).toLocaleTimeString() : "" }));
+                    const mapped = (refreshed.messages || []).map((m) => ({ ...m, time: formatMsgTime(m.createdAt) }));
                     setMessagesMap((m) => ({ ...m, [selectedChat]: mapped }));
                   }
-                  showToast('تم إرسال الملف بنجاح', 'success');
+                  showToast(t('fileSent'), 'success');
                   setUploadProgress({ uploading: false, percent: 0, filename: null });
                 })();
               }
@@ -474,34 +544,34 @@ export default function Page() {
             if (!msgRes.ok) {
               setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).map(mm => mm.id === tempId ? { ...mm, status: 'failed' } : mm) }));
               const err = await msgRes.json().catch(() => ({}));
-              showToast(err.error || 'فشل إرسال الرسالة مع الملف', 'error');
+              showToast(err.error || t('errorSendMessageWithFile'), 'error');
               return;
             }
             const res2 = await fetch(`/api/chat/${selectedChat}/messages`, { credentials: 'include' });
             if (res2.ok) {
-              const mapped = (await res2.json()).messages.map((m) => ({ ...m, time: m.createdAt ? new Date(m.createdAt).toLocaleTimeString() : "" }));
+              const mapped = (await res2.json()).messages.map((m) => ({ ...m, time: formatMsgTime(m.createdAt) }));
               setMessagesMap((m) => ({ ...m, [selectedChat]: mapped }));
             }
-            showToast('تم إرسال الملف بنجاح', 'success');
+            showToast(t('fileSent'), 'success');
             setUploadProgress({ uploading: false, percent: 0, filename: null });
           }
         } catch (e) {
           console.error('send file message failed', e);
           setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).map(mm => mm.id === tempId ? { ...mm, status: 'failed' } : mm) }));
-          showToast('خطأ في إرسال الرسالة مع الملف', 'error');
+          showToast(t('errorSendFileMessage'), 'error');
           setUploadProgress({ uploading: false, percent: 0, filename: null });
         }
       } catch (e) {
         console.error(e);
         setMessagesMap((m) => ({ ...m, [selectedChat]: (m[selectedChat] || []).map(mm => mm.id === tempId ? { ...mm, status: 'failed' } : mm) }));
-        showToast('خطأ في رفع الملف', 'error');
+        showToast(t('errorUploadFile'), 'error');
       }
     };
     input.click();
   };
 
-  const handleVoiceCall = () => showToast("بدء مكالمة صوتية", "info");
-  const handleVideoCall = () => showToast("بدء مكالمة فيديو", "info");
+  const handleVoiceCall = () => showToast(t("voiceCallStarted"), "info");
+  const handleVideoCall = () => showToast(t("videoCallStarted"), "info");
 
   const deleteSelectedChat = async () => {
     if (!selectedChat) return;
@@ -509,7 +579,7 @@ export default function Page() {
       const res = await fetch(`/api/chat/${selectedChat}`, { method: "DELETE", credentials: "include" });
       const data = await res.json();
       if (!res.ok) {
-        showToast(data.error || "خطأ عند حذف المحادثة", "error");
+        showToast(data.error || t("deleteConversationError"), "error");
         return;
       }
       setConversations((cs) => cs.filter((c) => c.id !== selectedChat));
@@ -518,33 +588,33 @@ export default function Page() {
         const remaining = conversations.filter((c) => c.id !== prev);
         return remaining.length ? remaining[0].id : null;
       });
-      showToast(safeT("deletedToast", "تم حذف المحادثة"), "success");
+      showToast(t("deletedToast"), "success");
     } catch (e) {
       console.error(e);
-      showToast("خطأ في الاتصال", "error");
+      showToast(t("connectionError"), "error");
     }
   };
 
   return (
     <DoctorLayout>
       <ToastContainer />
-      <div className="h-screen bg-linear-to-br from-blue-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6 text-gray-900 dark:text-gray-100 [&_div.bg-white]:dark:bg-zinc-900 [&_div.bg-white]:dark:border-zinc-800">
+      <div className="h-screen bg-(--ui-surface-2) p-6 text-(--ui-foreground)">
         {socketMismatch && (
-          <div className="mb-4 rounded-lg border-l-4 border-red-600 bg-red-50 p-3 text-sm text-red-800">
+          <div className="mb-4 rounded-lg border-l-4 border-(--ui-danger) bg-(--ui-danger-bg) p-3 text-sm text-(--ui-danger-foreground)">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <strong>جلسة Socket غير متطابقة</strong>
-                <div className="mt-1">هوية الاتصال بـSocket لا تتطابق مع المستخدم المسجّل. الرجاء إعادة تسجيل الدخول أو المحاولة مرة أخرى.</div>
+                <strong>{t("socketMismatchTitle")}</strong>
+                <div className="mt-1">{t("socketMismatchDescription")}</div>
               </div>
               <div className="flex gap-2">
                 <button
-                  className="rounded bg-white px-3 py-1 text-sm font-medium text-red-700 border border-red-200"
+                  className="rounded bg-(--ui-surface) px-3 py-1 text-sm font-medium text-(--ui-danger) border border-(--ui-border) hover:bg-(--ui-surface-2)"
                   onClick={() => window.location.reload()}
-                >إعادة المحاولة</button>
+                >{t("socketMismatchRetry")}</button>
                 <button
-                  className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white"
+                  className="rounded bg-(--ui-danger) px-3 py-1 text-sm font-medium text-(--ui-danger-foreground) hover:bg-(--ui-danger)/90"
                   onClick={() => router.push(`/${locale}/login`)}
-                >إعادة تسجيل الدخول</button>
+                >{t("socketMismatchRelogin")}</button>
               </div>
             </div>
           </div>
@@ -552,26 +622,26 @@ export default function Page() {
         <div className="mx-auto h-full max-w-7xl">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <FaComments className="text-blue-600" />
+            <h1 className="text-3xl font-bold text-(--ui-foreground) flex items-center gap-3">
+              <FaComments className="text-(--ui-info)" />
               {t("title")}
             </h1>
-            <p className="mt-2 text-gray-600">{t("subtitle")}</p>
+            <p className="mt-2 text-(--ui-muted-foreground)">{t("subtitle")}</p>
           </div>
 
           {/* Chat Container */}
           <div className="flex h-[calc(100%-120px)] gap-6 overflow-hidden">
             {/* Left Sidebar */}
-            <div className="flex w-80 shrink-0 flex-col rounded-xl bg-white shadow-lg border border-gray-100">
-              <div className="border-b border-gray-200 p-4">
+            <div className="flex w-80 shrink-0 flex-col rounded-xl card-glass shadow-(--shadow-soft) border border-(--ui-border)">
+              <div className="border-b border-(--ui-border) p-4">
                 <div className="relative">
-                  <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-(--ui-muted-foreground)" />
                   <input
                     type="text"
                     placeholder={t("searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pr-10 pl-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) py-2 pr-10 pl-4 text-sm text-(--ui-foreground) placeholder:text-(--ui-muted-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                   />
                 </div>
               </div>
@@ -582,20 +652,20 @@ export default function Page() {
                     <div
                       key={patient.id}
                       onClick={() => conv ? setSelectedChat(conv.id) : null}
-                      className={`cursor-pointer border-b border-gray-100 p-4 transition-all hover:bg-gray-50 ${conv && selectedChat === conv.id ? "bg-blue-50 border-l-4 border-l-blue-600" : ""}`}
+                      className={`cursor-pointer border-b border-(--ui-border) p-4 transition-all hover:bg-(--ui-surface-2) ${conv && selectedChat === conv.id ? "bg-(--ui-info-bg) border-l-4 border-l-(--ui-info)" : ""}`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-2xl">{conv?.avatar || "👤"}</div>
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-(--ui-info-bg) text-2xl">{conv?.avatar || "👤"}</div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <h3 className="font-semibold text-gray-900 truncate">{patient.fullName}</h3>
-                            <span className="text-xs text-gray-500">{conv?.lastMessageTime || ""}</span>
+                            <h3 className="font-semibold text-(--ui-foreground) truncate">{patient.fullName}</h3>
+                            <span className="text-xs text-(--ui-muted-foreground)">{conv?.lastMessageTime || ""}</span>
                           </div>
                           <div className="flex items-center justify-between mt-1">
-                            <p className="text-sm text-gray-600 truncate">{conv?.lastMessage || ""}</p>
+                            <p className="text-sm text-(--ui-muted-foreground) truncate">{conv?.lastMessage || ""}</p>
                             {!conv && (
                               <button
-                                className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700 border border-blue-200 hover:bg-blue-200"
+                                className="rounded bg-(--ui-info-bg) px-2 py-1 text-xs text-(--ui-info-foreground) border border-(--ui-info-border) hover:bg-(--ui-info-bg)/70"
                                 onClick={async (e) => {
                                   e.stopPropagation();
                                   try {
@@ -619,11 +689,11 @@ export default function Page() {
                                       }]);
                                                                   setSelectedChat(String(data.chat.id));
                                     } else {
-                                      showToast(data.error || "تعذر بدء المحادثة", "error");
+                                      showToast(data.error || t("startChatFailed"), "error");
                                     }
-                                  } catch { showToast("تعذر بدء المحادثة", "error"); }
+                                  } catch { showToast(t("startChatFailed"), "error"); }
                                 }}
-                              >بدء محادثة جديدة</button>
+                              >{t("startNewChat")}</button>
                             )}
                           </div>
                         </div>
@@ -635,52 +705,52 @@ export default function Page() {
             </div>
 
             {/* Right Side - Chat Window */}
-            <div className="flex flex-1 flex-col rounded-xl bg-white shadow-lg border border-gray-100">
+            <div className="flex flex-1 flex-col rounded-xl card-glass shadow-(--shadow-soft) border border-(--ui-border)">
               {currentChat ? (
                 <>
                   {/* Chat Header */}
-                  <div className="flex items-center justify-between border-b border-gray-200 p-4">
+                  <div className="flex items-center justify-between border-b border-(--ui-border) p-4">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-2xl">{currentChat.avatar}</div>
-                        {currentChat.online && <FaCircle className="absolute bottom-0 left-0 text-xs text-green-500 bg-white rounded-full" />}
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-(--ui-info-bg) text-2xl">{currentChat.avatar}</div>
+                        {currentChat.online && <FaCircle className="absolute bottom-0 left-0 text-xs text-(--ui-success) bg-(--ui-surface) rounded-full" />}
                       </div>
                       <div>
-                        <h3 className="font-bold text-gray-900">{currentChat.patientName}</h3>
-                        <p className="text-sm text-gray-600">{currentChat.online ? t("online") : t("offline")}</p>
+                        <h3 className="font-bold text-(--ui-foreground)">{currentChat.patientName}</h3>
+                        <p className="text-sm text-(--ui-muted-foreground)">{currentChat.online ? t("online") : t("offline")}</p>
                         {currentChat && typingUsers[currentChat.patientId] && (
-                          <p className="text-xs text-gray-500">{t('typing') || '...typing'}</p>
+                          <p className="text-xs text-(--ui-muted-foreground)">{t('typing')}</p>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={handleVoiceCall} className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 hover:text-blue-600"><FaPhone /></button>
-                      <button onClick={handleVideoCall} className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 hover:text-blue-600"><FaVideo /></button>
-                      <ChatActionsPopover onDelete={deleteSelectedChat} confirmText={locale==="ar"?"هل تريد حذف المحادثة؟":"Delete conversation?"} confirmYes={locale==="ar"?"حذف":"Delete"} confirmNo={locale==="ar"?"إلغاء":"Cancel"} />
+                      <button onClick={handleVoiceCall} className="rounded-lg p-2 text-(--ui-muted-foreground) hover:bg-(--ui-surface-2) hover:text-(--ui-info)"><FaPhone /></button>
+                      <button onClick={handleVideoCall} className="rounded-lg p-2 text-(--ui-muted-foreground) hover:bg-(--ui-surface-2) hover:text-(--ui-info)"><FaVideo /></button>
+                      <ChatActionsPopover onDelete={deleteSelectedChat} confirmText={t("confirmDelete.text")} confirmYes={t("confirmDelete.yes")} confirmNo={t("confirmDelete.no")} />
                     </div>
                   </div>
 
                   {/* Messages Area */}
-                  <div ref={messagesContainerRef} className="flex-1 overflow-y-auto bg-gray-50 p-6">
+                  <div ref={messagesContainerRef} className="flex-1 overflow-y-auto bg-(--ui-surface-2) p-6">
                     <div className="space-y-4">
                       {currentMessages.map((msg, idx) => (
                         <div key={`${msg.clientKey || msg.id}-${idx}`} className={`flex ${msg.sender==="doctor"?"justify-start":"justify-end"}`}>
-                          <div className={`max-w-md rounded-2xl px-4 py-3 ${msg.sender==="doctor"?"bg-blue-600 text-white rounded-tr-sm":"bg-white text-gray-900 rounded-tl-sm shadow-md"}`}>
+                          <div className={`max-w-md rounded-2xl px-4 py-3 ${msg.sender==="doctor"?"bg-(--ui-info) text-(--ui-info-foreground) rounded-tr-sm":"bg-(--ui-surface) text-(--ui-foreground) rounded-tl-sm shadow-(--shadow-soft) border border-(--ui-border)"}`}>
                             {msg.fileUrl || (msg.file && typeof msg.file === 'object') ? (
                               (() => {
                                 const url = msg.fileUrl || msg.file?.url || (msg.file && URL.createObjectURL(msg.file));
                                 const mime = msg.mimeType || msg.file?.type || '';
-                                const name = msg.fileName || msg.file?.name || 'attachment';
-                                if (mime && mime.startsWith('image/')) return <Image src={url} alt="img" className="max-w-full rounded" width={400} height={300} style={{ objectFit: 'contain' }} />;
-                                if (mime && mime.includes('pdf')) return <div className="flex items-center gap-2"><FaFilePdf className="text-red-500"/><a href={url} target="_blank" className="underline">{name}</a></div>;
+                                const name = msg.fileName || msg.file?.name || t('attachmentFallbackName');
+                                if (mime && mime.startsWith('image/')) return <Image src={url} alt={t('imageAlt')} className="max-w-full rounded" width={400} height={300} style={{ objectFit: 'contain' }} />;
+                                if (mime && mime.includes('pdf')) return <div className="flex items-center gap-2"><FaFilePdf className="text-(--ui-danger)"/><a href={url} target="_blank" className="underline">{name}</a></div>;
                                 return <div className="flex items-center gap-2"><FaFileAlt/><a href={url} target="_blank" className="underline">{name}</a></div>;
                               })()
                             ) : (
                               <p className="text-sm">{msg.text}</p>
                             )}
-                            <div className={`mt-1 flex items-center justify-end gap-1 text-xs ${msg.sender==="doctor"?"text-blue-100":"text-gray-500"}`}>
+                            <div className={`mt-1 flex items-center justify-end gap-1 text-xs ${msg.sender==="doctor"?"text-(--ui-info-foreground) opacity-80":"text-(--ui-muted-foreground)"}`}>
                               <span>{msg.time}</span>
-                                      {msg.sender==="doctor" && (msg.status==="sent"?<FaCheck/>:msg.status==="delivered"?<FaCheckDouble/>:msg.status==="read"?<FaCheckDouble className="text-blue-300"/>:null)}
+                                      {msg.sender==="doctor" && (msg.status==="sent"?<FaCheck/>:msg.status==="delivered"?<FaCheckDouble/>:msg.status==="read"?<FaCheckDouble className="text-(--ui-info-foreground)"/>:null)}
                                       {msg.sender==="doctor" && msg.status === 'failed' && (
                                         <button onClick={() => {
                                           // retry upload for this message
@@ -688,7 +758,7 @@ export default function Page() {
                                             const retryEvt = new CustomEvent('chat:retry-upload', { detail: { chatId: msg.chatId, messageId: msg.id } });
                                             window.dispatchEvent(retryEvt);
                                           } catch (e) { console.error(e); }
-                                        }} className="ml-2 text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700">{safeT('retry','Retry')}</button>
+                                        }} className="ml-2 text-xs px-2 py-1 rounded bg-(--ui-warning-bg) text-(--ui-warning-foreground)">{t('retry')}</button>
                                       )}
                             </div>
                           </div>
@@ -698,15 +768,15 @@ export default function Page() {
                   </div>
 
                   {/* Message Input */}
-                  <div className="border-t border-gray-200 bg-white p-4">
+                  <div className="border-t border-(--ui-border) bg-(--ui-surface) p-4">
                     <div className="flex items-center gap-3">
-                      <button onClick={handleAttachment} className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 hover:text-blue-600"><FaPaperclip /></button>
+                      <button onClick={handleAttachment} className="rounded-lg p-2 text-(--ui-muted-foreground) hover:bg-(--ui-surface-2) hover:text-(--ui-info)"><FaPaperclip /></button>
                       <div className="flex-1">
                         {uploadProgress.uploading && (
                           <div className="mb-2">
-                            <div className="text-xs text-gray-600">{uploadProgress.filename} — {uploadProgress.percent}%</div>
-                            <div className="w-full h-2 rounded bg-gray-200 overflow-hidden">
-                              <div className="h-2 bg-blue-600" style={{ width: `${uploadProgress.percent}%` }} />
+                            <div className="text-xs text-(--ui-muted-foreground)">{t("uploadProgress", { filename: uploadProgress.filename, percent: uploadProgress.percent })}</div>
+                            <div className="w-full h-2 rounded bg-(--ui-border) overflow-hidden">
+                              <div className="h-2 bg-(--ui-info)" style={{ width: `${uploadProgress.percent}%` }} />
                             </div>
                           </div>
                         )}
@@ -725,18 +795,18 @@ export default function Page() {
                           } catch {}
                         }}
                         onKeyPress={(e)=>e.key==="Enter" && handleSendMessage()}
-                        className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        className="flex-1 rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-3 text-sm text-(--ui-foreground) placeholder:text-(--ui-muted-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                       />
                       </div>
-                      <button onClick={handleSendMessage} className="rounded-lg bg-blue-600 p-3 text-white hover:bg-blue-700"><FaPaperPlane /></button>
+                      <button onClick={handleSendMessage} className="rounded-lg btn-gradient p-3 text-white"><FaPaperPlane /></button>
                     </div>
                   </div>
                 </>
               ) : (
                 <div className="flex h-full items-center justify-center">
                   <div className="text-center">
-                    <FaComments className="mx-auto mb-4 text-6xl text-gray-300" />
-                    <p className="text-lg text-gray-600">اختر محادثة لبدء الدردشة</p>
+                    <FaComments className="mx-auto mb-4 text-6xl text-(--ui-muted-foreground)" />
+                    <p className="text-lg text-(--ui-muted-foreground)">{t("selectChatPrompt")}</p>
                   </div>
                 </div>
               )}

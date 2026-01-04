@@ -1,17 +1,20 @@
 import React from 'react';
 import styles from './NotificationSettings.module.css';
+import { useTranslations } from 'next-intl';
 
 export default function NotificationSettings({ value, onChange }) {
+  const t = useTranslations('doctorSettings');
+
   return (
     <div className={styles.notifications}>
-      <h3>إعدادات الإشعارات</h3>
+      <h3>{t('doctorSettings.notifications.title')}</h3>
       <label>
         <input
           type="checkbox"
           checked={value.email || false}
           onChange={e => onChange({ ...value, email: e.target.checked })}
         />
-        إشعارات البريد الإلكتروني
+        {t('doctorSettings.notifications.email')}
       </label>
       <label>
         <input
@@ -19,7 +22,7 @@ export default function NotificationSettings({ value, onChange }) {
           checked={value.sms || false}
           onChange={e => onChange({ ...value, sms: e.target.checked })}
         />
-        إشعارات الرسائل النصية
+        {t('doctorSettings.notifications.sms')}
       </label>
       <label>
         <input
@@ -27,7 +30,7 @@ export default function NotificationSettings({ value, onChange }) {
           checked={value.inApp || false}
           onChange={e => onChange({ ...value, inApp: e.target.checked })}
         />
-        إشعارات داخل التطبيق
+        {t('doctorSettings.notifications.push')}
       </label>
     </div>
   );

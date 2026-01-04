@@ -5,7 +5,7 @@ import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
 
 export const GET = withRBAC(async (request, user) => {
-  const rl = rateLimit(request);
+  const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/doctor/me" } });
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -34,4 +34,4 @@ export const GET = withRBAC(async (request, user) => {
     logAudit({ event: "doctor_profile_view_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: err.message } });
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
-});
+}, ["doctor"]);

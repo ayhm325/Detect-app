@@ -8,6 +8,6 @@
 .filters select {
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--ui-border);
   font-size: 1rem;
 }

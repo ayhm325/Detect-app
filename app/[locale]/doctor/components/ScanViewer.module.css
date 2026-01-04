@@ -4,18 +4,19 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.4);
+  background: color-mix(in srgb, var(--color-neutral) 40%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 .content {
-  background: #fff;
-  border-radius: 10px;
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
   padding: 32px;
   min-width: 400px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+  border: 1px solid var(--ui-border);
+  box-shadow: var(--shadow-lift);
   position: relative;
 }
 .closeBtn {
@@ -31,7 +32,8 @@
   width: 320px;
   height: 320px;
   object-fit: contain;
-  border-radius: 8px;
-  background: #f8f8f8;
+  border-radius: var(--radius-md);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
   margin-bottom: 18px;
 }

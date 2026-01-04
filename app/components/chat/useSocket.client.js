@@ -190,7 +190,7 @@ export default function useSocket({ url } = {}) {
       globalThis.__app_socket_lastJoinTs.set(sock.id, lastObj);
       globalThis.__app_socket_joinedRooms.set(sock.id, joined);
     } catch (e) {}
-  }, []);
+  }, [getGlobalSocket]);
 
   const leave = useCallback((chatId) => {
     const sock = socketRef.current || getGlobalSocket();
@@ -200,7 +200,7 @@ export default function useSocket({ url } = {}) {
       const joined = globalThis.__app_socket_joinedRooms && globalThis.__app_socket_joinedRooms.get(sock.id);
       if (joined) joined.delete(chatId);
     } catch (e) {}
-  }, []);
+  }, [getGlobalSocket]);
 
   const sendMessage = useCallback((payload, cb) => {
     if (!socketRef.current) return cb && cb({ error: 'not_connected' });
@@ -232,55 +232,55 @@ export default function useSocket({ url } = {}) {
     if (!sock) return;
     sock.on('typing', handler);
     return () => { try { sock.off('typing', handler); } catch (e) {} };
-  }, []);
+  }, [getGlobalSocket]);
 
   const onPresence = useCallback((handler) => {
     const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     sock.on('presence', handler);
     return () => { try { sock.off('presence', handler); } catch (e) {} };
-  }, []);
+  }, [getGlobalSocket]);
 
   const on = useCallback((event, handler) => {
     const sock = socketRef.current || getGlobalSocket();
     if (!sock || !event || typeof handler !== 'function') return;
     try { sock.on(event, handler); } catch (e) {}
     return () => { try { sock.off && sock.off(event, handler); } catch (e) {} };
-  }, []);
+  }, [getGlobalSocket]);
 
   const off = useCallback((event, handler) => {
     const sock = socketRef.current || getGlobalSocket();
     if (!sock || !event || typeof handler !== 'function') return;
     try { sock.off && sock.off(event, handler); } catch (e) {}
-  }, []);
+  }, [getGlobalSocket]);
 
   const onMessage = useCallback((handler) => {
     const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     sock.on('message', handler);
     return () => { try { sock.off('message', handler); } catch (e) {} };
-  }, []);
+  }, [getGlobalSocket]);
 
   const onMessageUpdate = useCallback((handler) => {
     const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     sock.on('message_update', handler);
     return () => { try { sock.off('message_update', handler); } catch (e) {} };
-  }, []);
+  }, [getGlobalSocket]);
 
   const onMessageRead = useCallback((handler) => {
     const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     sock.on('message_read', handler);
     return () => { try { sock.off('message_read', handler); } catch (e) {} };
-  }, []);
+  }, [getGlobalSocket]);
 
   const onConnectError = useCallback((handler) => {
     const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     sock.on('connect_error', handler);
     return () => { try { sock.off('connect_error', handler); } catch (e) {} };
-  }, []);
+  }, [getGlobalSocket]);
 
   const emitEvent = useCallback((event, payload, cb) => {
     const sock = socketRef.current || getGlobalSocket();
@@ -288,7 +288,7 @@ export default function useSocket({ url } = {}) {
     try {
       sock.emit(event, payload, cb);
     } catch (e) { if (cb) cb({ error: 'emit_failed' }); }
-  }, []);
+  }, [getGlobalSocket]);
 
   useEffect(() => {
     return () => {
@@ -316,7 +316,24 @@ export default function useSocket({ url } = {}) {
     emitEvent,
     onConnectError,
     connected,
-  }), [connect, disconnect, join, leave, sendMessage, sendTyping, onMessage, onTyping, onPresence, connected]);
+  }), [
+    connect,
+    disconnect,
+    join,
+    leave,
+    sendMessage,
+    sendTyping,
+    onMessage,
+    onMessageUpdate,
+    onMessageRead,
+    onTyping,
+    onPresence,
+    on,
+    off,
+    emitEvent,
+    onConnectError,
+    connected,
+  ]);
 
   return api;
 }

@@ -17,7 +17,7 @@ Migration behavior
 Environment / configuration
 ---------------------------
 - Default file path: `data/revokedTokens.json` (same as before).
-- You can override the path with `REVOKED_TOKENS_PATH` env var.
+- Note: the path is intentionally fixed (no env override) to avoid Turbopack over-tracing and over-bundling.
 
 Why hash?
 ----------
@@ -103,7 +103,7 @@ REDIS_URL=redis://localhost:6379 node scripts/migrate-revoked-to-redis.mjs --con
 You can bypass the confirm check in scripted environments by setting `DISABLE_CONFIRM_CHECK=1` in the environment, but this is discouraged for production.
 
 The script:
-- reads `data/revokedTokens.json` (or `REVOKED_TOKENS_PATH` if set),
+- reads `data/revokedTokens.json`,
 - copies each entry's `hash` (or legacy `token` → hash) into Redis as `revoked:<hash>`,
 - applies TTL if `exp` is present,
 - backs up the JSON file with a timestamped `.bak` suffix when entries were migrated.

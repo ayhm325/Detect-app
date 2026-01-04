@@ -52,7 +52,9 @@ export { saveAnalysisResult, getAnalysisHistory };
 export { deleteAnalysisResult };
 
 // also export as ESM default for dynamic import compatibility
-export default {
+const analysisResultService = {
   saveAnalysisResult,
   getAnalysisHistory
 };
+
+export default analysisResultService;

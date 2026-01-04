@@ -8,15 +8,15 @@ export default async function TermsPage(props) {
   if (typeof params?.then === 'function') {
     params = await params;
   }
-  const locale = params?.locale || "ar";
+  const locale = params?.locale;
   const dir = locale === "ar" ? "rtl" : "ltr";
+  const dateLocale = locale === "en" ? "en-US" : "ar-EG";
   // Load terms JSON directly
   const t = (await import(`../../locales/${locale}/terms.json`)).default;
 
   return (
     <div
-      className="min-h-screen bg-linear-to-br from-yellow-50 via-white to-red-50
-                 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 py-20"
+      className="min-h-screen bg-(--ui-surface) text-(--ui-foreground) py-20"
       dir={dir}
       lang={locale}
     >
@@ -30,17 +30,17 @@ export default async function TermsPage(props) {
         {/* Header */}
         <div className="text-center mb-16 animate-fadeIn">
           <h1 className="text-5xl font-bold mb-6">
-            <span className="bg-linear-to-r from-yellow-600 to-red-600 bg-clip-text text-transparent">
+            <span className="brand-gradient-text">
               {t.title}
             </span>
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            {t.lastUpdate}: {new Date('2025-12-20').toLocaleDateString('en-US')}
+          <p className="text-lg text-(--ui-muted-foreground)">
+            {t.lastUpdate}: {new Date('2025-12-20').toLocaleDateString(dateLocale)}
           </p>
         </div>
 
         {/* Content */}
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 md:p-12 shadow-2xl space-y-12">
+        <div className="card-glass rounded-3xl p-8 md:p-12 border border-(--ui-border) space-y-12">
 
           {/* Acceptance */}
           <section>
@@ -96,10 +96,8 @@ export default async function TermsPage(props) {
 
           {/* Medical Disclaimer */}
           <section>
-            <div className="bg-red-50 dark:bg-red-900/20 border-2
-                            border-red-200 dark:border-red-800
-                            rounded-2xl p-6">
-              <h2 className="text-3xl font-bold mb-4 text-red-900 dark:text-red-200">
+            <div className="bg-(--ui-danger-bg) border border-(--ui-danger-border) rounded-2xl p-6">
+              <h2 className="text-3xl font-bold mb-4 text-(--ui-danger)">
                 {t.medicalDisclaimer.title}
               </h2>
               <p className="font-semibold">
@@ -138,9 +136,7 @@ export default async function TermsPage(props) {
         <div className="mt-10 text-center">
           <a
             href={`/${locale}`}
-            className="inline-block px-8 py-4 bg-red-600 text-white
-                       font-bold rounded-full hover:bg-red-700
-                       transition-colors shadow-lg"
+            className="inline-block px-8 py-4 btn-gradient font-bold rounded-full"
           >
             {t.backToHome}
           </a>

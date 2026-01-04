@@ -1,139 +1,124 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   useDoctorChangeRequests,
   approveDoctorChangeRequest,
   rejectDoctorChangeRequest,
 } from "./doctor-change-requests";
-// Page is rendered inside the route-level AdminLayout; avoid double-wrapping
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
 import { FaCheck, FaTimes, FaUserMd, FaUser } from "react-icons/fa";
 
 export default function DoctorChangeRequestsPage() {
-  const { locale } = useLocale();
-
-  const t =
-    locale === "ar"
-      ? ar.doctorChangeRequests
-      : en.doctorChangeRequests;
-
-  const tResolved =
-    t ||
-    (locale === "ar"
-      ? ar.default?.doctorChangeRequests
-      : en.default?.doctorChangeRequests);
-
   const [refresh, setRefresh] = useState(0);
-  const requests = useDoctorChangeRequests();
+  const t = useTranslations("doctorChangeRequests");
+  const ui = useTranslations("ui");
+  const placeholder = ui("placeholder");
+  const requests = useDoctorChangeRequests(refresh);
   const [actionLoading, setActionLoading] = useState(null);
 
   const handleApprove = async (id) => {
     setActionLoading(id);
-    await approveDoctorChangeRequest(id);
+    try {
+      await approveDoctorChangeRequest(id);
+    } catch (e) {
+      alert(t("errors.approveFailed", { message: e?.message || "" }));
+    }
     setActionLoading(null);
     setRefresh((v) => v + 1);
   };
 
   const handleReject = async (id) => {
     setActionLoading(id);
-    await rejectDoctorChangeRequest(id);
+    try {
+      await rejectDoctorChangeRequest(id);
+    } catch (e) {
+      alert(t("errors.rejectFailed", { message: e?.message || "" }));
+    }
     setActionLoading(null);
     setRefresh((v) => v + 1);
   };
 
-  if (!tResolved || !tResolved.title) {
-    return (
-      <>
-        <div className="p-8">
-          <h1 className="text-3xl font-bold text-red-600">
-            Translation for DoctorChangeRequests is missing
-          </h1>
-        </div>
-      </>
-    );
-  }
-
   return (
     <>
-      <div className="py-8 px-4 md:px-8">
-        <h1 className="text-3xl font-bold mb-6">{tResolved.title}</h1>
+      <div className="px-4 py-6 md:px-8">
+        <div className="card-glass p-6 md:p-8">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground mb-6">{t("title")}</h1>
 
-        {requests.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-8 text-center">
-            <FaUserMd
-              size={48}
-              className="mx-auto mb-4 text-gray-400 dark:text-gray-600"
-            />
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
-              {tResolved.noRequests}
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto max-w-3xl">
-            <table className="w-full border bg-white dark:bg-slate-800">
-              <thead>
-                <tr className="bg-gray-100 dark:bg-slate-700">
-                  <th className="p-2 border">المريض</th>
-                  <th className="p-2 border">الطبيب الحالي</th>
-                  <th className="p-2 border">الطبيب المطلوب</th>
-                  <th className="p-2 border">السبب</th>
-                  <th className="p-2 border">الحالة</th>
-                  <th className="p-2 border">إجراء</th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((req) => (
-                  <tr key={req.id} className="border-b">
-                    <td className="p-2 border">{req.patientName || '—'}</td>
-                    <td className="p-2 border">{req.currentDoctorName || '—'}</td>
-                    <td className="p-2 border">{req.requestedDoctorName || '—'}</td>
-                    <td className="p-2 border">{req.reason || '—'}</td>
-                    <td className="p-2 border">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${
-                        req.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : req.status === 'approved'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {req.status === 'pending'
-                          ? tResolved.pending
-                          : req.status === 'approved'
-                          ? tResolved.approved
-                          : tResolved.rejected}
-                      </span>
-                    </td>
-                    <td className="p-2 border">
-                      {req.status === 'pending' ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleApprove(req.id)}
-                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded disabled:opacity-50"
-                            disabled={actionLoading === req.id}
-                          >
-                            موافقة
-                          </button>
-                          <button
-                            onClick={() => handleReject(req.id)}
-                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded disabled:opacity-50"
-                            disabled={actionLoading === req.id}
-                          >
-                            رفض
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
+          {requests.length === 0 ? (
+            <div className="rounded-2xl border border-(--ui-border) bg-(--ui-surface) p-8 text-center">
+              <FaUserMd
+                size={48}
+                className="mx-auto mb-4 text-(--ui-muted-2)"
+              />
+              <p className="text-(--ui-muted-2) text-lg">
+                {t("noRequests")}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto max-w-3xl rounded-2xl border border-(--ui-border)">
+              <table className="w-full bg-(--ui-surface)">
+                <thead>
+                  <tr className="bg-(--ui-surface-2) text-(--ui-muted-2)">
+                    <th className="p-3 text-start text-xs font-semibold">{t("table.patient")}</th>
+                    <th className="p-3 text-start text-xs font-semibold">{t("table.currentDoctor")}</th>
+                    <th className="p-3 text-start text-xs font-semibold">{t("table.requestedDoctor")}</th>
+                    <th className="p-3 text-start text-xs font-semibold">{t("table.reason")}</th>
+                    <th className="p-3 text-start text-xs font-semibold">{t("table.status")}</th>
+                    <th className="p-3 text-start text-xs font-semibold">{t("table.actions")}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {requests.map((req) => (
+                    <tr key={req.id} className="border-t border-(--ui-border) hover:bg-(--ui-surface-2)/60">
+                      <td className="p-3 text-sm text-foreground">{req.patientName || placeholder}</td>
+                      <td className="p-3 text-sm text-foreground">{req.currentDoctorName || placeholder}</td>
+                      <td className="p-3 text-sm text-foreground">{req.requestedDoctorName || placeholder}</td>
+                      <td className="p-3 text-sm text-(--ui-muted-2)">{req.reason || placeholder}</td>
+                      <td className="p-3 text-sm">
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold border ${
+                          req.status === 'pending'
+                            ? 'bg-(--ui-warning-bg) text-(--ui-warning) border-(--ui-warning-border)'
+                            : req.status === 'approved'
+                            ? 'bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)'
+                            : 'bg-(--ui-danger-bg) text-(--ui-danger) border-(--ui-danger-border)'
+                        }`}>
+                          {req.status === 'pending'
+                            ? t("pending")
+                            : req.status === 'approved'
+                            ? t("approved")
+                            : t("rejected")}
+                        </span>
+                      </td>
+                      <td className="p-3 text-sm">
+                        {req.status === 'pending' ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleApprove(req.id)}
+                              className="rounded-xl border border-(--ui-success-border) bg-(--ui-success) px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                              disabled={actionLoading === req.id}
+                            >
+                              {t("approve")}
+                            </button>
+                            <button
+                              onClick={() => handleReject(req.id)}
+                              className="rounded-xl border border-(--ui-danger-border) bg-(--ui-danger) px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                              disabled={actionLoading === req.id}
+                            >
+                              {t("reject")}
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-(--ui-muted-2)">{placeholder}</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

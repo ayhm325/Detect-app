@@ -1,21 +1,21 @@
-import useLocale from "../../hooks/useLocale";
-import en from "../../locales/en";
-import ar from "../../locales/ar";
+import { useTranslations } from "next-intl";
 
 export default function ChatSidebar({ chats, onSelect }) {
-  const { locale } = useLocale();
-  const tr = locale === "ar" ? ar.adminAnalysis : en.adminAnalysis;
-  // العنوان من ملف الترجمة أو نص افتراضي
-  const chatListTitle = tr.chatSidebarTitle || (locale === "ar" ? "قائمة الدردشات" : "Chat List");
+  const t = useTranslations("adminChat");
+  const chatListTitle = t("sidebarTitle");
   return (
-    <aside className="w-64 h-full bg-white shadow-lg p-4">
-      <h3 className="font-bold text-lg mb-4 text-yellow-700">{chatListTitle}</h3>
+    <aside className="w-64 h-full border-r border-(--ui-border) bg-(--ui-surface) p-4">
+      <h3 className="mb-4 text-lg font-bold text-foreground">{chatListTitle}</h3>
       <ul className="space-y-3">
         {chats.map(chat => (
-          <li key={chat.id} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 shadow cursor-pointer hover:bg-yellow-100" onClick={() => onSelect(chat)}>
-            <span className="font-bold text-zinc-700">{chat.doctor}</span>
-            <span className="mx-2 text-zinc-400">→</span>
-            <span className="font-bold text-zinc-700">{chat.patient}</span>
+          <li
+            key={chat.id}
+            className="flex cursor-pointer items-center gap-3 rounded-xl border border-(--ui-border) bg-(--ui-surface-2) p-3 hover:opacity-90"
+            onClick={() => onSelect(chat)}
+          >
+            <span className="font-semibold text-foreground">{chat.doctor}</span>
+            <span className="mx-2 text-(--ui-muted-2)">→</span>
+            <span className="font-semibold text-foreground">{chat.patient}</span>
           </li>
         ))}
       </ul>

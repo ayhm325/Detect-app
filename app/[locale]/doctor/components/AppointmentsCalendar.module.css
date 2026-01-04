@@ -1,7 +1,8 @@
 .calendar {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--ui-border);
+  box-shadow: var(--shadow-soft);
   padding: 24px;
   min-width: 400px;
   min-height: 480px;
@@ -15,7 +16,7 @@
 .title {
   font-size: 20px;
   font-weight: bold;
-  color: #222;
+  color: var(--color-text);
 }
 .days {
   display: flex;
@@ -24,10 +25,11 @@
 }
 .day {
   font-size: 15px;
-  color: #888;
+  color: var(--ui-muted);
   padding: 6px 12px;
   border-radius: 4px;
-  background: #f8f8f8;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
 }
 .appointments {
   display: flex;
