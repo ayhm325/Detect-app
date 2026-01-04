@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../components/ui/Toast";
 import { FaFileAlt, FaXRay, FaSearch, FaFilter, FaDownload, FaEye, FaShare, FaPrint, FaTimes, FaCheckCircle, FaHourglassHalf } from "react-icons/fa";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function PatientResultsPage() {
   const router = useRouter();
   const { showToast, ToastContainer } = useToast();
+  const locale = useLocale();
   const t = useTranslations("patientResults");
 
   // UI state variables
@@ -29,12 +30,87 @@ export default function PatientResultsPage() {
         const res = await fetch("/api/patient/results");
         if (!res.ok) return;
         const data = await res.json();
-        setReports(data.records || []);
+
+        const inferTypeKey = (imageUrl) => {
+          const u = String(imageUrl || "").toLowerCase();
+          if (u.includes("ct")) return "ct";
+          if (u.includes("mri")) return "mri";
+          if (u.includes("ultra") || u.includes("us")) return "ultrasound";
+          if (u.includes("lab")) return "lab";
+          if (u.includes("xray") || u.includes("x-ray") || u.includes("cxr")) return "xray";
+          return "xray";
+        };
+
+        const formatDate = (dt) => {
+          if (!dt) return "";
+          const d = new Date(dt);
+          if (Number.isNaN(d.getTime())) return "";
+          return d.toISOString().slice(0, 10);
+        };
+
+        const formatTime = (dt) => {
+          if (!dt) return "";
+          const d = new Date(dt);
+          if (Number.isNaN(d.getTime())) return "";
+          try {
+            return d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+          } catch {
+            return "";
+          }
+        };
+
+        const mapped = (data.records || []).map((r) => {
+          const typeKey = inferTypeKey(r.imageUrl);
+          const typeLabel = (() => {
+            try {
+              return t(`types.${typeKey}`);
+            } catch {
+              return typeKey;
+            }
+          })();
+
+          const status = r.reviewedByDoctor ? "ready" : "pending";
+          const ai = (r.aiResult || "").toString().toUpperCase();
+          const confidence = typeof r.confidenceScore === "number" ? r.confidenceScore : null;
+
+          const priority = ai === "POSITIVE" && (confidence == null || confidence >= 0.7) ? "urgent" : "normal";
+
+          const aiSummary = (() => {
+            if (ai === "POSITIVE") return t("aiSummary.positive", { score: confidence == null ? "" : Math.round(confidence * 100) });
+            if (ai === "NEGATIVE") return t("aiSummary.negative", { score: confidence == null ? "" : Math.round(confidence * 100) });
+            return t("aiSummary.unknown");
+          })();
+
+          const findings = (() => {
+            if (ai === "POSITIVE") return [{ type: "warning", text: t("findings.positive") }];
+            if (ai === "NEGATIVE") return [{ type: "normal", text: t("findings.negative") }];
+            return [{ type: "info", text: t("findings.unknown") }];
+          })();
+
+          return {
+            id: r.id,
+            title: t("titles.default"),
+            type: typeLabel,
+            typeIcon: typeKey === "xray" ? "🩻" : (typeKey === "ct" ? "🔬" : (typeKey === "mri" ? "🧲" : (typeKey === "ultrasound" ? "📡" : "📄"))),
+            date: formatDate(r.createdAt),
+            time: formatTime(r.createdAt),
+            status,
+            priority,
+            doctor: r.doctor?.name || t("defaults.unknownDoctor"),
+            facility: r.doctor?.clinic || (r.doctor?.name ? t("defaults.clinicOfDoctor", { name: r.doctor.name }) : t("defaults.unknownFacility")),
+            aiSummary,
+            findings,
+            notes: r.doctorNotes || "",
+            images: r.imageUrl ? [r.imageUrl] : []
+          };
+        });
+
+        setReports(mapped);
       } catch (err) {
         console.error("Failed to load patient results:", err);
       }
     });
-  }, []);
+  }, [t, locale]);
   const statsLabels = {
     total: t("stats.total"),
     ready: t("stats.ready"),
@@ -42,8 +118,8 @@ export default function PatientResultsPage() {
     thisMonth: t("stats.thisMonth")
   };
 
-  const statusSynonyms = t.raw?.("statusSynonyms") || {};
-  const prioritySynonyms = t.raw?.("prioritySynonyms") || {};
+  const statusSynonyms = typeof t.raw === "function" ? (t.raw("statusSynonyms") || {}) : {};
+  const prioritySynonyms = typeof t.raw === "function" ? (t.raw("prioritySynonyms") || {}) : {};
 
   const normalizeToken = (value) => String(value ?? "").trim().toLowerCase();
   const tokenInList = (value, list) => {
@@ -53,6 +129,12 @@ export default function PatientResultsPage() {
   };
 
   const normalizeStatus = (status) => {
+    const token = normalizeToken(status);
+    // Always support canonical keys (API/UI internal)
+    if (token === "ready") return "ready";
+    if (token === "pending") return "pending";
+    if (token === "urgent") return "urgent";
+
     if (tokenInList(status, statusSynonyms.ready)) return "ready";
     if (tokenInList(status, statusSynonyms.pending)) return "pending";
     if (tokenInList(status, statusSynonyms.urgent)) return "urgent";
@@ -60,6 +142,10 @@ export default function PatientResultsPage() {
   };
 
   const normalizePriority = (priority) => {
+    const token = normalizeToken(priority);
+    if (token === "urgent") return "urgent";
+    if (token === "normal") return "normal";
+
     if (tokenInList(priority, prioritySynonyms.urgent)) return "urgent";
     if (tokenInList(priority, prioritySynonyms.normal)) return "normal";
     return "unknown";
@@ -174,9 +260,12 @@ export default function PatientResultsPage() {
   };
 
   const filteredReports = reports.filter(report => {
-    const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         report.doctor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         report.type.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch =
+      !q ||
+      (report.title || "").toLowerCase().includes(q) ||
+      (report.doctor || "").toLowerCase().includes(q) ||
+      (report.type || "").toLowerCase().includes(q);
     const matchesType = filterType === "all" || report.type === filterType;
     const matchesStatus = filterStatus === "all" || normalizeStatus(report.status) === filterStatus;
     return matchesSearch && matchesType && matchesStatus;
@@ -315,29 +404,6 @@ export default function PatientResultsPage() {
                   </div>
                 )}
 
-                {/* Images */}
-                {report.images.length > 0 && (
-                  <div className="mb-4">
-                    <p className="text-sm font-medium text-(--ui-foreground) mb-2">
-                      {t("sections.imagesCount", { count: report.images.length })}
-                    </p>
-                    <div className="flex gap-2 overflow-x-auto">
-                      {report.images.map((img, idx) => (
-                        <div
-                          key={idx}
-                          onClick={() => {
-                            setSelectedReport(report);
-                            setShowImageModal(true);
-                          }}
-                          className="w-20 h-20 rounded-lg bg-(--ui-surface-2) border border-(--ui-border) flex items-center justify-center cursor-pointer hover:bg-(--ui-surface-2)/60 transition-colors"
-                        >
-                          <FaEye className="text-(--ui-muted-foreground)" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Actions */}
                 <div className="flex gap-2">
                   <button
@@ -417,8 +483,19 @@ export default function PatientResultsPage() {
                     <h4 className="font-bold text-(--ui-foreground) mb-3">{t("modal.medicalImages")}</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedReport.images.map((img, idx) => (
-                        <div key={idx} className="aspect-square bg-(--ui-surface-2) border border-(--ui-border) rounded-lg flex items-center justify-center">
-                          <FaXRay className="text-6xl text-(--ui-muted-foreground)" />
+                        <div key={idx} className="aspect-square bg-(--ui-surface-2) border border-(--ui-border) rounded-lg overflow-hidden">
+                          <img
+                            src={img}
+                            alt={selectedReport.title}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                          <div className="w-full h-full flex items-center justify-center">
+                            <FaXRay className="text-6xl text-(--ui-muted-foreground)" />
+                          </div>
                         </div>
                       ))}
                     </div>

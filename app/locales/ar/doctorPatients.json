@@ -1,6 +1,10 @@
   {
     "ageSuffix": "سنة",
     "genderSuffix": "",
+    "genders": {
+      "male": "ذكر",
+      "female": "أنثى"
+    },
     "filters": {
       "all": "الكل",
       "stable": "مستقر",
@@ -48,6 +52,7 @@
   },
   "actions": {
     "view": "عرض التفاصيل",
+    "results": "النتائج",
     "chat": "محادثة",
     "call": "اتصال"
   },

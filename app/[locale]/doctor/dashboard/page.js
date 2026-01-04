@@ -37,18 +37,38 @@ export default async function DoctorDashboard({ params }) {
       include: { user: true }
     });
 
+    if (!doctor) {
+      const breadcrumbs = [{ label: tNav("home"), href: `${basePrefix}/doctor/dashboard` }];
+      return (
+        <DoctorDashboardWrapper>
+          <DoctorLayout breadcrumbs={breadcrumbs}>
+            <DashboardHome serverData={{}} />
+          </DoctorLayout>
+        </DoctorDashboardWrapper>
+      );
+    }
+
     const start = new Date();
     start.setHours(0, 0, 0, 0);
     const end = new Date();
     end.setHours(23, 59, 59, 999);
 
-    const [patientsCount, todayAppointmentsCount, pendingScansCount, unreadNotificationsCount, todayAppointmentsList, recentActivity] = await Promise.all([
+    const [patientsCount, todayAppointmentsCount, pendingScansCount, unreadNotificationsCount, todayAppointmentsList, recentActivity, pendingScansList] = await Promise.all([
       prisma.patient.count({ where: { doctorId: doctor.id } }),
       prisma.appointment.count({ where: { doctorId: doctor.id, scheduledAt: { gte: start, lte: end } } }),
       prisma.medicalRecord.count({ where: { doctorId: doctor.id, reviewedByDoctor: false } }),
       prisma.notification.count({ where: { userId: user.id, isRead: false, isDeleted: false } }),
       prisma.appointment.findMany({ where: { doctorId: doctor.id, scheduledAt: { gte: start, lte: end } }, include: { patient: true }, orderBy: { scheduledAt: 'asc' }, take: 10 }),
       prisma.activity.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 6 }),
+      prisma.medicalRecord.findMany({
+        where: { doctorId: doctor.id, reviewedByDoctor: false },
+        include: {
+          patient: { select: { fullName: true } },
+          appointment: { select: { type: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 3,
+      }),
     ]);
 
     serverData = {
@@ -70,6 +90,13 @@ export default async function DoctorDashboard({ params }) {
         id: r.id,
         action: r.description,
         time: r.createdAt,
+      })),
+      pendingScansList: pendingScansList.map((r) => ({
+        id: r.id,
+        patient: r.patient?.fullName ?? r.patientId,
+        type: r.appointment?.type ?? null,
+        confidenceScore: r.confidenceScore,
+        createdAt: r.createdAt.toISOString(),
       })),
     };
   }

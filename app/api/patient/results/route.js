@@ -28,6 +28,7 @@ export const GET = withRBAC(async (request, user) => {
           doctor: {
             select: {
               userId: true,
+              clinic: true,
               user: { select: { id: true, fullName: true, email: true } },
             },
           },
@@ -36,22 +37,15 @@ export const GET = withRBAC(async (request, user) => {
       });
     }
 
-    const chestRecords = records.filter((r) => {
-      if (!r) return false;
-      if (r.imageUrl && /chest|x-?ray|cxr/i.test(r.imageUrl)) return true;
-      if (r.title && /chest|x-?ray|cxr/i.test(r.title)) return true;
-      if (r.notes && /chest|x-?ray|cxr/i.test(r.notes)) return true;
-      return false;
-    });
-
-    const out = chestRecords.map((r) => ({
+    const out = (records || []).map((r) => ({
       id: r.id,
-      title: r.title || "Chest X-Ray",
       imageUrl: r.imageUrl || null,
       aiResult: r.aiResult || null,
       confidenceScore: r.confidenceScore || null,
+      reviewedByDoctor: Boolean(r.reviewedByDoctor),
+      doctorNotes: r.doctorNotes || null,
       createdAt: r.createdAt,
-      doctor: r.doctor?.user ? { id: r.doctor.userId, name: r.doctor.user.fullName || null } : null
+      doctor: r.doctor?.user ? { id: r.doctor.userId, name: r.doctor.user.fullName || null, clinic: r.doctor.clinic || null } : null
     }));
 
     logAudit({ event: "patient_results_viewed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { count: out.length } });

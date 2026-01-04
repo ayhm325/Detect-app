@@ -58,11 +58,29 @@
   },
   "reportLabels": {
     "doctor": "Doctor:",
-    "facility": "Facility:",
+    "facility": "Clinic:",
     "date": "Date:",
     "aiSummary": "AI Summary",
     "findings": "Findings",
     "notes": "Notes"
+  },
+  "titles": {
+    "default": "Medical Record"
+  },
+  "defaults": {
+    "unknownDoctor": "Unknown doctor",
+    "unknownFacility": "Unknown clinic",
+    "clinicOfDoctor": "Doctor clinic ({name})"
+  },
+  "aiSummary": {
+    "positive": "AI flagged a possible finding{score, select, 0 {} other { ({score}% confidence)}}.",
+    "negative": "AI did not detect suspicious findings{score, select, 0 {} other { ({score}% confidence)}}.",
+    "unknown": "AI summary is not available for this report."
+  },
+  "findings": {
+    "positive": "Possible finding detected. Please review with your doctor.",
+    "negative": "No suspicious findings detected.",
+    "unknown": "No structured findings available."
   },
   "report1Title": "Chest X-Ray",
   "report1Type": "X-Ray",

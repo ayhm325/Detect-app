@@ -217,7 +217,7 @@ export default function Page() {
       try { offRead && offRead(); } catch (e) {}
       try { if (window.__chat_cleanup_whoami) { window.__chat_cleanup_whoami(); window.__chat_cleanup_whoami = null; } } catch (e) {}
     };
-  }, [socket, jwtToken, selectedChat, t, showToast]);
+  }, [socket, jwtToken, selectedChat, t, showToast, formatMsgTime]);
 
   // Load conversations and patients
   useEffect(() => {

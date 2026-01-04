@@ -3,6 +3,7 @@
 import DoctorLayout from "../DoctorLayout";
 import { useToast } from "../../../components/ui/Toast";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   FaUsers,
   FaSearch,
@@ -27,6 +28,7 @@ import { formatDate } from "../../../lib/date";
 // You may need to get locale and labels from props or context, adjust as needed
 export default function DoctorPatientsPage({ locale }) {
   const { showToast, ToastContainer } = useToast();
+  const router = useRouter();
   const t = useTranslations("doctorPatients");
   const ui = useTranslations("ui");
   const placeholder = ui("placeholder");
@@ -35,6 +37,20 @@ export default function DoctorPatientsPage({ locale }) {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [patients, setPatients] = useState([]);
+
+  const getGenderLabel = useCallback(
+    (gender) => {
+      const raw = (gender ?? "").toString().trim();
+      const g = raw.toLowerCase();
+      if (!g) return "";
+
+      if (g === "male" || g === "m" || g === "ذكر") return t("genders.male");
+      if (g === "female" || g === "f" || g === "أنثى" || g === "انثى") return t("genders.female");
+
+      return raw;
+    },
+    [t]
+  );
 
   // Helper: compute age from birthDate string
   const computeAge = useCallback((birthDate) => {
@@ -131,6 +147,16 @@ export default function DoctorPatientsPage({ locale }) {
 
   const handleStartChat = (patient) => {
     showToast(`${t("toast.chat")} ${patient.name}`, "info");
+  };
+
+  const handleViewResults = (patient) => {
+    const prefix = locale ? `/${locale}` : "";
+    const targetId = patient?.id;
+    if (!targetId) {
+      showToast(t("error"), "error");
+      return;
+    }
+    router.push(`${prefix}/doctor/results?patientId=${encodeURIComponent(targetId)}`);
   };
 
   const handleCall = (patient) => {
@@ -286,7 +312,8 @@ export default function DoctorPatientsPage({ locale }) {
                     <div>
                       <h3 className="text-lg font-bold text-(--ui-foreground)">{patient.name}</h3>
                       <p className="text-sm text-(--ui-muted-foreground)">
-                        {patient.age} {t("ageSuffix")} • {patient.gender}
+                        {patient.age} {t("ageSuffix")}
+                        {patient.gender ? ` • ${getGenderLabel(patient.gender)}` : ""}
                       </p>
                     </div>
                   </div>
@@ -358,6 +385,13 @@ export default function DoctorPatientsPage({ locale }) {
                     {t("actions.view")}
                   </button>
                   <button
+                    onClick={() => handleViewResults(patient)}
+                    className="flex items-center justify-center rounded-lg bg-(--ui-surface-2) border border-(--ui-border) px-3 py-2 text-(--ui-foreground) transition-all hover:opacity-90"
+                    title={t("actions.results")}
+                  >
+                    <FaFileAlt />
+                  </button>
+                  <button
                     onClick={() => handleStartChat(patient)}
                     className="flex items-center justify-center rounded-lg bg-(--ui-success) px-3 py-2 text-white transition-all hover:opacity-90"
                     title={t("actions.chat")}
@@ -398,7 +432,8 @@ export default function DoctorPatientsPage({ locale }) {
                 <div>
                   <h2 className="text-2xl font-bold text-(--ui-foreground)">{selectedPatient.name}</h2>
                   <p className="text-(--ui-muted-foreground)">
-                    {selectedPatient.age} {t("ageSuffix")} • {selectedPatient.gender}
+                    {selectedPatient.age} {t("ageSuffix")}
+                    {selectedPatient.gender ? ` • ${getGenderLabel(selectedPatient.gender)}` : ""}
                   </p>
                 </div>
               </div>

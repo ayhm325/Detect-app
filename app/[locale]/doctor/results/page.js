@@ -26,6 +26,7 @@ import {
 } from "react-icons/fa";
 import { formatDate } from "../../../lib/date";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 
 export default function DoctorResultsPage() {
   const { showToast, ToastContainer } = useToast();
@@ -33,6 +34,9 @@ export default function DoctorResultsPage() {
   const t = useTranslations("doctorResults");
   const ui = useTranslations("ui");
   const placeholder = ui("placeholder");
+
+  const searchParams = useSearchParams();
+  const patientId = (searchParams?.get("patientId") || "").trim();
 
   // ...existing code...
   // Replace all labels.X with t("key")
@@ -45,33 +49,69 @@ export default function DoctorResultsPage() {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  const [reviewNotes, setReviewNotes] = useState("");
+  const [savingReview, setSavingReview] = useState(false);
+
 
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("/api/doctor/results")
+    const url = patientId ? `/api/doctor/results?patientId=${encodeURIComponent(patientId)}` : "/api/doctor/results";
+    fetch(url)
       .then(async (res) => {
-        if (!res.ok) throw new Error(t("errors.fetchResultsFailed"));
+        if (!res.ok) throw new Error("fetch_failed");
         const data = await res.json();
         // Transform API data to match UI expectations
-        const inferTypeKey = (rawTitle) => {
-          if (!rawTitle || typeof rawTitle !== "string") return null;
-          const title = rawTitle.toLowerCase();
-          if (title.includes("ct")) return "ct";
-          if (title.includes("mri")) return "mri";
-          if (title.includes("ultra")) return "ultrasound";
-          if (title.includes("x-ray") || title.includes("xray")) return "xray";
+        const inferTypeKey = (rawTitle, imageUrl) => {
+          const title = typeof rawTitle === "string" ? rawTitle.toLowerCase() : "";
+          const url = typeof imageUrl === "string" ? imageUrl.toLowerCase() : "";
+          const blob = `${title} ${url}`;
+          if (blob.includes("ct")) return "ct";
+          if (blob.includes("mri")) return "mri";
+          if (blob.includes("ultra") || blob.includes("us")) return "ultrasound";
+          if (blob.includes("x-ray") || blob.includes("xray") || blob.includes("cxr")) return "xray";
           return null;
         };
 
+        const formatTime = (dt) => {
+          if (!dt) return "";
+          const d = new Date(dt);
+          if (Number.isNaN(d.getTime())) return "";
+          try {
+            return d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+          } catch {
+            return "";
+          }
+        };
+
         const mapped = (data.records || []).map((r) => {
-          const inferredTypeKey = inferTypeKey(r.title);
+          const inferredTypeKey = inferTypeKey(r.title, r.imageUrl);
           const typeKey = inferredTypeKey ?? "xray";
           const typeLabel = inferredTypeKey
             ? t(`scanTypes.${inferredTypeKey}`)
             : (r.title || t("scanTypes.xray"));
+
+          const confidence = typeof r.confidenceScore === "number" ? r.confidenceScore : null;
+          const score = confidence == null ? 0 : Math.round(confidence * 100);
+          const ai = (r.aiResult || "").toString().toUpperCase();
+
+          const status = r.reviewedByDoctor
+            ? "completed"
+            : (ai === "POSITIVE" && (confidence == null || confidence >= 0.7) ? "urgent" : "pending");
+
+          const aiSummary = (() => {
+            if (ai === "POSITIVE") return t("aiMessages.positive", { score });
+            if (ai === "NEGATIVE") return t("aiMessages.negative", { score });
+            return t("aiMessages.unknown");
+          })();
+
+          const findings = (() => {
+            if (ai === "POSITIVE") return [{ type: "warning", text: t("findingsMessages.positive") }];
+            if (ai === "NEGATIVE") return [{ type: "normal", text: t("findingsMessages.negative") }];
+            return r.doctorNotes ? [{ type: "info", text: r.doctorNotes }] : [{ type: "info", text: t("findingsMessages.unknown") }];
+          })();
 
           return {
             id: r.id,
@@ -81,21 +121,23 @@ export default function DoctorResultsPage() {
             typeLabel,
             bodyPart: t("defaults.bodyPart"),
             date: r.createdAt,
-            time: r.createdAt,
-            status: "completed", // Assume completed for now
-            aiSummary: r.aiResult || t("defaults.noAiSummary"),
+            time: formatTime(r.createdAt),
+            status,
+            aiSummary,
             thumbnail: r.imageUrl || "/icons/xray-placeholder.png",
-            findings: r.aiResult ? [{ type: "ai", text: r.aiResult }] : [],
+            findings,
+            reviewedByDoctor: Boolean(r.reviewedByDoctor),
+            doctorNotes: r.doctorNotes || "",
           };
         });
         setScans(mapped);
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message);
+        setError(err.message === "fetch_failed" ? t("errors.fetchResultsFailed") : err.message);
         setLoading(false);
       });
-  }, [t, placeholder]);
+  }, [patientId, locale]);
 
   const stats = {
     total: scans.length,
@@ -128,8 +170,53 @@ export default function DoctorResultsPage() {
 
   const handleViewScan = (scan) => {
     setSelectedScan(scan);
+    setReviewNotes(scan?.doctorNotes || "");
     setViewerOpen(true);
     showToast(t("toast.viewingScan"), "info");
+  };
+
+  const handleMarkReviewed = async () => {
+    if (!selectedScan?.id) return;
+    setSavingReview(true);
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const res = await fetch("/api/doctor/results", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          id: selectedScan.id,
+          reviewedByDoctor: true,
+          doctorNotes: reviewNotes,
+        }),
+      });
+
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || body.message || `HTTP ${res.status}`);
+
+      const nextDoctorNotes = typeof reviewNotes === "string" ? reviewNotes.trim() : "";
+      const nextFindings = nextDoctorNotes
+        ? [{ type: "info", text: nextDoctorNotes }, ...(selectedScan.findings || []).filter((f) => f?.text !== nextDoctorNotes)]
+        : (selectedScan.findings || []);
+
+      const updatedScan = {
+        ...selectedScan,
+        status: "completed",
+        reviewedByDoctor: true,
+        doctorNotes: nextDoctorNotes,
+        findings: nextFindings,
+      };
+
+      setSelectedScan(updatedScan);
+      setScans((prev) => prev.map((s) => (s.id === selectedScan.id ? updatedScan : s)));
+      showToast(t("toast.reviewSaved"), "success");
+    } catch (e) {
+      showToast(t("toast.reviewSaveFailed"), "error");
+    } finally {
+      setSavingReview(false);
+    }
   };
 
   const handleDownload = (scan) => {
@@ -482,6 +569,43 @@ export default function DoctorResultsPage() {
                   </div>
                 </div>
               )}
+
+              {/* Doctor Review */}
+              <div className="mt-4 rounded-lg bg-(--ui-surface-2) border border-(--ui-border) p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                  <h3 className="font-bold text-(--ui-foreground)">{t("viewer.review.title")}</h3>
+                  <div className="flex items-center gap-2">
+                    {selectedScan.reviewedByDoctor && (
+                      <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)">
+                        <FaCheckCircle />
+                        {t("viewer.review.reviewed")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <label className="block text-sm font-medium text-(--ui-muted-foreground) mb-2">
+                  {t("viewer.review.notesLabel")}
+                </label>
+                <textarea
+                  value={reviewNotes}
+                  onChange={(e) => setReviewNotes(e.target.value)}
+                  rows={4}
+                  placeholder={t("viewer.review.notesPlaceholder")}
+                  className="w-full px-4 py-3 bg-(--ui-surface) border border-(--ui-border) rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring) outline-none transition-all text-(--ui-foreground) resize-none"
+                />
+
+                <div className="mt-3 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={handleMarkReviewed}
+                    disabled={savingReview}
+                    className="px-4 py-2 rounded-xl btn-gradient text-sm font-semibold disabled:opacity-60"
+                  >
+                    {savingReview ? t("viewer.review.saving") : t("viewer.review.markReviewed")}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

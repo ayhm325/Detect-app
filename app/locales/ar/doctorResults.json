@@ -95,7 +95,15 @@
     "findings": "النتائج",
     "fullscreen": "ملء الشاشة",
     "exitFullscreen": "تصغير",
-    "emptyState": "لا توجد نتائج لهذا الفحص."
+    "emptyState": "لا توجد نتائج لهذا الفحص.",
+    "review": {
+      "title": "مراجعة الطبيب",
+      "reviewed": "تمت المراجعة",
+      "notesLabel": "ملاحظات الطبيب",
+      "notesPlaceholder": "اكتب شرح الطبيب أو الملاحظات السريرية لهذا التقرير…",
+      "markReviewed": "تأكيد المراجعة",
+      "saving": "جارٍ الحفظ…"
+    }
   },
   "scanTypes": {
     "xray": "أشعة سينية",
@@ -107,12 +115,24 @@
     "bodyPart": "صدر",
     "noAiSummary": "لا يوجد ملخص من الذكاء الاصطناعي"
   },
+  "aiMessages": {
+    "positive": "تم رصد مؤشر محتمل بواسطة الذكاء الاصطناعي{score, select, 0 {} other { (نسبة ثقة {score}%)}}.",
+    "negative": "لم يرصد الذكاء الاصطناعي مؤشرات مقلقة{score, select, 0 {} other { (نسبة ثقة {score}%)}}.",
+    "unknown": "لا يتوفر ملخص للذكاء الاصطناعي لهذا الفحص."
+  },
+  "findingsMessages": {
+    "positive": "تم رصد مؤشر محتمل. يرجى المراجعة.",
+    "negative": "لا توجد مؤشرات مقلقة.",
+    "unknown": "لا توجد نتائج منظمة متاحة."
+  },
   "statusLabel": "الحالة",
   "toast": {
     "viewingScan": "جاري عرض الفحص...",
     "downloadStart": "جاري بدء التحميل...",
     "printStart": "جاري تجهيز الطباعة...",
-    "shareCopied": "تم نسخ الرابط!"
+    "shareCopied": "تم نسخ الرابط!",
+    "reviewSaved": "تم حفظ المراجعة.",
+    "reviewSaveFailed": "فشل حفظ المراجعة."
   },
   "errors": {
     "fetchResultsFailed": "فشل في جلب النتائج"

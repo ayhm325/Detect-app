@@ -109,10 +109,10 @@ export default function HeroSection() {
 
       {/* Main Title with Animated Gradient */}
       <h1 className="relative z-10 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-center mb-6 animate-fadeIn">
-        <span className="block brand-gradient-text drop-shadow-2xl">
+        <span className="block text-(--ui-foreground) drop-shadow-2xl">
           {t("content.hero.title")}
         </span>
-        <span className="block text-2xl sm:text-3xl md:text-4xl mt-4 brand-gradient-text">
+        <span className="block text-2xl sm:text-3xl md:text-4xl mt-4 text-(--ui-muted-foreground)">
           {t("content.hero.subtitle")}
         </span>
       </h1>
@@ -141,7 +141,7 @@ export default function HeroSection() {
 
         <Link 
           href={withLocale("/login")}
-          className="group relative px-8 sm:px-12 py-4 sm:py-5 rounded-full card-glass border-2 border-(--ui-border) hover:border-(--ui-ring) text-(--ui-foreground) text-lg sm:text-xl font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
+          className="group relative px-8 sm:px-12 py-4 sm:py-5 rounded-full bg-(--ui-surface) border-2 border-(--ui-border-strong) hover:border-(--ui-ring) text-(--ui-foreground) text-lg sm:text-xl font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
         >
           <span className="flex items-center gap-3">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

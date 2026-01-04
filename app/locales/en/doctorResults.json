@@ -92,7 +92,15 @@
     "findings": "Findings",
     "fullscreen": "Fullscreen",
     "exitFullscreen": "Exit fullscreen",
-    "emptyState": "No results for this scan."
+    "emptyState": "No results for this scan.",
+    "review": {
+      "title": "Doctor review",
+      "reviewed": "Reviewed",
+      "notesLabel": "Doctor notes",
+      "notesPlaceholder": "Write your clinical notes or explanation for this report…",
+      "markReviewed": "Mark as reviewed",
+      "saving": "Saving…"
+    }
   },
   "scanTypes": {
     "xray": "X-Ray",
@@ -103,6 +111,16 @@
   "defaults": {
     "bodyPart": "Chest",
     "noAiSummary": "No AI summary"
+  },
+  "aiMessages": {
+    "positive": "AI flagged a possible finding{score, select, 0 {} other { ({score}% confidence)}}.",
+    "negative": "AI did not detect suspicious findings{score, select, 0 {} other { ({score}% confidence)}}.",
+    "unknown": "AI summary is not available for this scan."
+  },
+  "findingsMessages": {
+    "positive": "Possible finding detected. Please review.",
+    "negative": "No suspicious findings detected.",
+    "unknown": "No structured findings available."
   },
   "emptyState": "No results found.",
   "loading": "Loading results...",
@@ -115,6 +133,8 @@
     "viewingScan": "Viewing scan...",
     "downloadStart": "Download started...",
     "printStart": "Preparing print...",
-    "shareCopied": "Link copied to clipboard!"
+    "shareCopied": "Link copied to clipboard!",
+    "reviewSaved": "Review saved.",
+    "reviewSaveFailed": "Failed to save review."
   }
 }

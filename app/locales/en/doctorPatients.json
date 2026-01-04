@@ -1,6 +1,10 @@
   {
     "ageSuffix": "years",
     "genderSuffix": "",
+    "genders": {
+      "male": "Male",
+      "female": "Female"
+    },
     "filters": {
       "all": "All",
       "stable": "Stable",
@@ -48,6 +52,7 @@
     },
     "actions": {
       "view": "View Details",
+      "results": "Results",
       "chat": "Chat",
       "call": "Call"
     },

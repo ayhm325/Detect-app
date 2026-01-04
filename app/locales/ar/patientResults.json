@@ -58,11 +58,29 @@
   },
   "reportLabels": {
     "doctor": "الطبيب:",
-    "facility": "المرفق:",
+    "facility": "العيادة:",
     "date": "التاريخ:",
     "aiSummary": "ملخص الذكاء الاصطناعي",
     "findings": "النتائج",
     "notes": "ملاحظات"
+  },
+  "titles": {
+    "default": "سجل طبي"
+  },
+  "defaults": {
+    "unknownDoctor": "طبيب غير معروف",
+    "unknownFacility": "عيادة غير معروفة",
+    "clinicOfDoctor": "عيادة الطبيب ({name})"
+  },
+  "aiSummary": {
+    "positive": "تم رصد مؤشر محتمل بواسطة الذكاء الاصطناعي{score, select, 0 {} other { (نسبة ثقة {score}%)}}.",
+    "negative": "لم يرصد الذكاء الاصطناعي مؤشرات مقلقة{score, select, 0 {} other { (نسبة ثقة {score}%)}}.",
+    "unknown": "لا يتوفر ملخص للذكاء الاصطناعي لهذا التقرير."
+  },
+  "findings": {
+    "positive": "تم رصد مؤشر محتمل. يرجى المراجعة مع الطبيب.",
+    "negative": "لا توجد مؤشرات مقلقة.",
+    "unknown": "لا توجد نتائج منظمة متاحة."
   },
   "report1Title": "أشعة الصدر",
   "report1Type": "أشعة",

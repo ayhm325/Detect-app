@@ -22,6 +22,24 @@ import { runInference } from '../../../../ai/inference/inference.service.js';
 import { saveAnalysisResult } from '../../../../services/analysisResult.service.js';
 import { getJwtSecret } from '../../../../lib/auth/jwtSecret.js';
 
+async function _getPrisma() {
+  const mod = await import('../../../../lib/prismaClient.js');
+  return mod.default;
+}
+
+function toAiResult(prediction) {
+  const p = String(prediction || '').toLowerCase();
+  // Treat "normal"/"negative" as NEGATIVE; everything else defaults to POSITIVE
+  if (p.includes('normal') || p.includes('negative') || p.includes('no finding')) return 'NEGATIVE';
+  return 'POSITIVE';
+}
+
+function clamp01(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(1, n));
+}
+
 export async function POST(request) {
   try {
     // auth: accept token from cookie OR Authorization header OR body
@@ -156,8 +174,9 @@ export async function POST(request) {
       var imageUrl = `/uploads/${encodeURIComponent(safeFileName)}`;
       // if enabled, generate a signed URL (note: enforcing signature requires middleware)
       if (process.env.ENABLE_SIGNED_URLS === '1') {
+        const signingSecret = process.env.UPLOAD_URL_SIGNING_SECRET || getJwtSecret();
         const expires = Date.now() + (Number(process.env.UPLOAD_URL_EXP_MS) || 5 * 60 * 1000);
-        const sig = crypto.createHmac('sha256', SECRET).update(`${safeFileName}:${expires}`).digest('hex');
+        const sig = crypto.createHmac('sha256', signingSecret).update(`${safeFileName}:${expires}`).digest('hex');
         imageUrl = `/uploads/${encodeURIComponent(safeFileName)}?exp=${expires}&sig=${sig}`;
       }
 
@@ -199,6 +218,32 @@ export async function POST(request) {
       saveError = e && (e.message ?? String(e));
       console.warn('Failed to save analysis result', saveError, e && e.stack);
       // continue and return the normalized analysis result even if saving fails
+    }
+
+    // Also persist into MedicalRecord so patient/doctor results pages can display real reports.
+    // This is best-effort and should never break the analysis endpoint.
+    try {
+      const prisma = await _getPrisma();
+      const patient = await prisma.patient.findUnique({
+        where: { userId },
+        select: { id: true, doctorId: true }
+      });
+
+      if (patient?.id) {
+        await prisma.medicalRecord.create({
+          data: {
+            patientId: patient.id,
+            doctorId: patient.doctorId || null,
+            aiResult: toAiResult(analysisResult.prediction),
+            confidenceScore: clamp01(analysisResult.confidence),
+            imageUrl: finalImageUrl,
+            reviewedByDoctor: false,
+            doctorNotes: null
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('/api/analysis/analyze: failed to create MedicalRecord', e && e.message);
     }
 
     // if saved, Prisma returns camelCase fields; otherwise return normalized object

@@ -175,17 +175,44 @@ export default function DashboardHome({ serverData = {} }) {
     ? serverData.recentActivity.map((r, i) => ({ id: r.id || i, action: r.action || r.description || '', time: formatDateTime(r.time), icon: FaClipboardList, color: 'text-(--ui-warning)' }))
     : defaultRecentActivity;
 
-  const pendingScans = safeRawArray("pendingScans.defaults", []).map((s, i) => {
-    const dateLabel = s.dateKey === "yesterday" ? labels.ui.yesterday : labels.ui.today;
-    const typeLabel = labels.todayAppointments.types?.[s.typeKey] ?? placeholder;
-    return {
-      id: s.id ?? i + 1,
-      patient: s.patient,
-      type: typeLabel,
-      date: dateLabel,
-      priority: s.priority,
-    };
-  });
+  const pendingScans = (serverData.pendingScansList && serverData.pendingScansList.length)
+    ? serverData.pendingScansList.map((s, i) => {
+        const createdAt = s.createdAt ? new Date(s.createdAt) : null;
+        const now = new Date();
+        const isSameDay = (a, b) => a && b && a.toDateString() === b.toDateString();
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+
+        const dateLabel = isSameDay(createdAt, now)
+          ? labels.ui.today
+          : isSameDay(createdAt, yesterday)
+          ? labels.ui.yesterday
+          : createdAt
+          ? formatDateTime(createdAt)
+          : "";
+
+        const score = typeof s.confidenceScore === 'number' ? s.confidenceScore : null;
+        const priority = score == null
+          ? 'low'
+          : score >= 0.85
+          ? 'high'
+          : score >= 0.65
+          ? 'medium'
+          : 'low';
+
+        const typeLabel = s.type
+          ? (labels.todayAppointments.types?.[s.type] ?? s.type)
+          : placeholder;
+
+        return {
+          id: s.id ?? i + 1,
+          patient: s.patient ?? placeholder,
+          type: typeLabel,
+          date: dateLabel,
+          priority,
+        };
+      })
+    : [];
 
   const quickActions = [
     {
