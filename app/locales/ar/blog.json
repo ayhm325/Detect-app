@@ -1,6 +1,10 @@
 {
   "title": "المدونة",
   "description": "مقالات ونصائح حول الذكاء الاصطناعي والصحة الرقمية.",
+  "languageToggleLabel": "English",
+  "languageToggleAria": "التبديل إلى الإنجليزية",
+  "comingSoon": "قريباً",
+  "backHome": "عودة إلى الرئيسية",
   "posts": [
     {
       "title": "أهمية الذكاء الاصطناعي في الطب الحديث",

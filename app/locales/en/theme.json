@@ -1,0 +1,13 @@
+{
+  "aria": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
+  },
+  "label": {
+    "mode": "Mode:"
+  },
+  "mode": {
+    "light": "Light",
+    "dark": "Dark"
+  }
+}

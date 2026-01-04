@@ -106,8 +106,27 @@
   "defaults": {
     "systemName": "PneumoDetect"
   },
+
+  "demoForm": {
+    "systemName": {
+      "label": "اسم النظام",
+      "placeholder": "مثال: نظام إدارة الأشعة"
+    },
+    "primaryColor": {
+      "label": "اللون الرئيسي"
+    },
+    "notificationsEnabled": {
+      "label": "تفعيل الإشعارات",
+      "enabled": "مفعّل",
+      "disabled": "غير مفعّل"
+    },
+    "actions": {
+      "save": "حفظ الإعدادات"
+    }
+  },
   "notifications": {
     "title": "إعدادات الإشعارات",
+    "enable": "تفعيل الإشعارات",
     "email": "إشعارات البريد الإلكتروني",
     "sms": "إشعارات الرسائل النصية",
     "push": "إشعارات التطبيق"
@@ -131,5 +150,19 @@
   "messages": {
     "success": "تم حفظ الإعدادات بنجاح!",
     "error": "حدث خطأ أثناء الحفظ. حاول مرة أخرى."
+  },
+  "rolePermissionsEditor": {
+    "title": "تعديل صلاحيات الدور",
+    "roles": {
+      "admin": "أدمن",
+      "doctor": "طبيب",
+      "patient": "مريض"
+    },
+    "permissions": {
+      "read": "قراءة",
+      "write": "كتابة",
+      "edit": "تعديل",
+      "delete": "حذف"
+    }
   }
 }

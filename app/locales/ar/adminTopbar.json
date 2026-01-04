@@ -1,0 +1,11 @@
+{
+  "title": "لوحة تحكم الأدمن",
+  "notifications": {
+    "newUserTitle": "مستخدم جديد",
+    "newUserMsg": "تم إضافة مستخدم جديد للنظام",
+    "newTestTitle": "فحص جديد",
+    "newTestMsg": "تم رفع فحص طبي جديد للمراجعة",
+    "systemAlertTitle": "تنبيه النظام",
+    "systemAlertMsg": "استخدام الذاكرة 85%"
+  }
+}

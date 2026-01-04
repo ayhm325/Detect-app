@@ -1,10 +1,20 @@
 {
+  "ui": {
+    "backHomeTitle": "العودة للرئيسية",
+    "switchLanguageTitle": "Switch to English",
+    "switchLanguageShort": "EN"
+  },
+  "social": {
+    "facebook": "فيسبوك",
+    "google": "جوجل"
+  },
   "auth": {
     "login": {
       "title": "تسجيل الدخول",
       "subtitle": "أدخل بيانات حسابك للمتابعة",
       "socialDivider": "أو تابع عبر البريد الإلكتروني",
       "emailLabel": "البريد الإلكتروني",
+      "emailPlaceholder": "example@email.com",
       "passwordLabel": "كلمة المرور",
       "passwordShow": "إظهار",
       "passwordHide": "إخفاء",
@@ -12,7 +22,11 @@
       "ctaPrimary": "دخول",
       "forgot": "نسيت كلمة المرور؟",
       "noAccount": "ليس لديك حساب؟",
-      "goSignup": "إنشاء حساب"
+      "goSignup": "إنشاء حساب",
+      "errors": {
+        "unexpected": "حدث خطأ غير متوقع. حاول مرة أخرى.",
+        "serverConnection": "حدث خطأ في الاتصال بالخادم"
+      }
     }
   }
 }

@@ -1,6 +1,25 @@
 {
   "title": "الإشعارات",
   "pageTitle": "الإشعارات",
+  "demo": {
+    "items": [
+      {
+        "title": "تم حجز موعد",
+        "message": "لديك موعد جديد مع المريض أحمد",
+        "time": "اليوم 09:00"
+      },
+      {
+        "title": "نتيجة جديدة",
+        "message": "تم رفع نتيجة مختبر",
+        "time": "أمس 14:20"
+      },
+      {
+        "title": "رسالة جديدة",
+        "message": "رسالة من المريض",
+        "time": "قبل 3 أيام"
+      }
+    ]
+  },
   "noNotifications": "لا توجد إشعارات حالياً",
   "markAllAsRead": "تحديد الكل كمقروء",
   "deleteAll": "حذف جميع الإشعارات",
@@ -54,6 +73,7 @@
   "timeHourAgo": "منذ ساعة",
   "timeHoursAgo": "{hours} ساعات مضت",
   "timeDaysAgo": "{days} أيام مضت",
-  "timeJustNow": "الآن"
+  "timeJustNow": "الآن",
+  "viewAll": "عرض جميع الإشعارات"
 
 }

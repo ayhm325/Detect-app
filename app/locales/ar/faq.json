@@ -1,6 +1,7 @@
 {
   "title": "الأسئلة الشائعة",
   "description": "إجابات على أكثر الأسئلة شيوعًا حول PneumoDetect",
+  "backHome": "عودة إلى الرئيسية",
   "categories": [
     {
       "category": "عام",

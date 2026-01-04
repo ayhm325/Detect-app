@@ -1,0 +1,12 @@
+{
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي",
+    "pageXofY": "صفحة {currentPage} من {totalPages}"
+  },
+  "confirmDialog": {
+    "defaultMessage": "هل أنت متأكد من تنفيذ هذا الإجراء؟",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء"
+  }
+}

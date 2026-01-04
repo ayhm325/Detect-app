@@ -2,10 +2,14 @@
   "contactPage": {
     "title": "Contact Us",
     "description": "We are here to help. Reach out for any questions or suggestions.",
+    "backHome": "Back to Home",
     "form": {
       "name": "Full Name",
+      "namePlaceholder": "Enter your full name",
       "email": "Email",
+      "emailPlaceholder": "example@example.com",
       "phone": "Phone Number",
+      "phonePlaceholder": "+962 xxxxxxxxx",
       "subject": "Subject",
       "subjectPlaceholder": "Select subject",
       "options": {
@@ -22,9 +26,9 @@
       "emailTitle": "Email",
       "emails": ["support@detect-ai.com", "info@detect-ai.com"],
       "phoneTitle": "Phone",
-      "phones": ["+966 50 123 4567", "+966 50 765 4321"],
+      "phones": ["+962 7 8123 4567", "+962 7 8765 4321"],
       "addressTitle": "Address",
-      "addressLines": ["Riyadh, Saudi Arabia", "Sulaimaniah District, King Fahd Road"],
+      "addressLines": ["Irbed , Jordan", "Habras , Bani Kenana"],
       "hoursTitle": "Working Hours",
       "hours": ["Sun - Thu: 9:00 AM - 6:00 PM", "Fri - Sat: Closed"]
     }

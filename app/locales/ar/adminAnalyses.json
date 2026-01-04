@@ -1,0 +1,37 @@
+{
+  "buttons": {
+    "upload": "رفع صورة التحليل"
+  },
+  "summary": {
+    "total": "عدد التحليلات الكلي",
+    "success": "تحليلات ناجحة",
+    "failed": "تحليلات فاشلة"
+  },
+  "charts": {
+    "monthly": "إحصائية شهرية",
+    "successRate": "نسبة النجاح",
+    "caseDistribution": "توزيع الحالات"
+  },
+  "chart": {
+    "title": "رسم بياني للتحليلات"
+  },
+  "table": {
+    "index": "#",
+    "patient": "اسم المريض",
+    "date": "تاريخ التحليل",
+    "status": "الحالة",
+    "actions": "إجراءات"
+  },
+  "actions": {
+    "view": "عرض",
+    "details": "تفاصيل",
+    "compare": "مقارنة"
+  },
+  "statuses": {
+    "completed": "مكتمل",
+    "pending": "قيد الانتظار",
+    "reviewing": "قيد المراجعة",
+    "failed": "فاشل",
+    "success": "ناجح"
+  }
+}

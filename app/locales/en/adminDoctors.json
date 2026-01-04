@@ -1,0 +1,23 @@
+{
+  "title": "Doctors",
+  "loading": "Loading…",
+  "empty": "No doctors found.",
+  "columns": {
+    "index": "#",
+    "name": "Name",
+    "license": "License No.",
+    "phone": "Phone",
+    "email": "Email",
+    "actions": "Actions"
+  },
+  "buttons": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add new doctor"
+  },
+  "confirmDelete": "Are you sure you want to delete this doctor?",
+  "errors": {
+    "fetchDoctors": "Failed to fetch doctors",
+    "deleteDoctor": "An error occurred while deleting"
+  }
+}

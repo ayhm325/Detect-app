@@ -1,0 +1,26 @@
+{
+  "hero": {
+    "title": "Radiology analytics — hologram demo",
+    "description": "A fast modern interface designed around brand colors with glass and hologram effects.",
+    "primaryCta": "Get started",
+    "secondaryCta": "Learn more"
+  },
+  "glassCard": {
+    "title": "Glass Card",
+    "badge": "New",
+    "description": "A glass card with a hologram border and a soft shadow.",
+    "primaryCta": "Primary CTA",
+    "secondaryCta": "Secondary"
+  },
+  "scanCards": {
+    "xrayShoulder": {
+      "title": "X-ray - Shoulder",
+      "description": "Ready for review"
+    },
+    "ctChest": {
+      "title": "CT - Chest",
+      "description": "Waiting for the doctor"
+    }
+  },
+  "accent": "Accent"
+}

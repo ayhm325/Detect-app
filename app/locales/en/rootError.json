@@ -1,0 +1,8 @@
+{
+  "title": "Sorry! Something went wrong",
+  "fallbackMessage": "An unexpected error occurred. We're working on fixing it.",
+  "retry": "Try again",
+  "backHome": "Back to home",
+  "supportPrefix": "If the problem persists, please",
+  "contactUs": "contact us"
+}

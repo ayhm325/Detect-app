@@ -100,8 +100,4 @@
   "hide": "Hide",
   "show": "Show",
   "saving": "Saving..."
-  ,
-  "placeholder": {
-    "empty": "—"
-  }
 }

@@ -29,6 +29,12 @@
   "privacyPage": { "title": "سياسة الخصوصية" },
   "termsPage": { "title": "الشروط والأحكام" },
   "brand": "PneumoDetect",
+  "social": {
+    "facebook": "فيسبوك",
+    "twitter": "تويتر",
+    "instagram": "إنستغرام",
+    "linkedin": "لينكدإن"
+  },
   "footer": {
     "description": "منصة ذكاء طبي متقدمة للتشخيص السريع والدقيق. نوفر لك أدق النتائج بأسرع وقت ممكن.",
     "contact": {

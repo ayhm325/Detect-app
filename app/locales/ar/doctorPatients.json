@@ -51,6 +51,35 @@
     "chat": "محادثة",
     "call": "اتصال"
   },
+  "table": {
+    "headers": {
+      "name": "الاسم",
+      "lastScan": "آخر فحص",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    }
+  },
+  "filtersForm": {
+    "namePlaceholder": "اسم المريض",
+    "agePlaceholder": "العمر",
+    "statusAll": "كل الحالات",
+    "statuses": {
+      "stable": "مستقر",
+      "critical": "حرج",
+      "pendingScan": "بانتظار الفحص"
+    }
+  },
+  "quickView": {
+    "title": "تفاصيل المريض",
+    "close": "إغلاق",
+    "labels": {
+      "name": "الاسم",
+      "age": "العمر",
+      "status": "الحالة",
+      "lastScan": "آخر فحص",
+      "medicalHistory": "تاريخ طبي مختصر"
+    }
+  },
   "emptyState": "لا يوجد مرضى مطابقون للبحث أو الفلاتر.",
   "items": [
     {

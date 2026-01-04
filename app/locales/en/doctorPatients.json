@@ -51,6 +51,35 @@
       "chat": "Chat",
       "call": "Call"
     },
+    "table": {
+      "headers": {
+        "name": "Name",
+        "lastScan": "Last Scan",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "filtersForm": {
+      "namePlaceholder": "Patient name",
+      "agePlaceholder": "Age",
+      "statusAll": "All statuses",
+      "statuses": {
+        "stable": "Stable",
+        "critical": "Critical",
+        "pendingScan": "Pending scan"
+      }
+    },
+    "quickView": {
+      "title": "Patient details",
+      "close": "Close",
+      "labels": {
+        "name": "Name",
+        "age": "Age",
+        "status": "Status",
+        "lastScan": "Last scan",
+        "medicalHistory": "Brief medical history"
+      }
+    },
     "emptyState": "No patients match your search or filters.",
     "items": [
       {

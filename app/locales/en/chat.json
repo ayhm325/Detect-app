@@ -1,3 +1,12 @@
 {
-  "message": "Chat translations go here. Please use patientChat.json for patient-related chat translations."
+  "message": "Chat translations go here. Please use patientChat.json for patient-related chat translations.",
+  "actions": {
+    "more": "More",
+    "deleteConversation": "Delete conversation"
+  },
+  "confirmDelete": {
+    "text": "Delete conversation?",
+    "yes": "Delete",
+    "no": "Cancel"
+  }
 }

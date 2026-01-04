@@ -1,4 +1,13 @@
 {
+    "ui": {
+      "backHomeTitle": "Back to home",
+      "switchLanguageTitle": "التبديل للعربية",
+      "switchLanguageShort": "AR"
+    },
+    "social": {
+      "facebook": "Facebook",
+      "google": "Google"
+    },
     "homeAria": "Back to home",
     "login": {
       "title": "Sign in",
@@ -36,9 +45,16 @@
       "doctorRole": "Doctor",
       "patientRole": "Patient",
       "nameLabel": "Full name",
+      "namePlaceholder": "John Doe",
       "emailLabel": "Email",
+      "emailPlaceholder": "example@email.com",
       "doctorPickerLabel": "Attending doctor",
       "doctorPlaceholder": "Select your doctor",
+      "doctorsLoading": "Loading doctors...",
+      "licenseNumberLabel": "Medical License Number",
+      "licenseNumberPlaceholder": "e.g. 123456",
+      "phoneLabel": "Phone Number",
+      "phonePlaceholder": "+9665xxxxxxx",
       "passwordLabel": "Password",
       "confirmPasswordLabel": "Confirm password",
       "passwordShow": "Show",
@@ -63,9 +79,13 @@
       "ctaButton": "Start now",
       "errors": {
         "required": "Please fill all required fields",
+        "loadDoctorsFailed": "Failed to load doctors",
+        "doctorLicensePhoneRequired": "License number and phone are required for doctors.",
         "doctorMissing": "Please choose your attending doctor",
         "weakPassword": "Password does not meet all requirements",
-        "mismatch": "Passwords do not match"
+        "mismatch": "Passwords do not match",
+        "registrationFailed": "An error occurred while creating the account",
+        "serverConnection": "Server connection error"
       },
       "success": "Account created successfully! Redirecting...",
       "haveAccount": "Already have an account?",

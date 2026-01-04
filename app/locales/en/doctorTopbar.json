@@ -1,0 +1,22 @@
+{
+  "doctorImageAlt": "Doctor image",
+  "notificationsTitle": "Notifications",
+  "noNewNotifications": "No new notifications",
+  "settingsTitle": "Settings",
+  "logoutTitle": "Sign out",
+  "markAsRead": "Mark as read",
+  "mockNotifications": {
+    "0": {
+      "type": "New message",
+      "text": "You have a new message from patient Mohamed Ali"
+    },
+    "1": {
+      "type": "New scan",
+      "text": "A new scan was uploaded for Sara Youssef"
+    },
+    "2": {
+      "type": "Urgent alert",
+      "text": "A critical case was detected by AI"
+    }
+  }
+}

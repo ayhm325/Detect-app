@@ -1,8 +1,15 @@
 {
   "brand": "PneumoDetect",
+  "brandShort": "DX",
   "navTagline": "Advanced Medical AI",
   "langSwitch": "AR",
   "langSwitchAria": "Switch language",
+  "menuToggleAria": "Toggle menu",
+  "logoIconAria": "Lung icon",
+  "theme": {
+    "switchToLightAria": "Switch to light mode",
+    "switchToDarkAria": "Switch to dark mode"
+  },
   "home": "Home",
   "about": "About",
   "services": "Services"

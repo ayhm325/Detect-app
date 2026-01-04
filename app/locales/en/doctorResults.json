@@ -48,16 +48,68 @@
     "view": "View details",
     "download": "Download report",
     "print": "Print",
+    "share": "Share",
     "close": "Close"
+  },
+  "table": {
+    "scanNumber": "Scan #",
+    "date": "Date",
+    "scanType": "Type",
+    "aiSummary": "AI Summary",
+    "comparison": "Comparison",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No",
+    "buttons": {
+      "view": "View",
+      "compare": "Compare",
+      "annotate": "Annotate"
+    }
+  },
+  "scanViewer": {
+    "close": "Close",
+    "title": "Scan viewer: {type}",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "imageAlt": "Scan image",
+    "thumbnailAlt": "Image {index}"
+  },
+  "scanAnnotations": {
+    "title": "Annotations"
+  },
+  "mock": {
+    "scan101": {
+      "aiSummary": "No obvious abnormal signs.",
+      "annotation1": { "text": "Suspicious area", "position": "Upper right" },
+      "annotation2": { "text": "Mild calcifications", "position": "Lower left" }
+    },
+    "scan102": {
+      "aiSummary": "Mild enlargement in the right lung."
+    }
   },
   "viewer": {
     "aiAnalysis": "AI Analysis",
     "findings": "Findings",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
     "emptyState": "No results for this scan."
+  },
+  "scanTypes": {
+    "xray": "X-Ray",
+    "ct": "CT Scan",
+    "mri": "MRI",
+    "ultrasound": "Ultrasound"
+  },
+  "defaults": {
+    "bodyPart": "Chest",
+    "noAiSummary": "No AI summary"
   },
   "emptyState": "No results found.",
   "loading": "Loading results...",
   "error": "Error loading results:",
+  "errors": {
+    "fetchResultsFailed": "Failed to fetch results"
+  },
   "statusLabel": "Status",
   "toast": {
     "viewingScan": "Viewing scan...",

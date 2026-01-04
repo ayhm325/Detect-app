@@ -6,5 +6,50 @@
   "scans": "الفحوصات",
   "reports": "التقارير",
   "chartTitle": "نظرة شهرية",
-  "noData": "لا توجد بيانات متاحة"
+  "noData": "لا توجد بيانات متاحة",
+  "timeRange": {
+    "week": "هذا الأسبوع",
+    "month": "هذا الشهر",
+    "year": "هذه السنة"
+  },
+  "export": "تصدير",
+  "toast": {
+    "exportStart": "جارٍ تجهيز التصدير...",
+    "exportSuccess": "تم تجهيز التصدير."
+  },
+  "stats": {
+    "patients": "إجمالي المرضى",
+    "scans": "إجمالي الفحوصات",
+    "completed": "مكتمل",
+    "pending": "معلق",
+    "previous": "السابق"
+  },
+  "chart": {
+    "patientDistribution": "توزيع المرضى"
+  },
+  "units": {
+    "patients": "مريض"
+  },
+  "scanTypesTitle": "توزيع أنواع الفحوصات",
+  "scanTypesOfTotal": "من الإجمالي",
+  "recentActivityTitle": "النشاط الأخير",
+  "patientChartData": [
+    { "day": "الإثنين", "value": 6 },
+    { "day": "الثلاثاء", "value": 8 },
+    { "day": "الأربعاء", "value": 5 },
+    { "day": "الخميس", "value": 9 },
+    { "day": "الجمعة", "value": 7 },
+    { "day": "السبت", "value": 4 },
+    { "day": "الأحد", "value": 6 }
+  ],
+  "scanTypes": [
+    { "label": "أشعة صدر", "count": 32, "percentage": 52 },
+    { "label": "تصوير مقطعي", "count": 18, "percentage": 29 },
+    { "label": "رنين مغناطيسي", "count": 12, "percentage": 19 }
+  ],
+  "recentActivity": [
+    { "status": "completed", "actionLabel": "تمت مراجعة الفحص", "patient": "أحمد", "time": "قبل ساعتين" },
+    { "status": "pending", "actionLabel": "بانتظار المراجعة", "patient": "سارة", "time": "قبل 4 ساعات" },
+    { "status": "sent", "actionLabel": "تم إرسال التقرير", "patient": "خالد", "time": "أمس" }
+  ]
 }

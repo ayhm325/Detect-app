@@ -107,6 +107,24 @@
     "systemName": "PneumoDetect"
   },
 
+  "demoForm": {
+    "systemName": {
+      "label": "System Name",
+      "placeholder": "Example: Radiology Management System"
+    },
+    "primaryColor": {
+      "label": "Primary Color"
+    },
+    "notificationsEnabled": {
+      "label": "Enable notifications",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "actions": {
+      "save": "Save settings"
+    }
+  },
+
   "security": {
     "hipaaNotice": "Enabling these features helps protect patient data and ensures HIPAA compliance.",
     "title": "Security Settings",
@@ -115,6 +133,7 @@
   },
   "notifications": {
     "title": "Notification Settings",
+    "enable": "Enable notifications",
     "email": "Email Notifications",
     "sms": "SMS Notifications",
     "push": "App Notifications"
@@ -132,5 +151,19 @@
   "messages": {
     "success": "Settings saved successfully!",
     "error": "An error occurred while saving. Please try again."
+  },
+  "rolePermissionsEditor": {
+    "title": "Edit Role Permissions",
+    "roles": {
+      "admin": "Admin",
+      "doctor": "Doctor",
+      "patient": "Patient"
+    },
+    "permissions": {
+      "read": "Read",
+      "write": "Write",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
   }
 }

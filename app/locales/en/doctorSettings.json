@@ -34,27 +34,67 @@
       "phone": "Phone Number",
       "license": "Medical License Number",
       "bio": "Doctor Bio",
-      "save": "Save"
+      "save": "Save",
+      "toast": {
+        "saved": "Profile saved"
+      }
     },
     "availability": {
       "header": "Working Hours",
       "workDays": "Work Days",
+      "exampleDays": "Example: Sun - Thu",
+      "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
       "startTime": "Start Time",
       "endTime": "End Time",
       "slotDuration": "Appointment Duration (minutes)",
+      "minutes": "minutes",
       "maxPatients": "Max Patients Per Day",
-      "saveButton": "Save Hours"
+      "saveButton": "Save Hours",
+      "toast": {
+        "saved": "Working hours saved"
+      }
+    },
+    "demo": {
+      "availabilityDays": "Sun - Thu",
+      "openModal": "Open settings modal",
+      "sensitiveAction": "Sensitive action (example account deletion)",
+      "confirmSensitiveActionMessage": "Are you sure you want to proceed with this sensitive action?"
+    },
+    "passwordChange": {
+      "submit": "Change"
     },
     "notifications": {
       "title": "Notification Settings",
+      "communicationMethodsTitle": "Communication Methods",
       "email": "Email Notifications",
+      "emailDesc": "Receive notifications via email",
       "sms": "SMS Notifications",
+      "smsDesc": "Receive notifications via SMS",
       "push": "Push Notifications",
+      "pushDesc": "Receive notifications in app",
+      "typesTitle": "Notification Types",
       "newAppointment": "New Appointments",
       "appointmentReminder": "Appointment Reminders",
       "patientMessages": "Patient Messages",
       "systemUpdates": "System Updates",
-      "saveButton": "Save Preferences"
+      "typeDesc": {
+        "newAppointment": "When a new appointment is booked",
+        "appointmentReminder": "One hour before appointment",
+        "patientMessages": "When receiving a new message",
+        "systemUpdates": "About system updates"
+      },
+      "saveButton": "Save Preferences",
+      "toast": {
+        "saved": "Notification preferences saved"
+      }
+    },
+    "security": {
+      "toast": {
+        "fillFields": "Please fill all password fields",
+        "mismatch": "Passwords do not match",
+        "changedSuccess": "Password changed successfully",
+        "changeFailed": "Failed to change password"
+      }
     },
     "security_min_length": "Password must be at least 8 characters"
   }

@@ -1,0 +1,21 @@
+{
+  "title": "Account settings",
+  "fields": {
+    "newPassword": "New password",
+    "email": "Email",
+    "doctorVisibility": "Visibility for doctor",
+    "languageAppearance": "Language and appearance"
+  },
+  "visibility": {
+    "full": "Fully visible",
+    "partial": "Hide some information",
+    "private": "Private"
+  },
+  "language": {
+    "arabic": "Arabic",
+    "english": "English"
+  },
+  "actions": {
+    "save": "Save"
+  }
+}

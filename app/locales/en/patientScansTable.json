@@ -1,0 +1,28 @@
+{
+  "title": "My Scans",
+  "columns": {
+    "id": "Scan ID",
+    "type": "Type",
+    "uploadedAt": "Uploaded",
+    "status": "Status",
+    "aiSummary": "AI Summary",
+    "doctorNotes": "Doctor Notes",
+    "actions": "Actions"
+  },
+  "empty": "No scans yet",
+  "actions": {
+    "view": "View",
+    "download": "Download",
+    "requestReview": "Request review"
+  },
+  "statuses": {
+    "reviewed": "Reviewed",
+    "pending": "Pending review",
+    "unknown": "Unknown"
+  },
+  "types": {
+    "xray": "X-ray",
+    "ct": "CT",
+    "mri": "MRI"
+  }
+}

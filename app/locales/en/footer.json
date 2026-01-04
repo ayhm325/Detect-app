@@ -29,6 +29,12 @@
   "privacyPage": { "title": "Privacy" },
   "termsPage": { "title": "Terms" },
   "brand": "PneumoDetect",
+  "social": {
+    "facebook": "Facebook",
+    "twitter": "Twitter",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn"
+  },
   "footer": {
     "description": "An advanced medical AI platform for fast and accurate diagnosis. We provide you with the most accurate results as quickly as possible.",
     "contact": {

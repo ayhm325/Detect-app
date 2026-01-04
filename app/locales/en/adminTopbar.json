@@ -1,0 +1,11 @@
+{
+  "title": "Admin Dashboard",
+  "notifications": {
+    "newUserTitle": "New User",
+    "newUserMsg": "A new user has been added to the system",
+    "newTestTitle": "New Test",
+    "newTestMsg": "A new medical test has been uploaded for review",
+    "systemAlertTitle": "System Alert",
+    "systemAlertMsg": "Memory usage 85%"
+  }
+}

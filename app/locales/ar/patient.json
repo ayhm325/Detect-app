@@ -18,6 +18,16 @@
     "ar": "العربية",
     "en": "English"
   },
+  "layout": {
+    "sidebar": {
+      "expandTitle": "فتح الشريط",
+      "collapseTitle": "إغلاق الشريط"
+    },
+    "localeSwitch": {
+      "title": "تبديل اللغة",
+      "label": "English"
+    }
+  },
   "version": "الإصدار: 1.0",
   "status": "الحالة: متصل ✓",
   "healthScoreValue": "98%",
@@ -48,7 +58,29 @@
       "activity": "النشاطات الأخيرة"
     }
   },
+  "healthSummary": {
+    "title": "ملخص صحي",
+    "labels": {
+      "weight": "الوزن",
+      "height": "الطول",
+      "bmi": "BMI",
+      "allergies": "حساسيات",
+      "chronic": "أمراض مزمنة"
+    },
+    "units": {
+      "kg": "كغ",
+      "cm": "سم"
+    },
+    "noData": "لا توجد بيانات"
+  },
   "profile": {
+    "avatarAlt": "صورة المريض",
+    "healthStatus": {
+      "stable": "مستقرة",
+      "attention": "تحتاج متابعة",
+      "critical": "حرجة",
+      "unknown": "غير محددة"
+    },
     "tab": {
       "personalInfo": "البيانات الشخصية",
       "health": "الصحة",
@@ -79,6 +111,9 @@
       "patientNumber": "رقم المريض",
       "activeAccount": "الحساب مفعل",
       "memberSince": "عضو منذ",
+      "age": "العمر",
+      "genderLabel": "الجنس",
+      "healthStatus": "الحالة الصحية العامة",
       "gender": {
         "male": "ذكر",
         "female": "أنثى",
@@ -156,16 +191,153 @@
       "time": "الوقت",
       "type": "النوع",
       "reason": "السبب",
+      "location": "الموقع",
       "phone": "الهاتف",
       "cancel": "إلغاء",
       "submit": "إرسال",
       "cancelReasonTitle": "سبب الإلغاء",
-      "cancelReasonLabel": "يرجى كتابة سبب الإلغاء"
+      "cancelReasonLabel": "يرجى كتابة سبب الإلغاء",
+      "cancelReasonRequired": "يرجى إدخال سبب الإلغاء"
     },
     "modalTitle": "تحتاج موعداً جديداً؟",
     "modalBody": "تحدث مع طبيب أو اطلب موعداً آخر.",
     "chatButton": "محادثة مع طبيب",
     "closeButton": "إغلاق",
     "noLocation": "لا يوجد موقع"
+  },
+  "analysis": {
+    "title": "تحليل الصور الطبية بالذكاء الاصطناعي",
+    "subtitle": "ارفع صورة للحصول على نتائج تشخيصية مدعومة بالذكاء الاصطناعي",
+    "badge": "ذكاء سريع",
+    "controls": {
+      "includeHeatmap": "تضمين خريطة الحرارة",
+      "chooseImage": "اختيار صورة",
+      "remove": "إزالة"
+    },
+    "preview": {
+      "alt": "معاينة الصورة المحددة",
+      "noneSelected": "لم يتم اختيار صورة",
+      "noFile": "لا يوجد ملف"
+    },
+    "actions": {
+      "analyze": "تحليل الصورة",
+      "analyzing": "جارٍ التحليل…",
+      "cancelUpload": "إلغاء الرفع"
+    },
+    "errors": {
+      "uploadCanceled": "تم إلغاء الرفع",
+      "networkUpload": "حدث خطأ في الشبكة أثناء الرفع"
+    },
+    "progress": {
+      "etaLabel": "الوقت المتبقي"
+    },
+    "results": {
+      "heatmap": "خريطة الحرارة",
+      "diagnosis": "التشخيص",
+      "needsReview": "يتطلب مراجعة أخصائي الأشعة",
+      "modelLabel": "النموذج:",
+      "inferenceTimeLabel": "زمن الاستدلال:",
+      "unknown": "غير معروف",
+      "savedToHistory": "تم الحفظ في السجل",
+      "confidence": "الثقة",
+      "confidenceTitle": "درجة ثقة الذكاء الاصطناعي",
+      "explanationLabel": "التفسير",
+      "noHeatmap": "لا توجد خريطة حرارة متاحة"
+    }
+  },
+  "analysisHistory": {
+    "title": "سجل التحاليل",
+    "subtitle": "تحليلات الذكاء الاصطناعي السابقة على حسابك",
+    "refresh": "تحديث",
+    "emptyTitle": "لا توجد تحاليل بعد",
+    "emptySubtitle": "قم بإجراء تحليل من الصفحة الرئيسية لتظهر النتائج هنا.",
+    "imageAltFallback": "صورة التحليل",
+    "confidence": "الثقة",
+    "view": "عرض",
+    "confirmDelete": "هل تريد حذف هذا التحليل؟",
+    "delete": "حذف",
+    "deleting": "جارٍ الحذف…"
+  },
+  "components": {
+    "myDoctor": {
+      "title": "طبيبي",
+      "labels": {
+        "email": "البريد:",
+        "phone": "الهاتف:"
+      },
+      "actions": {
+        "requestConsultation": "طلب استشارة"
+      }
+    },
+    "supportCenter": {
+      "title": "مركز الدعم",
+      "form": {
+        "title": "إرسال مشكلة",
+        "subjectPlaceholder": "العنوان",
+        "descriptionPlaceholder": "الوصف",
+        "submit": "إرسال"
+      },
+      "alerts": {
+        "submitted": "تم إرسال المشكلة (واجهة فقط)"
+      },
+      "faq": {
+        "title": "الأسئلة الشائعة",
+        "items": {
+          "uploadXray": "كيف أحمّل صورة أشعة؟",
+          "requestReview": "كيف أطلب مراجعة من الطبيب؟",
+          "editAccount": "كيف أعدّل بيانات الحساب؟"
+        }
+      },
+      "requestsStatus": "حالة الطلبات: قيد التطوير (واجهة فقط)"
+    },
+    "chat": {
+      "title": "الدردشة مع الطبيب",
+      "role": {
+        "patient": "مريض",
+        "doctor": "طبيب"
+      },
+      "typing": "الطبيب يكتب...",
+      "placeholder": "اكتب رسالتك هنا...",
+      "send": "إرسال",
+      "mockReply": "تم استلام الرسالة، سنراجع قريبًا."
+    },
+    "medicalRecords": {
+      "title": "التقارير والصور الشعاعية",
+      "columns": {
+        "file": "الملف",
+        "type": "النوع",
+        "examDate": "تاريخ الفحص",
+        "reportStatus": "حالة التقرير",
+        "action": "إجراء"
+      },
+      "empty": "لا توجد سجلات",
+      "viewDetails": "عرض التفصيل",
+      "status": {
+        "ready": "جاهز",
+        "processing": "قيد الإعداد"
+      },
+      "type": {
+        "xray": "أشعة سينية",
+        "mri": "الرنين المغناطيسي",
+        "ct": "الأشعة المقطعية"
+      }
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "empty": "لا توجد إشعارات"
+    },
+    "upcomingAppointments": {
+      "title": "المواعيد القادمة",
+      "empty": "لا توجد مواعيد قادمة",
+      "doctorLabel": "الطبيب",
+      "dateLabel": "الموعد"
+    },
+    "previousAppointments": {
+      "title": "الزيارات السابقة",
+      "empty": "لا يوجد سجل زيارات",
+      "dateLabel": "التاريخ",
+      "doctorPrefix": "الطبيب:",
+      "viewDetails": "عرض التفاصيل"
+    }
   }
 }

@@ -1,10 +1,27 @@
 {
+  "add": "Add Doctor",
+  "edit": "Edit Doctor",
+  "name": "Name",
+  "email": "Email",
+  "license": "License Number",
+  "phone": "Phone",
+  "save": "Save",
+  "cancel": "Cancel",
+  "specialties": {
+    "radiology": "Radiology",
+    "pulmonology": "Pulmonology",
+    "orthopedics": "Orthopedics"
+  },
+  "statusLabels": {
+    "pending": "Pending",
+    "verified": "Verified",
+    "rejected": "Rejected"
+  },
   "title": "Add/Edit Doctor",
   "nameLabel": "Name",
   "specialtyLabel": "Specialty",
   "emailLabel": "Email",
   "phoneLabel": "Phone",
   "statusLabel": "Status",
-  "submit": "Save",
-  "cancel": "Cancel"
+  "submit": "Save"
 }

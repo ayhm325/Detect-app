@@ -2,6 +2,10 @@
   "title": "طلبات تغيير الأطباء",
   "description": "إدارة طلبات تغيير الأطباء.",
   "table": {
+    "patient": "المريض",
+    "currentDoctor": "الطبيب الحالي",
+    "requestedDoctor": "الطبيب المطلوب",
+    "reason": "السبب",
     "doctorName": "اسم الطبيب",
     "requestType": "نوع الطلب",
     "status": "الحالة",
@@ -13,5 +17,9 @@
   "reject": "رفض",
   "pending": "قيد الانتظار",
   "approved": "تمت الموافقة",
-  "rejected": "تم الرفض"
+  "rejected": "تم الرفض",
+  "errors": {
+    "approveFailed": "فشل الموافقة. {message}",
+    "rejectFailed": "فشل الرفض. {message}"
+  }
 }

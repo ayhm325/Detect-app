@@ -6,5 +6,50 @@
   "scans": "Scans",
   "reports": "Reports",
   "chartTitle": "Monthly Overview",
-  "noData": "No data available"
+  "noData": "No data available",
+  "timeRange": {
+    "week": "This week",
+    "month": "This month",
+    "year": "This year"
+  },
+  "export": "Export",
+  "toast": {
+    "exportStart": "Preparing export...",
+    "exportSuccess": "Export ready."
+  },
+  "stats": {
+    "patients": "Total Patients",
+    "scans": "Total Scans",
+    "completed": "Completed",
+    "pending": "Pending",
+    "previous": "Previous"
+  },
+  "chart": {
+    "patientDistribution": "Patient distribution"
+  },
+  "units": {
+    "patients": "patients"
+  },
+  "scanTypesTitle": "Scan type distribution",
+  "scanTypesOfTotal": "of total",
+  "recentActivityTitle": "Recent activity",
+  "patientChartData": [
+    { "day": "Mon", "value": 6 },
+    { "day": "Tue", "value": 8 },
+    { "day": "Wed", "value": 5 },
+    { "day": "Thu", "value": 9 },
+    { "day": "Fri", "value": 7 },
+    { "day": "Sat", "value": 4 },
+    { "day": "Sun", "value": 6 }
+  ],
+  "scanTypes": [
+    { "label": "Chest X-ray", "count": 32, "percentage": 52 },
+    { "label": "CT", "count": 18, "percentage": 29 },
+    { "label": "MRI", "count": 12, "percentage": 19 }
+  ],
+  "recentActivity": [
+    { "status": "completed", "actionLabel": "Scan reviewed", "patient": "Ahmed", "time": "2h ago" },
+    { "status": "pending", "actionLabel": "Awaiting review", "patient": "Sara", "time": "4h ago" },
+    { "status": "sent", "actionLabel": "Report sent", "patient": "Khaled", "time": "Yesterday" }
+  ]
 }

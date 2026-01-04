@@ -1,6 +1,11 @@
 {
   "title": "لوحة التحكم الطبية",
   "welcome": "مرحباً بك د.",
+  "ui": {
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "sampleDoctorName": "أحمد محمد"
+  },
   "stats": {
     "patients": "إجمالي المرضى",
     "todayAppointments": "مواعيد اليوم",
@@ -21,15 +26,22 @@
   "todayAppointments": {
     "title": "مواعيد اليوم",
     "viewAll": "عرض الكل",
+    "empty": "لا توجد مواعيد اليوم",
     "types": {
       "xray": "أشعة",
       "consult": "استشارة",
       "followup": "متابعة",
-      "ct": "أشعة مقطعية"
+      "ct": "أشعة مقطعية",
+      "mri": "رنين مغناطيسي",
+      "clinic": "العيادة",
+      "online": "أونلاين"
     },
     "status": {
+      "scheduled": "مجدول",
       "confirmed": "مؤكد",
-      "pending": "معلق"
+      "pending": "معلق",
+      "cancelled": "ملغى",
+      "no_show": "لم يحضر"
     }
   },
   "pendingScans": {
@@ -39,7 +51,26 @@
       "medium": "متوسطة",
       "low": "منخفضة"
     },
-    "viewAll": "عرض كل الفحوصات"
+    "viewAll": "عرض كل الفحوصات",
+    "defaults": [
+      { "id": 1, "patient": "عمر حسن", "typeKey": "xray", "dateKey": "today", "priority": "high" },
+      { "id": 2, "patient": "ليلى محمود", "typeKey": "ct", "dateKey": "today", "priority": "medium" },
+      { "id": 3, "patient": "يوسف علي", "typeKey": "mri", "dateKey": "yesterday", "priority": "low" }
+    ]
   },
-  "recentActivityTitle": "النشاط الأخير"
+  "recentActivityTitle": "النشاط الأخير",
+  "recentActivity": {
+    "defaults": {
+      "reviewXray": "تم فحص صورة أشعة لـ محمد علي",
+      "newAppointment": "موعد جديد مع فاطمة أحمد",
+      "newMessage": "رسالة جديدة من أحمد حسن",
+      "reportReady": "تقرير جاهز لسارة خالد"
+    },
+    "times": {
+      "min10": "منذ 10 دقائق",
+      "min25": "منذ 25 دقيقة",
+      "min45": "منذ 45 دقيقة",
+      "hour1": "منذ ساعة"
+    }
+  }
 }

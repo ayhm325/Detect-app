@@ -1,10 +1,20 @@
 {
+  "ui": {
+    "backHomeTitle": "Back to home",
+    "switchLanguageTitle": "التبديل للعربية",
+    "switchLanguageShort": "AR"
+  },
+  "social": {
+    "facebook": "Facebook",
+    "google": "Google"
+  },
   "auth": {
     "login": {
       "title": "Login",
       "subtitle": "Enter your account details to continue",
       "socialDivider": "Or continue with email",
       "emailLabel": "Email",
+      "emailPlaceholder": "example@email.com",
       "passwordLabel": "Password",
       "passwordShow": "Show",
       "passwordHide": "Hide",
@@ -12,7 +22,11 @@
       "ctaPrimary": "Login",
       "forgot": "Forgot your password?",
       "noAccount": "Don't have an account?",
-      "goSignup": "Sign Up"
+      "goSignup": "Sign Up",
+      "errors": {
+        "unexpected": "Something went wrong. Please try again.",
+        "serverConnection": "Server connection error"
+      }
     }
   }
 }

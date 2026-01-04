@@ -4,6 +4,7 @@
     "totalUsers": "Total Users",
     "doctors": "Doctors",
     "patients": "Patients",
+    "analyses": "Analyses",
     "todayScans": "Today's Scans",
     "totalScansAll": "Total Scans"
   },
@@ -25,15 +26,80 @@
   },
   "pendingApprovalsTitle": "Pending Approvals",
   "pendingApprovals": {
+    "loading": "Loading…",
+    "empty": "No pending requests right now.",
+    "requestTitle": "Doctor registration request",
+    "fields": {
+      "id": "ID:",
+      "name": "Name:",
+      "email": "Email:",
+      "license": "License:",
+      "phone": "Phone:",
+      "created": "Created:"
+    },
     "approve": "Approve",
     "reject": "Reject",
     "viewAll": "View All"
   },
   "recentActivityTitle": "Recent Activity",
+  "recentActivity": {
+    "title": "Recent Activity",
+    "loading": "Loading recent activity…",
+    "empty": "No recent activity."
+  },
   "notifications": "Notifications",
+  "errors": {
+    "fetchStats": "Failed to fetch statistics",
+    "fetchActivities": "Failed to fetch recent activity",
+    "fetchPendingApprovals": "Failed to fetch pending requests"
+  },
   "toast": {
     "notifications": "Notifications coming soon",
     "approved": "Approved successfully",
     "rejected": "Rejected successfully"
+  },
+  "usersChart": {
+    "title": "Users Chart"
+  },
+  "demoActivity": {
+    "title": "Recent Activity",
+    "items": {
+      "addUser": "New user added: Ahmed Ali",
+      "editPatient": "Patient updated: Mona Abdullah",
+      "deleteDoctor": "Doctor deleted: Dr. Sami Youssef"
+    },
+    "times": {
+      "minuteAgo": "a minute ago",
+      "minutesAgo5": "5 minutes ago",
+      "minutesAgo10": "10 minutes ago"
+    }
+  },
+  "demoChats": {
+    "title": "Recent Chats",
+    "items": {
+      "doctor1": "Dr. Mohamed Salem",
+      "patient1": "Mona Abdullah",
+      "lastMsg1": "Results sent.",
+      "doctor2": "Dr. Laila Hassan",
+      "patient2": "Saeed Hassan",
+      "lastMsg2": "Please upload the X-ray image.",
+      "doctor3": "Dr. Sami Youssef",
+      "patient3": "Hala Youssef",
+      "lastMsg3": "Case reviewed."
+    }
+  },
+  "welcomeCards": {
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Manage the system and overall statistics."
+    },
+    "users": {
+      "title": "Users",
+      "description": "Manage user accounts and permissions."
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Configure system and application settings."
+    }
   }
 }

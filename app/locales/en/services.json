@@ -1,6 +1,9 @@
 {
   "title": "Our Services",
   "description": "Discover the range of AI-powered medical services we offer.",
+  "languageToggleAria": "Switch language",
+  "languageToggleLabel": "العربية",
+  "backHome": "Back to Home",
   "list": [
     {
       "name": "X-ray Analysis",

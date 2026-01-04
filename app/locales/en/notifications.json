@@ -1,6 +1,25 @@
 {
   "title": "Notifications",
   "pageTitle": "Notifications",
+  "demo": {
+    "items": [
+      {
+        "title": "Appointment booked",
+        "message": "You have a new appointment with patient Ahmed",
+        "time": "Today 09:00"
+      },
+      {
+        "title": "New result",
+        "message": "Lab result uploaded",
+        "time": "Yesterday 14:20"
+      },
+      {
+        "title": "New message",
+        "message": "Message from patient",
+        "time": "3 days ago"
+      }
+    ]
+  },
   "noNotifications": "No notifications at the moment",
   "markAllAsRead": "Mark all as read",
   "deleteAll": "Delete all notifications",
@@ -54,6 +73,7 @@
   "timeHourAgo": "An hour ago",
   "timeHoursAgo": "{hours} hours ago",
   "timeDaysAgo": "{days} days ago",
-  "timeJustNow": "Just now"
+  "timeJustNow": "Just now",
+  "viewAll": "View all notifications"
 
 }

@@ -1,0 +1,22 @@
+{
+  "imageAlt": "Doctor photo",
+  "actions": {
+    "edit": "Edit info",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "modal": {
+    "title": "Edit doctor information",
+    "fields": {
+      "name": "Name",
+      "specialization": "Specialty",
+      "email": "Email",
+      "phone": "Phone"
+    }
+  }
+}

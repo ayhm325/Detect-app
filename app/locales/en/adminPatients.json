@@ -17,7 +17,8 @@
     "searchPlaceholder": "Search by name, email, phone or ID...",
     "ageUnit": "yrs",
     "table": {
-      "noMatches": "No matches found"
+      "noMatches": "No matches found",
+      "actions": "Actions"
     },
     "errorFetching": "An error occurred while fetching data.",
     "loading": "Loading data...",
@@ -73,8 +74,30 @@
     },
     "actions": {
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "details": "Details"
     }
+    ,
+    "demoItems": [
+      {
+        "id": 1,
+        "name": "Mona Abdullah",
+        "age": 32,
+        "email": "mona@patient.com"
+      },
+      {
+        "id": 2,
+        "name": "Saeed Hassan",
+        "age": 45,
+        "email": "saeed@patient.com"
+      },
+      {
+        "id": 3,
+        "name": "Hala Youssef",
+        "age": 28,
+        "email": "hala@patient.com"
+      }
+    ]
     ,
     "statLabel": "Stat",
     "labels": {
@@ -84,5 +107,17 @@
       "doctor": "Dr."
     },
     "selectDoctorPlaceholder": "-- Select Doctor --"
+  }
+
+  ,"detailsCard": {
+    "title": "Patient Details",
+    "nameLabel": "Name:",
+    "ageLabel": "Age:",
+    "emailLabel": "Email:"
+  }
+
+  ,"history": {
+    "title": "Patient History",
+    "noHistory": "No patient history."
   }
 }

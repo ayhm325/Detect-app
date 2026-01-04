@@ -11,6 +11,7 @@
   "status": "الحالة",
   "actions": {
     "view": "عرض التفاصيل",
+    "confirm": "تأكيد الموعد",
     "cancel": "إلغاء الموعد",
     "reschedule": "إعادة الجدولة",
     "delete": "حذف الموعد"
@@ -28,7 +29,17 @@
     "confirm": "تم تأكيد الموعد.",
     "cancel": "تم إلغاء الموعد.",
     "delete": "تم حذف الموعد.",
-    "fillRequired": "يرجى تعبئة جميع الحقول المطلوبة."
+    "fillRequired": "يرجى تعبئة جميع الحقول المطلوبة.",
+    "error": "حدث خطأ ما. حاول مرة أخرى."
+  },
+  "errors": {
+    "fetchAppointmentsFailed": "فشل في تحميل المواعيد.",
+    "fetchPatientsFailed": "فشل في تحميل المرضى."
+  },
+  "form": {
+    "loadingPatients": "جاري تحميل المرضى...",
+    "selectPatientPlaceholder": "اختر المريض",
+    "typeLabel": "النوع"
   },
   "stats": {
     "total": "إجمالي المواعيد",
@@ -57,6 +68,56 @@
       "submit": "حجز"
     }
   },
+  "calendar": {
+    "title": "تقويم المواعيد",
+    "addAppointment": "إضافة موعد",
+    "days": ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
+    "filters": {
+      "patientPlaceholder": "اسم المريض",
+      "allStatuses": "كل الحالات"
+    },
+    "statusLabels": {
+      "scheduled": "مجدول",
+      "confirmed": "مؤكد",
+      "cancelled": "ملغي"
+    },
+    "card": {
+      "patient": "المريض",
+      "time": "الوقت",
+      "status": "الحالة"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "save": "حفظ",
+      "cancel": "إلغاء"
+    },
+    "modal": {
+      "addTitle": "إضافة موعد جديد",
+      "editTitle": "تعديل موعد"
+    },
+    "form": {
+      "patient": "اسم المريض",
+      "date": "التاريخ",
+      "time": "الوقت",
+      "status": "الحالة"
+    }
+  },
+  "demoAppointments": [
+    {
+      "id": 1,
+      "patient": "محمد علي",
+      "date": "2025-12-02",
+      "time": "09:00",
+      "status": "scheduled"
+    },
+    {
+      "id": 2,
+      "patient": "سارة يوسف",
+      "date": "2025-12-03",
+      "time": "11:30",
+      "status": "confirmed"
+    }
+  ],
   "reasonLabel": "السبب:",
   "emptyState": "لا توجد مواعيد.",
   "items": [

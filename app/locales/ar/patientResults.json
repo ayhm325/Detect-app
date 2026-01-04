@@ -5,6 +5,15 @@
     "pending": "قيد المراجعة",
     "thisMonth": "هذا الشهر"
   },
+    "statusSynonyms": {
+      "ready": ["جاهز"],
+      "pending": ["قيد المراجعة"],
+      "urgent": ["عاجل"]
+    },
+    "prioritySynonyms": {
+      "urgent": ["عاجل"],
+      "normal": ["عادي"]
+    },
   "status": {
     "ready": "جاهز",
     "pending": "قيد المراجعة"
@@ -27,6 +36,10 @@
     "ready": "جاهز",
     "pending": "قيد المراجعة"
   },
+  "priorities": {
+    "urgent": "عاجل",
+    "normal": "عادي"
+  },
   "emptyState": "لا توجد تقارير مطابقة للبحث أو الفلاتر المحددة.",
   "actions": {
     "view": "عرض"
@@ -36,6 +49,13 @@
     "share": "تمت مشاركة التقرير!",
     "print": "تم إرسال التقرير للطباعة."
   },
+  "sections": {
+    "imagesCount": "الصور ({count})"
+  },
+  "modal": {
+    "medicalImages": "الصور الطبية:",
+    "doctorInformation": "معلومات الطبيب:"
+  },
   "reportLabels": {
     "doctor": "الطبيب:",
     "facility": "المرفق:",
@@ -43,8 +63,7 @@
     "aiSummary": "ملخص الذكاء الاصطناعي",
     "findings": "النتائج",
     "notes": "ملاحظات"
-  }
-  ,
+  },
   "report1Title": "أشعة الصدر",
   "report1Type": "أشعة",
   "report1TypeIcon": "🩻",

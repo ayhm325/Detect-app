@@ -2,6 +2,10 @@
   "title": "Doctor Change Requests",
   "description": "Manage requests for doctor changes.",
   "table": {
+    "patient": "Patient",
+    "currentDoctor": "Current Doctor",
+    "requestedDoctor": "Requested Doctor",
+    "reason": "Reason",
     "doctorName": "Doctor Name",
     "requestType": "Request Type",
     "status": "Status",
@@ -13,5 +17,9 @@
   "reject": "Reject",
   "pending": "Pending",
   "approved": "Approved",
-  "rejected": "Rejected"
+  "rejected": "Rejected",
+  "errors": {
+    "approveFailed": "Failed to approve. {message}",
+    "rejectFailed": "Failed to reject. {message}"
+  }
 }

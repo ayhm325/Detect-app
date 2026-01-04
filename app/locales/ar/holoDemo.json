@@ -1,0 +1,26 @@
+{
+  "hero": {
+    "title": "منصة تحليلات الأشعة – تجربة هولوجرام مبهرة",
+    "description": "واجهة حديثة سريعة، صُممت حول ألوان العلامة وتأثيرات زجاجية وهولوجرام.",
+    "primaryCta": "ابدأ الآن",
+    "secondaryCta": "تعرّف أكثر"
+  },
+  "glassCard": {
+    "title": "بطاقة زجاجية",
+    "badge": "جديد",
+    "description": "هذه بطاقة زجاجية مع حدود هولوجرام وظل خفيف.",
+    "primaryCta": "CTA أساسي",
+    "secondaryCta": "ثانوي"
+  },
+  "scanCards": {
+    "xrayShoulder": {
+      "title": "فحص الأشعة - كتف",
+      "description": "جاهز للمراجعة"
+    },
+    "ctChest": {
+      "title": "فحص CT - صدر",
+      "description": "بانتظار الطبيب"
+    }
+  },
+  "accent": "Accent"
+}

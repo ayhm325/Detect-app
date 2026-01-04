@@ -1,0 +1,52 @@
+{
+  "title": "Chat",
+  "subtitle": "View and manage doctor/patient conversations",
+  "searchPlaceholder": "Search by name or email...",
+  "tablePatient": "Patient",
+  "tableDoctor": "Doctor",
+  "tableLast": "Last message",
+  "tableUpdated": "Updated",
+  "tableActions": "Actions",
+  "view": "View",
+  "delete": "Delete",
+  "empty": "No conversations",
+  "loading": "Loading...",
+  "attachment": "Attachment",
+  "deleteTitle": "Confirm deletion",
+  "deleteBody": "Do you want to delete this conversation?",
+  "cancel": "Cancel",
+  "confirmDelete": "Delete",
+  "close": "Close",
+  "toastDeleted": "Conversation deleted",
+  "toastDeleteFailed": "Failed to delete conversation",
+  "sidebarTitle": "Chat List",
+  "placeholder": "—",
+  "errors": {
+    "serverError": "Unable to load conversations right now.",
+    "deleteFailed": "Unable to delete the conversation.",
+    "unknown": "Something went wrong."
+  },
+  "demoChats": [
+    {
+      "id": 1,
+      "doctor": "Dr. Mohammed Salem",
+      "patient": "Mona Abdullah",
+      "lastMsg": "Results have been sent.",
+      "time": "1 minute ago"
+    },
+    {
+      "id": 2,
+      "doctor": "Dr. Layla Hassan",
+      "patient": "Saeed Hassan",
+      "lastMsg": "Please upload the X-ray image.",
+      "time": "5 minutes ago"
+    },
+    {
+      "id": 3,
+      "doctor": "Dr. Sami Youssef",
+      "patient": "Hala Youssef",
+      "lastMsg": "The case has been reviewed.",
+      "time": "10 minutes ago"
+    }
+  ]
+}

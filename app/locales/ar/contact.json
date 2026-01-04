@@ -2,10 +2,14 @@
   "contactPage": {
     "title": "تواصل معنا",
     "description": "نحن هنا لمساعدتك. تواصل معنا لأي استفسارات أو اقتراحات.",
+    "backHome": "عودة إلى الرئيسية",
     "form": {
       "name": "الاسم الكامل",
+      "namePlaceholder": "أدخل اسمك الكامل",
       "email": "البريد الإلكتروني",
+      "emailPlaceholder": "example@example.com",
       "phone": "رقم الهاتف",
+      "phonePlaceholder": "+962 xxxxxxxxx",
       "subject": "الموضوع",
       "subjectPlaceholder": "اختر الموضوع",
       "options": {
@@ -22,9 +26,9 @@
       "emailTitle": "البريد الإلكتروني",
       "emails": ["support@detect-ai.com", "info@detect-ai.com"],
       "phoneTitle": "الهاتف",
-      "phones": ["+966 50 123 4567", "+966 50 765 4321"],
+      "phones": ["+962 7 8123 4567", "+962 7 8765 4321"],
       "addressTitle": "العنوان",
-      "addressLines": ["الرياض، المملكة العربية السعودية", "حي السليمانية، طريق الملك فهد"],
+      "addressLines": ["اربد ، الأردن", "حبراص ، بني كنانة"],
       "hoursTitle": "ساعات العمل",
       "hours": ["الأحد - الخميس: 9:00 ص - 6:00 م", "الجمعة - السبت: مغلق"]
     }

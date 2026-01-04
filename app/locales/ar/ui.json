@@ -1,0 +1,73 @@
+{
+  "aria": {
+    "breadcrumbs": "مسار الصفحة الحالي",
+    "close": "إغلاق",
+    "lungIcon": "أيقونة الرئة",
+    "openMenu": "فتح القائمة",
+    "skipToContent": "تخطي إلى المحتوى الرئيسي"
+  },
+  "sidebar": {
+    "expand": "فتح الشريط",
+    "collapse": "إغلاق الشريط",
+    "show": "إظهار الشريط",
+    "hide": "طي الشريط"
+  },
+  "footer": {
+    "version": "الإصدار: 1.0",
+    "statusOnline": "الحالة: متصل ✓"
+  },
+  "profile": {
+    "avatarAlt": "الصورة الشخصية"
+  },
+  "topbar": {
+    "notifications": "الإشعارات",
+    "settings": "الإعدادات"
+  },
+  "language": {
+    "english": "English",
+    "arabic": "العربية",
+    "switchToEnglish": "التبديل إلى الإنجليزية",
+    "switchToArabic": "التبديل إلى العربية"
+  },
+  "placeholder": "—",
+  "errors": {
+    "unexpected": "حدث خطأ غير متوقع. يرجى إعادة تحميل الصفحة."
+  },
+  "actions": {
+    "confirm": "تأكيد",
+    "cancel": "إلغاء"
+  },
+  "status": {
+    "ready": "جاهز",
+    "processing": "قيد المعالجة",
+    "reviewed": "تمت المراجعة",
+    "pending": "بانتظار",
+    "confirmed": "مؤكد",
+    "online": "متصل",
+    "offline": "غير متصل",
+    "error": "خطأ"
+  },
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي",
+    "page": "صفحة",
+    "of": "من"
+  },
+  "search": {
+    "placeholder": "بحث..."
+  },
+  "filters": {
+    "label": "الفلاتر",
+    "advancedTitle": "الفلاتر المتقدمة",
+    "all": "الكل",
+    "apply": "تطبيق",
+    "reset": "إعادة تعيين"
+  },
+  "export": {
+    "noData": "لا توجد بيانات للتصدير",
+    "download": "تنزيل"
+  },
+  "punctuation": {
+    "commaSpace": "، "
+  }
+}

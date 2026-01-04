@@ -37,7 +37,14 @@
     "doctorUpdated": "تم تحديث بيانات الطبيب",
     "doctorDeleted": "تم حذف الطبيب",
     "deleteFailed": "فشل حذف الطبيب",
+    "addFailed": "فشل إضافة الطبيب",
+    "updateFailed": "فشل التحديث",
+    "activationFailed": "فشل تفعيل الطبيب",
+    "rejectFailed": "فشل رفض الطبيب",
     "exportStarted": "جاري تصدير البيانات..."
+  },
+  "errors": {
+    "missingDoctorId": "لا يوجد مُعرّف للطبيب"
   },
   "actions": {
     "viewDetails": "عرض التفاصيل",

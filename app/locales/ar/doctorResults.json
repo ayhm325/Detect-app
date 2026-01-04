@@ -48,7 +48,44 @@
     "view": "عرض التفاصيل",
     "download": "تحميل التقرير",
     "print": "طباعة",
+    "share": "مشاركة",
     "close": "إغلاق"
+  },
+  "table": {
+    "scanNumber": "رقم الفحص",
+    "date": "التاريخ",
+    "scanType": "النوع",
+    "aiSummary": "ملخص الذكاء الاصطناعي",
+    "comparison": "مقارنة",
+    "actions": "إجراءات",
+    "yes": "نعم",
+    "no": "لا",
+    "buttons": {
+      "view": "عرض",
+      "compare": "مقارنة",
+      "annotate": "تعليق توضيحي"
+    }
+  },
+  "scanViewer": {
+    "close": "إغلاق",
+    "title": "عارض الفحص: {type}",
+    "zoomIn": "تكبير",
+    "zoomOut": "تصغير",
+    "imageAlt": "صورة الفحص",
+    "thumbnailAlt": "صورة {index}"
+  },
+  "scanAnnotations": {
+    "title": "التعليقات التوضيحية"
+  },
+  "mock": {
+    "scan101": {
+      "aiSummary": "لا توجد علامات غير طبيعية واضحة.",
+      "annotation1": { "text": "منطقة مشبوهة", "position": "يمين أعلى" },
+      "annotation2": { "text": "تكلسات بسيطة", "position": "يسار أسفل" }
+    },
+    "scan102": {
+      "aiSummary": "يوجد تضخم بسيط في الرئة اليمنى."
+    }
   },
   "emptyState": "لا توجد نتائج.",
   "loading": "جاري تحميل النتائج...",
@@ -56,7 +93,19 @@
   "viewer": {
     "aiAnalysis": "تحليل الذكاء الاصطناعي",
     "findings": "النتائج",
+    "fullscreen": "ملء الشاشة",
+    "exitFullscreen": "تصغير",
     "emptyState": "لا توجد نتائج لهذا الفحص."
+  },
+  "scanTypes": {
+    "xray": "أشعة سينية",
+    "ct": "تصوير مقطعي",
+    "mri": "رنين مغناطيسي",
+    "ultrasound": "موجات فوق صوتية"
+  },
+  "defaults": {
+    "bodyPart": "صدر",
+    "noAiSummary": "لا يوجد ملخص من الذكاء الاصطناعي"
   },
   "statusLabel": "الحالة",
   "toast": {
@@ -64,6 +113,8 @@
     "downloadStart": "جاري بدء التحميل...",
     "printStart": "جاري تجهيز الطباعة...",
     "shareCopied": "تم نسخ الرابط!"
+  },
+  "errors": {
+    "fetchResultsFailed": "فشل في جلب النتائج"
   }
-}
 }

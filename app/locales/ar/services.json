@@ -1,6 +1,9 @@
 {
   "title": "خدماتنا",
   "description": "تعرف على جميع الخدمات الطبية والتقنية التي نقدمها من خلال منصتنا الذكية.",
+  "languageToggleAria": "تبديل اللغة",
+  "languageToggleLabel": "English",
+  "backHome": "العودة إلى الرئيسية",
   "list": [
     {
       "name": "تحليل صور الأشعة",

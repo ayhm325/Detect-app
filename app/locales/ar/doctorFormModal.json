@@ -1,10 +1,27 @@
 {
+  "add": "إضافة طبيب",
+  "edit": "تعديل طبيب",
+  "name": "الاسم",
+  "email": "البريد الإلكتروني",
+  "license": "رقم الترخيص",
+  "phone": "الهاتف",
+  "save": "حفظ",
+  "cancel": "إلغاء",
+  "specialties": {
+    "radiology": "أشعة",
+    "pulmonology": "صدرية",
+    "orthopedics": "عظام"
+  },
+  "statusLabels": {
+    "pending": "قيد الانتظار",
+    "verified": "تم التحقق",
+    "rejected": "مرفوض"
+  },
   "title": "إضافة/تعديل طبيب",
   "nameLabel": "الاسم",
   "specialtyLabel": "التخصص",
   "emailLabel": "البريد الإلكتروني",
   "phoneLabel": "الهاتف",
   "statusLabel": "الحالة",
-  "submit": "حفظ",
-  "cancel": "إلغاء"
+  "submit": "حفظ"
 }

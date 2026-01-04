@@ -1,6 +1,10 @@
 {
   "title": "Blog",
   "description": "Articles and tips about AI and digital health.",
+  "languageToggleLabel": "Arabic",
+  "languageToggleAria": "Switch to Arabic",
+  "comingSoon": "Coming soon",
+  "backHome": "Back to Home",
   "posts": [
     {
       "title": "The Importance of AI in Modern Medicine",

@@ -5,6 +5,15 @@
     "pending": "Pending",
     "thisMonth": "This Month"
   },
+    "statusSynonyms": {
+      "ready": ["ready"],
+      "pending": ["pending", "under review", "in review"],
+      "urgent": ["urgent"]
+    },
+    "prioritySynonyms": {
+      "urgent": ["urgent"],
+      "normal": ["normal"]
+    },
   "status": {
     "ready": "ready",
     "pending": "pending"
@@ -27,6 +36,10 @@
     "ready": "Ready",
     "pending": "Pending"
   },
+  "priorities": {
+    "urgent": "Urgent",
+    "normal": "Normal"
+  },
   "emptyState": "No reports match your search or filters.",
   "actions": {
     "view": "View"
@@ -36,6 +49,13 @@
     "share": "Report shared!",
     "print": "Report sent to printer."
   },
+  "sections": {
+    "imagesCount": "Images ({count})"
+  },
+  "modal": {
+    "medicalImages": "Medical Images:",
+    "doctorInformation": "Doctor Information:"
+  },
   "reportLabels": {
     "doctor": "Doctor:",
     "facility": "Facility:",
@@ -43,8 +63,7 @@
     "aiSummary": "AI Summary",
     "findings": "Findings",
     "notes": "Notes"
-  }
-  ,
+  },
   "report1Title": "Chest X-Ray",
   "report1Type": "X-Ray",
   "report1TypeIcon": "🩻",

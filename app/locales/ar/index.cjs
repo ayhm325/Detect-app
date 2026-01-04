@@ -28,6 +28,8 @@ const patientResults = require('./patientResults.json');
 const patientSidebar = require('./patientSidebar.json');
 const adminSettings = require('./adminSettings.json');
 const doctorPatients = require('./doctorPatients.json');
+const doctorSidebar = require('./doctorSidebar.json');
+const doctorDashboard = require('./doctorDashboard.json');
 const profile = require('./profile.json');
 const patientChat = require('./patientChat.json');
 const doctorResults = require("./doctorResults.json");
@@ -35,11 +37,21 @@ const doctorChat = require("./doctorChat.json");
 const doctorAppointments = require("./doctorAppointments.json");
 const doctorDetails = require("./doctorDetails.json");
 const adminDashboard = require("./adminDashboard.json");
+const adminDoctors = require("./adminDoctors.json");
+const adminChat = require("./adminChat.json");
+const rootError = require("./rootError.json");
 const doctorSettings = require("./doctorSettings.json");
+const doctorAnalytics = require("./doctorAnalytics.json");
+const doctorCommon = require("./doctorCommon.json");
 const notifications = require("./notifications.json");
 const logout = require("./logout.json");
 const uploadXray = require('./uploadXray.json');
 const adminPatients = require('./adminPatients.json');
+const doctorTopbar = require('./doctorTopbar.json');
+const forgotpasswordform = require('./forgotpasswordform.json');
+const holoDemo = require('./holoDemo.json');
+const doctorProfile = require('./doctorProfile.json');
+const doctorFormModal = require('./doctorFormModal.json');
 
 module.exports = {
   navbar,
@@ -69,6 +81,8 @@ module.exports = {
   doctorResults,
   doctorChat,
   doctorAppointments,
+  doctorSidebar,
+  doctorDashboard,
   doctorsTable,
   DoctorChangeRequests,
   doctorChangeRequests: DoctorChangeRequests,
@@ -78,10 +92,20 @@ module.exports = {
   navigation,
   doctorPatients,
   doctorSettings,
+  doctorAnalytics,
+  doctorCommon,
   doctorDetails,
   adminDashboard,
+  adminDoctors,
+  adminChat,
+  rootError,
   notifications,
   logout,
   uploadXray,
-  adminPatients
+  adminPatients,
+  doctorTopbar,
+  forgotpasswordform,
+  holoDemo,
+  doctorProfile,
+  doctorFormModal
 };

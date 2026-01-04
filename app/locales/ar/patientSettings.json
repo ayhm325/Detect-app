@@ -1,0 +1,21 @@
+{
+  "title": "إعدادات الحساب",
+  "fields": {
+    "newPassword": "كلمة المرور الجديدة",
+    "email": "البريد الإلكتروني",
+    "doctorVisibility": "خصوصية الظهور للطبيب",
+    "languageAppearance": "اللغة والمظهر"
+  },
+  "visibility": {
+    "full": "مرئي بالكامل",
+    "partial": "مخفى بعض المعلومات",
+    "private": "خاص"
+  },
+  "language": {
+    "arabic": "العربية",
+    "english": "English"
+  },
+  "actions": {
+    "save": "حفظ"
+  }
+}

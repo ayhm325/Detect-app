@@ -14,5 +14,11 @@
       { "text": "24/7 Support", "icon": "♥" },
       { "text": "ISO Certified", "icon": "◆" }
     ]
+  },
+  "aria": {
+    "previous": "Previous testimonial",
+    "next": "Next testimonial",
+    "goTo": "Go to testimonial {index}",
+    "imageAltFallback": "Testimonial"
   }
 }

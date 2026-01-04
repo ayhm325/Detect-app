@@ -1,6 +1,30 @@
 {
   "pageTitle": "Upload X-ray",
   "fileTypes": "Allowed file types: JPG, PNG, DCM",
+  "patientNameLabel": "Patient",
+  "patientPlaceholder": "Patient name or file number",
+  "imageTypeLabel": "Image Type",
+  "dateLabel": "Date",
+  "statusLabel": "Status",
+  "dragDrop": "Drag and drop files here",
+  "orText": "or",
+  "selectFiles": "select files",
+  "selectedFilesLabel": "Selected files",
+  "recentUploadsTitle": "Recent uploads",
+  "types": {
+    "xray": "X-Ray",
+    "ct": "CT Scan",
+    "mri": "MRI",
+    "ultrasound": "Ultrasound"
+  },
+  "statuses": {
+    "completed": "Completed",
+    "reviewing": "Under Review"
+  },
+  "toast": {
+    "selectPatient": "Please select a patient and at least one file",
+    "uploaded": "Upload completed successfully"
+  },
   "ready": "Ready",
   "pending_review": "Pending Review",
   "uploadCard_title": "Upload File",
@@ -24,5 +48,31 @@
   "uploadSuccess": "Upload successful",
   "fileSelected": "File selected",
   "size": "Size",
-  "noFiles": "No files found"
+  "noFiles": "No files found",
+  "demoRecentUploads": [
+    {
+      "id": 1,
+      "patientName": "Mohammed Ali",
+      "type": "xray",
+      "date": "2025-12-01",
+      "status": "completed",
+      "notes": "Clear and high quality image"
+    },
+    {
+      "id": 2,
+      "patientName": "Sarah Youssef",
+      "type": "ct",
+      "date": "2025-11-30",
+      "status": "reviewing",
+      "notes": "Awaiting analysis"
+    },
+    {
+      "id": 3,
+      "patientName": "Ahmed Mahmoud",
+      "type": "mri",
+      "date": "2025-11-28",
+      "status": "completed",
+      "notes": "No issues found"
+    }
+  ]
 }

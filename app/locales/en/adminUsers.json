@@ -20,12 +20,18 @@
     "banned": "Banned"
   },
   "table": {
+    "index": "#",
+    "name": "Name",
+    "email": "Email",
     "user": "User",
     "role": "Role",
     "status": "Status",
     "joinDate": "Join Date",
     "lastLogin": "Last Login",
     "actions": "Actions"
+  },
+  "buttons": {
+    "addNewUser": "Add new user"
   },
   "toast": {
     "fillFields": "Please fill all fields",
@@ -103,9 +109,9 @@
     "save": "Save",
     "add": "Add",
     "saveChanges": "Save Changes"
-  }
-
-  ,"details": {
+  },
+  "details": {
+    "name": "Name:",
     "email": "Email",
     "phone": "Phone Number",
     "joinDate": "Join Date",
@@ -115,6 +121,7 @@
     "license": "License Number",
     "patientInfo": "Patient Information",
     "patientId": "Patient ID",
+    "role": "Role:",
     "permissions": "Permissions"
   }
 }

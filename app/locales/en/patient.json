@@ -15,8 +15,18 @@
     "dark": "Dark mode"
   },
   "localeToggle": {
-    "ar": "العربية",
+    "ar": "Arabic",
     "en": "English"
+  },
+  "layout": {
+    "sidebar": {
+      "expandTitle": "Expand sidebar",
+      "collapseTitle": "Collapse sidebar"
+    },
+    "localeSwitch": {
+      "title": "Switch language",
+      "label": "Arabic"
+    }
   },
   "version": "Version: 1.0",
   "status": "Status: Online ✓",
@@ -48,7 +58,29 @@
       "activity": "Recent activity"
     }
   },
+  "healthSummary": {
+    "title": "Health summary",
+    "labels": {
+      "weight": "Weight",
+      "height": "Height",
+      "bmi": "BMI",
+      "allergies": "Allergies",
+      "chronic": "Chronic conditions"
+    },
+    "units": {
+      "kg": "kg",
+      "cm": "cm"
+    },
+    "noData": "No data"
+  },
   "profile": {
+    "avatarAlt": "Patient avatar",
+    "healthStatus": {
+      "stable": "Stable",
+      "attention": "Needs follow-up",
+      "critical": "Critical",
+      "unknown": "Unknown"
+    },
     "tab": {
       "personalInfo": "Personal",
       "health": "Health",
@@ -78,7 +110,15 @@
       "emergencyRelation": "Relation",
       "patientNumber": "Patient No.",
       "activeAccount": "Active Account",
-      "memberSince": "Member since"
+      "memberSince": "Member since",
+      "age": "Age",
+      "genderLabel": "Gender",
+      "healthStatus": "Overall health status",
+      "gender": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other"
+      }
     },
     "toast": {
       "saveError": "Failed to save profile"
@@ -151,15 +191,152 @@
       "time": "Time",
       "type": "Type",
       "reason": "Reason",
+      "location": "Location",
       "phone": "Phone",
       "cancel": "Cancel",
       "submit": "Send",
       "cancelReasonTitle": "Reason for cancellation",
-      "cancelReasonLabel": "Please enter the reason for cancellation"
+      "cancelReasonLabel": "Please enter the reason for cancellation",
+      "cancelReasonRequired": "Please enter the reason for cancellation"
     },
     "modalTitle": "Need a new appointment?",
     "modalBody": "Chat with a doctor or request another time slot.",
     "chatButton": "Chat with doctor",
     "closeButton": "Close"
+  },
+  "analysis": {
+    "title": "AI Medical Image Analysis",
+    "subtitle": "Upload an image to get AI-powered diagnostic insights",
+    "badge": "Quick AI",
+    "controls": {
+      "includeHeatmap": "Include heatmap",
+      "chooseImage": "Choose image",
+      "remove": "Remove"
+    },
+    "preview": {
+      "alt": "Selected image preview",
+      "noneSelected": "No image selected",
+      "noFile": "No file"
+    },
+    "actions": {
+      "analyze": "Analyze image",
+      "analyzing": "Analyzing…",
+      "cancelUpload": "Cancel upload"
+    },
+    "errors": {
+      "uploadCanceled": "Upload canceled",
+      "networkUpload": "Network error during upload"
+    },
+    "progress": {
+      "etaLabel": "ETA"
+    },
+    "results": {
+      "heatmap": "Heatmap",
+      "diagnosis": "Diagnosis",
+      "needsReview": "Needs radiologist review",
+      "modelLabel": "Model:",
+      "inferenceTimeLabel": "Inference time:",
+      "unknown": "unknown",
+      "savedToHistory": "Saved to history",
+      "confidence": "Confidence",
+      "confidenceTitle": "AI confidence score",
+      "explanationLabel": "Explanation",
+      "noHeatmap": "No heatmap available"
+    }
+  },
+  "analysisHistory": {
+    "title": "Analysis History",
+    "subtitle": "Previous AI analyses on your account",
+    "refresh": "Refresh",
+    "emptyTitle": "No analyses yet",
+    "emptySubtitle": "Run an analysis from the main page to see results here.",
+    "imageAltFallback": "analysis image",
+    "confidence": "Confidence",
+    "view": "View",
+    "confirmDelete": "Delete this analysis?",
+    "delete": "Delete",
+    "deleting": "Deleting…"
+  },
+  "components": {
+    "myDoctor": {
+      "title": "My doctor",
+      "labels": {
+        "email": "Email:",
+        "phone": "Phone:"
+      },
+      "actions": {
+        "requestConsultation": "Request consultation"
+      }
+    },
+    "supportCenter": {
+      "title": "Support center",
+      "form": {
+        "title": "Report an issue",
+        "subjectPlaceholder": "Subject",
+        "descriptionPlaceholder": "Description",
+        "submit": "Send"
+      },
+      "alerts": {
+        "submitted": "Issue submitted (UI only)"
+      },
+      "faq": {
+        "title": "FAQ",
+        "items": {
+          "uploadXray": "How do I upload an X-ray image?",
+          "requestReview": "How do I request a review from the doctor?",
+          "editAccount": "How do I edit my account details?"
+        }
+      },
+      "requestsStatus": "Request status: in progress (UI only)"
+    },
+    "chat": {
+      "title": "Chat with doctor",
+      "role": {
+        "patient": "Patient",
+        "doctor": "Doctor"
+      },
+      "typing": "Doctor is typing…",
+      "placeholder": "Type your message here…",
+      "send": "Send",
+      "mockReply": "Message received. We'll review soon."
+    },
+    "medicalRecords": {
+      "title": "Reports and radiology images",
+      "columns": {
+        "file": "File",
+        "type": "Type",
+        "examDate": "Exam date",
+        "reportStatus": "Report status",
+        "action": "Action"
+      },
+      "empty": "No records",
+      "viewDetails": "View details",
+      "status": {
+        "ready": "Ready",
+        "processing": "Processing"
+      },
+      "type": {
+        "xray": "X-ray",
+        "mri": "MRI",
+        "ct": "CT"
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "No notifications"
+    },
+    "upcomingAppointments": {
+      "title": "Upcoming appointments",
+      "empty": "No upcoming appointments",
+      "doctorLabel": "Doctor",
+      "dateLabel": "Appointment"
+    },
+    "previousAppointments": {
+      "title": "Previous visits",
+      "empty": "No visit history",
+      "dateLabel": "Date",
+      "doctorPrefix": "Doctor:",
+      "viewDetails": "View details"
+    }
   }
 }

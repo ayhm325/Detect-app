@@ -20,14 +20,28 @@
     "language": "اللغة",
     "notifications": {
       "title": "إعدادات الإشعارات",
+      "communicationMethodsTitle": "طرق التواصل",
       "email": "إشعارات البريد الإلكتروني",
+      "emailDesc": "استلام الإشعارات عبر بريد إلكتروني",
       "sms": "إشعارات الرسائل النصية القصيرة",
+      "smsDesc": "استلام الإشعارات عبر SMS",
       "push": "إشعارات التطبيق",
+      "pushDesc": "استلام الإشعارات داخل التطبيق",
+      "typesTitle": "أنواع الإشعارات",
       "newAppointment": "مواعيد جديدة",
       "appointmentReminder": "تذكير بالمواعيد",
       "patientMessages": "رسائل المرضى",
       "systemUpdates": "تحديثات النظام",
-      "saveButton": "حفظ التفضيلات"
+      "typeDesc": {
+        "newAppointment": "عند حجز موعد جديد",
+        "appointmentReminder": "قبل الموعد بساعة",
+        "patientMessages": "عند استلام رسالة جديدة",
+        "systemUpdates": "إشعارات حول التحديثات"
+      },
+      "saveButton": "حفظ التفضيلات",
+      "toast": {
+        "saved": "تم حفظ تفضيلات الإشعارات"
+      }
     },
     "enable_notifications": "تفعيل الإشعارات",
     "disable_notifications": "تعطيل الإشعارات",
@@ -45,16 +59,42 @@
       "phone": "رقم الهاتف",
       "license": "رقم الترخيص الطبي",
       "bio": "نبذة عن الطبيب",
-      "save": "حفظ"
+      "save": "حفظ",
+      "toast": {
+        "saved": "تم حفظ الملف الشخصي"
+      }
     },
     "availability": {
       "header": "مواعيد العمل",
       "workDays": "أيام العمل",
+      "exampleDays": "مثال: الأحد - الخميس",
+      "days": ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
       "startTime": "وقت البدء",
       "endTime": "وقت الانتهاء",
       "slotDuration": "مدة الموعد (بالدقائق)",
+      "minutes": "دقيقة",
       "maxPatients": "الحد الأقصى للمرضى في اليوم",
-      "saveButton": "حفظ المواعيد"
+      "saveButton": "حفظ المواعيد",
+      "toast": {
+        "saved": "تم حفظ مواعيد العمل"
+      }
+    },
+    "demo": {
+      "availabilityDays": "الأحد - الخميس",
+      "openModal": "فتح نافذة الإعدادات",
+      "sensitiveAction": "إجراء حساس (مثال حذف الحساب)",
+      "confirmSensitiveActionMessage": "هل أنت متأكد من تنفيذ هذا الإجراء الحساس؟"
+    },
+    "passwordChange": {
+      "submit": "تغيير"
+    },
+    "security": {
+      "toast": {
+        "fillFields": "يرجى ملء جميع حقول كلمة السر",
+        "mismatch": "كلمتا المرور غير متطابقتين",
+        "changedSuccess": "تم تغيير كلمة المرور بنجاح",
+        "changeFailed": "فشل تغيير كلمة المرور"
+      }
     },
     "security_min_length": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل"
   }

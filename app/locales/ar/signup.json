@@ -1,4 +1,13 @@
 {
+    "ui": {
+      "backHomeTitle": "العودة للرئيسية",
+      "switchLanguageTitle": "Switch to English",
+      "switchLanguageShort": "EN"
+    },
+    "social": {
+      "facebook": "فيسبوك",
+      "google": "جوجل"
+    },
     "homeAria": "العودة للرئيسية",
     "login": {
       "title": "تسجيل الدخول",
@@ -32,8 +41,12 @@
       "errors": {
         "mismatch": "كلمتا المرور غير متطابقتين",
         "required": "يرجى تعبئة جميع الحقول المطلوبة",
+        "loadDoctorsFailed": "تعذر تحميل الأطباء",
+        "doctorLicensePhoneRequired": "رقم الترخيص ورقم الجوال للطبيب مطلوبة",
         "doctorMissing": "يرجى اختيار الطبيب المعالج",
-        "weakPassword": "كلمة المرور لا تستوفي جميع المتطلبات"
+        "weakPassword": "كلمة المرور لا تستوفي جميع المتطلبات",
+        "registrationFailed": "حدث خطأ أثناء التسجيل",
+        "serverConnection": "حدث خطأ في الاتصال بالخادم"
       },
       "title": "إنشاء حساب جديد",
       "subtitle": "انضم لمنصتنا الطبية المتقدمة",
@@ -42,9 +55,16 @@
       "doctorRole": "طبيب",
       "patientRole": "مريض",
       "nameLabel": "الاسم الكامل",
+      "namePlaceholder": "أحمد محمد",
       "emailLabel": "البريد الإلكتروني",
+      "emailPlaceholder": "example@email.com",
       "doctorPickerLabel": "الطبيب المعالج",
       "doctorPlaceholder": "اختر الطبيب المعالج",
+      "doctorsLoading": "جاري تحميل الأطباء...",
+      "licenseNumberLabel": "رقم الترخيص الطبي",
+      "licenseNumberPlaceholder": "مثال: 123456",
+      "phoneLabel": "رقم الجوال",
+      "phonePlaceholder": "05xxxxxxxx",
       "passwordLabel": "كلمة المرور",
       "confirmPasswordLabel": "تأكيد كلمة المرور",
       "passwordShow": "إظهار",

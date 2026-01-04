@@ -1,8 +1,15 @@
 {
   "brand": "PneumoDetect",
+  "brandShort": "DX",
   "navTagline": "Advanced Medical AI",
   "langSwitch": "EN",
   "langSwitchAria": "تبديل اللغة",
+  "menuToggleAria": "تبديل القائمة",
+  "logoIconAria": "أيقونة الرئة",
+  "theme": {
+    "switchToLightAria": "التبديل إلى الوضع الفاتح",
+    "switchToDarkAria": "التبديل إلى الوضع الداكن"
+  },
   "home": "الرئيسية",
   "about": "من نحن",
   "services": "الخدمات"

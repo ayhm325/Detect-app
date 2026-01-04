@@ -11,6 +11,7 @@
   "status": "Status",
   "actions": {
     "view": "View Details",
+    "confirm": "Confirm Appointment",
     "cancel": "Cancel Appointment",
     "reschedule": "Reschedule",
     "delete": "Delete Appointment"
@@ -27,7 +28,18 @@
     "created": "Appointment created",
     "confirm": "Appointment confirmed.",
     "cancel": "Appointment cancelled.",
-    "delete": "Appointment deleted."
+    "delete": "Appointment deleted.",
+    "fillRequired": "Please fill all required fields.",
+    "error": "Something went wrong. Please try again."
+  },
+  "errors": {
+    "fetchAppointmentsFailed": "Failed to load appointments.",
+    "fetchPatientsFailed": "Failed to load patients."
+  },
+  "form": {
+    "loadingPatients": "Loading patients...",
+    "selectPatientPlaceholder": "Select patient",
+    "typeLabel": "Type"
   },
   "stats": {
     "total": "Total Appointments",
@@ -56,6 +68,56 @@
       "submit": "Book"
     }
   },
+  "calendar": {
+    "title": "Appointments calendar",
+    "addAppointment": "Add appointment",
+    "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    "filters": {
+      "patientPlaceholder": "Patient name",
+      "allStatuses": "All statuses"
+    },
+    "statusLabels": {
+      "scheduled": "Scheduled",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled"
+    },
+    "card": {
+      "patient": "Patient",
+      "time": "Time",
+      "status": "Status"
+    },
+    "actions": {
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "modal": {
+      "addTitle": "Add new appointment",
+      "editTitle": "Edit appointment"
+    },
+    "form": {
+      "patient": "Patient name",
+      "date": "Date",
+      "time": "Time",
+      "status": "Status"
+    }
+  },
+  "demoAppointments": [
+    {
+      "id": 1,
+      "patient": "Mohammed Ali",
+      "date": "2025-12-02",
+      "time": "09:00",
+      "status": "scheduled"
+    },
+    {
+      "id": 2,
+      "patient": "Sara Youssef",
+      "date": "2025-12-03",
+      "time": "11:30",
+      "status": "confirmed"
+    }
+  ],
   "reasonLabel": "Reason:",
   "emptyState": "No appointments found.",
   "items": [

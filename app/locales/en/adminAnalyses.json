@@ -1,0 +1,37 @@
+{
+  "buttons": {
+    "upload": "Upload Analysis Image"
+  },
+  "summary": {
+    "total": "Total analyses",
+    "success": "Successful analyses",
+    "failed": "Failed analyses"
+  },
+  "charts": {
+    "monthly": "Monthly stats",
+    "successRate": "Success rate",
+    "caseDistribution": "Case distribution"
+  },
+  "chart": {
+    "title": "Analyses Chart"
+  },
+  "table": {
+    "index": "#",
+    "patient": "Patient Name",
+    "date": "Analysis Date",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "actions": {
+    "view": "View",
+    "details": "Details",
+    "compare": "Compare"
+  },
+  "statuses": {
+    "completed": "Completed",
+    "pending": "Pending",
+    "reviewing": "Reviewing",
+    "failed": "Failed",
+    "success": "Success"
+  }
+}

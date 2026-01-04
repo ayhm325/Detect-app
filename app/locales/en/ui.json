@@ -1,0 +1,73 @@
+{
+  "aria": {
+    "breadcrumbs": "Current page breadcrumb",
+    "close": "Close",
+    "lungIcon": "Lung icon",
+    "openMenu": "Open menu",
+    "skipToContent": "Skip to main content"
+  },
+  "sidebar": {
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar",
+    "show": "Show sidebar",
+    "hide": "Hide sidebar"
+  },
+  "footer": {
+    "version": "Version: 1.0",
+    "statusOnline": "Status: Online ✓"
+  },
+  "profile": {
+    "avatarAlt": "Avatar"
+  },
+  "topbar": {
+    "notifications": "Notifications",
+    "settings": "Settings"
+  },
+  "language": {
+    "english": "English",
+    "arabic": "Arabic",
+    "switchToEnglish": "Switch to English",
+    "switchToArabic": "Switch to Arabic"
+  },
+  "placeholder": "—",
+  "errors": {
+    "unexpected": "An unexpected error occurred. Please reload the page."
+  },
+  "actions": {
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "status": {
+    "ready": "Ready",
+    "processing": "Processing",
+    "reviewed": "Reviewed",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "online": "Online",
+    "offline": "Offline",
+    "error": "Error"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of"
+  },
+  "search": {
+    "placeholder": "Search..."
+  },
+  "filters": {
+    "label": "Filters",
+    "advancedTitle": "Advanced filters",
+    "all": "All",
+    "apply": "Apply",
+    "reset": "Reset"
+  },
+  "export": {
+    "noData": "No data to export",
+    "download": "Download"
+  },
+  "punctuation": {
+    "commaSpace": ", "
+  }
+}

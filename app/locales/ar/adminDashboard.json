@@ -4,6 +4,7 @@
     "totalUsers": "إجمالي المستخدمين",
     "doctors": "عدد الأطباء",
     "patients": "عدد المرضى",
+    "analyses": "عدد التحليلات",
     "todayScans": "فحوصات اليوم",
     "totalScansAll": "إجمالي الفحوصات"
   },
@@ -25,15 +26,80 @@
   },
   "pendingApprovalsTitle": "طلبات الموافقة المعلقة",
   "pendingApprovals": {
+    "loading": "جارٍ التحميل…",
+    "empty": "لا توجد طلبات معلقة حالياً",
+    "requestTitle": "طلب تسجيل طبيب",
+    "fields": {
+      "id": "ID:",
+      "name": "الاسم:",
+      "email": "البريد الإلكتروني:",
+      "license": "رقم الترخيص:",
+      "phone": "رقم الجوال:",
+      "created": "تاريخ الإنشاء:"
+    },
     "approve": "قبول",
     "reject": "رفض",
     "viewAll": "عرض الكل"
   },
   "recentActivityTitle": "النشاطات الأخيرة",
+  "recentActivity": {
+    "title": "النشاطات الأخيرة",
+    "loading": "جارٍ تحميل النشاطات…",
+    "empty": "لا توجد نشاطات حديثة"
+  },
   "notifications": "الإشعارات",
+  "errors": {
+    "fetchStats": "خطأ في جلب الإحصائيات",
+    "fetchActivities": "خطأ في جلب النشاطات",
+    "fetchPendingApprovals": "خطأ في جلب الطلبات المعلقة"
+  },
   "toast": {
     "notifications": "الإشعارات قادمة قريباً",
     "approved": "تمت الموافقة بنجاح",
     "rejected": "تم الرفض بنجاح"
+  },
+  "usersChart": {
+    "title": "رسم بياني للمستخدمين"
+  },
+  "demoActivity": {
+    "title": "آخر الأنشطة",
+    "items": {
+      "addUser": "تم إضافة مستخدم جديد: أحمد علي",
+      "editPatient": "تم تعديل بيانات مريض: منى عبد الله",
+      "deleteDoctor": "تم حذف طبيب: د. سامي يوسف"
+    },
+    "times": {
+      "minuteAgo": "قبل دقيقة",
+      "minutesAgo5": "قبل 5 دقائق",
+      "minutesAgo10": "قبل 10 دقائق"
+    }
+  },
+  "demoChats": {
+    "title": "الدردشات الأخيرة",
+    "items": {
+      "doctor1": "د. محمد سالم",
+      "patient1": "منى عبد الله",
+      "lastMsg1": "تم إرسال النتائج.",
+      "doctor2": "د. ليلى حسن",
+      "patient2": "سعيد حسن",
+      "lastMsg2": "يرجى رفع صورة الأشعة.",
+      "doctor3": "د. سامي يوسف",
+      "patient3": "هالة يوسف",
+      "lastMsg3": "تمت مراجعة الحالة."
+    }
+  },
+  "welcomeCards": {
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "description": "إدارة النظام والإحصائيات العامة."
+    },
+    "users": {
+      "title": "المستخدمون",
+      "description": "إدارة حسابات المستخدمين والصلاحيات."
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "description": "ضبط إعدادات النظام والتطبيق."
+    }
   }
 }

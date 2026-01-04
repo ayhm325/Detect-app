@@ -17,7 +17,8 @@
     "searchPlaceholder": "ابحث بالاسم أو البريد أو الهاتف أو رقم الهوية...",
     "ageUnit": "سنة",
     "table": {
-      "noMatches": "لم يتم العثور على نتائج"
+      "noMatches": "لم يتم العثور على نتائج",
+      "actions": "الإجراءات"
     },
     "errorFetching": "حدث خطأ أثناء جلب البيانات.",
     "loading": "جاري تحميل البيانات...",
@@ -73,8 +74,30 @@
     },
     "actions": {
       "edit": "تعديل",
-      "delete": "حذف"
+      "delete": "حذف",
+      "details": "تفاصيل"
     }
+    ,
+    "demoItems": [
+      {
+        "id": 1,
+        "name": "منى عبد الله",
+        "age": 32,
+        "email": "mona@patient.com"
+      },
+      {
+        "id": 2,
+        "name": "سعيد حسن",
+        "age": 45,
+        "email": "saeed@patient.com"
+      },
+      {
+        "id": 3,
+        "name": "هالة يوسف",
+        "age": 28,
+        "email": "hala@patient.com"
+      }
+    ]
     ,
     "statLabel": "الإحصائية",
     "labels": {
@@ -84,5 +107,17 @@
       "doctor": "طبيب"
     },
     "selectDoctorPlaceholder": "اختر الطبيب"
+  }
+
+  ,"detailsCard": {
+    "title": "تفاصيل المريض",
+    "nameLabel": "الاسم:",
+    "ageLabel": "العمر:",
+    "emailLabel": "البريد الإلكتروني:"
+  }
+
+  ,"history": {
+    "title": "سجل المريض",
+    "noHistory": "لا يوجد سجل للمريض."
   }
 }

@@ -36,7 +36,14 @@
     "doctorUpdated": "Doctor updated successfully",
     "doctorDeleted": "Doctor deleted",
     "deleteFailed": "Failed to delete doctor",
+    "addFailed": "Failed to add doctor",
+    "updateFailed": "Update failed",
+    "activationFailed": "Failed to activate doctor",
+    "rejectFailed": "Failed to reject doctor",
     "exportStarted": "Exporting data..."
+  },
+  "errors": {
+    "missingDoctorId": "Doctor ID is missing"
   },
   "actions": {
     "viewDetails": "View Details",

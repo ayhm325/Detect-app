@@ -1,6 +1,30 @@
 {
   "pageTitle": "رفع الأشعة",
   "fileTypes": "الأنواع المسموحة: JPG, PNG, DCM",
+  "patientNameLabel": "اسم المريض",
+  "patientPlaceholder": "اسم المريض أو رقم الملف",
+  "imageTypeLabel": "نوع الأشعة",
+  "dateLabel": "التاريخ",
+  "statusLabel": "الحالة",
+  "dragDrop": "اسحب الملفات وأفلتها هنا",
+  "orText": "أو",
+  "selectFiles": "اختر ملفات",
+  "selectedFilesLabel": "الملفات المختارة",
+  "recentUploadsTitle": "الرفوعات الأخيرة",
+  "types": {
+    "xray": "أشعة سينية",
+    "ct": "أشعة مقطعية",
+    "mri": "رنين مغناطيسي",
+    "ultrasound": "موجات فوق صوتية"
+  },
+  "statuses": {
+    "completed": "مكتمل",
+    "reviewing": "قيد المراجعة"
+  },
+  "toast": {
+    "selectPatient": "يرجى اختيار مريض وإرفاق ملف واحد على الأقل",
+    "uploaded": "تم الرفع بنجاح"
+  },
   "ready": "جاهز",
   "pending_review": "بانتظار المراجعة",
   "uploadCard_title": "رفع الملف",
@@ -24,5 +48,31 @@
   "uploadSuccess": "تم الرفع بنجاح",
   "fileSelected": "تم اختيار الملف",
   "size": "الحجم",
-  "noFiles": "لا توجد ملفات"
+  "noFiles": "لا توجد ملفات",
+  "demoRecentUploads": [
+    {
+      "id": 1,
+      "patientName": "محمد علي",
+      "type": "xray",
+      "date": "2025-12-01",
+      "status": "completed",
+      "notes": "صورة واضحة وجودة عالية"
+    },
+    {
+      "id": 2,
+      "patientName": "سارة يوسف",
+      "type": "ct",
+      "date": "2025-11-30",
+      "status": "reviewing",
+      "notes": "في انتظار التحليل"
+    },
+    {
+      "id": 3,
+      "patientName": "أحمد محمود",
+      "type": "mri",
+      "date": "2025-11-28",
+      "status": "completed",
+      "notes": "لم تظهر مشاكل"
+    }
+  ]
 }

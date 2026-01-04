@@ -1,4 +1,11 @@
 {
+  "futuristic": {
+    "title": "Welcome to the Future",
+    "description": "Experience next-gen AI technology with immersive, interactive design.",
+    "actions": {
+      "analyzeXray": "X-ray analysis"
+    }
+  },
   "content": {
     "hero": {
       "title": "Welcome to Detect AI",
@@ -11,5 +18,16 @@
   "stats1": "99%",
   "stats2": "50+",
   "stats3": "100K+",
-  "stats4": "24/7"
+  "stats4": "24/7",
+  "statsLabel1": "Accurate diagnoses",
+  "statsLabel2": "Multilingual support",
+  "statsLabel3": "High security",
+  "statsLabel4": "24/7 support",
+  "aria": {
+    "background": "Hero background",
+    "iconAi": "AI",
+    "iconXray": "X-ray",
+    "iconResult": "Result",
+    "iconSettings": "Settings"
+  }
 }
