@@ -27,6 +27,8 @@
       "patientAdded": "Patient added",
       "patientUpdated": "Patient updated",
       "patientDeleted": "Patient suspended",
+      "patientDisabled": "Patient disabled",
+      "patientEnabled": "Patient enabled",
       "exportStarted": "CSV export started"
     },
     "csvHeader_id": "ID",
@@ -62,6 +64,17 @@
       "yes": "Yes, Suspend",
       "no": "No, Cancel"
     },
+    "confirmToggle": {
+      "disableTitle": "Disable Patient",
+      "enableTitle": "Enable Patient",
+      "disableMessage": "This will disable the account; the patient will not be able to sign in.",
+      "enableMessage": "This will enable the account; the patient will be able to sign in.",
+      "disableWarning": "Patient records will be retained and can be restored later.",
+      "enableWarning": "Patient access will be restored.",
+      "confirmDisable": "Disable",
+      "confirmEnable": "Enable",
+      "processing": "Processing…"
+    },
     "genders": {
       "male": "Male",
       "female": "Female"
@@ -74,6 +87,8 @@
     },
     "actions": {
       "edit": "Edit",
+      "disable": "Disable",
+      "enable": "Enable",
       "delete": "Delete",
       "details": "Details"
     }

@@ -9,6 +9,7 @@ import {
   FaPencil, FaTrash, FaX, FaFloppyDisk, FaEnvelope,
   FaPhone, FaCalendar, FaHeart, FaVial, FaUserDoctor, FaEye, FaEyeSlash
 } from "react-icons/fa6";
+import { FaTimes, FaCheckCircle } from "react-icons/fa";
 
 const CURRENT_YEAR = new Date().getUTCFullYear();
 
@@ -28,6 +29,8 @@ export default function PatientsPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
   const emptyForm = { name: "", email: "", phone: "", password: "", gender: "male", age: "", medicalId: "", doctorId: "", status: "active", bloodType: "", birthDate: "", allergies: "", chronicDiseases: "" };
   const [formData, setFormData] = useState({ ...emptyForm });
   const [showPassword, setShowPassword] = useState(false);
@@ -113,7 +116,7 @@ export default function PatientsPage() {
     active: tPatients('statuses.active'),
     pending: tPatients('statuses.pending'),
     banned: tPatients('statuses.banned'),
-    suspended: tPatients('statuses.suspended'),
+    suspended: tPatients('statuses.banned'),
   };
 
   const getStatusStyle = (status) => {
@@ -162,9 +165,20 @@ export default function PatientsPage() {
       try {
         const targetId = selectedPatient?.id || selectedPatient?.userId;
         if (!targetId) { setShowDeleteModal(false); return; }
-        const res = await fetch(`/api/admin/patients/${targetId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'suspended' }) });
-        if (!res.ok) { const errObj = await res.json().catch(() => ({})); showToast(errObj?.error || tPatients('toast.patientDeleted'), 'error'); setShowDeleteModal(false); return; }
-        await mutate(); setShowDeleteModal(false); showToast(tPatients('toast.patientDeleted'), 'success');
+        setDeleting(true);
+        setDeleteError(null);
+        const currentStatus = selectedPatient?.status || 'active';
+        const targetStatus = currentStatus === 'active' ? 'suspended' : 'active';
+        const res = await fetch(`/api/admin/patients/${targetId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: targetStatus }) });
+        if (!res.ok) {
+          const errObj = await res.json().catch(() => ({}));
+          const message = errObj?.error || tPatients('toast.patientDeleted');
+          setDeleteError(message);
+          setDeleting(false);
+          return;
+        }
+        await mutate(); setShowDeleteModal(false); setDeleteError(null); setDeleting(false);
+        showToast(targetStatus === 'banned' ? tPatients('toast.patientDisabled') : tPatients('toast.patientEnabled'), 'success');
       } catch (e) { showToast(e.message, 'error'); setShowDeleteModal(false); }
     })();
   };
@@ -343,13 +357,18 @@ export default function PatientsPage() {
 
                   {/* Actions */}
                   <div className="mt-auto pt-6 border-t border-(--ui-border) flex gap-4">
-                    <button onClick={() => openEditModal(patient)} className="flex-1 group/btn flex items-center justify-center gap-2 py-3 rounded-2xl bg-(--ui-surface-2) text-foreground border border-(--ui-border) hover:bg-(--ui-info) hover:text-white transition-all duration-300 font-medium text-sm">
-                      <FaPencil className="group-hover/btn:scale-110 transition-transform" size={14} />
-                      {tPatients('actions.edit')}
-                    </button>
-                    <button onClick={() => openDeleteModal(patient)} className="flex-1 group/btn flex items-center justify-center gap-2 py-3 rounded-2xl bg-(--ui-surface-2) text-foreground border border-(--ui-border) hover:bg-(--ui-danger) hover:text-white transition-all duration-300 font-medium text-sm">
-                      <FaTrash className="group-hover/btn:scale-110 transition-transform" size={14} />
-                      {tPatients('actions.delete')}
+                    <button onClick={() => openDeleteModal(patient)} className="flex-1 group/btn flex items-center justify-center gap-2 py-3 rounded-2xl bg-(--ui-surface-2) text-foreground border border-(--ui-border) hover:text-white transition-all duration-300 font-medium text-sm">
+                      {patient.status === 'active' || patient.status === undefined ? (
+                        <>
+                          <FaTimes className="group-hover/btn:scale-110 transition-transform" size={14} />
+                          {tPatients('actions.disable')}
+                        </>
+                      ) : (
+                        <>
+                          <FaCheckCircle className="group-hover/btn:scale-110 transition-transform" size={14} />
+                          {tPatients('actions.enable')}
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -478,13 +497,18 @@ export default function PatientsPage() {
             {showDeleteModal && selectedPatient && (
               <div className="relative card-glass rounded-4xl shadow-(--shadow-lift) w-full max-w-sm p-8 text-center animate-[zoomIn_0.2s_ease-out] border border-(--ui-border)">
                 <div className="w-20 h-20 bg-(--ui-danger-bg) text-(--ui-danger) border border-(--ui-danger-border) rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">⚠️</div>
-                <h3 className="text-2xl font-bold text-foreground mb-3">{tPatients('confirmDelete.title')}</h3>
-                <p className="text-(--ui-muted-2) mb-8 text-sm leading-relaxed">
-                  {tPatients('confirmDelete.description', { name: selectedPatient.name })}
+                <h3 className="text-2xl font-bold text-foreground mb-3">{(selectedPatient.status === 'active' || selectedPatient.status === undefined) ? tPatients('confirmToggle.disableTitle') : tPatients('confirmToggle.enableTitle')}</h3>
+                <p className="text-(--ui-muted-2) mb-4 text-sm leading-relaxed">
+                  {(selectedPatient.status === 'active' || selectedPatient.status === undefined) ? tPatients('confirmToggle.disableMessage') : tPatients('confirmToggle.enableMessage')} {" "}{(selectedPatient.status === 'active' || selectedPatient.status === undefined) ? tPatients('confirmToggle.disableWarning') : tPatients('confirmToggle.enableWarning')}
                 </p>
+                {deleteError && (
+                  <p className="text-(--ui-danger) mb-6 text-sm leading-relaxed font-medium" role="alert">
+                    {deleteError}
+                  </p>
+                )}
                 <div className="flex gap-4">
-                  <button onClick={handleDeletePatient} className="flex-1 bg-(--ui-danger) hover:opacity-90 text-white py-3.5 rounded-2xl font-bold shadow-(--shadow-lift) transition-all active:scale-95">
-                    {tPatients('confirmDelete.yes')}
+                  <button onClick={handleDeletePatient} disabled={deleting} className={`flex-1 ${deleting ? 'opacity-60 cursor-wait' : (selectedPatient.status === 'active' || selectedPatient.status === undefined ? 'bg-(--ui-danger) hover:opacity-90' : 'bg-(--ui-success) hover:opacity-90')} text-white py-3.5 rounded-2xl font-bold shadow-(--shadow-lift) transition-all active:scale-95`}>
+                    {deleting ? safeT('confirmToggle.processing', '…') : ((selectedPatient.status === 'active' || selectedPatient.status === undefined) ? tPatients('confirmToggle.confirmDisable') : tPatients('confirmToggle.confirmEnable'))}
                   </button>
                   <button onClick={() => setShowDeleteModal(false)} className="flex-1 bg-(--ui-surface-2) hover:bg-(--ui-surface) text-foreground border border-(--ui-border) py-3.5 rounded-2xl font-bold transition-all active:scale-95">
                     {tPatients('confirmDelete.no')}

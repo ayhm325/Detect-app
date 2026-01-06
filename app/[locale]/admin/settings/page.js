@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaSave, FaCheck, FaGlobeAmericas, FaUserMd, FaUserShield, FaClock, FaLock } from "react-icons/fa";
 import { FiSettings, FiUsers } from "react-icons/fi";
 import { useTranslations } from "next-intl";
@@ -40,13 +40,36 @@ export default function SettingsPage() {
     maxDoctorChangeRequests: 3,
     appointmentInterval: 15,
     rolePermissions: {
-      admin: true,
       doctor: true,
       patient: true,
     },
     sessionDuration: 30,
     enableTwoFactor: false,
   });
+
+  // عند فتح الصفحة، نحمل القيم المخزنة من الخادم
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/admin/settings');
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(err?.error || t('messages.saveFailed'), 'error');
+          return;
+        }
+        const body = await res.json().catch(() => ({}));
+        if (!mounted) return;
+        if (body?.settings) {
+          setSettings((prev) => ({ ...prev, ...body.settings }));
+        }
+      } catch (e) {
+        if (!mounted) return;
+        showToast(e?.message || t('messages.saveFailed'), 'error');
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   // التعامل مع تغيير الحقول
   const handleChange = (field, value) => {
@@ -63,8 +86,20 @@ export default function SettingsPage() {
 
   // حفظ الإعدادات
   const handleSave = () => {
-    // هنا يمكنك إضافة منطق إرسال البيانات للباك إند
-    showToast(t('messages.success'), "success");
+    (async () => {
+      try {
+        const res = await fetch('/api/admin/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showToast(err?.error || t('messages.saveFailed'), 'error');
+          return;
+        }
+        const body = await res.json();
+        showToast(t('messages.success'), 'success');
+      } catch (e) {
+        showToast(e.message || t('messages.saveFailed'), 'error');
+      }
+    })();
   };
 
   // Build appointment options by mapping known values to localized labels.
@@ -229,7 +264,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="grid grid-cols-1 gap-3 pt-2">
-                {Object.keys(settings.rolePermissions).map((role) => (
+                {Object.keys(settings.rolePermissions).filter((r) => r !== 'admin').map((role) => (
                   <button
                     key={role}
                     onClick={() => handleNestedChange("rolePermissions", role, !settings.rolePermissions[role])}

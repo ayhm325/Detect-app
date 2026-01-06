@@ -36,6 +36,8 @@
     "doctorAdded": "تمت إضافة الطبيب بنجاح",
     "doctorUpdated": "تم تحديث بيانات الطبيب",
     "doctorDeleted": "تم حذف الطبيب",
+    "doctorSuspended": "تم تعطيل حساب الطبيب",
+    "doctorActivated": "تم تفعيل حساب الطبيب",
     "deleteFailed": "فشل حذف الطبيب",
     "addFailed": "فشل إضافة الطبيب",
     "updateFailed": "فشل التحديث",

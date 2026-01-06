@@ -30,12 +30,16 @@
     "patientAdded": "تمت إضافة المريض بنجاح",
     "patientUpdated": "تم تحديث بيانات المريض",
     "patientDeleted": "تم حذف المريض",
+    "patientDisabled": "تم تعطيل المريض",
+    "patientEnabled": "تم تفعيل المريض",
     "exportStarted": "جاري تصدير البيانات..."
   },
   "actions": {
     "viewDetails": "عرض التفاصيل",
     "edit": "تعديل",
     "delete": "حذف",
+    "disable": "تعطيل",
+    "enable": "تفعيل",
     "showPassword": "إظهار كلمة المرور",
     "hidePassword": "إخفاء كلمة المرور"
   },
@@ -113,7 +117,20 @@
   "confirmDelete": {
     "title": "تأكيد تعليق المريض",
     "description": "هل أنت متأكد أنك تريد تعليق {name}؟ المرضى المعلقون لن يتمكنوا من تسجيل الدخول.",
+    "processing": "جاري المعالجة…",
     "yes": "نعم، علّق",
     "no": "إلغاء"
+  }
+  ,
+  "confirmToggle": {
+    "disableTitle": "تعطيل المريض",
+    "enableTitle": "تفعيل المريض",
+    "disableMessage": "سيتم تعطيل الحساب، لن يستطيع المريض تسجيل الدخول.",
+    "enableMessage": "سيتم تفعيل الحساب، سيتمكن المريض من تسجيل الدخول.",
+    "disableWarning": "سيبقى سجل المريض محفوظًا ويمكن استعادته لاحقًا.",
+    "enableWarning": "سيتم استعادة وصول المريض.",
+    "confirmDisable": "تعطيل",
+    "confirmEnable": "تفعيل",
+    "processing": "جاري المعالجة…"
   }
 }

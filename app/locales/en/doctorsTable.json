@@ -13,6 +13,8 @@
   "addDoctor": "Add Doctor",
   "add": "Add Doctor",
   "details": "Details",
+  "disable": "Disable",
+  "enable": "Enable",
   "approve": "Approve",
   "reject": "Reject",
   "statusLabels": {

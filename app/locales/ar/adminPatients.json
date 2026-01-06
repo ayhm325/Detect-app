@@ -27,6 +27,8 @@
       "patientAdded": "تم إضافة المريض",
       "patientUpdated": "تم تحديث المريض",
       "patientDeleted": "تم تعليق المريض",
+      "patientDisabled": "تم تعطيل المريض",
+      "patientEnabled": "تم تفعيل المريض",
       "exportStarted": "بدأ تصدير CSV"
     },
     "csvHeader_id": "المعرف",
@@ -58,9 +60,20 @@
     },
     "confirmDelete": {
       "title": "تأكيد",
-      "description": "هل تريد تعليق المريض {name}؟",
+      "description": "هل تريد تعليق المريض {name}?",
       "yes": "نعم، علق",
       "no": "لا، إلغاء"
+    },
+    "confirmToggle": {
+      "disableTitle": "تعطيل المريض",
+      "enableTitle": "تفعيل المريض",
+      "disableMessage": "سيتم تعطيل الحساب، لن يستطيع المريض تسجيل الدخول.",
+      "enableMessage": "سيتم تفعيل الحساب، سيتمكن المريض من تسجيل الدخول.",
+      "disableWarning": "سيبقى سجل المريض محفوظًا ويمكن استعادته لاحقًا.",
+      "enableWarning": "سيتم استعادة وصول المريض.",
+      "confirmDisable": "تعطيل",
+      "confirmEnable": "تفعيل",
+      "processing": "جاري المعالجة…"
     },
     "genders": {
       "male": "ذكر",
@@ -74,6 +87,8 @@
     },
     "actions": {
       "edit": "تعديل",
+      "disable": "تعطيل",
+      "enable": "تفعيل",
       "delete": "حذف",
       "details": "تفاصيل"
     }

@@ -6,7 +6,7 @@ import Pagination from "../ui/Pagination";
 
 import { useTranslations } from "next-intl";
 
-export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onAdd, page = 1, pageCount = 1, onPageChange }) {
+export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onAdd, onToggle, page = 1, pageCount = 1, onPageChange }) {
   const t = useTranslations("doctorsTable");
   const ui = useTranslations("ui");
   return (
@@ -42,9 +42,23 @@ export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onA
                 <TD className="py-2 px-4 text-center">{email}</TD>
                 <TD className="py-2 px-4">
                   <div className="flex items-center justify-center gap-2 flex-wrap">
-                    <Button variant="ghost" className="px-3 py-2" title={t("edit")} onClick={() => onEdit(doctor)}>{t("edit")}</Button>
-                    <Button variant="ghost" className="px-3 py-2 text-(--ui-danger)" title={t("delete")} onClick={() => onDelete(doctor)}>{t("delete")}</Button>
-                    <Button variant="ghost" className="px-3 py-2 text-(--ui-info)" title={t("details")} onClick={() => onDetails(doctor)}>{t("details")}</Button>
+                    {typeof onToggle === 'function' ? (
+                      // Show a single toggle button for enable/disable
+                      <Button
+                        variant="ghost"
+                        className="px-3 py-2"
+                        title={doctor.status === 'active' ? t('disable') : t('enable')}
+                        onClick={() => onToggle(doctor)}
+                      >
+                        {doctor.status === 'active' ? t('disable') : t('enable')}
+                      </Button>
+                    ) : (
+                      <>
+                        <Button variant="ghost" className="px-3 py-2" title={t("edit")} onClick={() => onEdit && onEdit(doctor)}>{t("edit")}</Button>
+                        <Button variant="ghost" className="px-3 py-2 text-(--ui-danger)" title={t("delete")} onClick={() => onDelete && onDelete(doctor)}>{t("delete")}</Button>
+                      </>
+                    )}
+                    <Button variant="ghost" className="px-3 py-2 text-(--ui-info)" title={t("details")} onClick={() => onDetails && onDetails(doctor)}>{t("details")}</Button>
                   </div>
                 </TD>
               </TRow>
@@ -53,10 +67,7 @@ export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onA
         </tbody>
       </Table>
 
-      <div className="flex items-center justify-between mt-6">
-        <Button variant="primary" className="px-6" onClick={onAdd}>
-          <span className="inline-flex items-center gap-2"><FaUserPlus /> {t("add")}</span>
-        </Button>
+      <div className="flex items-center justify-end mt-6">
         <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
       </div>
     </div>

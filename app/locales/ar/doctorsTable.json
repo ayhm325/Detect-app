@@ -13,6 +13,8 @@
   "addDoctor": "إضافة طبيب",
   "add": "إضافة طبيب",
   "details": "تفاصيل",
+  "disable": "تعطيل",
+  "enable": "تفعيل",
   "approve": "قبول",
   "reject": "رفض",
   "statusLabels": {

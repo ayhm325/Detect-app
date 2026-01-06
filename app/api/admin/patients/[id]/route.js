@@ -41,6 +41,12 @@ export const PATCH = withRBAC(async (request, user, context) => {
 
   const { name, email, phone, gender, doctorId, status, bloodType, birthDate, medicalId, allergies, chronicDiseases } = body;
 
+  // normalize legacy client values to Prisma enum-compatible values
+  let normalizedStatus = status;
+  if (status === 'banned') {
+    normalizedStatus = 'suspended';
+  }
+
   try {
     const prevDoctorId = patient?.doctorId || null;
 
@@ -70,9 +76,9 @@ export const PATCH = withRBAC(async (request, user, context) => {
         patientUpdate.doctorId = doctorId;
       }
 
-      // If status is provided, update patient.status if exists
-      if (status) {
-        patientUpdate.status = status;
+      // If status is provided, update patient.status if exists (use normalized value)
+      if (normalizedStatus) {
+        patientUpdate.status = normalizedStatus;
       }
 
       const updatedPatient = await tx.patient.update({
@@ -81,8 +87,8 @@ export const PATCH = withRBAC(async (request, user, context) => {
       });
 
       // If status changed and a linked user exists, reflect it in user.isActive
-      if (status && userId) {
-        await tx.user.update({ where: { id: userId }, data: { isActive: status === 'active' } });
+      if (normalizedStatus && userId) {
+        await tx.user.update({ where: { id: userId }, data: { isActive: normalizedStatus === 'active' } });
       }
 
       return { user: updatedUser, patient: updatedPatient };

@@ -374,6 +374,31 @@ function DoctorsPage() {
     }
   };
 
+  // تعتيم/تفعيل الطبيب (بديل للحذف/تعديل في الواجهة)
+  const handleToggleDoctor = async (doctor) => {
+    if (!doctor) return;
+    const userId = doctor.userId || doctor.id;
+    const currentStatus = getDoctorStatus(doctor) || 'active';
+    const targetStatus = currentStatus === 'active' ? 'banned' : 'active';
+    try {
+      const res = await fetch('/api/admin/doctors', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId, status: targetStatus })
+      });
+      if (res.ok) {
+        const updatedDoctors = doctors.map((d) => d.id === doctor.id ? { ...d, status: targetStatus, isActive: targetStatus === 'active' } : d);
+        setDoctors(updatedDoctors);
+        setPendingDoctors(updatedDoctors.filter((d) => getDoctorStatus(d) === 'pending'));
+        showSuccess(targetStatus === 'active' ? tDoctors('toast.doctorActivated') : tDoctors('toast.doctorSuspended'));
+      } else {
+        showError(tDoctors('toast.updateFailed'));
+      }
+    } catch (e) {
+      showError(tDoctors('toast.updateFailed'));
+    }
+  };
+
   return (
     <>
       <ToastContainer />
@@ -441,6 +466,7 @@ function DoctorsPage() {
           onAdd={() => setShowAddModal(true)}
           onApprove={handleApproveDoctor}
           onReject={handleRejectDoctor}
+          onToggle={handleToggleDoctor}
         />
 
         {displayedDoctors.length === 0 && (

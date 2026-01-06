@@ -138,6 +138,7 @@ export async function POST(request) {
         email: user.email,
         role: user.role,
         fullName: user.fullName,
+        isActive: !!user.isActive,
       },
       SECRET,
       applyJwtClaimsToSignOptions({ expiresIn: '2h' }) // صلاحية التوكن ساعتان فقط

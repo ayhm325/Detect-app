@@ -35,6 +35,8 @@
     "doctorAdded": "Doctor added successfully",
     "doctorUpdated": "Doctor updated successfully",
     "doctorDeleted": "Doctor deleted",
+    "doctorSuspended": "Doctor suspended",
+    "doctorActivated": "Doctor activated",
     "deleteFailed": "Failed to delete doctor",
     "addFailed": "Failed to add doctor",
     "updateFailed": "Update failed",

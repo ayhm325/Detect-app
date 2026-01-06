@@ -34,7 +34,8 @@ export default function UsersPage() {
         const mapped = data.map(u => {
           const role = u.role;
           const phone = (u.doctor && u.doctor.phone) || (u.patient && u.patient.phone) || '';
-          const status = role === 'admin' ? (u.isActive ? 'active' : 'suspended') : (role === 'doctor' ? (u.doctor?.status || 'pending') : (u.patient?.status || 'active'));
+          // Prefer explicit isActive flag: if user is not active, show as 'banned' in admin list
+          const status = (u.isActive === false) ? 'banned' : (role === 'admin' ? 'active' : (role === 'doctor' ? (u.doctor?.status || 'pending') : (u.patient?.status || 'active')));
           const roleDisplay = role;
           const statusDisplay = status;
           const joinDate = u.patient?.joinDate ? new Date(u.patient.joinDate).toISOString().split('T')[0] : (u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '');
@@ -48,6 +49,7 @@ export default function UsersPage() {
             role,
             roleDisplay,
             status,
+            isActive: !!u.isActive,
             statusDisplay,
             joinDate,
             lastLogin,
@@ -281,22 +283,23 @@ export default function UsersPage() {
     setSelectedUser(user);
     setShowDeleteModal(true);
   };
-
-  const handleDeleteUser = async () => {
+  const handleToggleUser = async () => {
     if (!selectedUser) return;
     try {
-      const res = await fetch(`/api/admin/users/${selectedUser.id}`, { method: 'DELETE' });
+      const targetIsActive = !selectedUser.isActive;
+      const res = await fetch(`/api/admin/users/${selectedUser.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive: targetIsActive }) });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        showToast(err.error || t('errors.exportFailed'), 'error');
+        showToast(err.error || t('errors.loadFailed'), 'error');
         return;
       }
-      setUsers(users.filter(user => user.id !== selectedUser.id));
+      // Update UI
+      setUsers(users.map(u => u.id === selectedUser.id ? { ...u, isActive: targetIsActive, status: targetIsActive ? 'active' : 'banned', statusDisplay: t(`statuses.${targetIsActive ? 'active' : 'banned'}`) } : u));
       setShowDeleteModal(false);
       setSelectedUser(null);
-      showToast(t('toast.userDeleted'), 'success');
+      showToast(targetIsActive ? t('toast.userAdded') : t('toast.userDeleted'), 'success');
     } catch (err) {
-      showToast(t('errors.exportFailed'), 'error');
+      showToast(t('errors.loadFailed'), 'error');
     }
   };
 
@@ -377,7 +380,6 @@ export default function UsersPage() {
               >
                 <option value="all">{t('filters.allStatuses')}</option>
                 <option value="active">{t('statuses.active')}</option>
-                <option value="suspended">{t('statuses.suspended')}</option>
                 <option value="banned">{t('statuses.banned')}</option>
               </select>
             </div>
@@ -431,13 +433,13 @@ export default function UsersPage() {
                           >
                             <FaEye />
                           </button>
-                          {/* Edit button removed as requested */}
+                          {/* Toggle Active/Banned */}
                           <button
                             onClick={() => openDeleteModal(user)}
-                            className="p-2 text-(--ui-danger) hover:bg-(--ui-danger-bg) rounded-lg transition-colors"
-                            title={t('actions.delete')}
+                            className={`p-2 rounded-lg transition-colors ${user.isActive ? 'text-(--ui-danger) hover:bg-(--ui-danger-bg)' : 'text-(--ui-success) hover:bg-(--ui-success-bg)'}`}
+                            title={user.isActive ? t('actions.delete') : t('actions.edit')}
                           >
-                            <FaTrash />
+                            {user.isActive ? <FaTimesCircle /> : <FaCheckCircle />}
                           </button>
                         </div>
                       </td>
@@ -628,18 +630,18 @@ export default function UsersPage() {
               <div className="card-glass rounded-xl shadow-(--shadow-lift) max-w-md w-full p-6">
                 <div className="text-center mb-6">
                   <div className="text-6xl mb-4">⚠️</div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">{t('modal.deleteTitle')}</h3>
+                  <h3 className="text-xl font-bold text-foreground mb-2">{selectedUser.isActive ? t('modal.toggleDisableTitle') : t('modal.toggleEnableTitle')}</h3>
                   <p className="text-(--ui-muted-2)">
-                    {t('modal.deleteMessage')} <span className="font-bold">{selectedUser.name}</span>?
-                    {" "}{t('modal.deleteWarning')}
+                    {selectedUser.isActive ? t('modal.toggleDisableMessage') : t('modal.toggleEnableMessage')} <span className="font-bold">{selectedUser.name}</span>?
+                    {" "}{selectedUser.isActive ? t('modal.toggleDisableWarning') : t('modal.toggleEnableWarning')}
                   </p>
                 </div>
                 <div className="flex gap-3">
                   <button
-                    onClick={handleDeleteUser}
-                    className="flex-1 bg-(--ui-danger) hover:opacity-90 text-white px-4 py-3 rounded-lg transition-colors font-medium"
+                    onClick={handleToggleUser}
+                    className={`flex-1 ${selectedUser.isActive ? 'bg-(--ui-danger) text-white hover:opacity-90' : 'bg-(--ui-success) text-white hover:opacity-90'} px-4 py-3 rounded-lg transition-colors font-medium`}
                   >
-                    {t('modal.confirmDelete')}
+                    {selectedUser.isActive ? t('modal.confirmDisable') : t('modal.confirmEnable')}
                   </button>
                   <button
                     onClick={() => setShowDeleteModal(false)}

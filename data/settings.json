@@ -1,0 +1,14 @@
+{
+  "systemName": "PneumoDetect",
+  "defaultLanguage": "ar",
+  "registrationEnabled": true,
+  "allowPatientChangeDoctor": true,
+  "maxDoctorChangeRequests": 3,
+  "appointmentInterval": 15,
+  "rolePermissions": {   
+    "doctor": true,
+    "patient": true
+  },
+  "sessionDuration": 30,
+  "enableTwoFactor": true
+}

@@ -150,7 +150,8 @@
   },
   "messages": {
     "success": "Settings saved successfully!",
-    "error": "An error occurred while saving. Please try again."
+    "error": "An error occurred while saving. Please try again.",
+    "saveFailed": "Failed to save settings. Please try again"
   },
   "rolePermissionsEditor": {
     "title": "Edit Role Permissions",
