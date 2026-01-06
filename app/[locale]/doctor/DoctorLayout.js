@@ -2,11 +2,13 @@
 export const dynamic = 'force-dynamic';
 
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { FaUserAlt } from 'react-icons/fa';
 import { useTheme } from "../../theme-provider";
 import { useLocaleContext } from "../../hooks/useLocaleContext";
 import AuthGuard from "../../components/AuthGuard";
+import useSocket from "../../components/chat/useSocket.client";
 
 export default function DoctorLayout({
   children,
@@ -15,6 +17,7 @@ export default function DoctorLayout({
   breadcrumbs = [],
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const socket = useSocket();
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
@@ -27,6 +30,32 @@ export default function DoctorLayout({
   const ui = useTranslations("ui");
   const navbar = useTranslations("navbar");
 
+  // Global presence: connect socket as soon as doctor enters the app (no need to open chat page).
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/token', { credentials: 'include' });
+        if (!mounted) return;
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.token) {
+            try { socket.connect({ token: data.token }); } catch (e) { try { socket.connect(); } catch (e2) {} }
+            return;
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+      try { socket.connect(); } catch (e) {}
+    })();
+
+    return () => {
+      mounted = false;
+      try { socket.disconnect && socket.disconnect(); } catch (e) {}
+    };
+  }, [socket]);
+
   // Navigation items
   const doctorNavItems = [
     { href: `${basePrefix}/doctor/dashboard`, label: t("dashboard"), icon: "🏠" },
@@ -34,7 +63,7 @@ export default function DoctorLayout({
     { href: `${basePrefix}/doctor/results`, label: t("results"), icon: "📊" },
     { href: `${basePrefix}/doctor/chat`, label: t("chat"), icon: "💬" },
     { href: `${basePrefix}/doctor/appointments`, label: t("appointments"), icon: "📅" },
-    { href: `${basePrefix}/doctor/settings`, label: t("settings"), icon: "⚙️" },
+    { href: `${basePrefix}/doctor/settings`, label: t("settings"), icon: <FaUserAlt style={{color: '#2b6cb0'}} /> },
     { href: "__logout__", label: t("logout"), icon: "🚪" },
   ];
 

@@ -47,7 +47,8 @@ export const GET = withRBAC(async (request, user) => {
       totalReports,
       readyReports,
       pendingReports,
-      newMessages
+      newMessages,
+      clinicalStatus: patient.clinicalStatus || null
     }, { status: 200 });
   } catch (err) {
     logAudit({ event: "patient_dashboard_stats_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: err.message } });

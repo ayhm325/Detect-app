@@ -50,6 +50,7 @@ export default function DoctorResultsPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [reviewNotes, setReviewNotes] = useState("");
+  const [reviewClinicalStatus, setReviewClinicalStatus] = useState("stable");
   const [savingReview, setSavingReview] = useState(false);
 
 
@@ -117,6 +118,7 @@ export default function DoctorResultsPage() {
             id: r.id,
             patientName: r.patient?.name || placeholder,
             patientId: r.patient?.id || placeholder,
+            patientClinicalStatus: r.patientClinicalStatus || r.patient?.clinicalStatus || null,
             typeKey,
             typeLabel,
             bodyPart: t("defaults.bodyPart"),
@@ -137,7 +139,7 @@ export default function DoctorResultsPage() {
         setError(err.message === "fetch_failed" ? t("errors.fetchResultsFailed") : err.message);
         setLoading(false);
       });
-  }, [patientId, locale]);
+  }, [patientId, locale, placeholder, t]);
 
   const stats = {
     total: scans.length,
@@ -171,6 +173,7 @@ export default function DoctorResultsPage() {
   const handleViewScan = (scan) => {
     setSelectedScan(scan);
     setReviewNotes(scan?.doctorNotes || "");
+    setReviewClinicalStatus(scan?.patientClinicalStatus || "stable");
     setViewerOpen(true);
     showToast(t("toast.viewingScan"), "info");
   };
@@ -190,6 +193,7 @@ export default function DoctorResultsPage() {
           id: selectedScan.id,
           reviewedByDoctor: true,
           doctorNotes: reviewNotes,
+          clinicalStatus: reviewClinicalStatus,
         }),
       });
 
@@ -206,6 +210,7 @@ export default function DoctorResultsPage() {
         status: "completed",
         reviewedByDoctor: true,
         doctorNotes: nextDoctorNotes,
+        patientClinicalStatus: reviewClinicalStatus,
         findings: nextFindings,
       };
 
@@ -454,20 +459,6 @@ export default function DoctorResultsPage() {
                     <FaEye />
                     {t("actions.view")}
                   </button>
-                  <button
-                    onClick={() => handleDownload(scan)}
-                    className="flex items-center justify-center rounded-lg bg-(--ui-surface-2) border border-(--ui-border) px-3 py-2 text-(--ui-foreground) transition-all hover:bg-(--ui-surface-2)/70"
-                    title={t("actions.download")}
-                  >
-                    <FaDownload />
-                  </button>
-                  <button
-                    onClick={() => handlePrint(scan)}
-                    className="flex items-center justify-center rounded-lg bg-(--ui-surface-2) border border-(--ui-border) px-3 py-2 text-(--ui-foreground) transition-all hover:bg-(--ui-surface-2)/70"
-                    title={t("actions.print")}
-                  >
-                    <FaPrint />
-                  </button>
                 </div>
               </div>
             ))}
@@ -587,6 +578,22 @@ export default function DoctorResultsPage() {
                 <label className="block text-sm font-medium text-(--ui-muted-foreground) mb-2">
                   {t("viewer.review.notesLabel")}
                 </label>
+
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-(--ui-muted-foreground) mb-2">
+                    {t("viewer.review.clinicalStatusLabel")}
+                  </label>
+                  <select
+                    value={reviewClinicalStatus}
+                    onChange={(e) => setReviewClinicalStatus(e.target.value)}
+                    className="w-full rounded-xl border border-(--ui-border) bg-(--ui-surface) px-4 py-3 text-sm font-medium text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring)/20"
+                  >
+                    <option value="stable">{t("viewer.review.clinicalStatuses.stable")}</option>
+                    <option value="critical">{t("viewer.review.clinicalStatuses.critical")}</option>
+                    <option value="recovering">{t("viewer.review.clinicalStatuses.recovering")}</option>
+                  </select>
+                </div>
+
                 <textarea
                   value={reviewNotes}
                   onChange={(e) => setReviewNotes(e.target.value)}

@@ -11,12 +11,14 @@ export const headers = () => {
   return [["Cache-Control", "no-store"]];
 };
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../components/ui/Toast";
-import { FaCalendarAlt, FaFileAlt, FaEnvelope, FaHeartbeat, FaArrowUp, FaBell } from "react-icons/fa";
+import { FaCalendarAlt, FaFileAlt, FaEnvelope, FaHeartbeat, FaArrowUp } from "react-icons/fa";
 import { useTranslations, useLocale } from "next-intl";
 import PatientDashboardWrapper from "../../../components/PatientDashboardWrapper";
+import NotificationBellButton from "../../../components/ui/NotificationBellButton";
+import useSocket from "../../../components/chat/useSocket.client";
 
 export default function PatientDashboardPage() {
   const router = useRouter();
@@ -27,7 +29,24 @@ export default function PatientDashboardPage() {
   const placeholder = ui("placeholder");
   const commaSpace = ui("punctuation.commaSpace");
 
+  const socket = useSocket();
+  const seenMessageKeysRef = useRef(new Set());
+
   const [patientName, setPatientName] = useState("");
+
+  function formatClinicalStatus(value) {
+    const raw = value == null ? "" : String(value).trim();
+    if (!raw) return placeholder;
+    const key = raw.toLowerCase();
+    if (key === "stable" || key === "critical" || key === "recovering") {
+      try {
+        return t(`dashboard.clinicalStatuses.${key}`);
+      } catch {
+        // fall through
+      }
+    }
+    return placeholder;
+  }
 
   // تحويل الأرقام العربية إلى 0123456789
   function toWesternDigits(str) {
@@ -50,34 +69,99 @@ export default function PatientDashboardPage() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
+    let mounted = true;
     async function fetchStats() {
       try {
         const res = await fetch("/api/patient/dashboard-stats", { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
+        if (!mounted) return;
         setStats([
           { title: t("dashboard.stats.upcomingAppointments"), value: data.upcomingAppointments ?? placeholder, change: null, icon: FaCalendarAlt },
           { title: t("dashboard.stats.readyReports"), value: data.readyReports ?? placeholder, change: null, icon: FaFileAlt },
           { title: t("dashboard.stats.newMessages"), value: data.newMessages ?? placeholder, change: null, icon: FaEnvelope },
-          { title: t("dashboard.stats.vitalSigns"), value: data.vitalSigns ?? placeholder, icon: FaHeartbeat },
+          { title: t("dashboard.stats.vitalSigns"), value: formatClinicalStatus(data.clinicalStatus), icon: FaHeartbeat },
         ]);
       } catch {}
     }
+    const refresh = () => fetchStats();
+    const onVis = () => { if (typeof document !== 'undefined' && !document.hidden) fetchStats(); };
+
     fetchStats();
+    try {
+      window.addEventListener('focus', refresh);
+      document.addEventListener('visibilitychange', onVis);
+    } catch {}
+
+    return () => {
+      mounted = false;
+      try {
+        window.removeEventListener('focus', refresh);
+        document.removeEventListener('visibilitychange', onVis);
+      } catch {}
+    };
   }, [t, placeholder]);
+
+  // Live increment: receive messages via user room (no chat join needed).
+  useEffect(() => {
+    if (!socket || !socket.onMessage) return;
+    const off = socket.onMessage((msg) => {
+      try {
+        if (!msg) return;
+        // Patient unread count = incoming from doctor.
+        if (msg.sender === 'doctor') {
+          // Avoid double counting when the socket is joined to both `chat:<id>` and `user:<id>`.
+          // We only count the user-scoped delivery for dashboard counters.
+          if (msg.__scope && msg.__scope !== 'user') return;
+          const key = msg.id ? `id:${msg.id}` : (msg.clientKey ? `ck:${msg.clientKey}` : null);
+          if (key) {
+            if (seenMessageKeysRef.current.has(key)) return;
+            seenMessageKeysRef.current.add(key);
+          }
+          setStats((prev) => {
+            if (!Array.isArray(prev) || prev.length < 3) return prev;
+            const next = [...prev];
+            const current = next[2] || { title: t("dashboard.stats.newMessages"), value: 0, change: null, icon: FaEnvelope };
+            const raw = current.value;
+            const n = typeof raw === 'number' ? raw : Number(raw);
+            const base = Number.isFinite(n) ? n : 0;
+            next[2] = { ...current, value: base + 1 };
+            return next;
+          });
+        }
+      } catch (e) {}
+    });
+    return () => { try { off && off(); } catch (e) {} };
+  }, [socket, t]);
 
   // Fetch unread notifications count
   useEffect(() => {
+    let mounted = true;
     async function fetchUnreadCount() {
       try {
-        const res = await fetch("/api/patient/notifications?userId=demo-user-id", { method: "HEAD" });
+        const res = await fetch("/api/patient/notifications", { method: "HEAD" });
         if (res.ok) {
           const count = res.headers.get("X-Unread-Count");
-          setUnreadCount(Number(count) || 0);
+          if (mounted) setUnreadCount(Number(count) || 0);
         }
       } catch {}
     }
+    const refresh = () => fetchUnreadCount();
+    const onVis = () => { if (typeof document !== 'undefined' && !document.hidden) fetchUnreadCount(); };
+
     fetchUnreadCount();
+    try {
+      window.addEventListener('focus', refresh);
+      document.addEventListener('visibilitychange', onVis);
+    } catch {}
+
+    return () => {
+      mounted = false;
+      try {
+        window.removeEventListener('focus', refresh);
+        document.removeEventListener('visibilitychange', onVis);
+      } catch {}
+    };
   }, []);
 
   // Fetch patient name for header
@@ -118,28 +202,22 @@ export default function PatientDashboardPage() {
             <p className="text-(--ui-muted-foreground) mt-2">{today}</p>
           </div>
 
-          <button
+          <NotificationBellButton
+            count={unreadCount}
             onClick={() => router.push(`${basePrefix}/patient/notifications`)}
-            className="relative p-3 bg-(--ui-surface) border border-(--ui-border) rounded-full shadow"
-          >
-            <FaBell />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-(--ui-danger) text-(--ui-danger-foreground) text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                {unreadCount}
-              </span>
-            )}
-          </button>
+            title={ui("topbar.notifications")}
+          />
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
           {stats.map((s, i) => (
             <div key={i} className="card-glass border border-(--ui-border) p-6 rounded-xl">
-              <div className="flex justify-between mb-3">
-                <s.icon className="text-2xl text-(--ui-info)" />
+              <div className={`flex items-center gap-3 justify-center mb-2 ${locale === "ar" ? "flex-row-reverse" : "flex-row"}`}>
+                <s.icon className="text-4xl text-(--ui-info)" style={{ order: locale === "ar" ? 2 : 1 }} />
+                <p className="text-(--ui-muted-foreground) text-2xl font-bold text-center w-full">{s.title}</p>
               </div>
-              <p className="text-(--ui-muted-foreground) text-sm">{s.title}</p>
-              <p className="text-3xl font-bold">{s.value}</p>
+              <p className="mt-1 text-4xl font-bold text-center">{s.value}</p>
             </div>
           ))}
         </div>

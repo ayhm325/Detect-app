@@ -4,6 +4,7 @@ import Image from 'next/image';
 import AnalysisDetailsModal from '../../../../components/analysis/AnalysisDetailsModal';
 import { useLocale, useTranslations } from 'next-intl';
 import { formatDateTime } from '../../../lib/date';
+import { formatArabicDate } from '../../../lib/arabicMonths';
 
 export default function PatientAnalysisHistoryPage() {
   const locale = useLocale();
@@ -44,16 +45,7 @@ export default function PatientAnalysisHistoryPage() {
           <h1 className="text-3xl font-extrabold">{t('analysisHistory.title')}</h1>
           <p className="text-sm text-(--ui-muted-foreground) mt-1">{t('analysisHistory.subtitle')}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => { setRecords([]); setError(null); setLoading(true); setTimeout(() => { setLoading(false); }, 600); }}
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-(--ui-surface-2)/40 border border-(--ui-border) rounded-md shadow-sm hover:bg-(--ui-surface-2)/60"
-          >
-            {/* refresh icon */}
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-(--ui-muted-foreground)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6"/></svg>
-            <span className="text-sm text-(--ui-foreground)">{t('analysisHistory.refresh')}</span>
-          </button>
-        </div>
+        {/* Refresh button removed as requested */}
       </div>
 
       {error && <div className="mb-4 p-4 bg-(--ui-danger-bg) border border-(--ui-danger-border) text-(--ui-danger) rounded">{error}</div>}
@@ -94,7 +86,26 @@ export default function PatientAnalysisHistoryPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
                       <h3 className="text-sm font-semibold truncate">{item.prediction || item.prediction_label || placeholder}</h3>
-                      <div className="text-xs text-(--ui-muted-foreground) mt-1">{formatDateTime(item.createdAt || item.created_at, dateLocale, placeholder)}</div>
+                      <div className="text-xs text-(--ui-muted-foreground) mt-1">
+                        {locale === 'ar'
+                          ? (() => {
+                              const d = new Date(item.createdAt || item.created_at);
+                              // Format: day month year، الساعة hh:mm ص/م
+                              const month = require('../../../lib/arabicMonths').default[d.getMonth()];
+                              const day = d.getDate();
+                              const year = d.getFullYear();
+                              let hour = d.getHours();
+                              let minute = d.getMinutes();
+                              const isAM = hour < 12;
+                              let hour12 = hour % 12;
+                              if (hour12 === 0) hour12 = 12;
+                              // Western numerals
+                              const toWestern = n => n.toLocaleString('en-US', {useGrouping: false});
+                              return `${toWestern(day)} ${month} ${toWestern(year)} في ${toWestern(hour12)}:${toWestern(minute.toString().padStart(2,'0'))} ${isAM ? 'ص' : 'م'}`;
+                            })()
+                          : formatDateTime(item.createdAt || item.created_at, dateLocale, placeholder)
+                        }
+                      </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <div className="text-xs text-(--ui-muted-foreground)">{t('analysisHistory.confidence')}</div>
@@ -103,7 +114,7 @@ export default function PatientAnalysisHistoryPage() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="text-xs text-(--ui-muted-foreground) line-clamp-3">{item.notes || item.summary || ''}</div>
+                    {/* Removed saved-to-history text as requested */}
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setSelected(item)}

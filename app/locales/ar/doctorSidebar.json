@@ -7,16 +7,16 @@
   "analytics": "التحليلات",
   "notifications": "الإشعارات",
   "results": "سجل النتائج",
-  "settings": "الإعدادات",
+  "settings": "الحساب",
   "logout": "تسجيل الخروج",
   "ui": {
     "collapseOpen": "توسيع الشريط الجانبي",
     "collapseClose": "طي الشريط الجانبي",
-    "themeLight": "الوضع الفاتح",
-    "themeDark": "الوضع الداكن",
-    "localeSwitchLabel": "التبديل إلى الإنجليزية",
-    "switchToEn": "التبديل إلى الإنجليزية",
-    "switchToAr": "التبديل إلى العربية",
+    "themeLight": "الوضع النهاري",
+    "themeDark": "الوضع الليلي",
+    "localeSwitchLabel": "English",
+    "switchToEn": "English",
+    "switchToAr": "العربية",
     "version": "الإصدار {version}",
     "systemsOperational": "جميع الأنظمة تعمل"
   }

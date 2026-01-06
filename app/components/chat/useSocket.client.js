@@ -11,6 +11,63 @@ export default function useSocket({ url } = {}) {
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
 
+  const getPresenceStore = useCallback(() => {
+    globalThis.__app_presence_store = globalThis.__app_presence_store || {
+      byUserId: new Map(),
+    };
+    return globalThis.__app_presence_store;
+  }, []);
+
+  const bindPresenceCache = useCallback((sock) => {
+    if (!sock) return;
+    try {
+      if (sock.__app_presenceCacheBound) return;
+      sock.__app_presenceCacheBound = true;
+    } catch (e) {
+      // If we can't mark it, still try to bind (worst case duplicates are harmless).
+    }
+
+    const handler = (evt) => {
+      try {
+        if (!evt || !evt.userId) return;
+        const store = getPresenceStore();
+        store.byUserId.set(String(evt.userId), Boolean(evt.online));
+      } catch (e) {}
+    };
+
+    try { sock.on('presence', handler); } catch (e) {}
+  }, [getPresenceStore]);
+
+  const getUserKeyForSocket = useCallback((sock) => {
+    try {
+      return sock && sock.__app_userKey ? String(sock.__app_userKey) : '__anon__';
+    } catch {
+      return '__anon__';
+    }
+  }, []);
+
+  const getJoinedRoomsForUser = useCallback((userKey) => {
+    globalThis.__app_socket_joinedRooms_by_user = globalThis.__app_socket_joinedRooms_by_user || new Map();
+    const m = globalThis.__app_socket_joinedRooms_by_user;
+    const key = String(userKey || '__anon__');
+    if (m.has(key)) return m.get(key);
+    const set = new Set();
+    m.set(key, set);
+    return set;
+  }, []);
+
+  const rejoinAllRooms = useCallback((sock) => {
+    if (!sock) return;
+    try {
+      const userKey = getUserKeyForSocket(sock);
+      const joined = getJoinedRoomsForUser(userKey);
+      if (!joined || !joined.size) return;
+      for (const chatId of joined) {
+        try { sock.emit('join', chatId); } catch (e) {}
+      }
+    } catch (e) {}
+  }, [getJoinedRoomsForUser, getUserKeyForSocket]);
+
   // Helper to find any existing global socket (prefer hook socketRef)
   const getGlobalSocket = useCallback(() => {
     if (socketRef.current) return socketRef.current;
@@ -66,7 +123,7 @@ export default function useSocket({ url } = {}) {
       socketRef.current = map[userKey].socket;
       // attach per-hook listeners for connect/disconnect but keep references
       const existing = socketRef.current;
-      const onConnect = () => setConnected(true);
+      const onConnect = () => { setConnected(true); rejoinAllRooms(existing); };
       const onDisconnect = () => setConnected(false);
       existing.on('connect', onConnect);
       existing.on('disconnect', onDisconnect);
@@ -86,6 +143,9 @@ export default function useSocket({ url } = {}) {
           try { if (existing.connected) existing.disconnect(); existing.connect(); } catch (e) {}
         }
       } catch (e) {}
+
+      // Ensure we cache presence events even if no page has subscribed yet.
+      try { bindPresenceCache(existing); } catch (e) {}
 
       return socketRef.current;
     }
@@ -113,7 +173,7 @@ export default function useSocket({ url } = {}) {
     } catch (e) {}
 
     // set up per-hook listeners and save cleanup
-    const onConnect = () => setConnected(true);
+    const onConnect = () => { setConnected(true); rejoinAllRooms(socket); };
     const onDisconnect = () => setConnected(false);
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
@@ -124,6 +184,9 @@ export default function useSocket({ url } = {}) {
       } catch (e) {}
     };
 
+    // Ensure we cache presence events even if no page has subscribed yet.
+    try { bindPresenceCache(socket); } catch (e) {}
+
     // initiate connection
     try {
       socket.connect();
@@ -133,7 +196,7 @@ export default function useSocket({ url } = {}) {
 
     socketRef.current = socket;
     return socket;
-  }, [url]);
+  }, [url, rejoinAllRooms, bindPresenceCache]);
 
   const disconnect = useCallback(() => {
     const sock = socketRef.current;
@@ -149,6 +212,9 @@ export default function useSocket({ url } = {}) {
         if (map[userKey].refcount === 0) {
           try { sock.disconnect(); } catch (e) {}
           try { delete globalThis.__app_socket_by_user[userKey]; } catch (e) {}
+          try {
+            if (globalThis.__app_socket_joinedRooms_by_user) globalThis.__app_socket_joinedRooms_by_user.delete(String(userKey));
+          } catch (e) {}
           // clean legacy pointer if it matches
           try { if (globalThis.__app_socket && globalThis.__app_socket.socket === sock) { delete globalThis.__app_socket; delete globalThis.__app_socket_userId; } } catch (e) {}
         }
@@ -172,35 +238,25 @@ export default function useSocket({ url } = {}) {
   const join = useCallback((chatId) => {
     const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
-    // ensure we don't spam repeated join emits for same room
-    globalThis.__app_socket_joinedRooms = globalThis.__app_socket_joinedRooms || new Map();
-    const joined = globalThis.__app_socket_joinedRooms.get(sock.id) || new Set();
-    // avoid mutating socket object (ESLint immutability rule)
-    globalThis.__app_socket_lastJoinTs = globalThis.__app_socket_lastJoinTs || new Map();
-    const lastObj = globalThis.__app_socket_lastJoinTs.get(sock.id) || {};
-    const now = Date.now();
-    if (joined.has(chatId)) {
-      // throttle duplicate joins: ignore if last join was within 1000ms
-      if (lastObj[chatId] && now - lastObj[chatId] < 1000) return;
-    }
+    const userKey = getUserKeyForSocket(sock);
+    const joined = getJoinedRoomsForUser(userKey);
+    if (joined.has(chatId)) return;
     try {
       sock.emit('join', chatId);
       joined.add(chatId);
-      lastObj[chatId] = now;
-      globalThis.__app_socket_lastJoinTs.set(sock.id, lastObj);
-      globalThis.__app_socket_joinedRooms.set(sock.id, joined);
     } catch (e) {}
-  }, [getGlobalSocket]);
+  }, [getGlobalSocket, getJoinedRoomsForUser, getUserKeyForSocket]);
 
   const leave = useCallback((chatId) => {
     const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
     try {
       sock.emit('leave', chatId);
-      const joined = globalThis.__app_socket_joinedRooms && globalThis.__app_socket_joinedRooms.get(sock.id);
+      const userKey = getUserKeyForSocket(sock);
+      const joined = globalThis.__app_socket_joinedRooms_by_user && globalThis.__app_socket_joinedRooms_by_user.get(String(userKey));
       if (joined) joined.delete(chatId);
     } catch (e) {}
-  }, [getGlobalSocket]);
+  }, [getGlobalSocket, getUserKeyForSocket]);
 
   const sendMessage = useCallback((payload, cb) => {
     if (!socketRef.current) return cb && cb({ error: 'not_connected' });
@@ -237,9 +293,30 @@ export default function useSocket({ url } = {}) {
   const onPresence = useCallback((handler) => {
     const sock = socketRef.current || getGlobalSocket();
     if (!sock) return;
+
+    // Replay current online users asynchronously so late subscribers don't miss the
+    // initial snapshot (which is emitted at connect time).
+    try {
+      const store = getPresenceStore();
+      const replay = () => {
+        try {
+          for (const [userId, online] of store.byUserId.entries()) {
+            if (!online) continue;
+            try { handler({ userId, online: true }); } catch (e) {}
+          }
+        } catch (e) {}
+      };
+      try {
+        if (typeof queueMicrotask === 'function') queueMicrotask(replay);
+        else setTimeout(replay, 0);
+      } catch (e) {
+        try { setTimeout(replay, 0); } catch (e2) {}
+      }
+    } catch (e) {}
+
     sock.on('presence', handler);
     return () => { try { sock.off('presence', handler); } catch (e) {} };
-  }, [getGlobalSocket]);
+  }, [getGlobalSocket, getPresenceStore]);
 
   const on = useCallback((event, handler) => {
     const sock = socketRef.current || getGlobalSocket();

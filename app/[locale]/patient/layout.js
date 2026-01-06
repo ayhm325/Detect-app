@@ -8,9 +8,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "../../theme-provider";
 import { useLocaleContext } from "../../hooks/useLocaleContext";
 import AuthGuard from "../../components/AuthGuard";
+import useSocket from "../../components/chat/useSocket.client";
 
 export default function PatientLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
+  const socket = useSocket();
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -19,6 +21,32 @@ export default function PatientLayout({ children }) {
   const isDark = theme === "dark";
   const basePath = locale === "en" ? "/en" : "/ar";
   const t = useTranslations("patient");
+
+  // Global presence: connect socket as soon as patient enters the app.
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/token', { credentials: 'include' });
+        if (!mounted) return;
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.token) {
+            try { socket.connect({ token: data.token }); } catch (e) { try { socket.connect(); } catch (e2) {} }
+            return;
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+      try { socket.connect(); } catch (e) {}
+    })();
+
+    return () => {
+      mounted = false;
+      try { socket.disconnect && socket.disconnect(); } catch (e) {}
+    };
+  }, [socket]);
 
   // Patient navigation items with translation
   const patientNavItems = [

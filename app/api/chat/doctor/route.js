@@ -1,11 +1,12 @@
-export function POST() {
-  return NextResponse.json({ error: "Method Not Allowed" }, { status: 405 });
-}
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma from "../../../../lib/prismaClient.js";
 import { getJwtSecret } from "../../../../lib/auth/jwtSecret.js";
 import { getJwtVerifyOptions } from "../../../../lib/auth/jwtClaims.js";
+
+export function POST() {
+  return NextResponse.json({ error: "Method Not Allowed" }, { status: 405 });
+}
 
 export async function GET(request) {
   try {
@@ -33,7 +34,10 @@ export async function GET(request) {
     // Ensure we return all patients assigned to this doctor.
     // For patients without a Chat row yet, create one so doctor can start messaging.
     // only include patients who are currently active
-    const patients = await prisma.patient.findMany({ where: { doctorId: user.id, status: 'active' }, select: { id: true, fullName: true, email: true, status: true } });
+    const patients = await prisma.patient.findMany({
+      where: { doctorId: user.id, status: 'active' },
+      select: { id: true, userId: true, fullName: true, email: true, status: true }
+    });
 
     const chats = [];
     for (const p of patients) {
@@ -50,7 +54,7 @@ export async function GET(request) {
     // Also include any chats that might exist for this doctor but whose patient isn't linked via doctorId
     const extraChats = await prisma.chat.findMany({
       where: { doctorId: user.id },
-      include: { patient: { select: { id: true, fullName: true, email: true, status: true } }, messages: { orderBy: { createdAt: "desc" }, take: 1 } },
+      include: { patient: { select: { id: true, userId: true, fullName: true, email: true, status: true } }, messages: { orderBy: { createdAt: "desc" }, take: 1 } },
     });
     for (const c of extraChats) {
       // avoid duplicates and only include if patient is active
@@ -64,7 +68,35 @@ export async function GET(request) {
       return tb - ta;
     });
 
-    return NextResponse.json({ chats });
+    // Unread messages for doctor: messages sent by patient and not yet read.
+    const chatIds = chats.map((c) => c.id);
+    const unreadByChat = new Map();
+    try {
+      if (chatIds.length) {
+        const grouped = await prisma.message.groupBy({
+          by: ['chatId'],
+          where: {
+            chatId: { in: chatIds },
+            sender: 'patient',
+            status: { not: 'read' },
+          },
+          _count: { _all: true },
+        });
+        for (const row of grouped) {
+          unreadByChat.set(row.chatId, row._count?._all || 0);
+        }
+      }
+    } catch (e) {
+      // Best-effort: if groupBy isn't supported in this Prisma version, fall back to 0.
+      console.warn('/api/chat/doctor unreadCount compute failed', e?.message || e);
+    }
+
+    const chatsWithUnread = chats.map((c) => ({
+      ...c,
+      unreadCount: unreadByChat.get(c.id) || 0,
+    }));
+
+    return NextResponse.json({ chats: chatsWithUnread });
   } catch (error) {
     console.error("/api/chat/doctor error", error);
     return NextResponse.json({ error: "server_error" }, { status: 500 });

@@ -1,5 +1,29 @@
 {
+  "analysisDetails": {
+    "title": "تفاصيل التحليل",
+    "closeDetails": "إغلاق التفاصيل",
+    "close": "إغلاق",
+    "originalImage": "الصورة الأصلية",
+    "openOriginalImage": "فتح الصورة الأصلية",
+    "savedToHistory": "تم الحفظ في السجل",
+    "notSavedToHistory": "يتم الحفظ في السجل",
+    "notSaved": "يتم الحفظ",
+    "analysis": "التحليل",
+    "analysisResult": "نتيجة التحليل",
+    "model": "النموذج",
+    "inferenceTime": "زمن الاستدلال",
+    "diagnosis": "التشخيص",
+    "explanation": "التفسير",
+    "confidence": "الثقة",
+    "confidenceScore": "درجة الثقة",
+    "heatmap": "خريطة الحرارة"
+  },
   "brand": "PneumoDetect",
+  "clinicalStatuses": {
+    "stable": "مستقر",
+    "critical": "حرج",
+    "recovering": "يتعافى"
+  },
   "nav": {
     "home": "الصفحة الرئيسية",
     "appointments": "المواعيد",
@@ -38,6 +62,11 @@
       "readyReports": "التقارير الجاهزة",
       "newMessages": "الرسائل الجديدة",
       "vitalSigns": "الحالة الصحية"
+    },
+    "clinicalStatuses": {
+      "stable": "مستقر",
+      "critical": "حرج",
+      "recovering": "يتعافى"
     },
     "quickActions": {
       "title": "إجراءات سريعة",

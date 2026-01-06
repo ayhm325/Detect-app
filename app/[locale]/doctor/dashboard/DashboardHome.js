@@ -1,9 +1,12 @@
 "use client";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "../../../components/ui/Toast";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { formatTime } from "../../../lib/date";
+import { formatActivityDescription } from "../../../lib/activityFormat";
+import NotificationBellButton from "../../../components/ui/NotificationBellButton";
+import useSocket from "../../../components/chat/useSocket.client";
 import {
   FaUserMd,
   FaUsers,
@@ -13,10 +16,8 @@ import {
   FaCheckCircle,
   FaHourglassHalf,
   FaExclamationTriangle,
-  FaArrowUp,
   FaArrowRight,
   FaClock,
-  FaBell,
   FaChartLine,
   FaClipboardList,
 } from "react-icons/fa";
@@ -29,6 +30,56 @@ export default function DashboardHome({ serverData = {} }) {
   const ui = useTranslations("ui");
   const basePrefix = locale === "en" ? "/en" : "/ar";
   const placeholder = ui("placeholder");
+
+  const socket = useSocket();
+  const seenMessageKeysRef = useRef(new Set());
+  const [liveNewMessages, setLiveNewMessages] = useState(() => {
+    const v = serverData?.counts?.newMessages;
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) ? n : 0;
+  });
+
+  // Live increment: receive messages via user room (no chat join needed).
+  useEffect(() => {
+    if (!socket || !socket.onMessage) return;
+    const off = socket.onMessage((msg) => {
+      try {
+        if (!msg) return;
+        // Doctor unread count = incoming from patient.
+        if (msg.sender === "patient") {
+          // Avoid double counting when the socket is joined to both `chat:<id>` and `user:<id>`.
+          // We only count the user-scoped delivery for dashboard counters.
+          if (msg.__scope && msg.__scope !== 'user') return;
+          const key = msg.id ? `id:${msg.id}` : (msg.clientKey ? `ck:${msg.clientKey}` : null);
+          if (key) {
+            if (seenMessageKeysRef.current.has(key)) return;
+            seenMessageKeysRef.current.add(key);
+          }
+          setLiveNewMessages((c) => (Number(c || 0) + 1));
+        }
+      } catch (e) {}
+    });
+    return () => { try { off && off(); } catch (e) {} };
+  }, [socket]);
+
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/doctor/notifications", { method: "HEAD" });
+        if (!mounted) return;
+        if (res.ok) {
+          const count = res.headers.get("X-Unread-Count");
+          setUnreadNotificationsCount(Number(count) || 0);
+        }
+      } catch {}
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const safeRawObject = (key, fallback = {}) => {
     try {
@@ -56,7 +107,6 @@ export default function DashboardHome({ serverData = {} }) {
       todayAppointments: t("stats.todayAppointments"),
       pendingScans: t("stats.pendingScans"),
       newMessages: t("stats.newMessages"),
-      changeSince: t("stats.changeSince"),
     },
     quickActions: {
       viewPatients: t("quickActions.viewPatients"),
@@ -92,14 +142,41 @@ export default function DashboardHome({ serverData = {} }) {
     locale === "en" ? "en-US" : "ar-EG-u-nu-latn",
     { weekday: "long", year: "numeric", month: "long", day: "numeric" }
   );
-  const formattedDate = formattedDateRaw ? formattedDateRaw.replace(/\u060C/g, "").trim() : formattedDateRaw;
+
+  const normalizeArabicMonthNames = (value) => {
+    if (!value || locale === 'en') return value;
+    const map = {
+      "يناير": "كانون الثاني",
+      "فبراير": "شباط",
+      "مارس": "آذار",
+      "أبريل": "نيسان",
+      "مايو": "أيار",
+      "يونيو": "حزيران",
+      "يوليو": "تموز",
+      "أغسطس": "آب",
+      "سبتمبر": "أيلول",
+      "أكتوبر": "تشرين الأول",
+      "نوفمبر": "تشرين الثاني",
+      "ديسمبر": "كانون الأول",
+    };
+
+    let out = value;
+    for (const [from, to] of Object.entries(map)) {
+      out = out.replaceAll(from, to);
+    }
+    return out;
+  };
+
+  const formattedDate = formattedDateRaw
+    ? normalizeArabicMonthNames(formattedDateRaw.replace(/\u060C/g, "").trim())
+    : formattedDateRaw;
 
   // Normalize date/time strings to avoid hydration mismatches between server and client
   const formatDateTime = (val) => {
     if (!val) return "";
     const raw = typeof val === "string" ? val : new Date(val).toLocaleString(locale === 'en' ? 'en-US' : 'ar-EG-u-nu-latn');
     // Remove Arabic comma (U+060C) and normalize whitespace so server and client match
-    return raw.replace(/\u060C/g, "").replace(/\s+/g, " ").trim();
+    return normalizeArabicMonthNames(raw.replace(/\u060C/g, "").replace(/\s+/g, " ").trim());
   };
 
   // Map DB appointment statuses to UI status keys we use for labels/colors
@@ -116,46 +193,34 @@ export default function DashboardHome({ serverData = {} }) {
     {
       title: labels.stats.patients,
       value: serverData.counts?.patients ?? "156",
-      change: "+12",
-      changePercent: "+8.3%",
       icon: FaUsers,
       color: "bg-(--ui-info)",
       bgLight: "bg-(--ui-info-bg)",
       textColor: "text-(--ui-info)",
-      trend: "up",
     },
     {
       title: labels.stats.todayAppointments,
       value: serverData.counts?.todayAppointments ?? "12",
-      change: "+3",
-      changePercent: "+25%",
       icon: FaCalendarAlt,
       color: "bg-(--ui-success)",
       bgLight: "bg-(--ui-success-bg)",
       textColor: "text-(--ui-success)",
-      trend: "up",
     },
     {
       title: labels.stats.pendingScans,
       value: serverData.counts?.pendingScans ?? "8",
-      change: "-2",
-      changePercent: "-20%",
       icon: FaXRay,
       color: "bg-(--ui-warning)",
       bgLight: "bg-(--ui-warning-bg)",
       textColor: "text-(--ui-warning)",
-      trend: "down",
     },
     {
       title: labels.stats.newMessages,
-      value: serverData.counts?.newMessages ?? "24",
-      change: "+5",
-      changePercent: "+26%",
+      value: liveNewMessages,
       icon: FaComments,
       color: "bg-(--ui-info)",
       bgLight: "bg-(--ui-info-bg)",
       textColor: "text-(--ui-info)",
-      trend: "up",
     },
   ];
 
@@ -172,7 +237,13 @@ export default function DashboardHome({ serverData = {} }) {
   ], [t]);
 
   const recentActivity = (serverData.recentActivity && serverData.recentActivity.length)
-    ? serverData.recentActivity.map((r, i) => ({ id: r.id || i, action: r.action || r.description || '', time: formatDateTime(r.time), icon: FaClipboardList, color: 'text-(--ui-warning)' }))
+    ? serverData.recentActivity.map((r, i) => ({
+        id: r.id || i,
+        action: formatActivityDescription({ type: r.type, description: r.description, meta: r.meta }, locale),
+        time: formatDateTime(r.time),
+        icon: FaClipboardList,
+        color: 'text-(--ui-warning)',
+      }))
     : defaultRecentActivity;
 
   const pendingScans = (serverData.pendingScansList && serverData.pendingScansList.length)
@@ -259,15 +330,11 @@ export default function DashboardHome({ serverData = {} }) {
               </h1>
               <p className="mt-2 text-(--ui-muted-foreground)">{labels.welcome} {serverData.doctor?.user?.fullName || labels.ui.sampleDoctorName} - {formattedDate}</p>
             </div>
-            <button
+            <NotificationBellButton
+              count={unreadNotificationsCount}
               onClick={() => router.push(`${basePrefix}/doctor/notifications`)}
-              className="relative rounded-lg btn-gradient p-3 text-white transition-all"
-            >
-              <FaBell className="text-xl" />
-              <span className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-(--ui-danger) text-xs font-bold text-(--ui-danger-foreground)">
-                {serverData.counts?.newMessages ?? 0}
-              </span>
-            </button>
+              title={ui("topbar.notifications")}
+            />
           </div>
 
           {/* Stats Cards */}
@@ -285,17 +352,10 @@ export default function DashboardHome({ serverData = {} }) {
                       <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.color}`}>
                         <Icon className="text-2xl text-white" />
                       </div>
-                      <div className={`flex items-center gap-1 text-sm font-medium ${stat.trend === "up" ? "text-(--ui-success)" : "text-(--ui-danger)"}`}>
-                        <FaArrowUp className={stat.trend === "down" ? "rotate-180" : ""} />
-                        {stat.changePercent}
-                      </div>
                     </div>
                     <div className="mt-4">
                       <p className="text-sm text-(--ui-muted-foreground)">{stat.title}</p>
                       <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{stat.value}</p>
-                      <p className="mt-1 text-xs text-(--ui-muted-foreground)">
-                        {stat.change} {labels.stats.changeSince}
-                      </p>
                     </div>
                   </div>
                 </div>

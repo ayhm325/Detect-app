@@ -2,7 +2,8 @@ import { getTranslations } from "next-intl/server";
 import ForgotPasswordForm from "../../components/ForgotPasswordForm";
 
 export async function generateMetadata({ params }) {
-  const locale = params?.locale;
+  const resolvedParams = typeof params?.then === "function" ? await params : params;
+  const locale = resolvedParams?.locale || "en";
   const t = await getTranslations({ locale, namespace: "meta" });
   return {
     title: t("forgotPassword.title"),
@@ -16,7 +17,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ForgotPasswordPage({ params }) {
-  const locale = params?.locale;
+  const resolvedParams = typeof params?.then === "function" ? await params : params;
+  const locale = resolvedParams?.locale || "en";
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (

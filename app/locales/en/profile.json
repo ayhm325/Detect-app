@@ -23,6 +23,7 @@
   "toastPasswordChangeNetwork": "Network error",
   "toastPasswordMismatch": "Passwords do not match",
   "toastPasswordLength": "Password too short",
+  "toastPasswordSameAsOld": "New password must be different from the old password",
   "toastPasswordChanged": "Password changed",
   "toastNotificationUpdated": "Notification updated"
   ,
@@ -70,6 +71,7 @@
     "doctorChangeSent": "Doctor change request sent to admin and will be reviewed soon",
     "doctorChangeFail": "Request failed",
     "doctorChangeSelect": "Please select a new doctor",
+    "doctorChangeSameDoctor": "You can't select your current doctor",
     "doctorChangeNetwork": "Network error"
   },
   "doctorChange": {

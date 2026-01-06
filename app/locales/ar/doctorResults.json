@@ -100,6 +100,12 @@
       "title": "مراجعة الطبيب",
       "reviewed": "تمت المراجعة",
       "notesLabel": "ملاحظات الطبيب",
+      "clinicalStatusLabel": "حالة المريض",
+      "clinicalStatuses": {
+        "stable": "مستقر",
+        "critical": "حرج",
+        "recovering": "يتعافى"
+      },
       "notesPlaceholder": "اكتب شرح الطبيب أو الملاحظات السريرية لهذا التقرير…",
       "markReviewed": "تأكيد المراجعة",
       "saving": "جارٍ الحفظ…"

@@ -1,54 +1,100 @@
-import { getNotificationsForUser } from '../../../../lib/prismaQueries.js';
+import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prismaClient.js';
+import { withRBAC } from '../../../../lib/auth/withRBAC';
+import { rateLimit } from '../../../../lib/security/rateLimiter';
+import { logAudit } from '../../../../lib/security/auditLogger';
 
-// Get unread notifications count for a user
-export async function HEAD(req) {
-  const userId = req.nextUrl.searchParams.get('userId') || 'demo-user-id';
-  const count = await prisma.notification.count({ where: { userId, isRead: false, isDeleted: false } });
-  return new Response(null, { status: 200, headers: { 'X-Unread-Count': count.toString() } });
-}
-
-export async function GET(req) {
-  // هنا يجب أن تحصل على userId من الجلسة أو التوكن أو الكوكيز
-  // مؤقتاً سنستخدم userId ثابت للتجربة
-  const userId = req.nextUrl.searchParams.get('userId') || 'demo-user-id';
-  const notifications = await getNotificationsForUser(userId);
-  return Response.json(notifications);
-}
-
-// Mark all notifications as read for a user
-export async function PUT(req) {
-  const userId = req.nextUrl.searchParams.get('userId') || 'demo-user-id';
-  const id = req.nextUrl.searchParams.get('id');
-  const body = req.body ? await req.json() : {};
-  if (id) {
-    // تحديث إشعار واحد
-    await prisma.notification.update({
-      where: { id },
-      data: { ...body }
-    });
-    return Response.json({ success: true });
-  } else {
-    // تحديث الكل كمقروء
-    await prisma.notification.updateMany({
-      where: { userId, read: false },
-      data: { read: true }
-    });
-    return Response.json({ success: true });
+export const HEAD = withRBAC(async (request, user) => {
+  const rl = await rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: 'rate_limit_exceeded', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: 'HEAD /api/patient/notifications' } });
+    return new Response(null, { status: 429, headers: { 'X-Unread-Count': '0' } });
   }
-}
-
-// Delete all notifications for a user
-export async function DELETE(req) {
-  const userId = req.nextUrl.searchParams.get('userId') || 'demo-user-id';
-  const id = req.nextUrl.searchParams.get('id');
-  if (id) {
-    // حذف إشعار واحد
-    await prisma.notification.delete({ where: { id } });
-    return Response.json({ success: true });
-  } else {
-    // حذف جميع الإشعارات
-    await prisma.notification.deleteMany({ where: { userId } });
-    return Response.json({ success: true });
+  try {
+    const unread = await prisma.notification.count({
+      where: { userId: user.id, isRead: false, isDeleted: false }
+    });
+    return new Response(null, { status: 200, headers: { 'X-Unread-Count': String(unread) } });
+  } catch (e) {
+    logAudit({ event: 'patient_notifications_unread_error', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: e?.message } });
+    return new Response(null, { status: 200, headers: { 'X-Unread-Count': '0' } });
   }
-}
+}, ['patient']);
+
+export const GET = withRBAC(async (request, user) => {
+  const rl = await rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: 'rate_limit_exceeded', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: 'GET /api/patient/notifications' } });
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
+  try {
+    const notifications = await prisma.notification.findMany({
+      where: { userId: user.id, isDeleted: false },
+      orderBy: { createdAt: 'desc' },
+      take: 200
+    });
+    logAudit({ event: 'patient_notifications_listed', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { count: notifications.length } });
+    return NextResponse.json({ notifications }, { status: 200 });
+  } catch (e) {
+    logAudit({ event: 'patient_notifications_list_error', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: e?.message } });
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
+  }
+}, ['patient']);
+
+export const PUT = withRBAC(async (request, user) => {
+  const rl = await rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: 'rate_limit_exceeded', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: 'PUT /api/patient/notifications' } });
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
+  try {
+    const id = request.nextUrl.searchParams.get('id');
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {}
+
+    const nextIsRead = typeof body?.isRead === 'boolean' ? body.isRead : undefined;
+
+    if (id) {
+      const existing = await prisma.notification.findUnique({ where: { id } });
+      if (!existing || existing.userId !== user.id) {
+        return NextResponse.json({ error: 'not_found' }, { status: 404 });
+      }
+      const updated = await prisma.notification.update({ where: { id }, data: { ...(typeof nextIsRead === 'boolean' ? { isRead: nextIsRead } : {}) } });
+      return NextResponse.json({ success: true, updated }, { status: 200 });
+    }
+
+    // Mark all as read
+    await prisma.notification.updateMany({ where: { userId: user.id, isDeleted: false, isRead: false }, data: { isRead: true } });
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (e) {
+    logAudit({ event: 'patient_notifications_update_error', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: e?.message } });
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
+  }
+}, ['patient']);
+
+export const DELETE = withRBAC(async (request, user) => {
+  const rl = await rateLimit(request);
+  if (rl.limited) {
+    logAudit({ event: 'rate_limit_exceeded', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: 'DELETE /api/patient/notifications' } });
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
+  try {
+    const id = request.nextUrl.searchParams.get('id');
+    if (id) {
+      const existing = await prisma.notification.findUnique({ where: { id } });
+      if (!existing || existing.userId !== user.id) {
+        return NextResponse.json({ error: 'not_found' }, { status: 404 });
+      }
+      await prisma.notification.update({ where: { id }, data: { isDeleted: true } });
+      return NextResponse.json({ success: true }, { status: 200 });
+    }
+
+    await prisma.notification.updateMany({ where: { userId: user.id, isDeleted: false }, data: { isDeleted: true } });
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (e) {
+    logAudit({ event: 'patient_notifications_delete_error', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: e?.message } });
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
+  }
+}, ['patient']);

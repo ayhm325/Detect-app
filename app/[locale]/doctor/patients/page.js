@@ -22,13 +22,15 @@ import {
   FaHistory,
   FaHospital,
 } from "react-icons/fa";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { formatDate } from "../../../lib/date";
 
 // You may need to get locale and labels from props or context, adjust as needed
 export default function DoctorPatientsPage({ locale }) {
   const { showToast, ToastContainer } = useToast();
   const router = useRouter();
+  const localeFromHook = useLocale();
+  const activeLocale = locale || localeFromHook;
   const t = useTranslations("doctorPatients");
   const ui = useTranslations("ui");
   const placeholder = ui("placeholder");
@@ -73,8 +75,9 @@ export default function DoctorPatientsPage({ locale }) {
     const gender = p.gender || (p.user && p.user.gender) || "";
     const phone = p.phone || (p.user && p.user.phone) || p.mobile || "";
     const email = p.email || (p.user && p.user.email) || "";
-    // Map backend status (e.g., active/suspended) to UI status keys (stable/critical/recovering)
-    let status = p.status || (p.user && p.user.status) || "stable";
+    // Prefer explicit doctor-set clinical status when available.
+    // Fallback: map backend account status (active/suspended) to UI keys.
+    let status = p.clinicalStatus || p.clinical_status || p.status || (p.user && p.user.status) || "stable";
     if (status === "active") status = "stable";
     if (status === "suspended") status = "critical";
 
@@ -88,18 +91,17 @@ export default function DoctorPatientsPage({ locale }) {
       status,
       lastVisit: p.lastVisit || p.last_visit || p.joinDate || new Date().toISOString(),
       nextAppointment: p.nextAppointment || p.next_appointment || null,
-      diagnosis: p.notes || p.diagnosis || (p.medicalRecords && p.medicalRecords[0] && p.medicalRecords[0].doctorNotes) || "",
+      diagnosis: (p.latestDoctorDiagnosis ?? "").toString(),
       scansCount: p.medicalRecordsCount || p.scansCount || 0,
       avatar: (name && name.charAt ? name.charAt(0) : ""),
       bloodType: p.bloodType || p.blood_type || "",
-      conditions: p.conditions || p.chronicConditions || p.notes || "",
     };
   }, [computeAge]);
 
   // Fetch real patients from the API (fallback to translation-based template on error)
   useEffect(() => {
     let mounted = true;
-    const prefix = locale ? `/${locale}` : "";
+    const prefix = activeLocale ? `/${activeLocale}` : "";
     (async () => {
       try {
         const res = await fetch(`${prefix}/api/doctor/patients`);
@@ -118,7 +120,7 @@ export default function DoctorPatientsPage({ locale }) {
     return () => {
       mounted = false;
     };
-  }, [locale, mapPatient]);
+  }, [activeLocale, mapPatient]);
 
   const stats = {
     total: patients.length,
@@ -146,11 +148,17 @@ export default function DoctorPatientsPage({ locale }) {
   };
 
   const handleStartChat = (patient) => {
-    showToast(`${t("toast.chat")} ${patient.name}`, "info");
+    const prefix = activeLocale ? `/${activeLocale}` : "";
+    const targetId = patient?.id;
+    if (!targetId) {
+      showToast(t("error"), "error");
+      return;
+    }
+    router.push(`${prefix}/doctor/chat?patientId=${encodeURIComponent(targetId)}`);
   };
 
   const handleViewResults = (patient) => {
-    const prefix = locale ? `/${locale}` : "";
+    const prefix = activeLocale ? `/${activeLocale}` : "";
     const targetId = patient?.id;
     if (!targetId) {
       showToast(t("error"), "error");
@@ -159,25 +167,21 @@ export default function DoctorPatientsPage({ locale }) {
     router.push(`${prefix}/doctor/results?patientId=${encodeURIComponent(targetId)}`);
   };
 
-  const handleCall = (patient) => {
-    showToast(`${t("toast.call")} ${patient.name}...`, "info");
-  };
-
   const getStatusConfig = (status) => {
     const config = {
       stable: {
         label: t("statuses.stable"),
-        color: "bg-(--ui-success-bg) text-(--ui-success-foreground) border-(--ui-success-border)",
+        color: "bg-(--ui-success) text-(--ui-success-foreground) border-(--ui-success-border)",
         icon: FaCheckCircle,
       },
       critical: {
         label: t("statuses.critical"),
-        color: "bg-(--ui-danger-bg) text-(--ui-danger-foreground) border-(--ui-danger-border)",
+        color: "bg-(--ui-danger) text-(--ui-danger-foreground) border-(--ui-danger-border)",
         icon: FaExclamationTriangle,
       },
       recovering: {
         label: t("statuses.recovering"),
-        color: "bg-(--ui-warning-bg) text-(--ui-warning-foreground) border-(--ui-warning-border)",
+        color: "bg-(--ui-warning) text-(--ui-warning-foreground) border-(--ui-warning-border)",
         icon: FaClock,
       },
     };
@@ -190,7 +194,7 @@ export default function DoctorPatientsPage({ locale }) {
     const config = getStatusConfig(status);
     const Icon = config.icon;
     return (
-      <span className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium ${config.color}`}>
+      <span className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold shadow-(--shadow-soft) ${config.color}`}>
         <Icon className="mr-1" />
         {config.label}
       </span>
@@ -322,29 +326,33 @@ export default function DoctorPatientsPage({ locale }) {
 
                 {/* Patient Info */}
                 <div className="mb-4 space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-(--ui-muted-foreground)">
-                    <FaPhone className="text-(--ui-info)" />
-                    {patient.phone}
+                  <div className="flex items-center gap-2 text-sm">
+                    <FaPhone className="text-(--ui-muted-foreground)" />
+                    <span className="text-(--ui-foreground)">{patient.phone}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-(--ui-muted-foreground)">
-                    <FaEnvelope className="text-(--ui-info)" />
-                    {patient.email}
+                  <div className="flex items-center gap-2 text-sm">
+                    <FaEnvelope className="text-(--ui-muted-foreground)" />
+                    <span className="text-(--ui-foreground)">{patient.email}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-(--ui-muted-foreground)">
-                    <FaCalendarAlt className="text-(--ui-success)" />
-                    {t("labels.lastVisit")} {formatDate(patient.lastVisit, locale, placeholder)}
+                  <div className="flex items-center gap-2 text-sm">
+                    <FaCalendarAlt className="text-(--ui-muted-foreground)" />
+                    <span className="text-(--ui-muted-foreground)">{t("labels.lastVisit")}</span>
+                    <span className="font-medium text-(--ui-foreground)">{formatDate(patient.lastVisit, locale, placeholder)}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-(--ui-muted-foreground)">
-                    <FaCalendarAlt className="text-(--ui-warning)" />
-                    {t("labels.nextAppointment")} {formatDate(patient.nextAppointment, locale, placeholder)}
+                  <div className="flex items-center gap-2 text-sm">
+                    <FaCalendarAlt className="text-(--ui-muted-foreground)" />
+                    <span className="text-(--ui-muted-foreground)">{t("labels.nextAppointment")}</span>
+                    <span className="font-medium text-(--ui-foreground)">{formatDate(patient.nextAppointment, locale, placeholder)}</span>
                   </div>
                 </div>
 
                 {/* Diagnosis */}
-                <div className="mb-4 rounded-lg bg-(--ui-info-bg) border border-(--ui-info-border) p-3">
-                  <p className="text-xs font-medium text-(--ui-info-foreground) mb-1">{t("labels.diagnosis")}</p>
-                  <p className="text-sm text-(--ui-info-foreground) opacity-90">{patient.diagnosis}</p>
-                </div>
+                {!!(patient.diagnosis && patient.diagnosis.trim()) && (
+                  <div className="mb-4 rounded-lg bg-(--ui-surface-2) border border-(--ui-border) p-3">
+                    <p className="text-xs font-medium text-(--ui-muted-foreground) mb-1">{t("labels.diagnosis")}</p>
+                    <p className="text-sm text-(--ui-foreground)">{patient.diagnosis}</p>
+                  </div>
+                )}
 
                 {/* Medical Info */}
                 <div className="mb-4 flex items-center justify-between text-sm">
@@ -357,23 +365,6 @@ export default function DoctorPatientsPage({ locale }) {
                     <span className="ml-2 font-bold text-(--ui-info)">{patient.scansCount}</span>
                   </div>
                 </div>
-
-                {/* Conditions */}
-                {patient.conditions && patient.conditions.length > 0 && (
-                  <div className="mb-4">
-                    <p className="text-xs font-medium text-(--ui-foreground) opacity-80 mb-1">{t("labels.chronic")}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {patient.conditions.split(/,|،/).map((condition, idx) => (
-                        <span
-                          key={idx}
-                          className="rounded-full bg-(--ui-warning-bg) border border-(--ui-warning-border) px-2 py-1 text-xs text-(--ui-warning-foreground)"
-                        >
-                          {condition.trim()}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 {/* Actions */}
                 <div className="flex gap-2">
@@ -397,13 +388,6 @@ export default function DoctorPatientsPage({ locale }) {
                     title={t("actions.chat")}
                   >
                     <FaComments />
-                  </button>
-                  <button
-                    onClick={() => handleCall(patient)}
-                    className="flex items-center justify-center rounded-lg bg-(--ui-info) px-3 py-2 text-white transition-all hover:opacity-90"
-                    title={t("actions.call")}
-                  >
-                    <FaPhone />
                   </button>
                 </div>
               </div>
@@ -485,13 +469,15 @@ export default function DoctorPatientsPage({ locale }) {
                 </div>
 
                 {/* Diagnosis */}
-                <div className="md:col-span-2 rounded-lg bg-(--ui-info-bg) border border-(--ui-info-border) p-4">
-                  <h3 className="mb-2 font-bold text-(--ui-info-foreground) flex items-center gap-2">
-                    <FaFileAlt />
-                    {t("sections.diagnosis")}
-                  </h3>
-                  <p className="text-(--ui-info-foreground) opacity-90">{selectedPatient.diagnosis}</p>
-                </div>
+                {!!(selectedPatient.diagnosis && selectedPatient.diagnosis.trim()) && (
+                  <div className="md:col-span-2 rounded-lg bg-(--ui-surface-2) border border-(--ui-border) p-4">
+                    <h3 className="mb-2 font-bold text-(--ui-foreground) flex items-center gap-2">
+                      <FaFileAlt />
+                      {t("sections.diagnosis")}
+                    </h3>
+                    <p className="text-(--ui-foreground)">{selectedPatient.diagnosis}</p>
+                  </div>
+                )}
 
                 {/* Appointments */}
                 <div className="rounded-lg bg-(--ui-surface-2) border border-(--ui-border) p-4">

@@ -23,6 +23,7 @@
   "toastPasswordChangeNetwork": "فشل الاتصال",
   "toastPasswordMismatch": "كلمتا المرور غير متطابقتين",
   "toastPasswordLength": "كلمة المرور قصيرة جدًا",
+  "toastPasswordSameAsOld": "يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمة المرور القديمة",
   "toastPasswordChanged": "تم تغيير كلمة المرور",
   "toastNotificationUpdated": "تم تحديث الإشعارات",
   "tab": {
@@ -68,6 +69,7 @@
     "doctorChangeSent": "تم إرسال طلب تغيير الطبيب للإدارة وسيتم مراجعته قريباً",
     "doctorChangeFail": "فشل الطلب",
     "doctorChangeSelect": "يرجى اختيار طبيب جديد",
+    "doctorChangeSameDoctor": "لا يمكنك اختيار نفس الطبيب الحالي",
     "doctorChangeNetwork": "فشل الاتصال"
   },
   "doctorChange": {

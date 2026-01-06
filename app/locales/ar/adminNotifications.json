@@ -1,0 +1,29 @@
+{
+  "title": "الإشعارات",
+  "subtitle": "إشعارات الإدارة والأحداث المهمة",
+  "summary": {
+    "unread": "غير المقروءة",
+    "pendingDoctorApprovals": "طلبات الأطباء المعلقة",
+    "pendingDoctorChangeRequests": "طلبات تغيير الطبيب المعلقة",
+    "clickToOpen": "اضغط للفتح"
+  },
+  "sections": {
+    "notifications": "الإشعارات",
+    "recentActivity": "النشاطات الأخيرة"
+  },
+  "states": {
+    "loading": "جارٍ التحميل…",
+    "unread": "غير مقروء",
+    "emptyNotifications": "لا توجد إشعارات حالياً.",
+    "emptyActivity": "لا توجد نشاطات حديثة."
+  },
+  "types": {
+    "info": "معلومات",
+    "warning": "تحذير",
+    "alert": "تنبيه",
+    "success": "نجاح"
+  },
+  "errors": {
+    "loadFailed": "تعذر تحميل الإشعارات"
+  }
+}

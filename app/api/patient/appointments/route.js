@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma from "../../../../lib/prismaClient";
 import { getAppointmentsForPatient } from "../../../../lib/prismaQueries";
+import { createNotificationBestEffort, formatDateTimeForLocale } from "../../../../lib/notifications";
 
 import { withRBAC } from "../../../../lib/auth/withRBAC";
 import { rateLimit } from "../../../../lib/security/rateLimiter";
@@ -99,6 +100,12 @@ export const POST = withRBAC(async (request, user) => {
 
     const scheduledDate = new Date(scheduledAt);
     try {
+      const doctor = await prisma.doctor.findUnique({
+        where: { userId: doctorId },
+        select: { user: { select: { fullName: true } } }
+      });
+      const doctorName = doctor?.user?.fullName || null;
+
       const created = await prisma.appointment.create({
         data: {
           doctorId,
@@ -108,6 +115,26 @@ export const POST = withRBAC(async (request, user) => {
           reason: reason || null,
           location: location || null,
           phone: phone || null
+        }
+      });
+
+      await createNotificationBestEffort(prisma, {
+        userId: user.id,
+        type: 'info',
+        message: {
+          ar: `تم حجز موعد${doctorName ? ` مع د. ${doctorName}` : ''} بتاريخ ${formatDateTimeForLocale(scheduledDate, 'ar')}.`,
+          en: `Your appointment${doctorName ? ` with Dr. ${doctorName}` : ''} was booked for ${formatDateTimeForLocale(scheduledDate, 'en')}.`
+        }
+      });
+
+      // Notify doctor (real notifications)
+      const patientName = patient?.fullName || null;
+      await createNotificationBestEffort(prisma, {
+        userId: doctorId,
+        type: 'info',
+        message: {
+          ar: `تم حجز موعد جديد من${patientName ? ` المريض ${patientName}` : ' أحد المرضى'} بتاريخ ${formatDateTimeForLocale(scheduledDate, 'ar')}.`,
+          en: `A new appointment was booked by${patientName ? ` ${patientName}` : ' a patient'} for ${formatDateTimeForLocale(scheduledDate, 'en')}.`
         }
       });
 

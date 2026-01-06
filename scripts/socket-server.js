@@ -30,6 +30,94 @@ const io = new Server(server, {
   cors: { origin: true, credentials: true },
 });
 
+// In-memory presence map (used when Redis isn't configured).
+// Key: chatId (string), Value: Set of userIds currently online in that chat room.
+const onlineByChat = new Map();
+
+// Global user presence (online/offline) independent of chat rooms.
+// In-memory refcounts for multi-tab. When Redis is configured, we track socket IDs per user.
+const onlineUserCounts = new Map(); // userId -> count
+const onlineUsers = new Set(); // userIds with count > 0
+
+async function emitGlobalPresenceSnapshotToSocket(socket) {
+  try {
+    const selfId = String(socket.user?.id);
+    let ids = [];
+    if (redis) {
+      ids = await redis.smembers('online:users').catch(() => []);
+    } else {
+      ids = Array.from(onlineUsers);
+    }
+    for (const id of ids) {
+      if (!id) continue;
+      if (selfId && String(id) === selfId) continue;
+      socket.emit('presence', { userId: id, online: true });
+    }
+  } catch (e) {
+    console.warn('global presence snapshot error', e?.message || e);
+  }
+}
+
+async function markUserOnline(socket) {
+  const userId = socket.user?.id;
+  if (!userId) return;
+  const id = String(userId);
+
+  if (redis) {
+    try {
+      const key = `online:user:${id}:sockets`;
+      await redis.sadd(key, socket.id);
+      const count = await redis.scard(key).catch(() => 0);
+      if (count === 1) {
+        await redis.sadd('online:users', id).catch(() => {});
+        io.emit('presence', { userId: id, online: true });
+      }
+    } catch (e) {
+      console.warn('markUserOnline redis error', e?.message || e);
+    }
+  } else {
+    const prev = onlineUserCounts.get(id) || 0;
+    const next = prev + 1;
+    onlineUserCounts.set(id, next);
+    if (prev === 0) {
+      onlineUsers.add(id);
+      io.emit('presence', { userId: id, online: true });
+    }
+  }
+
+  await emitGlobalPresenceSnapshotToSocket(socket);
+}
+
+async function markUserOffline(socket) {
+  const userId = socket.user?.id;
+  if (!userId) return;
+  const id = String(userId);
+
+  if (redis) {
+    try {
+      const key = `online:user:${id}:sockets`;
+      await redis.srem(key, socket.id).catch(() => {});
+      const count = await redis.scard(key).catch(() => 0);
+      if (count === 0) {
+        await redis.srem('online:users', id).catch(() => {});
+        io.emit('presence', { userId: id, online: false });
+      }
+    } catch (e) {
+      console.warn('markUserOffline redis error', e?.message || e);
+    }
+  } else {
+    const prev = onlineUserCounts.get(id) || 0;
+    const next = Math.max(prev - 1, 0);
+    if (next === 0) {
+      onlineUserCounts.delete(id);
+      onlineUsers.delete(id);
+      io.emit('presence', { userId: id, online: false });
+    } else {
+      onlineUserCounts.set(id, next);
+    }
+  }
+}
+
 // Initialize Redis adapter if REDIS_URL provided
 let redis = null;
 if (process.env.REDIS_URL) {
@@ -83,6 +171,15 @@ io.use(async (socket, next) => {
 io.on('connection', (socket) => {
   console.log('socket connected', socket.id, 'user', socket.user && socket.user.id);
 
+  // Always join a per-user room so we can deliver events even when the user
+  // hasn't joined any chat rooms (e.g., dashboards).
+  try {
+    if (socket.user?.id) socket.join(`user:${socket.user.id}`);
+  } catch (e) {}
+
+  // Global presence: user is online as soon as they connect (no need to join chat rooms).
+  markUserOnline(socket).catch(() => {});
+
   // Debug helper: client can request its authenticated user info
   socket.on('whoami', () => {
     try {
@@ -96,27 +193,73 @@ io.on('connection', (socket) => {
   // simple presence: notify rooms when user connects
   socket.on('join', async (chatId) => {
     if (!chatId) return;
-    socket.join(`chat:${chatId}`);
+    const roomKey = `chat:${chatId}`;
+    // Idempotency: if already in room, don't re-emit presence or re-log.
+    try {
+      if (socket.rooms && socket.rooms.has(roomKey)) return;
+    } catch (e) {}
+    socket.join(roomKey);
     console.log(`socket ${socket.id} joined chat:${chatId}`);
+
+    // Send presence snapshot to the joining socket so it can show online status immediately.
+    try {
+      let onlineIds = [];
+      if (redis) {
+        onlineIds = await redis.smembers(`chat:${chatId}:online`).catch(() => []);
+      } else {
+        const set = onlineByChat.get(String(chatId));
+        onlineIds = set ? Array.from(set) : [];
+      }
+      for (const id of onlineIds) {
+        if (!id) continue;
+        if (String(id) === String(socket.user.id)) continue;
+        socket.emit('presence', { userId: id, online: true });
+      }
+    } catch (e) {
+      console.error('presence snapshot error', e);
+    }
+
     // persist presence in Redis set per chat for multi-instance
     try {
       if (redis) {
         await redis.sadd(`chat:${chatId}:online`, socket.user.id);
       }
     } catch (e) { console.error('presence add error', e); }
+
+    // Update in-memory presence
+    try {
+      const key = String(chatId);
+      const set = onlineByChat.get(key) || new Set();
+      set.add(String(socket.user.id));
+      onlineByChat.set(key, set);
+    } catch (e) {}
+
     // broadcast presence
-    socket.to(`chat:${chatId}`).emit('presence', { userId: socket.user.id, online: true });
+    socket.to(roomKey).emit('presence', { userId: socket.user.id, online: true });
   });
 
   socket.on('leave', (chatId) => {
     if (!chatId) return;
-    socket.leave(`chat:${chatId}`);
+    const roomKey = `chat:${chatId}`;
+    // Idempotency: ignore leaves for rooms we're not in.
+    try {
+      if (socket.rooms && !socket.rooms.has(roomKey)) return;
+    } catch (e) {}
+    socket.leave(roomKey);
     try {
       if (redis) {
         redis.srem(`chat:${chatId}:online`, socket.user.id).catch(() => {});
       }
     } catch (e) { console.error('presence rem error', e); }
-    socket.to(`chat:${chatId}`).emit('presence', { userId: socket.user.id, online: false });
+    try {
+      const key = String(chatId);
+      const set = onlineByChat.get(key);
+      if (set) {
+        set.delete(String(socket.user.id));
+        if (set.size === 0) onlineByChat.delete(key);
+      }
+    } catch (e) {}
+    socket.to(roomKey).emit('presence', { userId: socket.user.id, online: false });
   });
 
   // typing indicator
@@ -166,7 +309,7 @@ io.on('connection', (socket) => {
         if (existing) {
           const payloadOut = { ...existing, time: existing.createdAt };
           // still emit to the room to ensure receivers have the message (safe)
-          io.to(`chat:${chatId}`).emit('message', payloadOut);
+          io.to(`chat:${chatId}`).emit('message', { ...payloadOut, __scope: 'chat' });
           return ack && ack({ ok: true, message: payloadOut, existing: true });
         }
       }
@@ -175,7 +318,20 @@ io.on('connection', (socket) => {
 
       // broadcast to room with ackable payload
       const payloadOut = { ...message, time: message.createdAt };
-      io.to(`chat:${chatId}`).emit('message', payloadOut);
+      io.to(`chat:${chatId}`).emit('message', { ...payloadOut, __scope: 'chat' });
+
+      // Also notify the receiver via their user room so they can update UI
+      // (e.g., unread counters) without joining chat rooms.
+      try {
+        if (sender === 'doctor') {
+          const patient = await prisma.patient.findUnique({ where: { id: chat.patientId }, select: { userId: true } });
+          if (patient?.userId) io.to(`user:${patient.userId}`).emit('message', { ...payloadOut, __scope: 'user' });
+        } else if (sender === 'patient') {
+          if (chat.doctorId) io.to(`user:${chat.doctorId}`).emit('message', { ...payloadOut, __scope: 'user' });
+        }
+      } catch (e) {
+        // best-effort
+      }
 
       // touch chat updatedAt
       await prisma.chat.update({ where: { id: chatId }, data: { updatedAt: new Date() } });
@@ -226,6 +382,10 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', (reason) => {
     console.log('socket disconnected', socket.id, reason);
+
+    // Global presence: decrement refcount; only emit offline when last tab disconnects.
+    markUserOffline(socket).catch(() => {});
+
     // On disconnect, remove the user from any chat:${chatId}:online sets they were part of
     try {
       const rooms = Array.from(socket.rooms || []);
@@ -235,6 +395,14 @@ io.on('connection', (socket) => {
         if (redis) {
           redis.srem(`chat:${chatId}:online`, socket.user.id).catch(() => {});
         }
+        try {
+          const key = String(chatId);
+          const set = onlineByChat.get(key);
+          if (set) {
+            set.delete(String(socket.user.id));
+            if (set.size === 0) onlineByChat.delete(key);
+          }
+        } catch (e) {}
         socket.to(r).emit('presence', { userId: socket.user.id, online: false });
       });
     } catch (e) { console.error('disconnect presence cleanup failed', e); }

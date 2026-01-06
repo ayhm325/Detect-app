@@ -27,6 +27,7 @@
   "unreadCount": "{unread} غير مقروءة من {total}",
   "allRead": "جميع الإشعارات مقروءة ({total})",
   "filterAll": "الكل",
+  "new": "جديد",
   "filterUnread": "غير مقروءة",
   "filterRead": "مقروءة",
   "markAllRead": "تحديد الكل كمقروء",
@@ -44,6 +45,10 @@
   "typeMessage": "رسالة",
   "typeReminder": "تذكير",
   "typeSystem": "نظام",
+  "typeInfo": "معلومة",
+  "typeSuccess": "نجاح",
+  "typeWarning": "تحذير",
+  "typeAlert": "تنبيه",
   "actions": {
     "view": "عرض",
     "delete": "حذف",

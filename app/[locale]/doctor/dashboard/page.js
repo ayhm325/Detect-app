@@ -53,15 +53,23 @@ export default async function DoctorDashboard({ params }) {
     const end = new Date();
     end.setHours(23, 59, 59, 999);
 
-    const [patientsCount, todayAppointmentsCount, pendingScansCount, unreadNotificationsCount, todayAppointmentsList, recentActivity, pendingScansList] = await Promise.all([
-      prisma.patient.count({ where: { doctorId: doctor.id } }),
-      prisma.appointment.count({ where: { doctorId: doctor.id, scheduledAt: { gte: start, lte: end } } }),
-      prisma.medicalRecord.count({ where: { doctorId: doctor.id, reviewedByDoctor: false } }),
-      prisma.notification.count({ where: { userId: user.id, isRead: false, isDeleted: false } }),
-      prisma.appointment.findMany({ where: { doctorId: doctor.id, scheduledAt: { gte: start, lte: end } }, include: { patient: true }, orderBy: { scheduledAt: 'asc' }, take: 10 }),
+    const doctorId = doctor.userId;
+
+    const [patientsCount, todayAppointmentsCount, pendingScansCount, newMessagesCount, todayAppointmentsList, recentActivity, pendingScansList] = await Promise.all([
+      prisma.patient.count({ where: { doctorId } }),
+      prisma.appointment.count({ where: { doctorId, scheduledAt: { gte: start, lte: end } } }),
+      prisma.medicalRecord.count({ where: { doctorId, reviewedByDoctor: false } }),
+      prisma.message.count({
+        where: {
+          chat: { doctorId },
+          status: { not: "read" },
+          sender: "patient",
+        },
+      }),
+      prisma.appointment.findMany({ where: { doctorId, scheduledAt: { gte: start, lte: end } }, include: { patient: true }, orderBy: { scheduledAt: 'asc' }, take: 10 }),
       prisma.activity.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 6 }),
       prisma.medicalRecord.findMany({
-        where: { doctorId: doctor.id, reviewedByDoctor: false },
+        where: { doctorId, reviewedByDoctor: false },
         include: {
           patient: { select: { fullName: true } },
           appointment: { select: { type: true } },
@@ -77,7 +85,7 @@ export default async function DoctorDashboard({ params }) {
         patients: patientsCount ?? 0,
         todayAppointments: todayAppointmentsCount ?? 0,
         pendingScans: pendingScansCount ?? 0,
-        newMessages: unreadNotificationsCount ?? 0,
+        newMessages: newMessagesCount ?? 0,
       },
       todayAppointments: todayAppointmentsList.map((a) => ({
         id: a.id,
@@ -88,7 +96,9 @@ export default async function DoctorDashboard({ params }) {
       })),
       recentActivity: recentActivity.map((r) => ({
         id: r.id,
-        action: r.description,
+        type: r.type,
+        description: r.description,
+        meta: r.meta,
         time: r.createdAt,
       })),
       pendingScansList: pendingScansList.map((r) => ({

@@ -21,6 +21,7 @@ import { isTokenRevoked } from '../../../../lib/auth/revocation.server.js';
 import { runInference } from '../../../../ai/inference/inference.service.js';
 import { saveAnalysisResult } from '../../../../services/analysisResult.service.js';
 import { getJwtSecret } from '../../../../lib/auth/jwtSecret.js';
+import { createNotificationBestEffort } from '../../../../lib/notifications.js';
 
 async function _getPrisma() {
   const mod = await import('../../../../lib/prismaClient.js');
@@ -226,7 +227,7 @@ export async function POST(request) {
       const prisma = await _getPrisma();
       const patient = await prisma.patient.findUnique({
         where: { userId },
-        select: { id: true, doctorId: true }
+        select: { id: true, doctorId: true, fullName: true }
       });
 
       if (patient?.id) {
@@ -241,6 +242,28 @@ export async function POST(request) {
             doctorNotes: null
           }
         });
+
+        await createNotificationBestEffort(prisma, {
+          userId,
+          type: 'success',
+          message: {
+            ar: 'تمت إضافة نتيجة فحص جديدة إلى سجلك.',
+            en: 'A new analysis result has been added to your records.'
+          }
+        });
+
+        // Notify doctor (real notifications)
+        if (patient?.doctorId) {
+          const patientName = patient?.fullName || null;
+          await createNotificationBestEffort(prisma, {
+            userId: patient.doctorId,
+            type: 'info',
+            message: {
+              ar: `تمت إضافة نتيجة فحص جديدة${patientName ? ` للمريض ${patientName}` : ' لأحد مرضاك'}.`,
+              en: `A new analysis result was added${patientName ? ` for patient ${patientName}` : ' for one of your patients'}.`
+            }
+          });
+        }
       }
     } catch (e) {
       console.warn('/api/analysis/analyze: failed to create MedicalRecord', e && e.message);

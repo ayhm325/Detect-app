@@ -3,6 +3,7 @@ import prisma from "../../../../../lib/prismaClient";
 import { withRBAC } from "../../../../../lib/auth/withRBAC";
 import { rateLimit } from "../../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../../lib/security/auditLogger";
+import { createNotificationBestEffort, formatDateTimeForLocale } from "../../../../../lib/notifications";
 
 export const PATCH = withRBAC(async (request, user, paramsArg) => {
   const rl = await rateLimit(request);
@@ -61,6 +62,26 @@ export const PATCH = withRBAC(async (request, user, paramsArg) => {
     let updated;
     if (action === "confirm" || action === "confirmed") {
       updated = await prisma.appointment.update({ where: { id }, data: { status: "completed" } });
+      await createNotificationBestEffort(prisma, {
+        userId: user.id,
+        type: 'success',
+        message: {
+          ar: `تم تأكيد إتمام الموعد بتاريخ ${formatDateTimeForLocale(appt.scheduledAt, 'ar')}.`,
+          en: `Your appointment on ${formatDateTimeForLocale(appt.scheduledAt, 'en')} was marked as completed.`
+        }
+      });
+
+      if (appt.doctorId) {
+        const patientName = patient?.fullName || null;
+        await createNotificationBestEffort(prisma, {
+          userId: appt.doctorId,
+          type: 'success',
+          message: {
+            ar: `أكد${patientName ? ` المريض ${patientName}` : ' المريض'} إتمام الموعد بتاريخ ${formatDateTimeForLocale(appt.scheduledAt, 'ar')}.`,
+            en: `${patientName ? `Patient ${patientName}` : 'A patient'} confirmed completion for the appointment on ${formatDateTimeForLocale(appt.scheduledAt, 'en')}.`
+          }
+        });
+      }
       logAudit({ event: "patient_appointment_confirmed", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { appointmentId: id } });
     } else if (action === "cancel" || action === "cancelled") {
       const patientReason = body.patientReason || body.reason || null;
@@ -71,9 +92,49 @@ export const PATCH = withRBAC(async (request, user, paramsArg) => {
         );
       }
       updated = await prisma.appointment.update({ where: { id }, data: { status: "cancelled", patientReason } });
+      await createNotificationBestEffort(prisma, {
+        userId: user.id,
+        type: 'warning',
+        message: {
+          ar: `تم إلغاء الموعد بتاريخ ${formatDateTimeForLocale(appt.scheduledAt, 'ar')}.`,
+          en: `Your appointment on ${formatDateTimeForLocale(appt.scheduledAt, 'en')} was cancelled.`
+        }
+      });
+
+      if (appt.doctorId) {
+        const patientName = patient?.fullName || null;
+        await createNotificationBestEffort(prisma, {
+          userId: appt.doctorId,
+          type: 'warning',
+          message: {
+            ar: `ألغى${patientName ? ` المريض ${patientName}` : ' المريض'} الموعد بتاريخ ${formatDateTimeForLocale(appt.scheduledAt, 'ar')}.${patientReason ? ` السبب: ${patientReason}` : ''}`,
+            en: `${patientName ? `Patient ${patientName}` : 'A patient'} cancelled the appointment on ${formatDateTimeForLocale(appt.scheduledAt, 'en')}.${patientReason ? ` Reason: ${patientReason}` : ''}`
+          }
+        });
+      }
       logAudit({ event: "patient_appointment_cancelled", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { appointmentId: id, patientReason } });
     } else if (action === "delete" || action === "remove") {
       updated = await prisma.appointment.update({ where: { id }, data: { isDeleted: true } });
+      await createNotificationBestEffort(prisma, {
+        userId: user.id,
+        type: 'info',
+        message: {
+          ar: `تم حذف الموعد بتاريخ ${formatDateTimeForLocale(appt.scheduledAt, 'ar')}.`,
+          en: `Your appointment on ${formatDateTimeForLocale(appt.scheduledAt, 'en')} was removed.`
+        }
+      });
+
+      if (appt.doctorId) {
+        const patientName = patient?.fullName || null;
+        await createNotificationBestEffort(prisma, {
+          userId: appt.doctorId,
+          type: 'info',
+          message: {
+            ar: `حذف${patientName ? ` المريض ${patientName}` : ' المريض'} الموعد بتاريخ ${formatDateTimeForLocale(appt.scheduledAt, 'ar')}.`,
+            en: `${patientName ? `Patient ${patientName}` : 'A patient'} removed the appointment on ${formatDateTimeForLocale(appt.scheduledAt, 'en')}.`
+          }
+        });
+      }
       logAudit({ event: "patient_appointment_deleted", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { appointmentId: id } });
     } else {
       return NextResponse.json(

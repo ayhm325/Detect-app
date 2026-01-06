@@ -97,6 +97,12 @@
       "title": "Doctor review",
       "reviewed": "Reviewed",
       "notesLabel": "Doctor notes",
+      "clinicalStatusLabel": "Patient status",
+      "clinicalStatuses": {
+        "stable": "Stable",
+        "critical": "Critical",
+        "recovering": "Recovering"
+      },
       "notesPlaceholder": "Write your clinical notes or explanation for this report…",
       "markReviewed": "Mark as reviewed",
       "saving": "Saving…"

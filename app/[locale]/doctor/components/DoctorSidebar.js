@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FaHome, FaUserInjured, FaXRay, FaComments, FaCalendarAlt, FaChartBar, FaBell, FaCog } from 'react-icons/fa';
+import { FaHome, FaUserInjured, FaXRay, FaComments, FaCalendarAlt, FaChartBar, FaBell, FaUserAlt } from 'react-icons/fa';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -22,7 +22,7 @@ export default function DoctorSidebar({ active }) {
     { label: t('appointments'), icon: <FaCalendarAlt />, href: `${basePrefix}/doctor/appointments` },
     { label: t('analytics'), icon: <FaChartBar />, href: `${basePrefix}/doctor/analytics` },
     { label: t('notifications'), icon: <FaBell />, href: `${basePrefix}/doctor/notifications` },
-    { label: t('settings'), icon: <FaCog />, href: `${basePrefix}/doctor/settings` },
+    { label: t('settings'), icon: <FaUserAlt className={styles.profileIcon} />, href: `${basePrefix}/doctor/settings` },
   ];
 
   return (

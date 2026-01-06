@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { getJwtSecret } from "../../../lib/auth/jwtSecret.js";
 import { applyJwtClaimsToSignOptions } from "../../../lib/auth/jwtClaims.js";
+import { createNotificationBestEffort } from "../../../lib/notifications";
 
 // تخزين مؤقت لمحاولات الدخول (ذاكرة السيرفر فقط)
 const loginAttempts = new Map();
@@ -42,7 +43,13 @@ export async function POST(request) {
       console.log("[login] user found:", { id: user.id, email: user.email, isActive: user.isActive, doctorActive: user.doctor?.isActive });
     }
     if (user.role === "doctor") {
-      if (!user.doctor || user.doctor.status !== "active") {
+      if (!user.doctor) {
+        return NextResponse.json({ error: "حسابك قيد المراجعة من الإدارة" }, { status: 403 });
+      }
+      if (user.doctor.status === "banned") {
+        return NextResponse.json({ error: "تم رفض طلبك" }, { status: 403 });
+      }
+      if (user.doctor.status !== "active") {
         return NextResponse.json({ error: "حسابك قيد المراجعة من الإدارة" }, { status: 403 });
       }
     } else {
@@ -76,12 +83,48 @@ export async function POST(request) {
           type: "login",
           description: `تسجيل دخول: ${user.fullName} (${user.email})`,
           userId: user.id,
-          meta: { ip: request.headers.get('x-forwarded-for') || request.headers.get('host') }
+          meta: {
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role,
+            ip: request.headers.get('x-forwarded-for') || request.headers.get('host'),
+          }
         }
       });
     } catch (e) {
       // تجاهل الخطأ في تسجيل النشاط حتى لا يؤثر على عملية الدخول
       console.error("خطأ في تسجيل نشاط الدخول:", e);
+    }
+
+    // إشعار أمني (مخفف) - مرة كل 12 ساعة
+    try {
+      const ip = request.headers.get('x-forwarded-for') || request.headers.get('host') || null;
+      const since = new Date(Date.now() - 12 * 60 * 60 * 1000);
+      const existing = await prisma.notification.findFirst({
+        where: {
+          userId: user.id,
+          isDeleted: false,
+          createdAt: { gte: since },
+          message: { contains: '"kind":"security_login"' },
+        },
+        select: { id: true },
+      });
+      if (!existing) {
+        await createNotificationBestEffort(prisma, {
+          userId: user.id,
+          type: 'warning',
+          message: {
+            ar: 'تنبيه أمني: تم تسجيل الدخول إلى حسابك.',
+            en: 'Security alert: a login to your account was detected.',
+            meta: { kind: 'security_login', ip }
+          }
+        });
+      }
+    } catch (e) {
+      // best-effort
+      if (process.env.DEBUG_AUTH === '1') {
+        console.warn('[login] security notification failed', e && e.message);
+      }
     }
 
     // لا ترجع كلمة المرور

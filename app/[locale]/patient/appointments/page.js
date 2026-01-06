@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa";
 import { useTranslations, useLocale } from "next-intl";
 import toLatin from "./toLatin";
+import { formatArabicDate } from "../../../lib/arabicMonths";
 
 export default function PatientAppointmentsPage() {
   const router = useRouter();
@@ -52,9 +53,14 @@ export default function PatientAppointmentsPage() {
       // Normalize API shape to the UI shape expected by this page
       const mapped = (list || []).map((a) => {
         const scheduled = a.scheduledAt ? new Date(a.scheduledAt) : null;
-        const dateStr = scheduled
-          ? scheduled.toLocaleDateString(locale === "en" ? "en-US" : "ar-EG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
-          : "";
+        let dateStr = "";
+        if (scheduled) {
+          if (locale === "ar") {
+            dateStr = formatArabicDate(scheduled);
+          } else {
+            dateStr = scheduled.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+          }
+        }
         const timeStr = scheduled
           ? scheduled.toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG", { hour: "2-digit", minute: "2-digit" })
           : "";
@@ -129,13 +135,13 @@ export default function PatientAppointmentsPage() {
     switch (status) {
       case "confirmed":
       case "completed":
-        return "bg-(--ui-success)/12 text-(--ui-success-foreground) ring-1 ring-inset ring-(--ui-success)/25";
+        return "bg-(--ui-success) text-white font-extrabold shadow ring-2 ring-(--ui-success)/60";
       case "pending":
-        return "bg-(--ui-warning)/12 text-(--ui-warning-foreground) ring-1 ring-inset ring-(--ui-warning)/25";
+        return "bg-(--ui-warning) text-white font-extrabold shadow ring-2 ring-(--ui-warning)/60";
       case "cancelled":
-        return "bg-(--ui-danger)/12 text-(--ui-danger-foreground) ring-1 ring-inset ring-(--ui-danger)/25";
+        return "bg-(--ui-danger) text-white font-extrabold shadow ring-2 ring-(--ui-danger)/60";
       default:
-        return "bg-(--ui-surface-2)/60 text-(--ui-muted-foreground) ring-1 ring-inset ring-(--ui-border)";
+        return "bg-(--ui-surface-2) text-(--ui-foreground) font-bold ring-2 ring-(--ui-border)";
     }
   };
 
@@ -269,7 +275,7 @@ export default function PatientAppointmentsPage() {
                 )}
                 <div className="flex gap-3 mt-6">
                   {(a.status === "confirmed" || a.status === "completed") ? (
-                    <span className="bg-(--ui-success)/12 text-(--ui-success-foreground) ring-1 ring-inset ring-(--ui-success)/25 px-6 py-2 rounded-lg flex items-center gap-2 text-lg font-bold shadow-sm transition">
+                    <span className="bg-(--ui-success) text-white font-extrabold shadow ring-2 ring-(--ui-success)/60 px-6 py-2 rounded-lg flex items-center gap-2 text-lg transition">
                       <FaCheckCircle /> {t("appointments.status.confirmed")}
                     </span>
                   ) : a.status === "cancelled" ? (

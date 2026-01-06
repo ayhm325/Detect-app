@@ -7,16 +7,16 @@
   "analytics": "Analytics",
   "notifications": "Notifications",
   "results": "Results History",
-  "settings": "Settings",
+  "settings": "Account",
   "logout": "Logout",
   "ui": {
     "collapseOpen": "Expand sidebar",
     "collapseClose": "Collapse sidebar",
     "themeLight": "Light mode",
     "themeDark": "Dark mode",
-    "localeSwitchLabel": "Switch to Arabic",
-    "switchToEn": "Switch to English",
-    "switchToAr": "Switch to Arabic",
+    "localeSwitchLabel": "Arabic",
+    "switchToEn": "English",
+    "switchToAr": "Arabic",
     "version": "Version {version}",
     "systemsOperational": "All systems operational"
   }

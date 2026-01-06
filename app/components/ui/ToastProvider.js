@@ -17,7 +17,7 @@ export function ToastProvider({ children }) {
   // إضافة Toast
   const addToast = useCallback(
     (message, type = "info", duration = 3000) => {
-      const id = Date.now(); // يمكن استبداله بـ nanoid
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
       setToasts((prev) => [...prev, { id, message, type, duration }]);
 
       if (duration > 0) {

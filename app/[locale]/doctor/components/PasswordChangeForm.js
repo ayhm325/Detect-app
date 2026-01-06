@@ -18,22 +18,22 @@ export default function PasswordChangeForm({ onChange }) {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <h3>{t('doctorSettings.change_password')}</h3>
+      <h3>{t('change_password')}</h3>
       <input
         type="password"
-        placeholder={t('doctorSettings.current_password')}
+        placeholder={t('current_password')}
         value={oldPassword}
         onChange={e => setOldPassword(e.target.value)}
         required
       />
       <input
         type="password"
-        placeholder={t('doctorSettings.new_password')}
+        placeholder={t('new_password')}
         value={newPassword}
         onChange={e => setNewPassword(e.target.value)}
         required
       />
-      <button type="submit">{t('doctorSettings.passwordChange.submit')}</button>
+      <button type="submit">{t('passwordChange.submit')}</button>
     </form>
   );
 }

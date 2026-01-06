@@ -56,8 +56,17 @@ export const POST = withRBAC(async (request, user) => {
     const patient = await prisma.patient.findFirst({ where: { userId } });
     if (!patient) return NextResponse.json({ success: false, error: 'Patient not found' }, { status: 404 });
 
-    const requestedDoctorId = body.requestedDoctorId || body.newDoctorId || body.newDoctor;
+    const requestedDoctorIdRaw = body.requestedDoctorId || body.newDoctorId || body.newDoctor;
+    const requestedDoctorId = typeof requestedDoctorIdRaw === 'string' ? requestedDoctorIdRaw.trim() : requestedDoctorIdRaw;
     const reason = body.reason || '';
+
+    if (!requestedDoctorId) {
+      return NextResponse.json({ success: false, error: 'Missing requestedDoctorId' }, { status: 400 });
+    }
+
+    if (patient.doctorId && requestedDoctorId === patient.doctorId) {
+      return NextResponse.json({ success: false, error: 'Requested doctor is the same as current doctor' }, { status: 400 });
+    }
 
     const cr = await prisma.changeRequest.create({
       data: {

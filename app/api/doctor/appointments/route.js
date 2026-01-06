@@ -2,6 +2,7 @@ import { withRBAC } from "../../../../lib/auth/withRBAC";
 import prisma from "../../../../lib/prismaClient";
 import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
+import { createNotificationBestEffort, formatDateTimeForLocale } from "../../../../lib/notifications";
 
 // GET /api/doctor/appointments
 export const GET = withRBAC(async (request, user) => {
@@ -88,6 +89,32 @@ export const POST = withRBAC(async (request, user) => {
         type: type || "clinic"
       }
     });
+
+    try {
+      const patient = await prisma.patient.findUnique({
+        where: { id: patientId },
+        select: { userId: true, fullName: true }
+      });
+      const doctorUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { fullName: true }
+      });
+      const patientUserId = patient?.userId || null;
+      const doctorName = doctorUser?.fullName || null;
+
+      if (patientUserId) {
+        await createNotificationBestEffort(prisma, {
+          userId: patientUserId,
+          type: 'info',
+          message: {
+            ar: `تم تحديد موعد لك${doctorName ? ` مع د. ${doctorName}` : ''} بتاريخ ${formatDateTimeForLocale(scheduled, 'ar')}.`,
+            en: `An appointment${doctorName ? ` with Dr. ${doctorName}` : ''} was scheduled for ${formatDateTimeForLocale(scheduled, 'en')}.`
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('/api/doctor/appointments: failed to notify patient', e && e.message);
+    }
 
     logAudit({ event: "doctor_appointment_created", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { appointmentId: created.id, patientId } });
     return Response.json({ appointment: created }, { status: 201 });

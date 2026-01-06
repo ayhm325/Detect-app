@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useToast } from "../../../components/ui/Toast";
 import { FaFileAlt, FaXRay, FaSearch, FaFilter, FaDownload, FaEye, FaShare, FaPrint, FaTimes, FaCheckCircle, FaHourglassHalf } from "react-icons/fa";
 import { useLocale, useTranslations } from "next-intl";
@@ -59,51 +60,55 @@ export default function PatientResultsPage() {
           }
         };
 
-        const mapped = (data.records || []).map((r) => {
-          const typeKey = inferTypeKey(r.imageUrl);
-          const typeLabel = (() => {
-            try {
-              return t(`types.${typeKey}`);
-            } catch {
-              return typeKey;
-            }
-          })();
+        // Map and sort by createdAt descending
+        const mapped = (data.records || [])
+          .map((r) => {
+            const typeKey = inferTypeKey(r.imageUrl);
+            const typeLabel = (() => {
+              try {
+                return t(`types.${typeKey}`);
+              } catch {
+                return typeKey;
+              }
+            })();
 
-          const status = r.reviewedByDoctor ? "ready" : "pending";
-          const ai = (r.aiResult || "").toString().toUpperCase();
-          const confidence = typeof r.confidenceScore === "number" ? r.confidenceScore : null;
+            const status = r.reviewedByDoctor ? "ready" : "pending";
+            const ai = (r.aiResult || "").toString().toUpperCase();
+            const confidence = typeof r.confidenceScore === "number" ? r.confidenceScore : null;
 
-          const priority = ai === "POSITIVE" && (confidence == null || confidence >= 0.7) ? "urgent" : "normal";
+            const priority = ai === "POSITIVE" && (confidence == null || confidence >= 0.7) ? "urgent" : "normal";
 
-          const aiSummary = (() => {
-            if (ai === "POSITIVE") return t("aiSummary.positive", { score: confidence == null ? "" : Math.round(confidence * 100) });
-            if (ai === "NEGATIVE") return t("aiSummary.negative", { score: confidence == null ? "" : Math.round(confidence * 100) });
-            return t("aiSummary.unknown");
-          })();
+            const aiSummary = (() => {
+              if (ai === "POSITIVE") return t("aiSummary.positive", { score: confidence == null ? "" : Math.round(confidence * 100) });
+              if (ai === "NEGATIVE") return t("aiSummary.negative", { score: confidence == null ? "" : Math.round(confidence * 100) });
+              return t("aiSummary.unknown");
+            })();
 
-          const findings = (() => {
-            if (ai === "POSITIVE") return [{ type: "warning", text: t("findings.positive") }];
-            if (ai === "NEGATIVE") return [{ type: "normal", text: t("findings.negative") }];
-            return [{ type: "info", text: t("findings.unknown") }];
-          })();
+            const findings = (() => {
+              if (ai === "POSITIVE") return [{ type: "warning", text: t("findings.positive") }];
+              if (ai === "NEGATIVE") return [{ type: "normal", text: t("findings.negative") }];
+              return [{ type: "info", text: t("findings.unknown") }];
+            })();
 
-          return {
-            id: r.id,
-            title: t("titles.default"),
-            type: typeLabel,
-            typeIcon: typeKey === "xray" ? "🩻" : (typeKey === "ct" ? "🔬" : (typeKey === "mri" ? "🧲" : (typeKey === "ultrasound" ? "📡" : "📄"))),
-            date: formatDate(r.createdAt),
-            time: formatTime(r.createdAt),
-            status,
-            priority,
-            doctor: r.doctor?.name || t("defaults.unknownDoctor"),
-            facility: r.doctor?.clinic || (r.doctor?.name ? t("defaults.clinicOfDoctor", { name: r.doctor.name }) : t("defaults.unknownFacility")),
-            aiSummary,
-            findings,
-            notes: r.doctorNotes || "",
-            images: r.imageUrl ? [r.imageUrl] : []
-          };
-        });
+            return {
+              id: r.id,
+              title: t("titles.default"),
+              type: typeLabel,
+              typeIcon: typeKey === "xray" ? "🩻" : (typeKey === "ct" ? "🔬" : (typeKey === "mri" ? "🧲" : (typeKey === "ultrasound" ? "📡" : "📄"))),
+              date: formatDate(r.createdAt),
+              time: formatTime(r.createdAt),
+              status,
+              priority,
+              doctor: r.doctor?.name || t("defaults.unknownDoctor"),
+              facility: r.doctor?.clinic || (r.doctor?.name ? t("defaults.clinicOfDoctor", { name: r.doctor.name }) : t("defaults.unknownFacility")),
+              aiSummary,
+              findings,
+              notes: r.doctorNotes || "",
+              images: r.imageUrl ? [r.imageUrl] : [],
+              createdAt: r.createdAt // keep original date for sorting
+            };
+          })
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         setReports(mapped);
       } catch (err) {
@@ -200,24 +205,24 @@ export default function PatientResultsPage() {
   const getStatusColor = (status) => {
     const normalized = normalizeStatus(status);
     if (normalized === "ready") {
-      return "bg-(--ui-success-bg) text-(--ui-success-foreground) border-(--ui-success-border)";
+      return "bg-green-600 text-white border-green-700 dark:bg-green-500 dark:text-white dark:border-green-300";
     } else if (normalized === "pending") {
-      return "bg-(--ui-warning-bg) text-(--ui-warning-foreground) border-(--ui-warning-border)";
+      return "bg-yellow-400 text-black border-yellow-600 dark:bg-yellow-300 dark:text-black dark:border-yellow-500";
     } else if (normalized === "urgent") {
-      return "bg-(--ui-danger-bg) text-(--ui-danger-foreground) border-(--ui-danger-border)";
+      return "bg-red-600 text-white border-red-700 dark:bg-red-500 dark:text-white dark:border-red-300";
     } else {
-      return "bg-(--ui-surface-2)/60 text-(--ui-muted-foreground) border-(--ui-border)";
+      return "bg-gray-200 text-gray-700 border-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-500";
     }
   };
 
   const getPriorityColor = (priority) => {
     const normalized = normalizePriority(priority);
     if (normalized === "urgent") {
-      return "bg-(--ui-danger-bg) text-(--ui-danger-foreground) border-(--ui-danger-border)";
+      return "bg-red-600 text-white border-red-700 dark:bg-red-500 dark:text-white dark:border-red-300";
     } else if (normalized === "normal") {
-      return "bg-(--ui-info-bg) text-(--ui-info-foreground) border-(--ui-info-border)";
+      return "bg-blue-600 text-white border-blue-700 dark:bg-blue-500 dark:text-white dark:border-blue-300";
     } else {
-      return "bg-(--ui-surface-2)/60 text-(--ui-muted-foreground) border-(--ui-border)";
+      return "bg-gray-200 text-gray-700 border-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-500";
     }
   };
 
@@ -351,10 +356,10 @@ export default function PatientResultsPage() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs border ${getStatusColor(report.status)}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs border font-bold drop-shadow-sm ${getStatusColor(report.status)} border-2! border-black/20! dark:border-white/30!`}>
                       {getStatusLabel(report.status)}
                     </span>
-                    <span className={`px-3 py-1 rounded-full text-xs border ${getPriorityColor(report.priority)}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs border font-bold drop-shadow-sm ${getPriorityColor(report.priority)} border-2! border-black/20! dark:border-white/30!`}>
                       {getPriorityLabel(report.priority)}
                     </span>
                   </div>
@@ -416,24 +421,6 @@ export default function PatientResultsPage() {
                     <FaEye />
                     <span>{labels('actions.view')}</span>
                   </button>
-                  <button
-                    onClick={() => handleDownload(report.id)}
-                    className="bg-(--ui-success) hover:bg-(--ui-success)/90 text-(--ui-success-foreground) px-4 py-2 rounded-lg text-sm transition-colors"
-                  >
-                    <FaDownload />
-                  </button>
-                  <button
-                    onClick={() => handleShare(report.id)}
-                    className="bg-(--ui-info) hover:bg-(--ui-info)/90 text-(--ui-info-foreground) px-4 py-2 rounded-lg text-sm transition-colors"
-                  >
-                    <FaShare />
-                  </button>
-                  <button
-                    onClick={() => handlePrint(report.id)}
-                    className="bg-(--ui-surface-2) hover:bg-(--ui-surface-2)/70 text-(--ui-foreground) border border-(--ui-border) px-4 py-2 rounded-lg text-sm transition-colors"
-                  >
-                    <FaPrint />
-                  </button>
                 </div>
               </div>
             ))}
@@ -483,19 +470,22 @@ export default function PatientResultsPage() {
                     <h4 className="font-bold text-(--ui-foreground) mb-3">{t("modal.medicalImages")}</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedReport.images.map((img, idx) => (
-                        <div key={idx} className="aspect-square bg-(--ui-surface-2) border border-(--ui-border) rounded-lg overflow-hidden">
-                          <img
-                            src={img}
-                            alt={selectedReport.title}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
-                          />
-                          <div className="w-full h-full flex items-center justify-center">
+                        <div key={idx} className="relative aspect-square bg-(--ui-surface-2) border border-(--ui-border) rounded-lg overflow-hidden">
+                          <div className="absolute inset-0 flex items-center justify-center">
                             <FaXRay className="text-6xl text-(--ui-muted-foreground)" />
                           </div>
+                          <Image
+                            src={img}
+                            alt={selectedReport.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            className="object-cover"
+                            unoptimized
+                            onError={(e) => {
+                              // Hide broken images so the fallback icon shows.
+                              try { e.currentTarget.style.display = "none"; } catch {}
+                            }}
+                          />
                         </div>
                       ))}
                     </div>

@@ -13,6 +13,7 @@
   },
   "statuses": {
     "active": "نشط",
+    "pending": "قيد الانتظار",
     "suspended": "معلق",
     "banned": "محظور"
   },
@@ -34,7 +35,9 @@
   "actions": {
     "viewDetails": "عرض التفاصيل",
     "edit": "تعديل",
-    "delete": "حذف"
+    "delete": "حذف",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "breadcrumbs": {
     "home": "الرئيسية",
@@ -81,6 +84,7 @@
     "fullName": "الاسم الكامل",
     "email": "البريد الإلكتروني",
     "phone": "الجوال",
+    "password": "كلمة المرور",
     "gender": "النوع",
     "age": "العمر",
     "bloodType": "فصيلة الدم",

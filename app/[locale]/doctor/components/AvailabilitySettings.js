@@ -7,18 +7,18 @@ export default function AvailabilitySettings({ value, onChange }) {
 
   return (
     <div className={styles.availability}>
-      <h3>{t('doctorSettings.availability.header')}</h3>
+      <h3>{t('availability.header')}</h3>
       <label>
-        {t('doctorSettings.availability.workDays')}:
+        {t('availability.workDays')}:
         <input
           type="text"
           value={value.days || ''}
           onChange={e => onChange({ ...value, days: e.target.value })}
-          placeholder={t('doctorSettings.availability.exampleDays')}
+          placeholder={t('availability.exampleDays')}
         />
       </label>
       <label>
-        {t('doctorSettings.availability.startTime')}:
+        {t('availability.startTime')}:
         <input
           type="time"
           value={value.start || ''}
@@ -26,7 +26,7 @@ export default function AvailabilitySettings({ value, onChange }) {
         />
       </label>
       <label>
-        {t('doctorSettings.availability.endTime')}:
+        {t('availability.endTime')}:
         <input
           type="time"
           value={value.end || ''}

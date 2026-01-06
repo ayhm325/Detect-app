@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import {
   FaUsers, FaMagnifyingGlass, FaPlus, FaDownload,
   FaPencil, FaTrash, FaX, FaFloppyDisk, FaEnvelope,
-  FaPhone, FaCalendar, FaHeart, FaVial, FaUserDoctor
+  FaPhone, FaCalendar, FaHeart, FaVial, FaUserDoctor, FaEye, FaEyeSlash
 } from "react-icons/fa6";
 
 const CURRENT_YEAR = new Date().getUTCFullYear();
@@ -18,6 +18,7 @@ export default function PatientsPage() {
   const ui = useTranslations('ui');
   const locale = useLocale();
   const placeholder = ui('placeholder');
+  const isRTL = !!(locale && typeof locale === 'object' ? locale.isRTL : locale === 'ar');
 
   // State
   const [search, setSearch] = useState("");
@@ -27,8 +28,9 @@ export default function PatientsPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const emptyForm = { name: "", email: "", phone: "", gender: "male", age: "", medicalId: "", doctorId: "", status: "active", bloodType: "", birthDate: "", allergies: "", chronicDiseases: "" };
+  const emptyForm = { name: "", email: "", phone: "", password: "", gender: "male", age: "", medicalId: "", doctorId: "", status: "active", bloodType: "", birthDate: "", allergies: "", chronicDiseases: "" };
   const [formData, setFormData] = useState({ ...emptyForm });
+  const [showPassword, setShowPassword] = useState(false);
   const [doctorsList, setDoctorsList] = useState([]);
 
   // Data Fetching
@@ -130,12 +132,16 @@ export default function PatientsPage() {
 
   // Handlers
   const handleAddPatient = async () => {
-    if (!formData.name || !formData.email || !formData.phone) { showToast(tPatients('toast.fillFields'), "error"); return; }
+    const trimmedPassword = (formData.password || "").trim();
+    if (!formData.name || !formData.email || !formData.phone || !trimmedPassword) {
+      showToast(tPatients('toast.fillFields'), "error");
+      return;
+    }
     try {
-      const payload = { name: formData.name, email: formData.email, phone: formData.phone, gender: formData.gender, medicalId: formData.medicalId || undefined, doctorId: formData.doctorId || undefined, status: formData.status === 'banned' || formData.status === 'suspended' ? 'suspended' : 'active', bloodType: formData.bloodType || undefined, birthDate: formData.birthDate || undefined, allergies: formData.allergies ? formData.allergies.split(',').map(s => s.trim()).filter(Boolean) : undefined, chronicDiseases: formData.chronicDiseases ? formData.chronicDiseases.split(',').map(s => s.trim()).filter(Boolean) : undefined };
+      const payload = { name: formData.name, email: formData.email, phone: formData.phone, password: trimmedPassword, gender: formData.gender, medicalId: formData.medicalId || undefined, doctorId: formData.doctorId || undefined, status: formData.status === 'banned' || formData.status === 'suspended' ? 'suspended' : 'active', bloodType: formData.bloodType || undefined, birthDate: formData.birthDate || undefined, allergies: formData.allergies ? formData.allergies.split(',').map(s => s.trim()).filter(Boolean) : undefined, chronicDiseases: formData.chronicDiseases ? formData.chronicDiseases.split(',').map(s => s.trim()).filter(Boolean) : undefined };
       const res = await fetch('/api/admin/patients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!res.ok) { const err = await res.json().catch(() => ({})); showToast(err?.error || tPatients('toast.patientAdded'), 'error'); return; }
-      await mutate(); setFormData({ ...emptyForm }); setShowAddModal(false); showToast(tPatients('toast.patientAdded'), "success");
+      await mutate(); setFormData({ ...emptyForm }); setShowPassword(false); setShowAddModal(false); showToast(tPatients('toast.patientAdded'), "success");
     } catch (e) { showToast(e.message, 'error'); }
   };
 
@@ -219,7 +225,7 @@ export default function PatientsPage() {
                 </div>
                 <span className="font-semibold hidden sm:block">{tPatients('exportButton')}</span>
               </button>
-              <button onClick={() => setShowAddModal(true)} className="group flex items-center gap-3 px-6 py-3 btn-gradient text-white rounded-2xl shadow-(--shadow-lift) transition-all duration-300 hover:-translate-y-1">
+              <button onClick={() => { setShowPassword(false); setFormData({ ...emptyForm }); setShowAddModal(true); }} className="group flex items-center gap-3 px-6 py-3 btn-gradient text-white rounded-2xl shadow-(--shadow-lift) transition-all duration-300 hover:-translate-y-1">
                 <div className="bg-(--color-neutral)/20 p-2 rounded-xl group-hover:rotate-90 transition-transform duration-500">
                   <FaPlus size={18} />
                 </div>
@@ -365,7 +371,7 @@ export default function PatientsPage() {
         {(showAddModal || showEditModal || showDeleteModal) && (
           <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
              {/* Backdrop */}
-            <div className="absolute inset-0 bg-(--color-neutral)/50 backdrop-blur-sm transition-opacity duration-300" onClick={() => { setShowAddModal(false); setShowEditModal(false); setShowDeleteModal(false); }}></div>
+            <div className="absolute inset-0 bg-(--color-neutral)/50 backdrop-blur-sm transition-opacity duration-300" onClick={() => { setShowPassword(false); setShowAddModal(false); setShowEditModal(false); setShowDeleteModal(false); }}></div>
 
             {/* Modal Content */}
             {(showAddModal || showEditModal) && (
@@ -374,7 +380,7 @@ export default function PatientsPage() {
                   <h3 className="text-2xl font-bold text-foreground">
                     {showAddModal ? tPatients('modals.addTitle') : tPatients('modals.editTitle')}
                   </h3>
-                  <button onClick={() => { setShowAddModal(false); setShowEditModal(false); }} className="w-10 h-10 rounded-full bg-(--ui-surface-2) border border-(--ui-border) flex items-center justify-center hover:bg-(--ui-danger-bg) hover:text-(--ui-danger) transition-colors">
+                  <button onClick={() => { setShowPassword(false); setShowAddModal(false); setShowEditModal(false); }} className="w-10 h-10 rounded-full bg-(--ui-surface-2) border border-(--ui-border) flex items-center justify-center hover:bg-(--ui-danger-bg) hover:text-(--ui-danger) transition-colors">
                     <FaX />
                   </button>
                 </div>
@@ -395,6 +401,30 @@ export default function PatientsPage() {
                     <label className="text-sm font-bold text-(--ui-muted-2) uppercase tracking-wider">{tPatients('modals.phone')}</label>
                     <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="w-full px-4 py-3 bg-(--ui-surface-2) border border-(--ui-border) rounded-2xl focus:ring-4 focus:ring-(--ui-ring)/20 outline-none transition-all text-foreground" />
                   </div>
+
+                  {showAddModal && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-(--ui-muted-2) uppercase tracking-wider">{tPatients('modals.password')}</label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={formData.password}
+                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                          required
+                          autoComplete="new-password"
+                          className={`w-full px-4 py-3 bg-(--ui-surface-2) border border-(--ui-border) rounded-2xl focus:ring-4 focus:ring-(--ui-ring)/20 outline-none transition-all text-foreground ${isRTL ? 'pr-10' : 'pl-10'}`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-(--ui-muted-2) p-1`}
+                          title={showPassword ? tPatients('actions.hidePassword') : tPatients('actions.showPassword')}
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -437,7 +467,7 @@ export default function PatientsPage() {
                   <button onClick={showAddModal ? handleAddPatient : handleEditPatient} className="flex-1 btn-gradient text-white py-3.5 rounded-2xl font-bold shadow-(--shadow-lift) transition-all active:scale-95 flex items-center justify-center gap-2">
                     <FaFloppyDisk /> {showAddModal ? tPatients('buttons.save') : tPatients('buttons.saveChanges')}
                   </button>
-                  <button onClick={() => { setShowAddModal(false); setShowEditModal(false); }} className="px-8 py-3.5 bg-(--ui-surface-2) text-foreground border border-(--ui-border) rounded-2xl font-bold hover:bg-(--ui-surface) transition-all active:scale-95">
+                  <button onClick={() => { setShowPassword(false); setShowAddModal(false); setShowEditModal(false); }} className="px-8 py-3.5 bg-(--ui-surface-2) text-foreground border border-(--ui-border) rounded-2xl font-bold hover:bg-(--ui-surface) transition-all active:scale-95">
                     {tPatients('buttons.cancel')}
                   </button>
                 </div>

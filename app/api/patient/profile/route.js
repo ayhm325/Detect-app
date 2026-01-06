@@ -20,14 +20,17 @@ export const GET = withRBAC(async (request, user) => {
 
     const out = {
       id: patient.id,
+      userId: patient.userId,
       fullName: patient.fullName || userObj?.fullName || "",
       email: patient.email || userObj?.email || "",
       phone: patient.phone || "",
+      doctorId: patient.doctorId || "",
       birthDate: patient.birthDate ? patient.birthDate.toISOString().split("T")[0] : "",
       gender: patient.gender || "",
       bloodType: patient.bloodType || "",
       notes: patient.notes || "",
       joinDate: patient.joinDate,
+      clinicalStatus: patient.clinicalStatus || patient.status || null,
       notificationSettings: {
         emailNotifications: true,
         smsNotifications: true,
@@ -37,7 +40,8 @@ export const GET = withRBAC(async (request, user) => {
         medicationReminders: true,
         healthTips: false
       },
-      createdAt: patient.createdAt
+      createdAt: patient.createdAt,
+      updatedAt: patient.updatedAt
     };
 
     try {

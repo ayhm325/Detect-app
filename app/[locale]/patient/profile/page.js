@@ -9,6 +9,7 @@ import { FaUser, FaEnvelope, FaPhone, FaEye, FaEyeSlash, FaIdCard, FaUserMd, FaL
 export default function PatientProfilePage() {
   const locale = useLocale();
   const t = useTranslations("profile");
+  const patientT = useTranslations("patient");
   const ui = useTranslations("ui");
   const placeholder = ui("placeholder");
   const { showToast, ToastContainer } = useToast();
@@ -32,6 +33,7 @@ export default function PatientProfilePage() {
     joinDate: '',
     lastVisit: '',
     status: '',
+    clinicalStatus: '',
     notes: '',
     createdAt: '',
     updatedAt: ''
@@ -62,6 +64,7 @@ export default function PatientProfilePage() {
           joinDate: p.joinDate || p.createdAt || '',
           lastVisit: p.lastVisit || '',
           status: p.status || '',
+          clinicalStatus: p.clinicalStatus || p.clinical_status || p.status || '',
           notes: p.notes || '',
           createdAt: p.createdAt || '',
           updatedAt: p.updatedAt || ''
@@ -127,6 +130,7 @@ export default function PatientProfilePage() {
           joinDate: p.joinDate || p.createdAt || '',
           lastVisit: p.lastVisit || '',
           status: p.status || '',
+          clinicalStatus: p.clinicalStatus || p.clinical_status || p.status || '',
           notes: p.notes || '',
           createdAt: p.createdAt || '',
           updatedAt: p.updatedAt || ''
@@ -219,21 +223,21 @@ export default function PatientProfilePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Email */}
-                  <div className="group">
+                  <div className="group min-w-0">
                     <label className="text-xs font-bold text-(--ui-muted-foreground) uppercase tracking-wider mb-1 flex items-center gap-2"><FaEnvelope className="text-(--ui-info)"/> {t("field.email")}</label>
                     {isEditing ? (
                       <input name="email" value={profileData.email} onChange={handleFieldChange} className="w-full px-4 py-3 bg-(--ui-surface) border border-(--ui-border) rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring) outline-none transition-all text-(--ui-foreground)" />
                     ) : (
-                      <div className="text-(--ui-muted-foreground) bg-(--ui-surface-2)/40 border border-(--ui-border) p-3 rounded-xl">{profileData.email || placeholder}</div>
+                      <div dir="ltr" className="min-w-0 text-(--ui-muted-foreground) bg-(--ui-surface-2)/40 border border-(--ui-border) p-3 rounded-xl truncate">{profileData.email || placeholder}</div>
                     )}
                   </div>
                   {/* Phone */}
-                  <div className="group">
+                  <div className="group min-w-0">
                     <label className="text-xs font-bold text-(--ui-muted-foreground) uppercase tracking-wider mb-1 flex items-center gap-2"><FaPhone className="text-(--ui-info)"/> {t("field.phone")}</label>
                     {isEditing ? (
                       <input name="phone" value={profileData.phone} onChange={handleFieldChange} className="w-full px-4 py-3 bg-(--ui-surface) border border-(--ui-border) rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring) outline-none transition-all text-(--ui-foreground)" />
                     ) : (
-                      <div className="text-(--ui-muted-foreground) bg-(--ui-surface-2)/40 border border-(--ui-border) p-3 rounded-xl">{profileData.phone || placeholder}</div>
+                      <div dir="ltr" className="min-w-0 text-(--ui-muted-foreground) bg-(--ui-surface-2)/40 border border-(--ui-border) p-3 rounded-xl truncate">{profileData.phone || placeholder}</div>
                     )}
                   </div>
                 </div>
@@ -278,12 +282,12 @@ export default function PatientProfilePage() {
 
               {/* Blood Type */}
               <div>
-                <label className="text-xs font-bold text-(--ui-muted-foreground) uppercase tracking-wider mb-2 flex items-center gap-2"><FaHeart className="text-(--ui-danger)"/> {t("field.bloodType")}</label>
+                <label className="text-xs font-bold text-(--ui-muted-foreground) uppercase tracking-wider mb-2 flex items-center gap-2">{t("field.bloodType")}</label>
                 {isEditing ? (
                   <input name="bloodType" value={profileData.bloodType} onChange={handleFieldChange} className="w-full px-4 py-3 bg-(--ui-surface) border border-(--ui-border) rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring) outline-none transition-all text-(--ui-foreground)" />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-lg bg-(--ui-danger)/10 text-(--ui-danger) flex items-center justify-center font-bold border border-(--ui-danger)/20">{profileData.bloodType || placeholder}</span>
+                    <span className="w-10 h-10 rounded-full bg-(--ui-danger)/10 text-(--ui-danger) flex items-center justify-center font-bold border border-(--ui-danger)/20">{profileData.bloodType || placeholder}</span>
                   </div>
                 )}
               </div>
@@ -294,29 +298,38 @@ export default function PatientProfilePage() {
                   {isEditing ? (
                   <input name="notes" value={profileData.notes} onChange={handleFieldChange} className="w-full px-4 py-3 bg-(--ui-surface) border border-(--ui-border) rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring) outline-none transition-all text-(--ui-foreground)" />
                 ) : (
-                  <div className="text-(--ui-muted-foreground) italic text-sm">{profileData.notes || placeholder}</div>
+                  <div className="text-(--ui-foreground) text-sm font-medium">{profileData.notes || placeholder}</div>
                 )}
               </div>
             </div>
 
             {/* Doctor & Stats Row */}
             {(profileData.doctorName || profileData.joinDate) && (
-              <div className="mt-8 pt-6 border-t border-(--ui-border) grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="mt-8 pt-6 border-t border-(--ui-border) flex flex-wrap gap-4">
                 {profileData.doctorName && (
-                  <div className="flex items-center gap-3 p-3 bg-(--ui-info-bg) rounded-xl border border-(--ui-info-border)">
+                  <div className="flex items-center gap-3 p-3 bg-(--ui-info-bg) rounded-xl border border-(--ui-info-border) w-full sm:w-auto max-w-full">
                     <div className="p-2 bg-(--ui-surface) border border-(--ui-border) rounded-lg text-(--ui-info) shadow-sm"><FaUserMd /></div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="text-xs text-(--ui-muted-foreground) uppercase font-bold">{t('currentDoctor')}</div>
-                      <div className="text-sm font-bold text-(--ui-foreground) truncate">{profileData.doctorName}</div>
+                      <div className="text-sm font-bold text-(--ui-foreground) whitespace-normal wrap-break-word">{profileData.doctorName}</div>
                     </div>
                   </div>
                 )}
                 {profileData.joinDate && (
-                   <div className="flex items-center gap-3 p-3 bg-(--ui-success-bg) rounded-xl border border-(--ui-success-border)">
+                   <div className="flex items-center gap-3 p-3 bg-(--ui-success-bg) rounded-xl border border-(--ui-success-border) w-full sm:w-auto max-w-full">
                     <div className="p-2 bg-(--ui-surface) border border-(--ui-border) rounded-lg text-(--ui-success) shadow-sm"><FaCalendar /></div>
                     <div>
                       <div className="text-xs text-(--ui-muted-foreground) uppercase font-bold">{t('joinDate')}</div>
                       <div className="text-sm font-bold text-(--ui-foreground)">{new Date(profileData.joinDate).toLocaleDateString(locale)}</div>
+                    </div>
+                  </div>
+                )}
+                {profileData.clinicalStatus && (
+                  <div className="flex items-center gap-3 p-3 bg-(--ui-info-bg) rounded-xl border border-(--ui-info-border) w-full sm:w-auto max-w-full">
+                    <div className="p-2 bg-(--ui-surface) border border-(--ui-border) rounded-lg text-(--ui-info) shadow-sm"><FaHeart /></div>
+                    <div>
+                      <div className="text-xs text-(--ui-muted-foreground) uppercase font-bold">{t('status')}</div>
+                      <div className="text-sm font-bold text-(--ui-foreground)">{patientT(`clinicalStatuses.${profileData.clinicalStatus}`) || profileData.clinicalStatus}</div>
                     </div>
                   </div>
                 )}
@@ -335,7 +348,7 @@ export default function PatientProfilePage() {
                 </div>
                 <h2 className="text-xl font-bold text-(--ui-foreground)">{t('doctorChange.title')}</h2>
               </div>
-              <DoctorChangeRequestForm showToast={showToast} t={t} />
+              <DoctorChangeRequestForm showToast={showToast} t={t} currentDoctorId={profileData.doctorId} />
             </div>
           </div>
 
@@ -362,7 +375,7 @@ export default function PatientProfilePage() {
 
 // --- Styled Sub-Components ---
 
-function DoctorChangeRequestForm({ showToast, t }) {
+function DoctorChangeRequestForm({ showToast, t, currentDoctorId }) {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -397,6 +410,12 @@ function DoctorChangeRequestForm({ showToast, t }) {
       return;
     }
 
+    if (currentDoctorId && requestedDoctorId === currentDoctorId) {
+      showToast(t('toast.doctorChangeSameDoctor'), 'error');
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/doctor-change-requests', {
         method: 'POST',
@@ -406,7 +425,16 @@ function DoctorChangeRequestForm({ showToast, t }) {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        showToast(err.error || t('toast.doctorChangeFail'), 'error');
+        const serverMsg = (err?.error || "").toString();
+        const sameDoctor = serverMsg === 'Requested doctor is the same as current doctor';
+        const missingDoctor = serverMsg === 'Missing requestedDoctorId';
+        if (sameDoctor) {
+          showToast(t('toast.doctorChangeSameDoctor'), 'error');
+        } else if (missingDoctor) {
+          showToast(t('toast.doctorChangeSelect'), 'error');
+        } else {
+          showToast(serverMsg || t('toast.doctorChangeFail'), 'error');
+        }
         setSubmitting(false);
         return;
       }
@@ -426,9 +454,11 @@ function DoctorChangeRequestForm({ showToast, t }) {
         <select name="requestedDoctorId" className="w-full px-4 py-3 bg-(--ui-surface) border border-(--ui-border) rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring) outline-none transition-all text-(--ui-foreground) appearance-none cursor-pointer" disabled={loading}>
           <option value="">{loading ? t('doctorChange.loading') : t('doctorChange.selectPlaceholder')}</option>
           {!loading && doctors.length === 0 && <option disabled>{t('doctorChange.noDoctors')}</option>}
-          {doctors.map((doc) => (
-            <option key={doc.id} value={doc.id}>{doc.fullName || doc.name || doc.email || doc.id}</option>
-          ))}
+          {doctors
+            .filter((doc) => !currentDoctorId || doc.id !== currentDoctorId)
+            .map((doc) => (
+              <option key={doc.id} value={doc.id}>{doc.fullName || doc.name || doc.email || doc.id}</option>
+            ))}
         </select>
       </div>
       <div>
@@ -455,6 +485,14 @@ function ChangePasswordForm({ showToast, t, router, pathname }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (
+      String(oldPassword || '').trim() &&
+      String(newPassword || '').trim() &&
+      String(oldPassword || '').trim() === String(newPassword || '').trim()
+    ) {
+      showToast(t('toastPasswordSameAsOld'), 'error');
+      return;
+    }
     if (newPassword.length < 8) {
       showToast(t('toastPasswordLength'), 'error');
       return;
@@ -473,7 +511,11 @@ function ChangePasswordForm({ showToast, t, router, pathname }) {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        showToast(err.error || t('toastPasswordChangeFail'), 'error');
+        if (err?.error === 'same_password') {
+          showToast(t('toastPasswordSameAsOld'), 'error');
+        } else {
+          showToast(err?.error || t('toastPasswordChangeFail'), 'error');
+        }
         setLoading(false);
         return;
       }

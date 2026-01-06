@@ -1,101 +1,30 @@
 {
-  "doctorSettings": {
-    "title": "Doctor Settings",
-    "subtitle": "Update your information and account settings as a doctor here.",
+  "title": "Doctor Settings",
+  "subtitle": "Update your information and account settings as a doctor here.",
+  "change_password": "Change Password",
+  "current_password": "Current Password",
+  "new_password": "New Password",
+  "confirm_password": "Confirm Password",
+  "profile": {
+    "header": "Doctor Information",
+    "name": "Name",
     "email": "Email",
     "phone": "Phone Number",
-    "specialty": "Specialty",
-    "clinic": "Clinic",
-    "address": "Address",
-    "working_hours": "Working Hours",
-    "change_password": "Change Password",
-    "current_password": "Current Password",
-    "new_password": "New Password",
-    "confirm_password": "Confirm Password",
-    "save_changes": "Save Changes",
-    "cancel": "Cancel",
-    "success_message": "Settings updated successfully.",
-    "error_message": "An error occurred. Please try again.",
-    "update": "Update",
-    "language": "Language",
-    "enable_notifications": "Enable Notifications",
-    "disable_notifications": "Disable Notifications",
-    "tabs": {
-      "profile": "Profile",
-      "availability": "Availability",
-      "notifications": "Notifications",
-      "security": "Security"
-    },
-    "profile": {
-      "header": "Doctor Information",
-      "name": "Name",
-      "specialty": "Specialty",
-      "email": "Email",
-      "phone": "Phone Number",
-      "license": "Medical License Number",
-      "bio": "Doctor Bio",
-      "save": "Save",
-      "toast": {
-        "saved": "Profile saved"
-      }
-    },
-    "availability": {
-      "header": "Working Hours",
-      "workDays": "Work Days",
-      "exampleDays": "Example: Sun - Thu",
-      "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-      "startTime": "Start Time",
-      "endTime": "End Time",
-      "slotDuration": "Appointment Duration (minutes)",
-      "minutes": "minutes",
-      "maxPatients": "Max Patients Per Day",
-      "saveButton": "Save Hours",
-      "toast": {
-        "saved": "Working hours saved"
-      }
-    },
-    "demo": {
-      "availabilityDays": "Sun - Thu",
-      "openModal": "Open settings modal",
-      "sensitiveAction": "Sensitive action (example account deletion)",
-      "confirmSensitiveActionMessage": "Are you sure you want to proceed with this sensitive action?"
-    },
-    "passwordChange": {
-      "submit": "Change"
-    },
-    "notifications": {
-      "title": "Notification Settings",
-      "communicationMethodsTitle": "Communication Methods",
-      "email": "Email Notifications",
-      "emailDesc": "Receive notifications via email",
-      "sms": "SMS Notifications",
-      "smsDesc": "Receive notifications via SMS",
-      "push": "Push Notifications",
-      "pushDesc": "Receive notifications in app",
-      "typesTitle": "Notification Types",
-      "newAppointment": "New Appointments",
-      "appointmentReminder": "Appointment Reminders",
-      "patientMessages": "Patient Messages",
-      "systemUpdates": "System Updates",
-      "typeDesc": {
-        "newAppointment": "When a new appointment is booked",
-        "appointmentReminder": "One hour before appointment",
-        "patientMessages": "When receiving a new message",
-        "systemUpdates": "About system updates"
-      },
-      "saveButton": "Save Preferences",
-      "toast": {
-        "saved": "Notification preferences saved"
-      }
-    },
-    "security": {
-      "toast": {
-        "fillFields": "Please fill all password fields",
-        "mismatch": "Passwords do not match",
-        "changedSuccess": "Password changed successfully",
-        "changeFailed": "Failed to change password"
-      }
-    },
-    "security_min_length": "Password must be at least 8 characters"
-  }
+    "license": "Medical License Number",
+    "bio": "Doctor Bio",
+    "save": "Save",
+    "toast": {
+      "saved": "Profile saved"
+    }
+  },
+  "security": {
+    "toast": {
+      "fillFields": "Please fill all password fields",
+      "mismatch": "Passwords do not match",
+      "sameAsOld": "New password must be different from the current password",
+      "changedSuccess": "Password changed successfully",
+      "changeFailed": "Failed to change password"
+    }
+  },
+  "security_min_length": "Password must be at least 8 characters"
 }

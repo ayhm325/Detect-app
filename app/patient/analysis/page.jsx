@@ -50,7 +50,7 @@ export default function AnalysisPage() {
   const [uploadTotal, setUploadTotal] = useState(null);
   const [uploadStartTime, setUploadStartTime] = useState(null);
   const [resultsVisible, setResultsVisible] = useState(false);
-  const [withHeatmap, setWithHeatmap] = useState(false);
+  // Always include heatmap
 
   const resetUploadUi = () => {
     setIsLoading(false);
@@ -143,7 +143,7 @@ export default function AnalysisPage() {
 
     const formData = new FormData();
     formData.append("image", selectedImage);
-    formData.append("with_heatmap", withHeatmap ? 'true' : 'false');
+    formData.append("with_heatmap", 'true');
 
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -239,19 +239,6 @@ export default function AnalysisPage() {
             onChange={handleImageChange}
             className="hidden"
           />
-          <label className="inline-flex items-center gap-2">
-            <input
-              id="with_heatmap"
-              type="checkbox"
-              className="rounded"
-              checked={withHeatmap}
-              onChange={(e) => setWithHeatmap(e.target.checked)}
-            />
-            <span className="text-sm text-(--ui-muted-foreground)">{t("analysis.controls.includeHeatmap")}</span>
-          </label>
-          
-          {/* controlled state for heatmap checkbox (defaults false) */}
-          
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -354,9 +341,19 @@ export default function AnalysisPage() {
 
             {analysisResult && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className={`p-6 rounded-3xl shadow-xl hover:scale-102 hover:shadow-2xl transition-transform duration-300 ${analysisResult?.needs_review ? 'bg-(--ui-warning-bg) border border-(--ui-warning-border)' : (String(analysisResult.prediction).toLowerCase().includes("normal") ? "bg-(--ui-success-bg) border border-(--ui-success-border)" : "bg-(--ui-danger-bg) border border-(--ui-danger-border)")}`}>
+                <div className={`p-6 rounded-3xl shadow-xl hover:scale-102 hover:shadow-2xl transition-transform duration-300
+                  ${analysisResult?.needs_review
+                    ? 'bg-(--ui-warning-bg) border border-(--ui-warning-border)'
+                    : (String(analysisResult.prediction).toLowerCase().includes("normal")
+                        ? 'bg-green-600 border-green-700 text-white font-bold'
+                        : (String(analysisResult.prediction).toLowerCase().includes("pneumonia")
+                          ? 'bg-red-600 border-red-700 text-white font-bold'
+                          : 'bg-(--ui-danger-bg) border border-(--ui-danger-border) font-bold')
+                      )
+                  }
+                `}>
                   <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-semibold mb-3 text-(--ui-foreground)">{t("analysis.results.diagnosis")}</h2>
+                    <h2 className="text-2xl font-bold mb-3 text-white">{t("analysis.results.diagnosis")}</h2>
                     {analysisResult?.needs_review && (
                       <span className="ml-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-(--ui-warning-bg) text-(--ui-foreground) text-sm font-semibold border border-(--ui-warning-border)">
                         ⚠ {t("analysis.results.needsReview")}
@@ -364,9 +361,10 @@ export default function AnalysisPage() {
                     )}
                   </div>
 
-                  <p className="text-(--ui-foreground) text-lg font-semibold">{analysisResult.display_label ?? analysisResult.prediction}</p>
-                  <p className="text-sm text-(--ui-muted-foreground) mt-3">{t("analysis.results.modelLabel")} {analysisResult.model_version ?? t("analysis.results.unknown")} • {t("analysis.results.inferenceTimeLabel")} {analysisResult.inference_time_ms ?? 0} ms</p>
-                  {savedToHistory && <p className="text-(--ui-success) mt-3">{t("analysis.results.savedToHistory")}</p>}
+                  <p className={`text-white text-center font-bold ${String(analysisResult.prediction).toLowerCase().includes("normal") || String(analysisResult.prediction).toLowerCase().includes("pneumonia") ? "text-3xl" : "text-lg"}`}>
+                    {analysisResult.display_label ?? analysisResult.prediction}
+                  </p>
+                  {savedToHistory && <p className="text-white mt-3 font-bold text-center">{t("analysis.results.savedToHistory")}</p>}
                 </div>
 
                 <div className="p-6 rounded-3xl shadow-xl card-glass hover:scale-102 transition-transform duration-300">

@@ -7,14 +7,14 @@ export default function NotificationSettings({ value, onChange }) {
 
   return (
     <div className={styles.notifications}>
-      <h3>{t('doctorSettings.notifications.title')}</h3>
+      <h3>{t('notifications.title')}</h3>
       <label>
         <input
           type="checkbox"
           checked={value.email || false}
           onChange={e => onChange({ ...value, email: e.target.checked })}
         />
-        {t('doctorSettings.notifications.email')}
+        {t('notifications.email')}
       </label>
       <label>
         <input
@@ -22,7 +22,7 @@ export default function NotificationSettings({ value, onChange }) {
           checked={value.sms || false}
           onChange={e => onChange({ ...value, sms: e.target.checked })}
         />
-        {t('doctorSettings.notifications.sms')}
+        {t('notifications.sms')}
       </label>
       <label>
         <input
@@ -30,7 +30,7 @@ export default function NotificationSettings({ value, onChange }) {
           checked={value.inApp || false}
           onChange={e => onChange({ ...value, inApp: e.target.checked })}
         />
-        {t('doctorSettings.notifications.push')}
+        {t('notifications.push')}
       </label>
     </div>
   );

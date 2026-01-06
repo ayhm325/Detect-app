@@ -27,6 +27,7 @@
   "unreadCount": "{unread} unread out of {total}",
   "allRead": "All notifications read ({total})",
   "filterAll": "All",
+  "new": "New",
   "filterUnread": "Unread",
   "filterRead": "Read",
   "markAllRead": "Mark all as read",
@@ -44,6 +45,10 @@
   "typeMessage": "Message",
   "typeReminder": "Reminder",
   "typeSystem": "System",
+  "typeInfo": "Info",
+  "typeSuccess": "Success",
+  "typeWarning": "Warning",
+  "typeAlert": "Alert",
   "actions": {
     "view": "View",
     "delete": "Delete",

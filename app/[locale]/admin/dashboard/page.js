@@ -9,8 +9,10 @@ export const headers = () => {
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../components/ui/ToastProvider";
-import { FaUsers, FaUserMd, FaUserInjured, FaXRay, FaArrowUp, FaArrowDown, FaBell, FaChartLine, FaCheckCircle, FaClock } from "react-icons/fa";
+import { FaUsers, FaUserMd, FaUserInjured, FaXRay, FaArrowUp, FaArrowDown, FaChartLine, FaCheckCircle, FaClock } from "react-icons/fa";
+import NotificationBellButton from "../../../components/ui/NotificationBellButton";
 import { useLocale, useTranslations } from "next-intl";
+import { formatActivityDescription } from "../../../lib/activityFormat";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -153,7 +155,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     fetch("/api/admin/notifications-unread")
       .then((res) => res.json())
-      .then((data) => setUnreadCount(data.unread || 0))
+      .then((data) => setUnreadCount((data && (data.badge ?? data.unread)) || 0))
       .catch(() => setUnreadCount(0));
   }, []);
 
@@ -169,18 +171,12 @@ export default function AdminDashboardPage() {
             </h1>
             <p className="text-(--ui-muted-2) mt-2">{formattedDate}</p>
           </div>
-          <button
+          <NotificationBellButton
+            count={unreadCount}
             onClick={() => router.push(`${basePrefix}/admin/notifications`)}
-            className="relative p-3 card-glass rounded-full border border-(--ui-border) shadow-(--shadow-soft) hover:shadow-(--shadow-lift) transition-shadow"
             title={t("notifications")}
-          >
-            <FaBell className="text-xl text-(--ui-muted-2)" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-(--ui-danger) text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                {unreadCount}
-              </span>
-            )}
-          </button>
+            iconClassName="text-(--ui-muted-2)"
+          />
         </div>
 
         {/* Stats Row - always in one line, scrollable on small screens */}
@@ -358,7 +354,7 @@ export default function AdminDashboardPage() {
                 >
                   <div className="text-3xl">📝</div>
                   <div className="flex-1">
-                    <p className="font-medium text-foreground">{activity.description}</p>
+                    <p className="font-medium text-foreground">{formatActivityDescription(activity, locale)}</p>
                     <p className="text-sm text-(--ui-muted-2)">{new Date(activity.createdAt).toLocaleString(locale === "en" ? "en-US" : "ar-EG")}</p>
                   </div>
                 </div>

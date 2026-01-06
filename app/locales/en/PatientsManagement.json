@@ -23,6 +23,7 @@
   },
   "statuses": {
     "active": "Active",
+    "pending": "Pending",
     "suspended": "Suspended",
     "banned": "Banned"
   },
@@ -49,7 +50,9 @@
   "actions": {
     "viewDetails": "View Details",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "breadcrumbs": {
     "home": "Home",
@@ -93,6 +96,7 @@
     "fullName": "Full Name",
     "email": "Email",
     "phone": "Phone",
+    "password": "Password",
     "gender": "Gender",
     "age": "Age",
     "bloodType": "Blood Type",

@@ -23,7 +23,7 @@ export default function PatientChatPage() {
     [dateLocale, placeholder]
   );
 
-  const [doctorChat, setDoctorChat] = useState({ id: null, doctorName: "", avatar: "👩‍⚕️", isOnline: false });
+  const [doctorChat, setDoctorChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
   const [file, setFile] = useState(null);
@@ -31,6 +31,30 @@ export default function PatientChatPage() {
   const [jwtToken, setJwtToken] = useState(null);
   const socket = useSocket();
   const messagesContainerRef = useRef(null);
+  const presenceByUserIdRef = useRef(new Map());
+  const missingChatRetryRef = useRef(0);
+
+  const mergeFetchedMessages = useCallback((prev, fetched) => {
+    const incoming = Array.isArray(fetched) ? fetched : [];
+    const current = Array.isArray(prev) ? prev : [];
+    const seen = new Set();
+    const out = [];
+
+    // Prefer server ordering (createdAt asc), then append any local-only messages.
+    for (const m of incoming) {
+      const key = m?.id ? `id:${m.id}` : (m?.clientKey ? `ck:${m.clientKey}` : null);
+      if (key && seen.has(key)) continue;
+      if (key) seen.add(key);
+      out.push(m);
+    }
+    for (const m of current) {
+      const key = m?.id ? `id:${m.id}` : (m?.clientKey ? `ck:${m.clientKey}` : null);
+      if (key && seen.has(key)) continue;
+      if (key) seen.add(key);
+      out.push(m);
+    }
+    return out;
+  }, []);
 
   // --- Load doctor info ---
   useEffect(() => {
@@ -41,51 +65,132 @@ export default function PatientChatPage() {
         const doctor = profileData?.profile?.doctor;
         if (!doctor) {
           showToast(t("noDoctorLinked"), "error");
-          setDoctorChat((prev) => ({ ...prev, doctorName: t("doctorFallbackName") }));
+          setDoctorChat(null);
           return;
         }
-        setDoctorChat(prev => ({ ...prev, doctorName: doctor.fullName, doctorUserId: doctor.userId || doctor.id || (doctor.user && doctor.user.id) }));
+        setDoctorChat({
+          id: null,
+          doctorName: doctor.fullName,
+          doctorUserId: doctor.userId || doctor.id || (doctor.user && doctor.user.id),
+          avatar: "👩‍⚕️",
+          isOnline: false,
+        });
       } catch(e) {
         showToast(t("errorLoadingChat"), "error");
+        setDoctorChat(null);
       }
     }
     loadDoctor();
   }, [showToast, t]);
 
-    // --- Try to load existing chat for patient on mount so messages and chatId are available ---
-    useEffect(() => {
-      let mounted = true;
-      (async () => {
-        try {
-          const res = await fetch('/api/chat/patient', { credentials: 'include' });
-          if (!res.ok) return;
+  // Ensure a chat exists as soon as we know the patient has a linked doctor.
+  // Presence is scoped per chat room, so we need a chatId to join and receive online status.
+  useEffect(() => {
+    if (!doctorChat) return;
+    if (doctorChat.id) return;
+    let mounted = true;
+    const controller = new AbortController();
+    (async () => {
+      try {
+        // First try GET in case chat already exists
+        const res = await fetch('/api/chat/patient', { credentials: 'include', signal: controller.signal });
+        if (res.ok) {
           const data = await res.json();
           const chats = data.chats || [];
-          if (!mounted) return;
-          if (chats.length) {
+          if (mounted && chats.length) {
             const first = chats[0];
             const chatId = first.id;
-            setDoctorChat(prev => ({
+            setDoctorChat((prev) => prev ? ({
               ...prev,
               id: chatId,
               doctorName: first.doctor?.user?.fullName || prev.doctorName,
               doctorUserId: first.doctor?.user?.id || first.doctor?.userId || prev.doctorUserId,
-            }));
-            // fetch messages immediately to avoid race between effects
+            }) : prev);
+
+            // Load full messages immediately for first render.
             try {
-              const mres = await fetch(`/api/chat/${chatId}/messages`, { credentials: 'include' });
+              const mres = await fetch(`/api/chat/${chatId}/messages`, { credentials: 'include', signal: controller.signal });
               if (mres.ok) {
                 const mdata = await mres.json();
-                if (mounted) setMessages((mdata.messages || []).map((m) => ({ ...m, time: formatMsgTime(m.createdAt) })));
+                if (mounted) {
+                  const mapped = (mdata.messages || []).map((m) => ({ ...m, time: formatMsgTime(m.createdAt) }));
+                  setMessages((prev) => mergeFetchedMessages(prev, mapped));
+                }
               }
             } catch (e) { /* ignore */ }
+            return;
           }
-        } catch (e) {
-          // ignore
         }
-      })();
-      return () => { mounted = false; };
-    }, [formatMsgTime]);
+
+        // Otherwise create/reuse chat (idempotent)
+        const cres = await fetch('/api/chat/patient', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+          credentials: 'include',
+          signal: controller.signal,
+        });
+        if (!cres.ok) return;
+        const cdata = await cres.json();
+        const chatId = cdata?.chat?.id;
+        if (mounted && chatId) {
+          setDoctorChat((prev) => prev ? ({ ...prev, id: chatId }) : prev);
+
+          // Load messages immediately after chat is ensured.
+          try {
+            const mres = await fetch(`/api/chat/${chatId}/messages`, { credentials: 'include', signal: controller.signal });
+            if (mres.ok) {
+              const mdata = await mres.json();
+              if (mounted) {
+                const mapped = (mdata.messages || []).map((m) => ({ ...m, time: formatMsgTime(m.createdAt) }));
+                setMessages((prev) => mergeFetchedMessages(prev, mapped));
+              }
+            }
+          } catch (e) { /* ignore */ }
+        }
+      } catch (e) {
+        // ignore
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      try { controller.abort(); } catch (e) {}
+    };
+  }, [doctorChat, formatMsgTime, mergeFetchedMessages]);
+
+  // --- Try to load existing chat messages whenever chatId becomes available ---
+  useEffect(() => {
+    let mounted = true;
+    const controller = new AbortController();
+    if (!doctorChat?.id) return;
+    (async () => {
+      try {
+        const mres = await fetch(`/api/chat/${doctorChat.id}/messages`, { credentials: 'include', signal: controller.signal });
+        if (!mres.ok) {
+          // If chat was deleted/changed server-side, reset and let the ensure-chat flow recreate/reselect.
+          if (mres.status === 404 && missingChatRetryRef.current < 1) {
+            missingChatRetryRef.current += 1;
+            if (mounted) {
+              setMessages([]);
+              setDoctorChat((prev) => (prev ? { ...prev, id: null } : prev));
+            }
+          }
+          return;
+        }
+        const mdata = await mres.json();
+        if (!mounted) return;
+        const mapped = (mdata.messages || []).map((m) => ({ ...m, time: formatMsgTime(m.createdAt) }));
+        setMessages((prev) => mergeFetchedMessages(prev, mapped));
+      } catch (e) {
+        // ignore
+      }
+    })();
+    return () => {
+      mounted = false;
+      try { controller.abort(); } catch (e) {}
+    };
+  }, [doctorChat?.id, formatMsgTime, mergeFetchedMessages]);
 
   // fetch JWT token for socket auth
   useEffect(() => {
@@ -105,6 +210,15 @@ export default function PatientChatPage() {
   // --- Socket connection ---
   const chatId = doctorChat?.id;
   const doctorUserId = doctorChat?.doctorUserId;
+
+  // If we already received presence events before doctorUserId was known, apply them now.
+  useEffect(() => {
+    if (!doctorUserId) return;
+    const v = presenceByUserIdRef.current.get(String(doctorUserId));
+    if (typeof v === 'boolean') {
+      setDoctorChat(prev => ({ ...prev, isOnline: v }));
+    }
+  }, [doctorUserId]);
 
   useEffect(() => {
     if (!socket) return;
@@ -134,6 +248,14 @@ export default function PatientChatPage() {
           }
         ];
       });
+
+      // If the chat is open and a doctor message arrives, mark it as read immediately.
+      try {
+        const incomingChatId = msg.chatId;
+        if (incomingChatId && chatId && String(incomingChatId) === String(chatId) && msg.sender === 'doctor' && msg.id) {
+          socket.emitEvent && socket.emitEvent('read_ack', { messageIds: [msg.id] });
+        }
+      } catch (e) {}
     });
 
     const offUpdate = socket.onMessageUpdate((upd) => {
@@ -147,9 +269,13 @@ export default function PatientChatPage() {
     });
 
     const offPresence = socket.onPresence(({ userId, online }) => {
+      if (!userId) return;
+      // Cache presence events so we can apply them even if doctorUserId isn't loaded yet.
+      try { presenceByUserIdRef.current.set(String(userId), Boolean(online)); } catch (e) {}
+
       // if presence refers to the linked doctor, update UI
-      if (doctorUserId && userId && String(userId) === String(doctorUserId)) {
-        setDoctorChat(prev => ({ ...prev, isOnline: online }));
+      if (doctorUserId && String(userId) === String(doctorUserId)) {
+        setDoctorChat(prev => ({ ...prev, isOnline: Boolean(online) }));
       }
     });
 
@@ -167,25 +293,6 @@ export default function PatientChatPage() {
     if(!el) return;
     try { el.scrollTo({ top: el.scrollHeight, behavior: "smooth" }); } catch(e){ el.scrollTop = el.scrollHeight; }
   }, [messages.length]);
-
-  // --- Load messages when chat exists (so they persist on reload) ---
-  useEffect(() => {
-    let mounted = true;
-    if (!chatId) return;
-    (async () => {
-      try {
-        const res = await fetch(`/api/chat/${chatId}/messages`, { credentials: 'include' });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!mounted) return;
-        const mapped = (data.messages || []).map((m) => ({ ...m, time: m.createdAt ? formatTime(m.createdAt) : "" }));
-        setMessages(mapped);
-      } catch (e) {
-        console.error('failed to load messages', e);
-      }
-    })();
-    return () => { mounted = false; };
-  }, [chatId]);
 
   // --- Send message ---
   const handleSendMessage = async () => {
@@ -374,29 +481,35 @@ export default function PatientChatPage() {
   return (
     <>
       <ToastContainer />
-      <div className="h-screen bg-(--ui-surface) text-(--ui-foreground) flex">
-        <div className="flex-1 flex flex-col">
+      <div className="min-h-screen bg-(--ui-surface) text-(--ui-foreground) p-4">
+        <div className="mx-auto w-full max-w-5xl h-[calc(100vh-2rem)] rounded-2xl border border-(--ui-border) overflow-hidden flex flex-col bg-(--ui-surface)">
           {doctorChat ? (
             <>
               {/* Header */}
-              <div className="bg-(--ui-surface) border-b border-(--ui-border) p-4 flex justify-between items-center">
+              <div className="bg-(--ui-surface) border-b border-(--ui-border) p-3 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-full bg-(--ui-info-bg) border border-(--ui-info-border) flex items-center justify-center text-2xl">{doctorChat.avatar}</div>
+                    <div className="w-10 h-10 rounded-full bg-(--ui-info-bg) border border-(--ui-info-border) flex items-center justify-center text-xl">{doctorChat.avatar}</div>
                   </div>
                   <div>
                     <h3 className="font-bold text-(--ui-foreground)">{doctorChat.doctorName}</h3>
+                    <div className="mt-0.5 inline-flex items-center gap-2 text-xs">
+                      <span className={`h-2 w-2 rounded-full ${doctorChat.isOnline ? 'bg-(--ui-success)' : 'bg-(--ui-muted-foreground)'}`} />
+                      <span className={doctorChat.isOnline ? 'text-(--ui-success)' : 'text-(--ui-muted-foreground)'}>
+                        {doctorChat.isOnline ? t('online') : t('offline')}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => showToast(t("voiceCallSoon"), "info")} className="p-3 hover:bg-(--ui-surface-2)/60 rounded-full"><FaPhone/></button>
-                  <button onClick={() => showToast(t("videoCallSoon"), "info")} className="p-3 hover:bg-(--ui-surface-2)/60 rounded-full"><FaVideo/></button>
+                  <button onClick={() => showToast(t("voiceCallSoon"), "info")} className="p-2 hover:bg-(--ui-surface-2)/60 rounded-full"><FaPhone/></button>
+                  <button onClick={() => showToast(t("videoCallSoon"), "info")} className="p-2 hover:bg-(--ui-surface-2)/60 rounded-full"><FaVideo/></button>
                   <ChatActionsPopover onDelete={handleDeleteChat} confirmText={t("confirmDelete")} confirmYes={t("delete")} confirmNo={t("cancel")} />
                 </div>
               </div>
 
               {/* Messages */}
-              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length===0 ? <div className="text-center text-(--ui-muted-foreground)">{t("noMessagesYet")}</div>
                 : messages.map((msg, idx)=>(
                   <div key={msg.clientKey || `${msg.id}-${idx}`} className={`flex ${msg.sender==="patient"?"justify-start":"justify-end"}`}>
@@ -429,8 +542,8 @@ export default function PatientChatPage() {
               </div>
 
               {/* Input */}
-              <div className="bg-(--ui-surface) border-t border-(--ui-border) p-4 flex gap-2 items-center">
-                <label className="p-3 hover:bg-(--ui-surface-2)/60 rounded-full cursor-pointer">
+              <div className="bg-(--ui-surface) border-t border-(--ui-border) p-3 flex gap-2 items-center">
+                <label className="p-2 hover:bg-(--ui-surface-2)/60 rounded-full cursor-pointer">
                   <FaPaperclip className="text-(--ui-muted-foreground)"/>
                   <input type="file" onChange={handleFileChange} className="hidden"/>
                 </label>
@@ -443,9 +556,9 @@ export default function PatientChatPage() {
                       </div>
                     </div>
                   )}
-                  <input type="text" value={messageInput} onChange={e=>setMessageInput(e.target.value)} onKeyPress={handleKeyPress} placeholder={t("messagePlaceholder")} className="w-full px-4 py-3 border border-(--ui-border) rounded-full bg-(--ui-surface) text-(--ui-foreground) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring)"/>
+                  <input type="text" value={messageInput} onChange={e=>setMessageInput(e.target.value)} onKeyPress={handleKeyPress} placeholder={t("messagePlaceholder")} className="w-full px-4 py-2 border border-(--ui-border) rounded-full bg-(--ui-surface) text-(--ui-foreground) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring)"/>
                 </div>
-                <button onClick={handleSendMessage} disabled={!messageInput.trim() && !file} className="p-3 btn-gradient rounded-full disabled:opacity-50"><FaPaperPlane/></button>
+                <button onClick={handleSendMessage} disabled={!messageInput.trim() && !file} className="p-2 btn-gradient rounded-full disabled:opacity-50"><FaPaperPlane/></button>
               </div>
             </>
           ) : <div className="flex-1 flex items-center justify-center text-center"><div><div className="text-6xl mb-4">💬</div><h3 className="text-xl font-bold text-(--ui-foreground)">{t("emptyStateTitle")}</h3><p className="text-(--ui-muted-foreground)">{t("emptyStateDescription")}</p></div></div>}

@@ -116,7 +116,7 @@ export default function ForgotPasswordForm() {
 
           {/* Success Message */}
           {success && (
-            <div className="bg-(--ui-success-bg) backdrop-blur border-2 border-(--ui-success-border) rounded-xl p-4 text-white text-base flex items-start gap-3 mt-4">
+            <div className="bg-(--color-neutral)/80 backdrop-blur border-2 border-(--ui-success-border) rounded-xl p-4 text-white text-base flex items-start gap-3 mt-4">
               <span className="text-xl shrink-0 mt-0.5">✅</span>
               <div className="flex-1 space-y-2">
                 <p className="font-semibold">{t("successMessage")}</p>
@@ -183,7 +183,7 @@ export default function ForgotPasswordForm() {
           {/* Back to Login */}
           <div className="flex flex-col gap-3 text-center text-sm">
             <Link
-              href="/login"
+              href={withLocale("/login")}
               className="flex items-center justify-center gap-2 text-(--ui-info) hover:text-white font-semibold transition-colors"
             >
               <FaArrowLeft className="text-lg" />

@@ -12,6 +12,7 @@ export default function UsersPage() {
   const { showToast, ToastContainer } = useToast();
   const { locale } = useLocale();
   const t = useTranslations("adminUsers");
+  const isRTL = locale === 'ar';
   
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
@@ -73,7 +74,6 @@ export default function UsersPage() {
     email: "",
     password: "",
     role: "admin",
-    status: "active"
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -212,8 +212,8 @@ export default function UsersPage() {
       email: formData.email,
       role: "admin",
       roleDisplay: t('roles.admin'),
-      status: formData.status,
-      statusDisplay: t(`statuses.${formData.status}`),
+      status: 'active',
+      statusDisplay: t('statuses.active'),
       joinDate: new Date().toISOString().split('T')[0],
       lastLogin: new Date().toISOString().replace('T', ' ').substring(0, 16),
       phone: "",
@@ -228,7 +228,6 @@ export default function UsersPage() {
       email: "",
       password: "",
       role: "admin",
-      status: "active"
     });
     showToast(t('toast.userAdded'), 'success');
     // Create admin via API
@@ -237,7 +236,7 @@ export default function UsersPage() {
         const res = await fetch('/api/admin/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password, status: formData.status })
+          body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password, status: 'active' })
         });
 
         if (!res.ok) {
@@ -265,7 +264,7 @@ export default function UsersPage() {
 
         setUsers(prev => [uiUser, ...prev]);
         setShowAddModal(false);
-        setFormData({ name: '', email: '', password: '', role: 'admin', status: 'active' });
+        setFormData({ name: '', email: '', password: '', role: 'admin' });
         showToast(t('messages.adminCreated'), 'success');
       } catch (err) {
         showToast(t('errors.createAdminFailed'), 'error');
@@ -486,44 +485,24 @@ export default function UsersPage() {
                     />
                   </div>
 
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{t('form.password')}</label>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      id="add-user-password"
-                      name="password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full pl-10 px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-(--ui-muted-2) p-1"
-                      title={showPassword ? t('actions.hidePassword') : t('actions.showPassword')}
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                  </div>
                   <div>
-                    <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{t('form.status')}</label>
-                    <div className="flex gap-3">
+                    <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{t('form.password')}</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        id="add-user-password"
+                        name="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className={`w-full px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground ${isRTL ? 'pr-10' : 'pl-10'}`}
+                      />
                       <button
                         type="button"
-                        onClick={() => setFormData({ ...formData, status: 'active' })}
-                        className={`flex-1 px-4 py-3 rounded-lg transition-colors font-medium ${formData.status === 'active' ? 'bg-(--ui-success) text-white' : 'bg-(--ui-surface-2) text-foreground border border-(--ui-border) hover:bg-(--ui-surface)'}`}
-                        aria-pressed={formData.status === 'active'}
+                        onClick={() => setShowPassword(!showPassword)}
+                        className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-(--ui-muted-2) p-1`}
+                        title={showPassword ? t('actions.hidePassword') : t('actions.showPassword')}
                       >
-                        {t('statuses.active')}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, status: 'banned' })}
-                        className={`flex-1 px-4 py-3 rounded-lg transition-colors font-medium ${formData.status === 'banned' ? 'bg-(--ui-danger) text-white' : 'bg-(--ui-surface-2) text-foreground border border-(--ui-border) hover:bg-(--ui-surface)'}`}
-                        aria-pressed={formData.status === 'banned'}
-                      >
-                        {t('statuses.banned')}
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
                       </button>
                     </div>
                   </div>

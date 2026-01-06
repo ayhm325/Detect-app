@@ -3,13 +3,14 @@ import { useState, useEffect } from "react";
 import { useToast } from "../../../components/ui/Toast";
 import { useTranslations } from "next-intl";
 import { FaBell, FaTrash, FaCheck, FaCheckDouble } from "react-icons/fa";
-import useLocale from "../../../hooks/useLocale";
+import { useLocale } from "next-intl";
 
 export default function PatientNotificationsPage() {
-  const { locale } = useLocale();
+  const locale = useLocale();
   const { showToast, ToastContainer } = useToast();
   const [filter, setFilter] = useState("all");
   const t = useTranslations("notifications");
+  const [nowMs, setNowMs] = useState(0);
   const labels = {
     pageTitle: t("pageTitle"),
     unreadCount: (...args) => t("unreadCount", { unread: args[0], total: args[1] }),
@@ -52,34 +53,48 @@ export default function PatientNotificationsPage() {
   // The following block is misplaced and should be removed or integrated into the i18n system.
   // Removed duplicate Arabic labels object.
   
-  // Start with empty notifications (no fake data)
   const [notifications, setNotifications] = useState([]);
 
-  // جلب الإشعارات الحقيقية من API
-  useEffect(() => {
-    async function fetchNotifications() {
-      try {
-        // يمكن تعديل userId حسب نظام المصادقة لديك
-        const res = await fetch("/api/patient/notifications?userId=demo-user-id");
-        if (res.ok) {
-          const data = await res.json();
-          setNotifications(data);
-        }
-      } catch (err) {
-        // يمكن عرض رسالة خطأ إذا أردت
+  const getLocalizedMessage = (raw) => {
+    if (raw == null) return "";
+    const str = String(raw);
+    try {
+      const parsed = JSON.parse(str);
+      if (parsed && typeof parsed === 'object') {
+        const byLocale = parsed?.[locale];
+        if (typeof byLocale === 'string' && byLocale.trim()) return byLocale;
+        const fallback = parsed?.en || parsed?.ar;
+        if (typeof fallback === 'string') return fallback;
       }
-    }
-    fetchNotifications();
+    } catch {}
+    return str;
+  };
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/patient/notifications", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json().catch(() => ({}));
+        if (!mounted) return;
+        setNowMs(Date.now());
+        setNotifications(Array.isArray(data?.notifications) ? data.notifications : []);
+      } catch {}
+    })();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const filteredNotifications = notifications.filter(notif => {
-    if (filter === "unread") return !notif.read;
-    if (filter === "read") return notif.read;
+    if (filter === "unread") return !notif.isRead;
+    if (filter === "read") return notif.isRead;
     return true;
   });
 
   const handleDelete = async (id) => {
-    await fetch(`/api/patient/notifications?userId=demo-user-id&id=${id}`, { method: "DELETE" });
+    await fetch(`/api/patient/notifications?id=${id}`, { method: "DELETE" });
     setNotifications(notifications.filter(n => n.id !== id));
     showToast(labels.toast.notificationDeleted, "info");
   };
@@ -87,70 +102,104 @@ export default function PatientNotificationsPage() {
   const handleDeleteAll = async () => {
     if (window.confirm(labels.confirmDeleteAll)) {
       // حذف من الباك-إند
-      await fetch("/api/patient/notifications?userId=demo-user-id", { method: "DELETE" });
+      await fetch("/api/patient/notifications", { method: "DELETE" });
       setNotifications([]);
       showToast(labels.toast.allDeleted, "success");
     }
   };
 
   const handleMarkAsRead = async (id) => {
-    await fetch(`/api/patient/notifications?userId=demo-user-id&id=${id}`, { method: "PUT", body: JSON.stringify({ read: true }), headers: { "Content-Type": "application/json" } });
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ));
-    showToast(labels.toast.markedRead, "info");
+    const res = await fetch(`/api/patient/notifications?id=${id}`, { method: "PUT", body: JSON.stringify({ isRead: true }), headers: { "Content-Type": "application/json" } });
+    if (!res.ok) {
+      showToast(labels.toast.errorUpdate, "error");
+      return;
+    }
+    const data = await res.json();
+    if (data.success) {
+      setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
+      showToast(labels.toast.markedRead, "info");
+    } else {
+      showToast(labels.toast.errorUpdate, "error");
+    }
   };
 
   const handleMarkAllAsRead = async () => {
-    // تحديث في الباك-إند
-    await fetch("/api/patient/notifications?userId=demo-user-id", { method: "PUT" });
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
-    showToast(labels.toast.allMarkedRead, "success");
+    const res = await fetch("/api/patient/notifications", { method: "PUT" });
+    if (!res.ok) {
+      showToast(labels.toast.errorUpdate, "error");
+      return;
+    }
+    const data = await res.json();
+    if (data.success) {
+      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      showToast(labels.toast.allMarkedRead, "success");
+    } else {
+      showToast(labels.toast.errorUpdate, "error");
+    }
   };
 
   const handleMarkAsUnread = async (id) => {
-    await fetch(`/api/patient/notifications?userId=demo-user-id&id=${id}`, { method: "PUT", body: JSON.stringify({ read: false }), headers: { "Content-Type": "application/json" } });
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: false } : n
-    ));
-    showToast(labels.toast.markedUnread, "info");
+    const res = await fetch(`/api/patient/notifications?id=${id}`, { method: "PUT", body: JSON.stringify({ isRead: false }), headers: { "Content-Type": "application/json" } });
+    if (!res.ok) {
+      showToast(labels.toast.errorUpdate, "error");
+      return;
+    }
+    const data = await res.json();
+    if (data.success) {
+      setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: false } : n));
+      showToast(labels.toast.markedUnread, "info");
+    } else {
+      showToast(labels.toast.errorUpdate, "error");
+    }
   };
 
   const getTypeIcon = (type) => {
     const icons = {
-      appointment: "📅",
-      result: "📊",
-      message: "💬",
-      reminder: "🔔",
-      system: "⚙️"
+      info: "ℹ️",
+      success: "✅",
+      warning: "⚠️",
+      alert: "🚨"
     };
     return icons[type] || "🔔";
   };
 
   const getTypeBadgeColor = (type) => {
     const colors = {
-      appointment: "bg-(--ui-info-bg) text-(--ui-foreground) border border-(--ui-info-border)",
-      result: "bg-(--ui-success-bg) text-(--ui-foreground) border border-(--ui-success-border)",
-      message: "bg-(--ui-info-bg) text-(--ui-foreground) border border-(--ui-info-border)",
-      reminder: "bg-(--ui-warning-bg) text-(--ui-foreground) border border-(--ui-warning-border)",
-      system: "bg-(--ui-warning-bg) text-(--ui-foreground) border border-(--ui-warning-border)"
+      info: "bg-(--ui-info-bg) text-(--ui-foreground) border border-(--ui-info-border)",
+      success: "bg-(--ui-success-bg) text-(--ui-foreground) border border-(--ui-success-border)",
+      warning: "bg-(--ui-warning-bg) text-(--ui-foreground) border border-(--ui-warning-border)",
+      alert: "bg-(--ui-danger)/10 text-(--ui-foreground) border border-(--ui-danger)/20"
     };
     return colors[type] || "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border)";
   };
 
   const getTypeLabel = (type) => {
     const typeLabels = {
-      appointment: labels.typeAppointment,
-      result: labels.typeResult,
-      message: labels.typeMessage,
-      reminder: labels.typeReminder,
-      system: labels.typeSystem
+      info: t("typeInfo"),
+      success: t("typeSuccess"),
+      warning: t("typeWarning"),
+      alert: t("typeAlert")
     };
-    return typeLabels[type] || labels.typeSystem;
+    return typeLabels[type] || t("typeInfo");
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.isRead).length;
   const totalCount = notifications.length;
+
+  const formatRelativeTime = (dateValue) => {
+    const dt = dateValue ? new Date(dateValue) : null;
+    if (!dt || isNaN(dt.getTime())) return "";
+    if (!nowMs) return "";
+    const diffMs = Math.max(0, nowMs - dt.getTime());
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return labels.timeJustNow();
+    if (mins < 60) return labels.timeMinutesAgo(mins);
+    const hours = Math.floor(mins / 60);
+    if (hours === 1) return labels.timeHourAgo();
+    if (hours < 24) return labels.timeHoursAgo(hours);
+    const days = Math.floor(hours / 24);
+    return labels.timeDaysAgo(days);
+  };
 
   return (
     <div className="min-h-screen bg-(--ui-surface) text-(--ui-foreground) py-8 px-4">
@@ -198,7 +247,7 @@ export default function PatientNotificationsPage() {
                 : "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border) hover:bg-(--ui-surface-2)"
             }`}
           >
-            {labels.filterRead} ({notifications.filter(n => n.read).length})
+            {labels.filterRead} ({notifications.filter(n => n.isRead).length})
           </button>
         </div>
 
@@ -238,37 +287,34 @@ export default function PatientNotificationsPage() {
               <div
                 key={notif.id}
                 className={`card-glass border border-(--ui-border) rounded-xl p-6 border-l-4 transition hover:shadow-lg ${
-                  notif.read
+                  notif.isRead
                     ? "border-l-(--ui-border)"
                     : "border-l-(--ui-success)"
-                } ${!notif.read ? "bg-(--ui-success-bg)" : ""}`}
+                } ${!notif.isRead ? "bg-(--ui-success-bg)" : ""}`}
               >
                 <div className="flex items-start justify-between gap-4">
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <span className="text-2xl">{getTypeIcon(notif.type)}</span>
-                      <h3 className="text-lg font-semibold text-(--ui-foreground)">
-                        {notif.title}
-                      </h3>
                       <span className={`px-3 py-1 text-xs font-medium rounded-full ${getTypeBadgeColor(notif.type)}`}>
                         {getTypeLabel(notif.type)}
                       </span>
-                      {!notif.read && (
+                      {!notif.isRead && (
                         <div className="w-3 h-3 bg-(--ui-success) rounded-full ml-auto shrink-0"></div>
                       )}
                     </div>
                     <p className="text-(--ui-muted-foreground) mb-2">
-                      {notif.message}
+                      {getLocalizedMessage(notif.message)}
                     </p>
                     <p className="text-sm text-(--ui-muted-foreground)">
-                      {notif.time}
+                      {formatRelativeTime(notif.createdAt)}
                     </p>
                   </div>
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 shrink-0">
-                    {!notif.read ? (
+                    {!notif.isRead ? (
                       <button
                         onClick={() => handleMarkAsRead(notif.id)}
                         title={labels.markAsRead}
@@ -299,23 +345,6 @@ export default function PatientNotificationsPage() {
           )}
         </div>
 
-        {/* Stats */}
-        {totalCount > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
-            <div className="card-glass border border-(--ui-border) rounded-xl p-6 border-t-4 border-t-(--ui-info)">
-              <h4 className="text-(--ui-muted-foreground) text-sm font-medium mb-2">{labels.statsTotal}</h4>
-              <p className="text-3xl font-bold text-(--ui-foreground)">{totalCount}</p>
-            </div>
-            <div className="card-glass border border-(--ui-border) rounded-xl p-6 border-t-4 border-t-(--ui-warning)">
-              <h4 className="text-(--ui-muted-foreground) text-sm font-medium mb-2">{labels.statsUnread}</h4>
-              <p className="text-3xl font-bold text-(--ui-foreground)">{unreadCount}</p>
-            </div>
-            <div className="card-glass border border-(--ui-border) rounded-xl p-6 border-t-4 border-t-(--ui-success)">
-              <h4 className="text-(--ui-muted-foreground) text-sm font-medium mb-2">{labels.statsRead}</h4>
-              <p className="text-3xl font-bold text-(--ui-foreground)">{notifications.filter(n => n.read).length}</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

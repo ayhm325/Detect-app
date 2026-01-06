@@ -3,6 +3,7 @@ import prisma from '../../../../lib/prismaClient';
 import { withRBAC } from "../../../../lib/auth/withRBAC";
 import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
+import { createNotificationBestEffort } from '../../../../lib/notifications';
 
 export const GET = withRBAC(async (request, user) => {
   const rl = await rateLimit(request);
@@ -99,6 +100,22 @@ export const POST = withRBAC(async (request, user) => {
       ...(body.doctorId ? { doctor: { connect: { userId: body.doctorId } } } : {}),
     };
     const patient = await createRecord('Patient', data);
+
+    // Notify assigned doctor (best-effort)
+    try {
+      const assignedDoctorId = body.doctorId ? String(body.doctorId).trim() : "";
+      if (assignedDoctorId) {
+        await createNotificationBestEffort(prisma, {
+          userId: assignedDoctorId,
+          type: 'info',
+          message: {
+            ar: `تم إسناد مريض جديد إليك: ${body.name}.`,
+            en: `A new patient has been assigned to you: ${body.name}.`
+          }
+        });
+      }
+    } catch {}
+
     logAudit({ event: "admin_patient_created", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { patientId: patient.id } });
     return new Response(JSON.stringify(patient), { status: 201 });
   } catch (error) {

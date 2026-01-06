@@ -25,6 +25,10 @@
   color: var(--ui-info);
 }
 
+.profileIcon {
+  color: #2b6cb0; /* blue */
+}
+
 .label {
   font-size: 1rem;
   color: var(--ui-foreground);

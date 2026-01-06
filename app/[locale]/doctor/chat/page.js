@@ -6,7 +6,7 @@ import { useToast } from "../../../components/ui/Toast";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import useSocket from "../../../components/chat/useSocket.client";
 import ChatActionsPopover from "../../../components/chat/ChatActionsPopover.client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   FaComments,
   FaSearch,
@@ -30,6 +30,7 @@ export default function Page() {
   const ui = useTranslations("ui");
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = useLocale();
 
   const placeholder = ui("placeholder");
@@ -154,10 +155,24 @@ export default function Page() {
           return { ...m, [chatKey]: [...list, mapped] };
         });
 
-        setConversations((cs) => cs.map((c) => c.id === chatKey ? { ...c, lastMessage: msg.text || '', lastMessageTime: mapped.time } : c));
+        setConversations((cs) => cs.map((c) => {
+          if (c.id !== chatKey) return c;
+          const isIncomingFromPatient = (msg.sender === 'patient' || mapped.sender === 'patient');
+          const isActiveChat = selectedChat && chatKey === String(selectedChat);
+          const nextUnread = (!isActiveChat && isIncomingFromPatient)
+            ? (Number(c.unreadCount || 0) + 1)
+            : Number(c.unreadCount || 0);
+          return { ...c, lastMessage: msg.text || '', lastMessageTime: mapped.time, unreadCount: nextUnread };
+        }));
 
         if (selectedChat && chatKey === String(selectedChat)) {
           try { socket.emitEvent && socket.emitEvent('delivered_ack', { messageIds: [messageId || msg.id] }); } catch (e) {}
+          // If this is a patient message and the doctor is viewing the chat, mark as read.
+          try {
+            if ((msg.sender === 'patient' || mapped.sender === 'patient') && (messageId || msg.id)) {
+              socket.emitEvent && socket.emitEvent('read_ack', { messageIds: [messageId || msg.id] });
+            }
+          } catch (e) {}
         }
       } catch (e) { console.error('onMessage handler', e); }
     });
@@ -174,7 +189,7 @@ export default function Page() {
     });
 
     const offPresence = socket.onPresence(({ userId, online }) => {
-      setConversations((cs) => cs.map((c) => (c.patientId === userId ? { ...c, online } : c)));
+      setConversations((cs) => cs.map((c) => (c.patientUserId && String(c.patientUserId) === String(userId) ? { ...c, online } : c)));
     });
 
     const offUpdate = socket.onMessageUpdate((upd) => {
@@ -239,17 +254,20 @@ export default function Page() {
         const convs = (data.chats || []).map((c) => ({
           id: String(c.id),
           patientId: c.patient?.id ? String(c.patient.id) : null,
+          patientUserId: c.patient?.userId ? String(c.patient.userId) : null,
           patientName: c.patient?.fullName || t("patientFallbackName"),
           lastMessage: c.messages?.[0]?.text || "",
           lastMessageTime: formatMsgTime(c.messages?.[0]?.createdAt),
-          unreadCount: 0,
+          unreadCount: Number(c.unreadCount || 0),
           online: false,
           avatar: "👨",
         }));
 
         if (!mounted) return;
         setConversations(convs);
-        setSelectedChat((prev) => prev ?? (convs.length ? String(convs[0].id) : null));
+        // Don't auto-open a specific patient's chat on first visit.
+        // Keep the previous selection only if it still exists.
+        setSelectedChat((prev) => (prev && convs.some((c) => String(c.id) === String(prev)) ? prev : null));
 
         const res2 = await fetch("/api/doctor/patients", { credentials: "include" });
         const patients = res2.ok ? await res2.json() : [];
@@ -270,6 +288,67 @@ export default function Page() {
     conversations.forEach((c) => { if (c.patientId) map[c.patientId] = c; });
     return map;
   }, [conversations]);
+
+  const requestedPatientId = useMemo(() => {
+    try {
+      const pid = searchParams?.get('patientId');
+      return pid ? String(pid) : null;
+    } catch {
+      return null;
+    }
+  }, [searchParams]);
+
+  const openedFromPatientRef = useRef(null);
+
+  // If navigated from patients page with ?patientId=..., open (or create) that conversation.
+  useEffect(() => {
+    if (!requestedPatientId) return;
+    if (loadingChats) return;
+    if (openedFromPatientRef.current === requestedPatientId) return;
+    openedFromPatientRef.current = requestedPatientId;
+
+    const conv = patientIdToConversation[requestedPatientId];
+    if (conv?.id) {
+      setSelectedChat(String(conv.id));
+      setConversations((cs) => cs.map((c) => (c.id === conv.id ? { ...c, unreadCount: 0 } : c)));
+      return;
+    }
+
+    // No existing conversation yet — create one (same behavior as "start new chat" button).
+    (async () => {
+      try {
+        const res = await fetch(`/api/chat/patient`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ patientId: requestedPatientId })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data?.chat?.id) {
+          const patient = allPatients.find((p) => String(p.id) === requestedPatientId);
+          const newConv = {
+            id: String(data.chat.id),
+            patientId: requestedPatientId,
+            patientName: patient?.fullName || t("patientFallbackName"),
+            lastMessage: "",
+            lastMessageTime: "",
+            unreadCount: 0,
+            online: false,
+            avatar: "👨",
+          };
+          setConversations((prev) => {
+            if (prev.some((c) => String(c.id) === String(newConv.id))) return prev;
+            return [...prev, newConv];
+          });
+          setSelectedChat(String(data.chat.id));
+        } else {
+          showToast(data?.error || t("startChatFailed"), "error");
+        }
+      } catch {
+        showToast(t("startChatFailed"), "error");
+      }
+    })();
+  }, [requestedPatientId, loadingChats, patientIdToConversation, allPatients, showToast, t]);
 
   const filteredPatients = useMemo(() => {
     if (!searchQuery.trim()) return allPatients;
@@ -325,6 +404,8 @@ export default function Page() {
         }));
 
         loadedMessagesRef.current.add(chatKey);
+        // Reset unread badge when opening the chat (server marks messages as read best-effort).
+        setConversations((cs) => cs.map((c) => (c.id === chatKey ? { ...c, unreadCount: 0 } : c)));
         setMessagesMap((m) => {
           const existing = m[chatKey] || [];
           if (!existing.length) return { ...m, [chatKey]: mapped };
@@ -354,24 +435,43 @@ export default function Page() {
   }, [selectedChat, formatMsgTime]);
 
   // Keep socket subscribed to the currently selected chat room so doctors
-  // receive patient messages in real time. Leave previous room when switching.
-  const _joinedChatRef = useRef(null);
+  // receive patient messages/presence in real time.
+  // Join ALL chat rooms in the left list so online/offline updates without reload.
+  const _joinedChatsRef = useRef(new Set());
   useEffect(() => {
+    if (!socket) return;
     try {
-      if (!socket) return;
-      const prev = _joinedChatRef.current;
-      if (prev && String(prev) !== String(selectedChat)) {
-        try { socket.leave && socket.leave(prev); } catch (e) {}
+      const next = new Set((conversations || []).map((c) => String(c.id)));
+      // join new rooms
+      for (const id of next) {
+        if (!_joinedChatsRef.current.has(id)) {
+          try { socket.join && socket.join(id); } catch (e) {}
+          _joinedChatsRef.current.add(id);
+        }
       }
-      if (selectedChat) {
-        try { socket.join && socket.join(selectedChat); _joinedChatRef.current = selectedChat; } catch (e) {}
+      // leave removed rooms
+      for (const id of Array.from(_joinedChatsRef.current)) {
+        if (!next.has(id)) {
+          try { socket.leave && socket.leave(id); } catch (e) {}
+          _joinedChatsRef.current.delete(id);
+        }
       }
-      return () => {
-        try { if (selectedChat) socket.leave && socket.leave(selectedChat); } catch (e) {}
-        _joinedChatRef.current = null;
-      };
     } catch (e) { /* ignore */ }
-  }, [socket, selectedChat]);
+  }, [socket, conversations]);
+
+  // Leave all joined rooms only when the socket changes or the page unmounts.
+  useEffect(() => {
+    if (!socket) return;
+    const joined = _joinedChatsRef.current;
+    return () => {
+      try {
+        for (const id of Array.from(joined)) {
+          try { socket.leave && socket.leave(id); } catch (e) {}
+        }
+        joined.clear();
+      } catch (e) { /* ignore */ }
+    };
+  }, [socket]);
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedChat) {
@@ -651,15 +751,32 @@ export default function Page() {
                   return (
                     <div
                       key={patient.id}
-                      onClick={() => conv ? setSelectedChat(conv.id) : null}
+                      onClick={() => {
+                        if (!conv) return;
+                        setSelectedChat(conv.id);
+                        // Optimistically clear badge when doctor opens this chat.
+                        setConversations((cs) => cs.map((c) => (c.id === conv.id ? { ...c, unreadCount: 0 } : c)));
+                      }}
                       className={`cursor-pointer border-b border-(--ui-border) p-4 transition-all hover:bg-(--ui-surface-2) ${conv && selectedChat === conv.id ? "bg-(--ui-info-bg) border-l-4 border-l-(--ui-info)" : ""}`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-(--ui-info-bg) text-2xl">{conv?.avatar || "👤"}</div>
+                        <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-(--ui-info-bg) text-2xl">
+                          {conv?.avatar || "👤"}
+                          {conv?.online ? (
+                            <FaCircle className="absolute bottom-0 left-0 text-xs text-(--ui-success) bg-(--ui-surface) rounded-full" />
+                          ) : null}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <h3 className="font-semibold text-(--ui-foreground) truncate">{patient.fullName}</h3>
-                            <span className="text-xs text-(--ui-muted-foreground)">{conv?.lastMessageTime || ""}</span>
+                            <div className="flex items-center gap-2">
+                              {conv?.unreadCount > 0 ? (
+                                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-(--ui-danger) px-1.5 text-xs font-semibold text-(--ui-danger-foreground)">
+                                  {conv.unreadCount > 99 ? '99+' : conv.unreadCount}
+                                </span>
+                              ) : null}
+                              <span className="text-xs text-(--ui-muted-foreground)">{conv?.lastMessageTime || ""}</span>
+                            </div>
                           </div>
                           <div className="flex items-center justify-between mt-1">
                             <p className="text-sm text-(--ui-muted-foreground) truncate">{conv?.lastMessage || ""}</p>
@@ -718,7 +835,7 @@ export default function Page() {
                       <div>
                         <h3 className="font-bold text-(--ui-foreground)">{currentChat.patientName}</h3>
                         <p className="text-sm text-(--ui-muted-foreground)">{currentChat.online ? t("online") : t("offline")}</p>
-                        {currentChat && typingUsers[currentChat.patientId] && (
+                        {currentChat && typingUsers[currentChat.patientUserId] && (
                           <p className="text-xs text-(--ui-muted-foreground)">{t('typing')}</p>
                         )}
                       </div>

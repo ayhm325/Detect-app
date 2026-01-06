@@ -29,9 +29,7 @@ import {
   FaPhone,
   FaCalendar,
   FaClock,
-  FaStethoscope,
   FaVial,
-  FaCertificate,
   FaStar,
 } from "react-icons/fa6";
 
@@ -149,25 +147,6 @@ function DoctorsPage() {
     };
   }, []);
 
-
-  // إحصائيات شاملة
-  const stats = [
-    {
-      title: tDoctors('stats.totalDoctors'),
-      value: doctors.length,
-      icon: FaStethoscope,
-    },
-    {
-      title: tDoctors('stats.totalPatients'),
-      value: patients.length,
-      icon: FaUsers,
-    },
-    {
-      title: tDoctors('stats.totalAdmins'),
-      value: admins.length,
-      icon: FaCertificate,
-    },
-  ];
 
   // Helper Functions
   const specialtiesMap = {
@@ -423,26 +402,6 @@ function DoctorsPage() {
               <span>{tDoctors('addButton')}</span>
             </button>
           </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border)"
-            >
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg brand-gradient shadow-(--shadow-soft)">
-                  <stat.icon className="text-2xl text-white" />
-                </div>
-                <div>
-                  <p className="text-(--ui-muted-2) text-sm">{stat.title}</p>
-                  <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* Filters */}

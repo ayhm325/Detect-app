@@ -8,9 +8,9 @@
   },
   "content": {
     "hero": {
-      "title": "Welcome to Detect AI",
-      "subtitle": "Smart Disease Detection System",
-      "desc": "A modern platform for highly accurate medical image analysis, providing doctors and patients with fast answers and keeping your data secure.",
+      "title": "Intelligent Medical Diagnosis Powered by Artificial Intelligence",
+      "subtitle": "Advanced medical image analysis that supports physicians in detecting diseases with greater accuracy and speed",
+      "desc": "A comprehensive medical platform leveraging trusted AI models for radiological image analysis and clinical decision support, while adhering to the highest standards of data privacy and security.",
       "primaryCta": "Get Started Free",
       "secondaryCta": "Sign In"
     }

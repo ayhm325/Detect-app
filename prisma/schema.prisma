@@ -82,6 +82,15 @@ enum DoctorStatus {
 }
 
 //////////////////////
+// الحالة السريرية للمريض (ClinicalStatus) //
+//////////////////////
+enum ClinicalStatus {
+  stable
+  critical
+  recovering
+}
+
+//////////////////////
 // المريض (Patient) //
 //////////////////////
 model Patient {
@@ -103,6 +112,9 @@ model Patient {
 
   status PatientStatus @default(active)
   notes  String?
+
+  // Doctor-set clinical status shown on doctor dashboard/patients list
+  clinicalStatus ClinicalStatus @default(stable)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

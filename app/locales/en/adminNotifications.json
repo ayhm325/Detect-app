@@ -1,0 +1,29 @@
+{
+  "title": "Notifications",
+  "subtitle": "Admin notifications and important events",
+  "summary": {
+    "unread": "Unread notifications",
+    "pendingDoctorApprovals": "Pending doctor approvals",
+    "pendingDoctorChangeRequests": "Pending doctor change requests",
+    "clickToOpen": "Click to open"
+  },
+  "sections": {
+    "notifications": "Notifications",
+    "recentActivity": "Recent activity"
+  },
+  "states": {
+    "loading": "Loading…",
+    "unread": "Unread",
+    "emptyNotifications": "No notifications right now.",
+    "emptyActivity": "No recent activity."
+  },
+  "types": {
+    "info": "Info",
+    "warning": "Warning",
+    "alert": "Alert",
+    "success": "Success"
+  },
+  "errors": {
+    "loadFailed": "Failed to load notifications"
+  }
+}

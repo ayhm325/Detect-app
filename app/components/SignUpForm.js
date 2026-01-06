@@ -10,7 +10,7 @@ function withLocale(locale, path) {
 
 import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaCheck, FaStethoscope, FaBed, FaGoogle, FaFacebook, FaEye, FaEyeSlash, FaPhone, FaHouse } from "react-icons/fa6";
 import Link from "next/link";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useLocaleContext } from "../hooks/useLocaleContext";
 
@@ -33,11 +33,31 @@ function SignUpForm() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // جلب الأطباء الحقيقيين من API
   const [doctors, setDoctors] = useState([]);
   const [doctorsLoading, setDoctorsLoading] = useState(false);
   const [doctorsError, setDoctorsError] = useState("");
+
+  const [doctorPickerOpen, setDoctorPickerOpen] = useState(false);
+  const doctorPickerRef = useRef(null);
+
+  const selectedDoctor = useMemo(
+    () => doctors.find((d) => String(d.id) === String(form.doctorId)),
+    [doctors, form.doctorId]
+  );
+
+  useEffect(() => {
+    if (!doctorPickerOpen) return;
+    const onMouseDown = (e) => {
+      const el = doctorPickerRef.current;
+      if (!el) return;
+      if (!el.contains(e.target)) setDoctorPickerOpen(false);
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [doctorPickerOpen]);
 
   useEffect(() => {
     if (form.userType !== "patient") return;
@@ -94,6 +114,7 @@ function SignUpForm() {
 
   const handleUserTypeChange = (type) => {
     setForm({ ...form, userType: type, doctorId: "" });
+    setDoctorPickerOpen(false);
     setError("");
     setSuccess("");
   };
@@ -155,6 +176,19 @@ function SignUpForm() {
       const data = await res.json();
       setLoading(false);
       if (!res.ok) {
+        const code = data?.errorCode;
+        if (code === "EMAIL_ALREADY_USED") {
+          setError(t("signup.errors.emailAlreadyUsed"));
+          return;
+        }
+        if (code === "PHONE_ALREADY_USED") {
+          setError(t("signup.errors.phoneAlreadyUsed"));
+          return;
+        }
+        if (code === "LICENSE_ALREADY_USED") {
+          setError(t("signup.errors.licenseAlreadyUsed"));
+          return;
+        }
         setError(data.error || t("signup.errors.registrationFailed"));
         return;
       }
@@ -371,23 +405,74 @@ function SignUpForm() {
               <div>
                 <label className="block text-sm font-semibold text-white mb-3">{t("signup.doctorPickerLabel")} *</label>
                 {doctorsLoading ? (
-                  <div className="text-white">{t("signup.doctorsLoading")}</div>
+                  <div className="w-full bg-(--color-neutral)/80 backdrop-blur border-2 border-(--ui-info-border) rounded-xl p-3 text-white text-sm text-center font-medium">
+                    {t("signup.doctorsLoading")}
+                  </div>
                 ) : doctorsError ? (
-                  <div className="text-(--ui-danger)">{doctorsError}</div>
+                  <div className="w-full bg-(--color-neutral)/80 backdrop-blur border-2 border-(--ui-danger-border) rounded-xl p-3 text-white text-sm text-center font-medium">
+                    {doctorsError}
+                  </div>
                 ) : (
-                  <select
-                    name="doctorId"
-                    value={form.doctorId}
-                    onChange={handleChange}
-                    className="w-full px-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
-                  >
-                    <option value="" className="text-(--ui-foreground)">{t("signup.doctorPlaceholder")}</option>
-                    {doctors.map((doc) => (
-                      <option key={doc.id} value={doc.id} className="text-(--ui-foreground)">
-                        {doc.name}{doc.specialty ? ` - ${doc.specialty}` : ""}
-                      </option>
-                    ))}
-                  </select>
+                  <div ref={doctorPickerRef} className="relative">
+                    <button
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-expanded={doctorPickerOpen ? "true" : "false"}
+                      onClick={() => setDoctorPickerOpen((v) => !v)}
+                      className="w-full px-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base flex items-center justify-between gap-3"
+                    >
+                      <span className="truncate">
+                        {selectedDoctor
+                          ? `${selectedDoctor.name}${selectedDoctor.specialty ? ` - ${selectedDoctor.specialty}` : ""}`
+                          : t("signup.doctorPlaceholder")}
+                      </span>
+                      <svg className={`w-5 h-5 shrink-0 transition-transform ${doctorPickerOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+
+                    {doctorPickerOpen && (
+                      <div
+                        role="listbox"
+                        className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-(--ui-border) bg-(--color-background) text-(--color-text) shadow-(--shadow-lift)"
+                      >
+                        <div className="max-h-64 overflow-auto">
+                          <button
+                            type="button"
+                            role="option"
+                            aria-selected={form.doctorId ? "false" : "true"}
+                            onClick={() => {
+                              setForm((prev) => ({ ...prev, doctorId: "" }));
+                              setDoctorPickerOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 text-sm border-b border-(--ui-border) hover:bg-(--ui-surface) transition-colors ${!form.doctorId ? 'bg-(--ui-surface-2)' : ''}`}
+                          >
+                            {t("signup.doctorPlaceholder")}
+                          </button>
+                          {doctors.map((doc) => {
+                            const isSelected = String(doc.id) === String(form.doctorId);
+                            return (
+                              <button
+                                key={doc.id}
+                                type="button"
+                                role="option"
+                                aria-selected={isSelected ? "true" : "false"}
+                                onClick={() => {
+                                  setForm((prev) => ({ ...prev, doctorId: doc.id }));
+                                  setDoctorPickerOpen(false);
+                                }}
+                                className={`w-full text-left px-4 py-3 text-sm hover:bg-(--ui-surface) transition-colors ${isSelected ? 'bg-(--ui-surface-2)' : ''}`}
+                              >
+                                <span className="block truncate">
+                                  {doc.name}{doc.specialty ? ` - ${doc.specialty}` : ""}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -425,14 +510,22 @@ function SignUpForm() {
                   <FaLock className="text-white text-lg" />
                 </span>
                 <input
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   placeholder="••••••••"
                   value={form.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="w-full pl-12 pr-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
+                  className="w-full pl-12 pr-24 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-(--ui-ring) hover:text-white transition-colors"
+                  title={showConfirmPassword ? t("signup.passwordHide") : t("signup.passwordShow")}
+                >
+                  {showConfirmPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+                </button>
               </div>
             </div>
             {/* شريط قوة كلمة المرور مع emoji */}
@@ -485,12 +578,12 @@ function SignUpForm() {
           <div className="border-t border-(--color-neutral)/20 pt-6 space-y-4 mt-6">
             {/* رسائل الأخطاء والنجاح */}
             {error && (
-              <div className="w-full bg-(--ui-danger-bg) backdrop-blur border-2 border-(--ui-danger-border) rounded-xl p-3 text-white text-sm text-center font-medium">
+              <div className="w-full bg-(--color-neutral)/80 backdrop-blur border-2 border-(--ui-danger-border) rounded-xl p-3 text-white text-sm text-center font-medium">
                 {error}
               </div>
             )}
             {success && (
-              <div className="w-full bg-(--ui-success-bg) backdrop-blur border-2 border-(--ui-success-border) rounded-xl p-3 text-white text-sm flex items-center justify-center gap-2 font-medium">
+              <div className="w-full bg-(--color-neutral)/80 backdrop-blur border-2 border-(--ui-success-border) rounded-xl p-3 text-white text-sm flex items-center justify-center gap-2 font-medium">
                 <FaCheck className="text-base shrink-0" />
                 <span>{success}</span>
               </div>

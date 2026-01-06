@@ -25,7 +25,7 @@ function loadAllMessages(locale) {
 
 export default async function LocaleLayout({ children, params }) {
   const { locale } = await params;
-  const messages = loadAllMessages(locale);
+  const messages = loadAllMessages(locale || 'en');
   return (
     <LocaleLayoutClient locale={locale} messages={messages}>
       {children}

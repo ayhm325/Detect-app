@@ -5,6 +5,7 @@ import prisma from '../../../../lib/prismaClient.js';
 import { isTokenRevoked } from '../../../../lib/auth/revocation.server.js';
 import { getJwtSecret } from '../../../../lib/auth/jwtSecret.js';
 import { getJwtVerifyOptions } from '../../../../lib/auth/jwtClaims.js';
+import { createNotificationBestEffort } from '../../../../lib/notifications';
 
 export async function POST(request) {
   try {
@@ -22,6 +23,12 @@ export async function POST(request) {
     const { oldPassword, newPassword } = body || {};
     if (!oldPassword || !newPassword) {
       return NextResponse.json({ error: 'missing_fields' }, { status: 400 });
+    }
+
+    const oldPw = String(oldPassword).trim();
+    const newPw = String(newPassword).trim();
+    if (oldPw && newPw && oldPw === newPw) {
+      return NextResponse.json({ error: 'same_password' }, { status: 400 });
     }
 
     // Accept token from cookie OR Authorization header OR body
@@ -64,6 +71,16 @@ export async function POST(request) {
     // hash new password and update
     const hashed = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({ where: { id: userId }, data: { password: hashed } });
+
+    await createNotificationBestEffort(prisma, {
+      userId,
+      type: 'warning',
+      message: {
+        ar: 'تنبيه أمني: تم تغيير كلمة المرور الخاصة بحسابك.',
+        en: 'Security alert: your account password was changed.',
+        meta: { kind: 'security_password_change' }
+      }
+    });
 
     return NextResponse.json({ success: true });
   } catch (e) {

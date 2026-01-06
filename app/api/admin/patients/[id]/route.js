@@ -2,6 +2,7 @@ import prisma from '../../../../../lib/prismaClient';
 import { withRBAC } from '../../../../../lib/auth/withRBAC';
 import { rateLimit } from '../../../../../lib/security/rateLimiter';
 import { logAudit } from '../../../../../lib/security/auditLogger';
+import { createNotificationBestEffort } from '../../../../../lib/notifications';
 
 export const PATCH = withRBAC(async (request, user, context) => {
   const rl = await rateLimit(request);
@@ -41,6 +42,8 @@ export const PATCH = withRBAC(async (request, user, context) => {
   const { name, email, phone, gender, doctorId, status, bloodType, birthDate, medicalId, allergies, chronicDiseases } = body;
 
   try {
+    const prevDoctorId = patient?.doctorId || null;
+
     // Update user (fullName/email) and patient (phone/gender) in a transaction
     const result = await prisma.$transaction(async (tx) => {
       const updatedUser = await tx.user.update({
@@ -102,6 +105,22 @@ export const PATCH = withRBAC(async (request, user, context) => {
         },
       },
     });
+
+    // Notify newly assigned doctor (best-effort)
+    try {
+      const nextDoctorId = doctorId ? String(doctorId).trim() : null;
+      if (nextDoctorId && nextDoctorId !== prevDoctorId) {
+        const patientName = (patientWithUser?.user?.fullName || patient?.fullName || '').trim();
+        await createNotificationBestEffort(prisma, {
+          userId: nextDoctorId,
+          type: 'info',
+          message: {
+            ar: `تم إسناد مريض إليك: ${patientName || 'مريض جديد'}.`,
+            en: `A patient has been assigned to you: ${patientName || 'a new patient'}.`
+          }
+        });
+      }
+    } catch {}
 
     logAudit({ event: "admin_patient_updated", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { patientId: id } });
     return new Response(JSON.stringify(patientWithUser), { status: 200 });

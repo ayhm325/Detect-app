@@ -1,3 +1,4 @@
+
 "use client";
 
 import DoctorLayout from "../DoctorLayout";
@@ -19,7 +20,9 @@ import {
   FaEdit,
   FaTrash,
 } from "react-icons/fa";
+import { formatDateTimeForLocale } from "../../../../lib/notifications";
 import { useLocale, useTranslations } from "next-intl";
+
 
 export default function DoctorAppointmentsPage() {
   const { showToast, ToastContainer } = useToast();
@@ -71,6 +74,8 @@ export default function DoctorAppointmentsPage() {
     }
   }
 
+  
+
   async function fetchAppointments() {
     setLoading(true);
     try {
@@ -81,7 +86,8 @@ export default function DoctorAppointmentsPage() {
         id: a.id,
         patientName: a.patient?.name || ui("placeholder"),
         date: a.scheduledAt,
-        time: a.scheduledAt ? new Date(a.scheduledAt).toLocaleTimeString(locale === "en" ? "en-US" : "ar-EG", { hour: "2-digit", minute: "2-digit" }) : ui("placeholder"),
+        // Modified: Use "ar-SY" for Arabic text (AM/PM -> ص/م) and numberingSystem: 'latn' for English numbers
+        time: a.scheduledAt ? new Date(a.scheduledAt).toLocaleTimeString("ar-SY", { hour: "2-digit", minute: "2-digit", numberingSystem: 'latn' }) : ui("placeholder"),
         type: a.type || "clinic",
         status: a.status || "pending",
         phone: a.doctor?.phone || a.patient?.phone || ui("placeholder"),
@@ -176,24 +182,26 @@ export default function DoctorAppointmentsPage() {
   };
 
   const getStatusBadge = (status) => {
-    let label, color;
+    let label, color, extra = "";
     if (status === "confirmed" || status === "completed") {
       label = t("statuses.confirmed");
-      color = "bg-(--ui-success-bg) text-(--ui-success-foreground) border-(--ui-success-border)";
+      color = "bg-(--ui-success) text-white border-(--ui-success-border)";
+      extra = "shadow-lg animate-pulse font-bold px-4 py-1 text-base";
     } else if (status === "pending") {
       label = t("statuses.pending");
-      color = "bg-(--ui-warning-bg) text-(--ui-warning-foreground) border-(--ui-warning-border)";
+      color = "bg-(--ui-warning) text-(--ui-warning-foreground) border-(--ui-warning-border)";
+      extra = "shadow-lg font-bold px-4 py-1 text-base";
     } else if (status === "cancelled") {
       label = t("statuses.cancelled");
-      color = "bg-(--ui-danger-bg) text-(--ui-danger-foreground) border-(--ui-danger-border)";
+      color = "bg-(--ui-danger) text-(--ui-danger-foreground) border-(--ui-danger-border)";
+      extra = "shadow-lg font-bold px-4 py-1 text-base";
     } else {
       label = t("statuses.pending");
       color = "bg-(--ui-surface-2)/60 text-(--ui-muted-foreground) border-(--ui-border)";
+      extra = "font-bold px-4 py-1 text-base";
     }
     return (
-      <span className={`rounded-full border px-3 py-1 text-xs font-medium ${color}`}>
-        {label}
-      </span>
+      <span className={`rounded-full border ${color} ${extra}`}>{label}</span>
     );
   };
 
@@ -247,7 +255,7 @@ export default function DoctorAppointmentsPage() {
                 setShowAddModal(true);
                       showToast(t("toast.addSoon"), "info");
               }}
-              className="flex items-center gap-2 rounded-lg btn-gradient px-4 py-2 font-medium text-white transition-all focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/40"
+              className="flex items-center gap-2 rounded-lg btn-gradient px-4 py-2 font-bold text-white transition-all focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/40"
             >
               <FaPlus />
                     {t("addButton")}
@@ -368,16 +376,8 @@ export default function DoctorAppointmentsPage() {
                         <div className="flex flex-wrap gap-4 text-sm text-(--ui-muted-foreground)">
                           <div className="flex items-center gap-2">
                             <FaCalendarAlt className="text-(--ui-info)" />
-                            {new Date(apt.date).toLocaleDateString(locale === "en" ? "en-US" : "ar-EG", {
-                              weekday: "long",
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <FaClock className="text-(--ui-warning)" />
-                            {apt.time}
+                            {/* Modified: Use direct toLocaleString with "ar-SY" for Arabic text and "latn" for English numbers */}
+                            {apt.date ? new Date(apt.date).toLocaleString("ar-SY", { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', numberingSystem: 'latn' }) : ""}
                           </div>
                           <div className="flex items-center gap-2">
                             {apt.type === "online" ? (
@@ -389,10 +389,10 @@ export default function DoctorAppointmentsPage() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-sm text-(--ui-muted-foreground)">
-                          <FaPhone className="text-(--ui-info)" />
-                          {apt.phone}
-                        </div>
+                          <div className="flex items-center gap-2 text-sm text-(--ui-muted-foreground)">
+                            <FaPhone className="text-(--ui-info)" />
+                            {apt.phone && apt.phone.toLocaleString("en-US")}
+                          </div>
 
                         <p className="text-sm text-(--ui-foreground)">
                           <span className="font-bold">{t("reasonLabel")}</span> {apt.reason}
@@ -501,5 +501,3 @@ export default function DoctorAppointmentsPage() {
     </DoctorLayout>
   );
 }
-
-// Modal form was added above inside the component return; ensure it's included here

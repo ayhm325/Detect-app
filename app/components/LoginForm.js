@@ -200,7 +200,7 @@ export default function LoginForm() {
           
           {/* Error Message */}
           {error && (
-            <div className="bg-(--ui-danger-bg) backdrop-blur border-2 border-(--ui-danger-border) rounded-xl p-4 text-white text-base flex items-center gap-3 mt-4">
+            <div className="bg-(--ui-danger) backdrop-blur border-2 border-(--ui-danger) rounded-xl p-4 text-(--ui-danger-foreground) text-base flex items-center gap-3 mt-4">
               <span className="text-xl shrink-0">⚠️</span>
               <span className="font-medium">{error}</span>
             </div>

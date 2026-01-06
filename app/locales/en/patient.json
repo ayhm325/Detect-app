@@ -1,5 +1,29 @@
 {
+  "analysisDetails": {
+    "title": "Analysis Details",
+    "closeDetails": "Close details",
+    "close": "Close",
+    "originalImage": "Original Image",
+    "openOriginalImage": "Open original image",
+    "savedToHistory": "Saved to history",
+    "notSavedToHistory": "saved to history",
+    "notSaved": "saved",
+    "analysis": "Analysis",
+    "analysisResult": "Analysis result",
+    "model": "Model",
+    "inferenceTime": "Inference Time",
+    "diagnosis": "Diagnosis",
+    "explanation": "Explanation",
+    "confidence": "Confidence",
+    "confidenceScore": "Confidence score",
+    "heatmap": "Heatmap"
+  },
   "brand": "PneumoDetect",
+  "clinicalStatuses": {
+    "stable": "Stable",
+    "critical": "Critical",
+    "recovering": "Recovering"
+  },
   "nav": {
     "home": "Home",
     "appointments": "Appointments",
@@ -38,6 +62,11 @@
       "readyReports": "Ready reports",
       "newMessages": "New messages",
       "vitalSigns": "Health status"
+    },
+    "clinicalStatuses": {
+      "stable": "Stable",
+      "critical": "Critical",
+      "recovering": "Recovering"
     },
     "quickActions": {
       "title": "Quick Actions",

@@ -23,13 +23,13 @@ export default function DoctorSettingsModal({ open, onClose, doctor, onSave }) {
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <h2>{t('doctorSettings.title')}</h2>
+        <h2>{t('title')}</h2>
         <AvailabilitySettings value={settings.availability} onChange={v => handleChange('availability', v)} />
         <NotificationSettings value={settings.notifications} onChange={v => handleChange('notifications', v)} />
         <PasswordChangeForm onChange={v => handleChange('password', v)} />
         <div className={styles.actions}>
-          <button onClick={handleSave}>{t('doctorSettings.save_changes')}</button>
-          <button onClick={onClose}>{t('doctorSettings.cancel')}</button>
+          <button onClick={handleSave}>{t('save_changes')}</button>
+          <button onClick={onClose}>{t('cancel')}</button>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import prisma from "../../../../../lib/prismaClient.js";
 import { withRBAC } from "../../../../../lib/auth/withRBAC";
 import { rateLimit } from "../../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../../lib/security/auditLogger";
+import { createNotificationBestEffort } from "../../../../../lib/notifications";
 
 // Basic text sanitization
 function sanitizeText(txt = "") {
@@ -10,6 +11,27 @@ function sanitizeText(txt = "") {
   const stripped = txt.replace(/<[^>]*>/g, "");
   // further normalization
   return stripped.trim();
+}
+
+async function shouldSendChatNotification(prismaClient, { userId, chatId }) {
+  try {
+    const existing = await prismaClient.notification.findFirst({
+      where: {
+        userId,
+        isDeleted: false,
+        isRead: false,
+        AND: [
+          { message: { contains: '"kind":"chat_message"' } },
+          { message: { contains: `"chatId":"${chatId}"` } }
+        ]
+      },
+      select: { id: true }
+    });
+    return !existing;
+  } catch {
+    // best-effort; don't block chat
+    return true;
+  }
 }
 
 export const GET = withRBAC(async (request, user, context) => {
@@ -38,6 +60,43 @@ export const GET = withRBAC(async (request, user, context) => {
       // admins may read any chat
     } else {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    }
+
+    // Mark unread chat-message notifications for this chat as read when the participant opens the chat.
+    // This keeps "new messages" counts aligned with conversations.
+    if (user.role === "doctor" || user.role === "patient") {
+      try {
+        await prisma.notification.updateMany({
+          where: {
+            userId: user.id,
+            isDeleted: false,
+            isRead: false,
+            AND: [
+              { message: { contains: '"kind":"chat_message"' } },
+              { message: { contains: `"chatId":"${chatId}"` } },
+            ],
+          },
+          data: { isRead: true },
+        });
+      } catch {
+        // best-effort; don't block chat
+      }
+
+      // Also mark unread messages from the other party as read.
+      // Patient dashboard counts unread doctor->patient messages; doctor dashboard counts unread patient->doctor messages.
+      try {
+        const unreadFrom = user.role === "doctor" ? "patient" : "doctor";
+        await prisma.message.updateMany({
+          where: {
+            chatId,
+            sender: unreadFrom,
+            status: { not: "read" },
+          },
+          data: { status: "read" },
+        });
+      } catch {
+        // best-effort
+      }
     }
 
     const messages = await prisma.message.findMany({ where: { chatId }, orderBy: { createdAt: "asc" } });
@@ -89,6 +148,36 @@ export const POST = withRBAC(async (request, user, context) => {
 
     const message = await prisma.message.create({ data: { chatId, sender, text: text || null, clientKey, fileUrl: fileUrl || null, mimeType: mimeType || null, fileName: fileName || null } });
     await prisma.chat.update({ where: { id: chatId }, data: { updatedAt: new Date() } });
+
+    if (sender === 'doctor') {
+      const patient = await prisma.patient.findUnique({
+        where: { id: chat.patientId },
+        select: { userId: true }
+      });
+      if (patient?.userId) {
+        const ok = await shouldSendChatNotification(prisma, { userId: patient.userId, chatId });
+        if (ok) {
+          await createNotificationBestEffort(prisma, {
+            userId: patient.userId,
+            type: 'info',
+            message: {
+              ar: 'لديك رسالة جديدة من طبيبك.',
+              en: 'You have a new message from your doctor.',
+              meta: { kind: 'chat_message', chatId }
+            }
+          });
+          logAudit({ event: 'chat_message_notification_created', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { receiverUserId: patient.userId, chatId, sender: 'doctor' } });
+        } else {
+          logAudit({ event: 'chat_message_notification_suppressed_unread_exists', userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { receiverUserId: patient.userId, chatId, sender: 'doctor' } });
+        }
+      }
+    } else if (sender === 'patient') {
+      const doctorUserId = chat.doctorId;
+      // Intentionally do NOT create a bell notification for doctors on chat messages.
+      // Doctors already have chat unread/newMessages counters and badges.
+      // This avoids duplicate "new message" signals.
+    }
+
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {
     console.error("/api/chat/[chatId]/messages POST error", error);
