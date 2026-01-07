@@ -26,7 +26,17 @@ test.describe('Upload cancellation scenarios', () => {
 
   test.beforeEach(async ({ page, baseURL, context }) => {
     // Ensure we have an authenticated patient cookie so the page isn't redirected to login.
-    const out = execSync('node scripts/create-test-patient.mjs', { encoding: 'utf8' }).trim();
+    // Increase robustness: allow create-test-patient to take slightly longer in CI by retrying briefly.
+    let out = '';
+    for (let i = 0; i < 3; i++) {
+      try {
+        out = execSync('node scripts/create-test-patient.mjs', { encoding: 'utf8', timeout: 10000 }).toString().trim();
+        if (out) break;
+      } catch (e) {
+        // wait a bit and retry
+        await new Promise((r) => setTimeout(r, 500));
+      }
+    }
     let token = out;
     try { token = JSON.parse(out).token; } catch (e) {}
 
@@ -35,7 +45,8 @@ test.describe('Upload cancellation scenarios', () => {
     await context.addCookies([{ name: 'token', value: token, domain: cookieHost, path: '/', httpOnly: true, secure: false, sameSite: 'Lax' }]);
 
     // navigate to patient analysis page
-    await page.goto((baseURL || '') + '/patient/analysis', { waitUntil: 'load' });
+    // Use 'domcontentloaded' to avoid waiting on long-running resources while still ensuring page is interactive.
+    await page.goto((baseURL || '') + '/patient/analysis', { waitUntil: 'domcontentloaded', timeout: 60000 });
   });
 
   test('cancels upload when selecting a new file', async ({ page }) => {
@@ -48,7 +59,9 @@ test.describe('Upload cancellation scenarios', () => {
     const file2 = { name: 'b.png', mimeType: 'image/png', buffer: Buffer.from([0x89,0x50,0x4E,0x47]) };
     await input.waitFor({ state: 'attached', timeout: 60000 });
     await input.setInputFiles([{ name: file1.name, mimeType: file1.mimeType, buffer: file1.buffer }]);
-    await page.locator('button:has-text("Analyze Image")').click();
+    const analyzeBtn = page.locator('button:has-text("Analyze Image")');
+    await expect(analyzeBtn).toBeEnabled({ timeout: 15000 });
+    await analyzeBtn.click();
 
     // progress UI should appear during the delayed response (bar may be 0% width initially)
     await expect(page.getByText('Cancel upload')).toBeVisible({ timeout: 5000 });
@@ -68,7 +81,9 @@ test.describe('Upload cancellation scenarios', () => {
     const file = { name: 'progress.png', mimeType: 'image/png', buffer: Buffer.from([0x89,0x50,0x4E,0x47]) };
     await input.waitFor({ state: 'attached', timeout: 60000 });
     await input.setInputFiles([{ name: file.name, mimeType: file.mimeType, buffer: file.buffer }]);
-    await page.locator('button:has-text("Analyze Image")').click();
+    const analyzeBtn = page.locator('button:has-text("Analyze Image")');
+    await expect(analyzeBtn).toBeEnabled({ timeout: 15000 });
+    await analyzeBtn.click();
 
     // progress bar should become visible during the delay
     await expect(page.getByText('Cancel upload')).toBeVisible({ timeout: 5000 });

@@ -45,7 +45,6 @@ export const GET = withRBAC(async (request, user) => {
       const diagnosisUpdatedAt = latest?.createdAt ? latest.createdAt : null;
 
       // Avoid leaking relation details by default; UI should use explicit fields
-      // eslint-disable-next-line no-unused-vars
       const { medicalRecords, ...rest } = p;
       return {
         ...rest,

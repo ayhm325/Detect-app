@@ -69,7 +69,7 @@ export default function SettingsPage() {
       }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [showToast, t]);
 
   // التعامل مع تغيير الحقول
   const handleChange = (field, value) => {

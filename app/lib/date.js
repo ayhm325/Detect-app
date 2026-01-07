@@ -2,7 +2,9 @@ export function formatDateTime(iso, locale = 'ar-EG', placeholder = "") {
   if (!iso) return placeholder;
   try {
     const d = new Date(iso);
-    return d.toLocaleString(locale === 'en' ? 'en-US' : 'ar-EG', {
+    const l = String(locale || '').toLowerCase();
+    const resolved = l.startsWith('en') ? 'en-US' : l.startsWith('ar') ? 'ar-EG' : locale;
+    return d.toLocaleString(resolved, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -19,7 +21,9 @@ export function formatDate(iso, locale = 'ar-EG', placeholder = "") {
   if (!iso) return placeholder;
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString(locale === 'en' ? 'en-US' : 'ar-EG', {
+    const l = String(locale || '').toLowerCase();
+    const resolved = l.startsWith('en') ? 'en-US' : l.startsWith('ar') ? 'ar-EG' : locale;
+    return d.toLocaleDateString(resolved, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -34,7 +38,9 @@ export function formatTime(iso, locale = 'ar-EG', placeholder = "") {
   if (!iso) return placeholder;
   try {
     const d = new Date(iso);
-    return d.toLocaleTimeString(locale === 'en' ? 'en-US' : 'ar-EG', {
+    const l = String(locale || '').toLowerCase();
+    const resolved = l.startsWith('en') ? 'en-US' : l.startsWith('ar') ? 'ar-EG' : locale;
+    return d.toLocaleTimeString(resolved, {
       hour: '2-digit',
       minute: '2-digit'
     });

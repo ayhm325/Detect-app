@@ -21,7 +21,10 @@ test('click add appointment button shows toast', async ({ page, baseURL, context
 
   // Wait for main container / UI to be ready, then ensure add button is visible
   await page.waitForSelector('main, [data-testid="appointments-list"], #root', { timeout: 60000 }).catch(() => {});
-  const addButton = page.getByRole('button', { name: /إضافة موعد جديد/i });
+  // Be resilient to small text variations: match "إضافة موعد" with optional "جديد"
+  const addButton = page.getByRole('button', { name: /إضافة موعد( جديد)?/i });
+  // fallback: wait for any button that contains the short text
+  await page.waitForSelector('button:has-text("إضافة موعد")', { timeout: 30000 }).catch(() => {});
   await expect(addButton).toBeVisible({ timeout: 15000 });
   await addButton.click({ timeout: 10000 });
 

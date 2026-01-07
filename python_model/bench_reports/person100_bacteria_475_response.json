@@ -1,8 +1,0 @@
-{
-  "prediction": "Pneumonia",
-  "probabilities": {
-    "Normal": 3.3100940299846116e-07,
-    "Pneumonia": 0.9999996423721313
-  },
-  "heatmap_url": "/uploads/heatmap_e7c5cfd3697a48eb9316220d99c0290f.png"
-}

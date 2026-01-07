@@ -14,7 +14,10 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const { chatId, key, filename, provider, bucket, region } = body || {};
-    if (!chatId || !key) return new Response(JSON.stringify({ error: 'Invalid parameters' }), { status: 400 });
+    if (!chatId || !key) {
+      console.error('uploads/complete: invalid params', { body });
+      return new Response(JSON.stringify({ error: 'Invalid parameters', details: { chatId: !!chatId, key: !!key } }), { status: 400 });
+    }
 
     if (provider === 's3') {
       // Validate object size using HeadObject
@@ -34,16 +37,25 @@ export async function POST(req) {
         const url = `https://${bucketToUse}.s3.${regionToUse}.amazonaws.com/${encodeURIComponent(key)}`;
         return new Response(JSON.stringify({ url, key, provider: 's3', contentType, filename: filename || key }), { status: 200 });
       } catch (e) {
-        console.error('S3 head error', e);
-        return new Response(JSON.stringify({ error: 's3_error' }), { status: 500 });
+        console.error('S3 head error', { bucket: bucketToUse, key, err: e });
+        return new Response(JSON.stringify({ error: 's3_error', message: e?.message }), { status: 500 });
       }
     }
 
     const abs = path.join(process.cwd(), 'public', key);
     const stat = await fs.promises.stat(abs).catch(() => null);
-    if (!stat) return new Response(JSON.stringify({ error: 'Uploaded file not found' }), { status: 400 });
-    if (stat.size > MAX_FILE_SIZE) return new Response(JSON.stringify({ error: 'file_too_large' }), { status: 400 });
-    if (!extAllowed(filename || key)) return new Response(JSON.stringify({ error: 'invalid_file_type' }), { status: 400 });
+    if (!stat) {
+      console.error('uploads/complete: uploaded file not found', { abs, body });
+      return new Response(JSON.stringify({ error: 'Uploaded file not found', path: abs }), { status: 400 });
+    }
+    if (stat.size > MAX_FILE_SIZE) {
+      console.error('uploads/complete: file too large', { abs, size: stat.size, max: MAX_FILE_SIZE });
+      return new Response(JSON.stringify({ error: 'file_too_large' }), { status: 400 });
+    }
+    if (!extAllowed(filename || key)) {
+      console.error('uploads/complete: invalid file type', { filename, key });
+      return new Response(JSON.stringify({ error: 'invalid_file_type' }), { status: 400 });
+    }
 
     // Return a publically-accessible URL under /uploads/... (public folder is served)
     const guessedType = (() => {

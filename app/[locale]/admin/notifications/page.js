@@ -15,6 +15,7 @@ import {
 } from "react-icons/fa";
 
 import { formatActivityDescription } from "../../../lib/activityFormat";
+import { deserializeLocalizedMessage } from "../../../../lib/notifications";
 
 export default function AdminNotificationsPage() {
   const router = useRouter();
@@ -95,6 +96,19 @@ export default function AdminNotificationsPage() {
 
         setNotifications(Array.isArray(notificationsJson?.notifications) ? notificationsJson.notifications : []);
         setActivities(Array.isArray(activitiesJson?.activities) ? activitiesJson.activities : []);
+
+        // If there are unread notifications, mark them read on page enter
+        try {
+          const hasUnread = Array.isArray(notificationsJson?.notifications) && notificationsJson.notifications.some(n => !n.isRead);
+          if (hasUnread) {
+            // fire-and-forget; update UI optimistically
+            fetch('/api/admin/notifications', { method: 'PUT' }).catch(() => {});
+            // update local state to mark as read
+            if (mounted) setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            setUnreadCount(0);
+            setBadgeCount(0);
+          }
+        } catch (e) {}
 
         setLoading(false);
       } catch (e) {
@@ -263,7 +277,7 @@ export default function AdminNotificationsPage() {
                             </span>
                           )}
                         </div>
-                        <p className="text-foreground wrap-break-word">{n.message}</p>
+                        <p className="text-foreground wrap-break-word">{deserializeLocalizedMessage(n.message, locale)}</p>
                       </div>
 
                       <div className="shrink-0 text-xs text-(--ui-muted-2) flex items-center gap-2">

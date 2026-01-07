@@ -11,7 +11,7 @@ export const headers = () => {
   return [["Cache-Control", "no-store"]];
 };
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../components/ui/Toast";
 import { FaCalendarAlt, FaFileAlt, FaEnvelope, FaHeartbeat, FaArrowUp } from "react-icons/fa";
@@ -34,7 +34,7 @@ export default function PatientDashboardPage() {
 
   const [patientName, setPatientName] = useState("");
 
-  function formatClinicalStatus(value) {
+  const formatClinicalStatus = useCallback((value) => {
     const raw = value == null ? "" : String(value).trim();
     if (!raw) return placeholder;
     const key = raw.toLowerCase();
@@ -46,7 +46,7 @@ export default function PatientDashboardPage() {
       }
     }
     return placeholder;
-  }
+  }, [t, placeholder]);
 
   // تحويل الأرقام العربية إلى 0123456789
   function toWesternDigits(str) {
@@ -100,7 +100,7 @@ export default function PatientDashboardPage() {
         document.removeEventListener('visibilitychange', onVis);
       } catch {}
     };
-  }, [t, placeholder]);
+  }, [formatClinicalStatus, t, placeholder]);
 
   // Live increment: receive messages via user room (no chat join needed).
   useEffect(() => {

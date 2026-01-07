@@ -31,7 +31,7 @@
       "category": "Account & Billing",
       "questions": [
         { "q": "Is signup free?", "a": "Yes, creating an account is free." },
-        { "q": "What does analysis cost?", "a": "We offer tiered plans; see pricing for details." },
+        { "q": "What does analysis cost?", "a": "Free." },
         { "q": "How do I cancel?", "a": "You can cancel anytime from account settings without extra fees." }
       ]
     },

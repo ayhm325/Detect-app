@@ -141,8 +141,8 @@ export default function Footer() {
                   <div className="text-(--ui-foreground) font-semibold mb-1">
                     {t("footer.contact.phoneLabel")}
                   </div>
-                  <a href="tel:+966123456789" className="hover:text-(--ui-ring) transition-colors" dir="ltr">
-                    +966 12 345 6789
+                  <a href="tel:+962 788 234 056" className="hover:text-(--ui-ring) transition-colors" dir="ltr">
+                    +962 788 234 056
                   </a>
                 </div>
               </li>

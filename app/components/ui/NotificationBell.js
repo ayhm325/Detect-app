@@ -1,13 +1,15 @@
 "use client";
 import React, { useState } from "react";
 import { FaBell, FaTimes } from "react-icons/fa";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { deserializeLocalizedMessage } from "../../../lib/notifications";
 
 const NotificationBell = ({ notifications = [], onRead = () => {} }) => {
   const t = useTranslations("notifications");
   const tUi = useTranslations("ui");
+  const locale = useLocale();
   const [showDropdown, setShowDropdown] = useState(false);
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !(n.isRead ?? n.read)).length;
 
   const handleMarkAsRead = (id) => {
     onRead(id);
@@ -48,32 +50,46 @@ const NotificationBell = ({ notifications = [], onRead = () => {} }) => {
                 {t("noNotifications")}
               </div>
             ) : (
-              notifications.map((notif) => (
+              notifications.map((notif) => {
+                const itemIsRead = (notif.isRead ?? notif.read) === true;
+                return (
                 <div
                   key={notif.id}
-                  className={`p-4 hover:bg-(--ui-surface-2) transition cursor-pointer ${
-                    notif.read ? "" : "bg-(--ui-info-bg)"
+                  className={`p-4 hover:bg-(--ui-surface-2) transition ${
+                    itemIsRead ? "" : "bg-(--ui-info-bg)"
                   }`}
-                  onClick={() => handleMarkAsRead(notif.id)}
                 >
                   <div className="flex gap-3">
                     <div className={`w-2 h-2 rounded-full mt-2 ${
-                      notif.read ? "bg-transparent" : "bg-(--ui-info)"
+                      itemIsRead ? "bg-transparent" : "bg-(--ui-info)"
                     }`} />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-(--ui-foreground) text-sm">
                         {notif.title}
                       </p>
                       <p className="text-(--ui-muted-foreground) text-xs mt-1">
-                        {notif.message}
+                        {deserializeLocalizedMessage(notif.message, locale)}
                       </p>
                       <p className="text-(--ui-muted-foreground) text-xs mt-2">
                         {notif.time}
                       </p>
                     </div>
+
+                    <div className="flex items-center gap-2 ml-2">
+                      {!itemIsRead && (
+                        <button
+                          onClick={() => onRead && onRead(notif.id)}
+                          className="text-(--ui-success) text-sm px-2 py-1 rounded-lg hover:bg-(--ui-success-bg)"
+                          title={t("markAsRead")}
+                        >
+                          {t("markAsRead")}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
 

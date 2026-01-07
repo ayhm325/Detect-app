@@ -437,7 +437,7 @@ export default function UsersPage() {
                           <button
                             onClick={() => openDeleteModal(user)}
                             className={`p-2 rounded-lg transition-colors ${user.isActive ? 'text-(--ui-danger) hover:bg-(--ui-danger-bg)' : 'text-(--ui-success) hover:bg-(--ui-success-bg)'}`}
-                            title={user.isActive ? t('actions.delete') : t('actions.edit')}
+                            title={user.isActive ? t('modal.confirmDisable') : t('modal.confirmEnable')}
                           >
                             {user.isActive ? <FaTimesCircle /> : <FaCheckCircle />}
                           </button>

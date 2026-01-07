@@ -52,8 +52,8 @@
       "label": "Arabic"
     }
   },
-  "version": "Version: 1.0",
-  "status": "Status: Online ✓",
+  "version": "Version 1.0.0",
+  "status": "All systems operational",
   "healthScoreValue": "98%",
   "dashboard": {
     "welcome": "Welcome",
