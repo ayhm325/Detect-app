@@ -27,7 +27,7 @@ export default async function ForgotPasswordPage({ params }) {
       dir={dir}
       lang={locale}
       style={{
-        backgroundImage: 'url(/icons/forgot.jpg)',
+        backgroundImage: 'url(/icons/forgot.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

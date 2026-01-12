@@ -25,7 +25,7 @@ export default async function SignUpPage() {
     <div
       className="min-h-screen flex items-center justify-center w-full relative bg-cover bg-center"
       style={{
-        backgroundImage: 'url(/icons/bluesignup.jpg)',
+        backgroundImage: 'url(/icons/bluesignup.png)',
       }}
       dir={dir}
       lang={locale}

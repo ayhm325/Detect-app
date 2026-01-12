@@ -18,20 +18,27 @@ function ThemeToggleButton() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="group relative p-3 rounded-full bg-(--ui-surface-2) border border-(--ui-border) hover:scale-110 transition-all shadow-lg"
+      className="group relative p-2.5 rounded-full bg-(--ui-surface-2) border border-(--ui-border) hover:scale-110 transition-all shadow"
       aria-label={isDark ? t("theme.switchToLightAria") : t("theme.switchToDarkAria")}
+      title={isDark ? t("theme.switchToLightAria") : t("theme.switchToDarkAria")}
     >
       {isDark ? (
-        <svg className="w-5 h-5 text-(--ui-ring)" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0z"
-          />
+        // Show a clear sun icon when in dark mode (indicates switching to light)
+        <svg className="w-6 h-6 text-(--ui-foreground)" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2" />
+          <path d="M12 20v2" />
+          <path d="M4.22 4.22l1.42 1.42" />
+          <path d="M18.36 18.36l1.42 1.42" />
+          <path d="M1 12h2" />
+          <path d="M21 12h2" />
+          <path d="M4.22 19.78l1.42-1.42" />
+          <path d="M18.36 5.64l1.42-1.42" />
         </svg>
       ) : (
-        <svg className="w-5 h-5 text-(--ui-ring)" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M17.293 13.293A8 8 0 016.707 2.707a8 8 0 1010.586 10.586z" />
+        // Show a clean crescent moon when in light mode (indicates switching to dark)
+        <svg className="w-6 h-6 text-(--ui-foreground)" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
         </svg>
       )}
     </button>

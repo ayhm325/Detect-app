@@ -68,17 +68,18 @@ export default function LoginForm() {
       <div className="fixed inset-0 z-0">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(/icons/bluelogin.jpg)' }}
+          style={{ backgroundImage: 'url(/icons/bluelogin.png)' }}
         />
-        {/* طبقة شفافة لزيادة التباين */}
-        <div className="absolute inset-0 bg-(--ui-foreground)/40 pointer-events-none" />
+        {/* أزلت طبقة التعتيم حتى تظهر الصورة بوضوح؛ الحقول ستحتوي على خلفية خفيفة للقراءة */}
+        <div className="absolute inset-0 bg-transparent pointer-events-none" />
       </div>
       
       {/* الفورم المحصور في المنتصف */}
       <div className="relative z-10 w-full max-w-md flex items-center justify-center min-h-[80vh] mx-auto">
         <form
           onSubmit={handleSubmit}
-          className="w-full glass-morph bg-(--color-neutral)/20 backdrop-blur-lg rounded-3xl shadow-2xl border border-(--color-neutral)/30 p-8 max-h-[90vh] overflow-y-auto"
+          className="w-full glass-morph bg-transparent backdrop-blur-3xl rounded-3xl shadow-none border border-(--color-neutral)/10 p-8 max-h-[90vh] overflow-y-auto"
+          style={{ backgroundClip: 'padding-box' }}
         >
           {/* Section 1: Header */}
           <div className="mb-8 flex flex-col items-center gap-4">
@@ -166,7 +167,7 @@ export default function LoginForm() {
                   value={form.email}
                   onChange={handleChange}
                   required
-                  className="w-full pl-12 pr-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
+                  className="w-full pl-12 pr-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-(--color-neutral)/30 text-white placeholder:text-white/70 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
                 />
               </div>
             </div>
@@ -185,7 +186,7 @@ export default function LoginForm() {
                   value={form.password}
                   onChange={handleChange}
                   required
-                  className="w-full pl-12 pr-12 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
+                  className="w-full pl-12 pr-12 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-(--color-neutral)/30 text-white placeholder:text-white/70 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
                 />
                 <button
                   type="button"

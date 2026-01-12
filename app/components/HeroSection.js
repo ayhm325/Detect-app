@@ -13,10 +13,14 @@ export default function HeroSection() {
   // ...existing code...
   // Use t("key") for all hero text and stats, remove any hardcoded text
   const heroStats = [
-    { number: "99%", label: t("statsLabel1") },
-    { number: "50+", label: t("statsLabel2") },
+    { number: "92%", label: t("statsLabel1") },
     { number: "100K+", label: t("statsLabel3") },
     { number: "24/7", label: t("statsLabel4") },
+  ];
+  const heroImages = [
+    { src: "/icons/hero1.jpeg" },
+    { src: "/icons/hero2.jpeg" },
+    { src: "/icons/hero3.jpeg" },
   ];
   const [showWaves, setShowWaves] = useState(false);
   const [particles, setParticles] = useState([]);
@@ -107,66 +111,83 @@ export default function HeroSection() {
         ))}
       </div>
 
-      {/* Main Title with Animated Gradient */}
-      <h1 className="relative z-10 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-center mb-6 animate-fadeIn">
-        <span className="block text-(--ui-foreground) drop-shadow-2xl">
-          {t("content.hero.title")}
-        </span>
-        <span className="block text-2xl sm:text-3xl md:text-4xl mt-4 text-(--ui-muted-foreground)">
-          {t("content.hero.subtitle")}
-        </span>
-      </h1>
+      {/* Two-column hero: left = copy + CTAs + stats, right = diagonal/staggered images */}
+      <div className="relative z-10 w-full max-w-6xl mx-auto mb-10 px-4">
+        <div className="flex flex-col-reverse md:flex-row items-center md:items-start gap-10">
+          {/* Left column: copy */}
+          <div className="w-full md:w-1/2">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-(--ui-foreground) mb-4">
+              {t("content.hero.title")}
+            </h1>
+            <p className="text-(--ui-muted-foreground) text-base sm:text-lg md:text-xl mb-6">
+              {t("content.hero.subtitle")}
+            </p>
+            <p className="text-(--ui-muted-foreground) max-w-xl mb-6 leading-relaxed">
+              {t("content.hero.desc")}
+            </p>
 
-      {/* Description */}
-      <p className="relative z-10 text-lg sm:text-xl md:text-2xl text-(--ui-muted-foreground) max-w-3xl mx-auto card-glass rounded-3xl px-6 sm:px-10 py-6 sm:py-8 shadow-2xl text-center mb-10 font-medium leading-relaxed animate-fadeIn"
-        style={{ animationDelay: "0.2s" }}
-      >
-        {t("content.hero.desc")}
-      </p>
-
-      {/* CTA Buttons */}
-      <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-6 items-center justify-center animate-fadeIn" style={{ animationDelay: "0.4s" }}>
-        <Link 
-          href={withLocale("/signup")}
-          className="group relative px-8 sm:px-12 py-4 sm:py-5 rounded-full btn-gradient text-lg sm:text-xl font-bold shadow-2xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-        >
-          <span className="relative z-10 flex items-center gap-3">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-            {t("content.hero.primaryCta")}
-          </span>
-          <div className="absolute inset-0 brand-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </Link>
-
-        <Link 
-          href={withLocale("/login")}
-          className="group relative px-8 sm:px-12 py-4 sm:py-5 rounded-full bg-(--ui-surface) border-2 border-(--ui-border-strong) hover:border-(--ui-ring) text-(--ui-foreground) text-lg sm:text-xl font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
-        >
-          <span className="flex items-center gap-3">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-            </svg>
-            {t("content.hero.secondaryCta")}
-          </span>
-        </Link>
-      </div>
-
-      {/* Stats Section */}
-      <div className="relative z-10 mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 w-full max-w-4xl animate-fadeIn" style={{ animationDelay: "0.6s" }}>
-        {heroStats.map((stat, i) => (
-          <div
-            key={i}
-            className="group relative p-4 sm:p-6 rounded-2xl card-glass shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
-          >
-            <div className="text-2xl sm:text-3xl font-black brand-gradient-text text-center mb-2">
-              {stat.number}
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
+              <Link
+                href={withLocale("/signup")}
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-full btn-gradient text-base font-bold shadow-md hover:-translate-y-0.5 transition-transform"
+              >
+                {t("content.hero.primaryCta")}
+              </Link>
+              <Link
+                href={withLocale("/login")}
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-(--ui-surface) border-2 border-(--ui-border-strong) text-(--ui-foreground) text-base font-bold shadow-sm hover:shadow-md transition-all"
+              >
+                {t("content.hero.secondaryCta")}
+              </Link>
             </div>
-            <div className="text-xs sm:text-sm text-(--ui-muted-foreground) font-semibold text-center">
-              {stat.label}
+
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {heroStats.map((stat, i) => (
+                <div key={i} className="p-4 rounded-2xl card-glass shadow-sm">
+                  <div className="text-xl sm:text-2xl font-black brand-gradient-text mb-1">{stat.number}</div>
+                  <div className="text-xs text-(--ui-muted-foreground) font-semibold">{stat.label}</div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
+
+          {/* Right column: images */}
+          <div className="w-full md:w-1/2">
+            <div className="sm:hidden grid grid-cols-1 gap-4 mb-4">
+              {heroImages.map((img, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden shadow-lg bg-(--ui-surface-2)">
+                  <div className="relative w-full h-44">
+                    <Image src={img.src} alt={`Hero ${i + 1}`} fill sizes="100vw" className="object-cover" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop layout: large left image + two stacked on the right (left height = sum of two right images) */}
+            <div className="hidden sm:grid grid-cols-2 gap-6 items-start h-72 md:h-88 lg:h-112">
+              {/* Large image (spans left column) */}
+              <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full">
+                <div className="relative w-full h-full">
+                  <Image src={heroImages[0].src} alt={`Hero 1`} fill sizes="(max-width: 1024px) 60vw, 720px" className="object-cover" />
+                </div>
+              </div>
+
+              {/* Right column: two stacked images, each half of the container */}
+              <div className="grid grid-rows-2 gap-6 h-full">
+                <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full">
+                  <div className="relative w-full h-full">
+                    <Image src={heroImages[1].src} alt={`Hero 2`} fill sizes="(max-width: 1024px) 30vw, 360px" className="object-cover" />
+                  </div>
+                </div>
+                <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full">
+                  <div className="relative w-full h-full">
+                    <Image src={heroImages[2].src} alt={`Hero 3`} fill sizes="(max-width: 1024px) 30vw, 360px" className="object-cover" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Scroll Indicator */}

@@ -208,7 +208,7 @@ function SignUpForm() {
       <div className="fixed inset-0 z-0">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(/icons/bluesignup.jpg)' }}
+          style={{ backgroundImage: 'url(/icons/bluesignup.png)' }}
         />
       </div>
 
