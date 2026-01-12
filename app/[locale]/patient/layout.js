@@ -103,7 +103,11 @@ export default function PatientLayout({ children }) {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-(--ui-surface) text-(--ui-foreground) flex" dir={locale === "ar" ? "rtl" : "ltr"}>
+      <div
+        className="min-h-screen bg-(--ui-surface) text-(--ui-foreground) flex"
+        dir={locale === "ar" ? "rtl" : "ltr"}
+        style={isDark ? undefined : { backgroundColor: "#E9F5EE", ['--ui-surface']: '#E9F5EE' }}
+      >
         {/* Fixed Sidebar */}
         <div
           className={`fixed ${locale === "ar" ? "right-0 border-l" : "left-0 border-r"} top-0 h-screen bg-(--ui-surface) shadow-2xl transition-all duration-300 z-50 border-(--ui-border) ${

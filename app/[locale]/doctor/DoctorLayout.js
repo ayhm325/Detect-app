@@ -73,7 +73,11 @@ export default function DoctorLayout({
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-(--ui-surface-2) text-(--ui-foreground) flex" dir={locale === "ar" ? "rtl" : "ltr"}>
+      <div
+        className="min-h-screen bg-(--ui-surface-2) text-(--ui-foreground) flex"
+        dir={locale === "ar" ? "rtl" : "ltr"}
+        style={isDark ? undefined : { backgroundColor: "#E9F5EE", ['--ui-surface']: '#E9F5EE', ['--ui-surface-2']: '#E9F5EE' }}
+      >
       {/* Sidebar */}
       <div
         className={`fixed ${locale === "ar" ? "right-0" : "left-0"} top-0 h-screen bg-(--ui-surface) border border-(--ui-border) shadow-(--shadow-lift) transition-all duration-300 z-50 ${

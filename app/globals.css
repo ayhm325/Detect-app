@@ -483,3 +483,12 @@ select:focus-visible {
   .btn-gradient, .hover-zoom { transition: none; }
   .skeleton-overlay::after { animation: none; }
 }
+
+/* Testimonials: light-mode background override */
+@media (prefers-color-scheme: light) {
+  :root.light .testimonials-light-bg,
+  :root:not(.dark) .testimonials-light-bg {
+    background-color: #DFF2E5; /* User-requested background for daytime */
+  }
+}
+

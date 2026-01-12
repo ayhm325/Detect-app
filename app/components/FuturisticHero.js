@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { useTheme } from "../theme-provider";
 
 const FuturisticStars = dynamic(() => import("./FuturisticStars"), { ssr: false });
 
@@ -10,8 +11,15 @@ export default function FuturisticHero() {
   const t = useTranslations("hero");
   const locale = useLocale();
   const basePrefix = locale === "en" ? "/en" : "/ar";
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const heroLightBg = '#F0FAF4';
+  const heroGreenShadow = '0 24px 80px rgba(34,197,94,0.14), 0 6px 24px rgba(34,197,94,0.08)';
   return (
-    <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden bg-transparent bg-linear-to-br from-(--color-primary-500) via-(--color-secondary-500) to-(--color-dark-500)">
+    <section
+      className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden bg-transparent bg-linear-to-br from-(--color-primary-500) via-(--color-secondary-500) to-(--color-dark-500)"
+      style={isDark ? undefined : { backgroundColor: heroLightBg }}
+    >
       {/* Neon SVG Gradient Overlay for Sci-Fi Glow */}
       <div className="absolute inset-0 -z-30 pointer-events-none">
         <svg className="w-full h-full" width="100%" height="100%" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -44,7 +52,7 @@ export default function FuturisticHero() {
       </div>
       {/* Holographic Interface Overlay */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 z-10">
-          <div className="w-105 h-55 rounded-3xl border-2 border-(--ui-border) card-glass shadow-2xl backdrop-blur-2xl flex flex-col items-center justify-center relative text-white">
+          <div className="w-105 h-55 rounded-3xl border-2 border-(--ui-border) card-glass shadow-2xl backdrop-blur-2xl flex flex-col items-center justify-center relative text-white" style={isDark ? undefined : { boxShadow: heroGreenShadow }}>
           <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-32 h-2 rounded-full bg-(--color-primary-500)/40 blur-md animate-pulse" />
           <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-32 h-2 rounded-full bg-(--color-secondary-500)/40 blur-md animate-pulse" />
           <div className="absolute left-4 top-4 w-6 h-6 rounded-full bg-(--color-primary-500)/30 blur-lg animate-pulse" />
@@ -52,7 +60,7 @@ export default function FuturisticHero() {
           <h1 className="text-4xl md:text-5xl font-extrabold brand-gradient-text drop-shadow-2xl animate-gradient-x neon-text-glow text-center">
             {t("futuristic.title")}
           </h1>
-          <p className="mt-4 text-lg max-w-xl card-glass rounded-2xl px-6 py-3 shadow-2xl backdrop-blur-2xl glassmorph-sci-fi text-center text-white drop-shadow-lg">
+          <p className="mt-4 text-lg max-w-xl card-glass rounded-2xl px-6 py-3 shadow-2xl backdrop-blur-2xl glassmorph-sci-fi text-center text-white drop-shadow-lg" style={isDark ? undefined : { boxShadow: heroGreenShadow }}>
             {t("futuristic.description")}
           </p>
           <Link

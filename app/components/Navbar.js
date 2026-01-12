@@ -74,28 +74,40 @@ export default function Navbar() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
+        @keyframes float {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
         }
-        .galaxy-bg {
-          animation: spin-slow 200s linear infinite;
+        @keyframes float-delayed {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(-30px, 50px) scale(0.9); }
+          66% { transform: translate(20px, -20px) scale(1.1); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-float {
+          animation: float 20s infinite ease-in-out;
+        }
+        .animate-float-delayed {
+          animation: float-delayed 25s infinite ease-in-out;
         }
       ` }} />
       <nav className="w-full flex items-center justify-between py-2 px-4 lg:px-12 relative z-50 overflow-hidden text-(--ui-foreground)">
-        {/* خلفية المجرة المتحركة */}
-        <div className="galaxy-bg absolute inset-0 -z-10 pointer-events-none">
+        {/* خلفية التدرج المتحركة الجديدة (Mesh Gradient) */}
+        <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none opacity-60">
+          {/* الخلفية الأساسية */}
           <div className="absolute inset-0 bg-(--ui-surface)" />
-          <div className="absolute inset-0 brand-gradient opacity-15" />
-          <div className="absolute inset-0 opacity-50">
-            <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-(--color-primary-500) rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
-            <div className="absolute top-0 -right-1/4 w-1/2 h-1/2 bg-(--color-accent-500) rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-2000" />
-            <div className="absolute -bottom-1/4 left-1/3 w-1/2 h-1/2 bg-(--color-secondary-500) rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-4000" />
-          </div>
+          
+          {/* الكرات اللونية المتحركة (Orbs) */}
+          {/* Orb 1: Primary Color */}
+          <div className="absolute top-[-10%] left-[-10%] w-125 h-125 bg-(--color-primary-500) rounded-full mix-blend-multiply filter blur-[100px] animate-float opacity-30" />
+          
+          {/* Orb 2: Secondary Color */}
+          <div className="absolute bottom-[-10%] right-[-10%] w-125 h-125(--color-secondary-500) rounded-full mix-blend-multiply filter blur-[100px] animate-float-delayed opacity-30" />
+          
+          {/* Orb 3: Accent Color (Smaller, faster) */}
+          <div className="absolute top-[20%] right-[20%] w-75 h-75 bg-(--color-accent-500) rounded-full mix-blend-screen filter blur-[80px] animate-float opacity-20 animation-delay-2000" />
         </div>
 
         {/* شعار الموقع */}

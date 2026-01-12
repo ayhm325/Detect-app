@@ -1,12 +1,17 @@
+"use client";
 import BackgroundWrapper from './BackgroundWrapper';
 import HoloButton from './HoloButton';
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
+import { useTheme } from '../../theme-provider';
 
-export default async function Hero() {
-  const t = await getTranslations('holoDemo');
+export default function Hero() {
+  const t = useTranslations('holoDemo');
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const heroLightBg = '#F0FAF4';
 
   return (
-    <BackgroundWrapper intensity="mid">
+    <BackgroundWrapper intensity="none" applyLightGradient={false} lightBgColor={!isDark ? heroLightBg : null}>
       <div className="mx-auto max-w-5xl px-6 py-24 text-center">
         <h1
           className="text-4xl md:text-6xl font-extrabold tracking-tight holo-sheen"

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { useTheme } from "../theme-provider";
 import dynamic from "next/dynamic";
 
 export default function HeroSection() {
@@ -22,55 +23,43 @@ export default function HeroSection() {
     { src: "/icons/hero2.jpeg" },
     { src: "/icons/hero3.jpeg" },
   ];
-  const [showWaves, setShowWaves] = useState(false);
+  const generateParticles = () =>
+    [...Array(20)].map((_, i) => ({
+      id: i,
+      width: Math.random() * 200 + 50,
+      height: Math.random() * 200 + 50,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      animationDelay: Math.random() * 5,
+      animationDuration: Math.random() * 10 + 10,
+    }));
+
+  // Initialize empty on the server to avoid hydration mismatches.
+  // Generate particles only on the client after mount.
   const [particles, setParticles] = useState([]);
+  useEffect(() => {
+    setParticles(generateParticles());
+  }, []);
   const withLocale = (path) => {
     const base = path.startsWith("/") ? path : `/${path}`;
     if (base.startsWith("/en") || base.startsWith("/ar")) return base;
     return `/${locale}${base === "/" ? "" : base}`;
   };
 
-  useEffect(() => {
-    setShowWaves(true);
-    // Generate particles on client side only
-    setParticles(
-      [...Array(20)].map((_, i) => ({
-        id: i,
-        width: Math.random() * 200 + 50,
-        height: Math.random() * 200 + 50,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        animationDelay: Math.random() * 5,
-        animationDuration: Math.random() * 10 + 10,
-      }))
-    );
-  }, []);
+  // particles are generated on the client after mount to ensure deterministic
+  // server-rendered HTML and avoid hydration mismatches.
 
-  const AnimatedWaves = dynamic(() => import("./_AnimatedWaves"), { ssr: false, loading: () => null });
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const heroLightBg = '#F0FAF4';
+  const heroGreenShadow = '0 24px 80px rgba(34,197,94,0.14), 0 6px 24px rgba(34,197,94,0.08)';
 
   return (
-    <section className="relative flex flex-col items-center justify-center min-h-[90vh] w-full py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background SVG */}
-      <div className="absolute inset-0 -z-30 pointer-events-none">
-        <Image
-          src="/bg-hero.svg"
-          alt={t("aria.background")}
-          fill
-          priority
-          sizes="100vw"
-          className="absolute inset-0 w-full h-full object-cover opacity-40"
-        />
-      </div>
-
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 -z-20 pointer-events-none bg-(--ui-surface) opacity-90" />
-
-      {/* Animated Waves */}
-      {showWaves && (
-        <div className="absolute inset-0 -z-10 pointer-events-none opacity-60">
-          <AnimatedWaves />
-        </div>
-      )}
+    <section
+      className="relative flex flex-col items-center justify-center min-h-[90vh] w-full py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      style={isDark ? undefined : { backgroundColor: heroLightBg }}
+    >
+      {/* Background SVG and Animated Waves removed as requested */}
 
       {/* Floating Particles */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
@@ -104,7 +93,10 @@ export default function HeroSection() {
             style={{ animationDelay: `${i * 0.2}s` }}
           >
             <div className="absolute inset-0 brand-gradient rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 transition-opacity" />
-            <div className="relative p-4 sm:p-5 rounded-3xl card-glass shadow-2xl transform group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300">
+            <div
+              className="relative p-4 sm:p-5 rounded-3xl card-glass shadow-2xl transform group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300"
+              style={isDark ? undefined : { boxShadow: heroGreenShadow }}
+            >
               <Image src={icon.src} alt={icon.alt} width={48} height={48} className="sm:w-14 sm:h-14 drop-shadow-2xl" />
             </div>
           </div>
@@ -143,7 +135,11 @@ export default function HeroSection() {
 
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
               {heroStats.map((stat, i) => (
-                <div key={i} className="p-4 rounded-2xl card-glass shadow-sm">
+                <div
+                  key={i}
+                  className="p-4 rounded-2xl card-glass shadow-sm"
+                  style={isDark ? undefined : { backgroundColor: heroLightBg, boxShadow: heroGreenShadow }}
+                >
                   <div className="text-xl sm:text-2xl font-black brand-gradient-text mb-1">{stat.number}</div>
                   <div className="text-xs text-(--ui-muted-foreground) font-semibold">{stat.label}</div>
                 </div>
@@ -155,7 +151,7 @@ export default function HeroSection() {
           <div className="w-full md:w-1/2">
             <div className="sm:hidden grid grid-cols-1 gap-4 mb-4">
               {heroImages.map((img, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden shadow-lg bg-(--ui-surface-2)">
+                <div key={i} className="rounded-2xl overflow-hidden shadow-lg bg-(--ui-surface-2)" style={isDark ? undefined : { boxShadow: heroGreenShadow }}>
                   <div className="relative w-full h-44">
                     <Image src={img.src} alt={`Hero ${i + 1}`} fill sizes="100vw" className="object-cover" />
                   </div>
@@ -166,7 +162,7 @@ export default function HeroSection() {
             {/* Desktop layout: large left image + two stacked on the right (left height = sum of two right images) */}
             <div className="hidden sm:grid grid-cols-2 gap-6 items-start h-72 md:h-88 lg:h-112">
               {/* Large image (spans left column) */}
-              <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full">
+              <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full" style={isDark ? undefined : { boxShadow: heroGreenShadow }}>
                 <div className="relative w-full h-full">
                   <Image src={heroImages[0].src} alt={`Hero 1`} fill sizes="(max-width: 1024px) 60vw, 720px" className="object-cover" />
                 </div>
@@ -174,12 +170,12 @@ export default function HeroSection() {
 
               {/* Right column: two stacked images, each half of the container */}
               <div className="grid grid-rows-2 gap-6 h-full">
-                <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full">
+                <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full" style={isDark ? undefined : { boxShadow: heroGreenShadow }}>
                   <div className="relative w-full h-full">
                     <Image src={heroImages[1].src} alt={`Hero 2`} fill sizes="(max-width: 1024px) 30vw, 360px" className="object-cover" />
                   </div>
                 </div>
-                <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full">
+                <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full" style={isDark ? undefined : { boxShadow: heroGreenShadow }}>
                   <div className="relative w-full h-full">
                     <Image src={heroImages[2].src} alt={`Hero 3`} fill sizes="(max-width: 1024px) 30vw, 360px" className="object-cover" />
                   </div>

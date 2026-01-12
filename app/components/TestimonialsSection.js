@@ -22,15 +22,24 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <section className="relative w-full py-20 sm:py-24 bg-(--ui-surface) text-(--ui-foreground) overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--color-bright-500) 26%, transparent) 0%, transparent 55%),
-            radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--color-dark-500) 22%, transparent) 0%, transparent 55%)
-          `,
-        }} />
+    <section className="relative w-full py-20 sm:py-24 bg-(--ui-surface) text-(--ui-foreground) overflow-hidden testimonials-light-bg">
+      {/* Background Pattern: soft colored blotches */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 18% 28%, color-mix(in srgb, var(--color-bright-500) 46%, transparent) 0%, transparent 40%),
+              radial-gradient(circle at 82% 72%, color-mix(in srgb, var(--color-dark-500) 40%, transparent) 0%, transparent 44%),
+              radial-gradient(circle at 50% 12%, color-mix(in srgb, var(--color-accent-300, var(--color-bright-200)) 34%, transparent) 0%, transparent 50%)
+            `,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '60% 60%, 50% 50%, 80% 36%',
+            filter: 'blur(22px)',
+            opacity: 0.26,
+            mixBlendMode: 'soft-light',
+          }}
+        />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -49,7 +58,13 @@ export default function TestimonialsSection() {
         {/* Testimonials Carousel */}
         <div className="relative max-w-4xl mx-auto">
           {/* Main Testimonial Card */}
-          <div className="relative p-8 sm:p-12 card-glass rounded-3xl border-2 border-(--ui-border) shadow-2xl">
+          <div
+            className="relative p-8 sm:p-12 card-glass rounded-3xl border-2 border-(--ui-border) shadow-2xl"
+            style={{
+              boxShadow: '0 30px 80px rgba(0,0,0,0.09), 0 0 60px color-mix(in srgb, var(--color-bright-500) 36%, transparent)',
+              borderColor: 'color-mix(in srgb, var(--color-bright-500) 40%, var(--ui-border))',
+            }}
+          >
             {/* Quote Icon */}
             <div className="absolute top-6 right-6 text-6xl text-(--ui-warning)/20">
               &ldquo;
@@ -143,6 +158,11 @@ export default function TestimonialsSection() {
                     ? 'bg-(--ui-surface-2) border-2 border-(--ui-border-strong) shadow-lg scale-105'
                     : 'bg-(--ui-surface) border border-(--ui-border) hover:shadow-md hover:scale-105'
                 }`}
+                style={
+                  i === activeIndex
+                    ? { boxShadow: '0 12px 36px color-mix(in srgb, var(--color-bright-500) 36%, rgba(0,0,0,0.12))' }
+                    : undefined
+                }
               >
                 <div className="w-12 h-12 mx-auto mb-2 bg-(--ui-surface) border border-(--ui-border) rounded-full flex items-center justify-center shadow-md">
                   <Image 

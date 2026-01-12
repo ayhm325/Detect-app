@@ -7,5 +7,9 @@ export default function PatientDashboardWrapper({ children }) {
   useEffect(() => {
     router.refresh();
   }, [router]);
-  return children;
+  return (
+    <div style={{ backgroundColor: "transparent", minHeight: "100vh" }}>
+      {children}
+    </div>
+  );
 }
