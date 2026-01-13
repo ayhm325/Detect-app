@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "../../../components/ui/Toast";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 import { formatTime } from "../../../lib/date";
 import { formatActivityDescription } from "../../../lib/activityFormat";
 import NotificationBellButton from "../../../components/ui/NotificationBellButton";
@@ -28,6 +29,7 @@ export default function DashboardHome({ serverData = {} }) {
   const locale = useLocale();
   const t = useTranslations("doctorDashboard");
   const ui = useTranslations("ui");
+  const patientT = useTranslations("patient");
   const basePrefix = locale === "en" ? "/en" : "/ar";
   const placeholder = ui("placeholder");
 
@@ -297,7 +299,7 @@ export default function DashboardHome({ serverData = {} }) {
 
         const typeLabel = s.type
           ? (labels.todayAppointments.types?.[s.type] ?? s.type)
-          : placeholder;
+          : "";
 
         return {
           id: s.id ?? i + 1,
@@ -305,6 +307,7 @@ export default function DashboardHome({ serverData = {} }) {
           type: typeLabel,
           date: dateLabel,
           priority,
+          clinicalStatus: s.patientClinicalStatus || s.patient?.clinicalStatus || s.clinicalStatus || "",
         };
       })
     : [];
@@ -417,12 +420,12 @@ export default function DashboardHome({ serverData = {} }) {
                   <FaCalendarAlt className="text-(--ui-info)" />
                   {labels.todayAppointments.title}
                 </h2>
-                <button
-                  onClick={() => router.push(`${basePrefix}/doctor/appointments`)}
+                <Link
+                  href={`${basePrefix}/doctor/appointments`}
                   className="text-sm text-(--ui-info) hover:opacity-90 font-medium"
                 >
                   {labels.todayAppointments.viewAll}
-                </button>
+                </Link>
               </div>
               <div className="space-y-3">
                 {todayAppointments.length === 0 ? (
@@ -486,17 +489,27 @@ export default function DashboardHome({ serverData = {} }) {
                       <p className="font-bold text-(--ui-foreground)">{scan.patient}</p>
                       <span
                         className={`rounded-full px-2 py-1 text-xs font-medium ${
-                          scan.priority === "high"
+                          (scan.clinicalStatus === "critical")
                             ? "bg-(--ui-danger-bg) text-(--ui-danger)"
-                            : scan.priority === "medium"
+                            : (scan.clinicalStatus === "recovering")
+                            ? "bg-(--ui-info-bg) text-(--ui-info) font-semibold text-sm px-3 py-1"
+                            : (scan.clinicalStatus === "stable")
+                            ? "bg-(--ui-success-bg) text-(--ui-success)"
+                            : (scan.priority === "high")
+                            ? "bg-(--ui-danger-bg) text-(--ui-danger)"
+                            : (scan.priority === "medium")
                             ? "bg-(--ui-warning-bg) text-(--ui-warning)"
                             : "bg-(--ui-info-bg) text-(--ui-info)"
                         }`}
                       >
-                        {labels.pendingScans.priority[scan.priority] || scan.priority}
+                        {scan.clinicalStatus
+                          ? (patientT(`clinicalStatuses.${scan.clinicalStatus}`) || scan.clinicalStatus)
+                          : (labels.pendingScans.priority[scan.priority] || scan.priority)}
                       </span>
                     </div>
-                    <p className="text-sm text-(--ui-muted-foreground)">{scan.type}</p>
+                    {scan.type ? (
+                      <p className="text-sm text-(--ui-muted-foreground)">{scan.type}</p>
+                    ) : null}
                     <p className="text-xs text-(--ui-muted-foreground) mt-1">{scan.date}</p>
                   </div>
                 ))}

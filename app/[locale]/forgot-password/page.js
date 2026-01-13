@@ -4,7 +4,9 @@ import ForgotPasswordForm from "../../components/ForgotPasswordForm";
 export async function generateMetadata({ params }) {
   const resolvedParams = typeof params?.then === "function" ? await params : params;
   const locale = resolvedParams?.locale || "en";
+  const dir = locale === "ar" ? "rtl" : "ltr";
   const t = await getTranslations({ locale, namespace: "meta" });
+
   return {
     title: t("forgotPassword.title"),
     description: t("forgotPassword.description"),
@@ -12,7 +14,15 @@ export async function generateMetadata({ params }) {
       title: t("forgotPassword.openGraph.title"),
       description: t("forgotPassword.openGraph.description"),
       type: "website",
+      locale,
     },
+    alternates: {
+      canonical: `/${locale}/forgot-password`,
+      languages: {
+        [locale]: `/${locale}/forgot-password`,
+      },
+    },
+    other: { locale, dir },
   };
 }
 
@@ -21,25 +31,6 @@ export default async function ForgotPasswordPage({ params }) {
   const locale = resolvedParams?.locale || "en";
   const dir = locale === "ar" ? "rtl" : "ltr";
 
-  return (
-    <div
-      className="min-h-screen w-full flex items-center justify-center no-scrollbar"
-      dir={dir}
-      lang={locale}
-      style={{
-        backgroundImage: 'url(/icons/forgot.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div className="card-glass rounded-2xl p-8 w-full max-w-md flex items-center justify-center" style={{margin: 0}}>
-        <ForgotPasswordForm />
-      </div>
-    </div>
-  );
+  // Render only the client component; locale and dir available as props if needed
+  return <ForgotPasswordForm locale={locale} dir={dir} />;
 }

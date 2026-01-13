@@ -8,7 +8,6 @@ import {
   FaXRay,
   FaSearch,
   FaFilter,
-  FaDownload,
   FaEye,
   FaCompressArrowsAlt,
   FaUser,
@@ -22,7 +21,6 @@ import {
   FaExpand,
   FaCompress,
   FaPrint,
-  FaShare,
 } from "react-icons/fa";
 import { formatDate } from "../../../lib/date";
 import { useLocale, useTranslations } from "next-intl";
@@ -224,19 +222,8 @@ export default function DoctorResultsPage() {
     }
   };
 
-  const handleDownload = (scan) => {
-    showToast(t("toast.downloadStart"), "info");
-    setTimeout(() => {
-      showToast(t("toast.downloadStart"), "success");
-    }, 1500);
-  };
-
   const handlePrint = (scan) => {
     showToast(t("toast.printStart"), "info");
-  };
-
-  const handleShare = (scan) => {
-    showToast(t("toast.shareCopied"), "success");
   };
 
   const getStatusBadge = (status) => {
@@ -493,20 +480,7 @@ export default function DoctorResultsPage() {
                 >
                   {isFullscreen ? <FaCompress /> : <FaExpand />}
                 </button>
-                <button
-                  onClick={() => handleDownload(selectedScan)}
-                  className="rounded-lg p-2 text-(--ui-muted-foreground) transition-all hover:bg-(--ui-surface-2)"
-                  title={t("actions.download")}
-                >
-                  <FaDownload />
-                </button>
-                <button
-                  onClick={() => handleShare(selectedScan)}
-                  className="rounded-lg p-2 text-(--ui-muted-foreground) transition-all hover:bg-(--ui-surface-2)"
-                  title={t("actions.share")}
-                >
-                  <FaShare />
-                </button>
+                {/* Download and Share buttons removed as requested */}
                 <button
                   onClick={() => setViewerOpen(false)}
                   className="rounded-lg p-2 text-(--ui-muted-foreground) transition-all hover:bg-(--ui-surface-2)"

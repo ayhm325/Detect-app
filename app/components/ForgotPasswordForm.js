@@ -55,7 +55,7 @@ export default function ForgotPasswordForm() {
       <div className="fixed inset-0 z-0">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(/icons/bluelogin.png)' }}
+          style={{ backgroundImage: 'url(/icons/bluelogin.jpg)' }}
         />
         {/* أزلت طبقة التعتيم حتى تظهر الصورة بوضوح؛ الحقول ستحتوي على خلفية خفيفة للقراءة */}
         <div className="absolute inset-0 bg-transparent pointer-events-none" />

@@ -71,7 +71,7 @@ export default async function DoctorDashboard({ params }) {
       prisma.medicalRecord.findMany({
         where: { doctorId, reviewedByDoctor: false },
         include: {
-          patient: { select: { fullName: true } },
+          patient: { select: { fullName: true, clinicalStatus: true } },
           appointment: { select: { type: true } },
         },
         orderBy: { createdAt: 'desc' },
@@ -104,6 +104,7 @@ export default async function DoctorDashboard({ params }) {
       pendingScansList: pendingScansList.map((r) => ({
         id: r.id,
         patient: r.patient?.fullName ?? r.patientId,
+        patientClinicalStatus: r.patient?.clinicalStatus ?? null,
         type: r.appointment?.type ?? null,
         confidenceScore: r.confidenceScore,
         createdAt: r.createdAt.toISOString(),

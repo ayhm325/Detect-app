@@ -1,33 +1,35 @@
 "use client";
-// Helper to prefix locale to path
-function withLocale(locale, path) {
-  if (!path.startsWith("/")) path = "/" + path;
-  if (locale === "ar" || locale === "en") {
-    return `/${locale}${path}`;
-  }
-  return path;
-}
 
+import { useState, useEffect, useMemo, useRef } from "react";
 import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaCheck, FaStethoscope, FaBed, FaGoogle, FaFacebook, FaEye, FaEyeSlash, FaPhone, FaHouse } from "react-icons/fa6";
 import Link from "next/link";
-import { useMemo, useState, useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useLocaleContext } from "../hooks/useLocaleContext";
+import {
+  glassContainer,
+  iconBubble,
+  inputBase,
+  inputBasePassword,
+  btnPrimary,
+  socialButton,
+  backHomeBtn,
+} from "./authStyles";
 
-function SignUpForm() {
+// Helper to prefix locale to path
+const withLocale = (locale, path) => {
+  if (!path.startsWith("/")) path = "/" + path;
+  return locale === "ar" || locale === "en" ? `/${locale}${path === "/" ? "" : path}` : path;
+};
+
+export default function SignUpForm() {
   const locale = useLocale();
   const t = useTranslations("signup");
   const { toggleLocale } = useLocaleContext();
   const dir = locale === "ar" ? "rtl" : "ltr";
+
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    userType: "doctor",
-    doctorId: "",
-    licenseNumber: "",
-    phone: "",
+    name: "", email: "", password: "", confirmPassword: "",
+    userType: "doctor", doctorId: "", licenseNumber: "", phone: ""
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -35,69 +37,45 @@ function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // جلب الأطباء الحقيقيين من API
+  // Doctor selection for patients
   const [doctors, setDoctors] = useState([]);
   const [doctorsLoading, setDoctorsLoading] = useState(false);
   const [doctorsError, setDoctorsError] = useState("");
-
   const [doctorPickerOpen, setDoctorPickerOpen] = useState(false);
   const doctorPickerRef = useRef(null);
 
-  const selectedDoctor = useMemo(
-    () => doctors.find((d) => String(d.id) === String(form.doctorId)),
-    [doctors, form.doctorId]
-  );
+  const selectedDoctor = useMemo(() => doctors.find(d => String(d.id) === String(form.doctorId)), [doctors, form.doctorId]);
 
   useEffect(() => {
     if (!doctorPickerOpen) return;
-    const onMouseDown = (e) => {
-      const el = doctorPickerRef.current;
-      if (!el) return;
-      if (!el.contains(e.target)) setDoctorPickerOpen(false);
-    };
-    document.addEventListener('mousedown', onMouseDown);
-    return () => document.removeEventListener('mousedown', onMouseDown);
+    const onMouseDown = (e) => { if (doctorPickerRef.current && !doctorPickerRef.current.contains(e.target)) setDoctorPickerOpen(false); };
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
   }, [doctorPickerOpen]);
 
   useEffect(() => {
     if (form.userType !== "patient") return;
     const fetchDoctors = async () => {
-      setDoctorsLoading(true);
-      setDoctorsError("");
+      setDoctorsLoading(true); setDoctorsError("");
       try {
         const apiPath = `/api/doctor/list${process.env.NEXT_PUBLIC_DEBUG_INCLUDE_PENDING === 'true' ? '?includePending=true' : ''}`;
         const res = await fetch(apiPath);
         const data = await res.json();
         if (data.doctors) {
-          setDoctors(
-            data.doctors.map((doc) => ({
-              id: doc.id,
-              name: doc.fullName || doc.name || doc.email || doc.id,
-              specialty: doc.specialty || "",
-              email: doc.email || ""
-            }))
-          );
-        } else {
-          setDoctors([]);
-        }
-        setDoctorsLoading(false);
+          setDoctors(data.doctors.map(doc => ({
+            id: doc.id,
+            name: doc.fullName || doc.name || doc.email || doc.id,
+            specialty: doc.specialty || "",
+            email: doc.email || ""
+          })));
+        } else setDoctors([]);
       } catch {
         setDoctorsError(t("signup.errors.loadDoctorsFailed"));
-        setDoctorsLoading(false);
       }
+      setDoctorsLoading(false);
     };
     fetchDoctors();
   }, [form.userType, locale, t]);
-
-  const passwordHints = [
-    t("signup.passwordHint1"),
-    t("signup.passwordHint2"),
-    t("signup.passwordHint3"),
-    t("signup.passwordHint4")
-  ];
-  const passwordStrengthLabel = t("signup.passwordStrengthLabel");
-  const haveAccountText = t("signup.haveAccount");
-  const loginText = t("signup.loginCta");
 
   const passwordChecks = {
     length: form.password.length >= 8,
@@ -105,526 +83,158 @@ function SignUpForm() {
     number: /[0-9]/.test(form.password),
     symbol: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(form.password),
   };
+  const passwordHints = [
+    t("signup.passwordHint1"), t("signup.passwordHint2"),
+    t("signup.passwordHint3"), t("signup.passwordHint4")
+  ];
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError("");
-    setSuccess("");
-  };
-
-  const handleUserTypeChange = (type) => {
-    setForm({ ...form, userType: type, doctorId: "" });
-    setDoctorPickerOpen(false);
-    setError("");
-    setSuccess("");
-  };
+  const handleChange = (e) => { setForm({ ...form, [e.target.name]: e.target.value }); setError(""); setSuccess(""); };
+  const handleUserTypeChange = (type) => { setForm({ ...form, userType: type, doctorId: "" }); setDoctorPickerOpen(false); setError(""); setSuccess(""); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // التحقق من الحقول
-    if (!form.name.trim() || !form.email.trim() || !form.password || !form.confirmPassword) {
-      setError(t("signup.errors.required"));
-      return;
-    }
-    if (form.userType === "doctor" && (!form.licenseNumber.trim() || !form.phone.trim())) {
-      setError(t("signup.errors.doctorLicensePhoneRequired"));
-      return;
-    }
-    if (form.userType === "patient" && !form.doctorId) {
-      setError(t("signup.errors.doctorMissing"));
-      return;
-    }
-    const isPasswordStrong = Object.values(passwordChecks).every(Boolean);
-    if (!isPasswordStrong) {
-      setError(t("signup.errors.weakPassword"));
-      return;
-    }
-    if (form.password !== form.confirmPassword) {
-      setError(t("signup.errors.mismatch"));
-      return;
-    }
-    setLoading(true);
-    setError("");
-    setSuccess("");
+    // Validation
+    if (!form.name.trim() || !form.email.trim() || !form.password || !form.confirmPassword) return setError(t("signup.errors.required"));
+    if (form.userType === "doctor" && (!form.licenseNumber.trim() || !form.phone.trim())) return setError(t("signup.errors.doctorLicensePhoneRequired"));
+    if (form.userType === "patient" && !form.doctorId) return setError(t("signup.errors.doctorMissing"));
+    if (!Object.values(passwordChecks).every(Boolean)) return setError(t("signup.errors.weakPassword"));
+    if (form.password !== form.confirmPassword) return setError(t("signup.errors.mismatch"));
+
+    setLoading(true); setError(""); setSuccess("");
     try {
-      let apiUrl, payload;
-      if (form.userType === "doctor") {
-        apiUrl = "/api/doctor";
-        payload = {
-          email: form.email,
-          password: form.password,
-          fullName: form.name,
-          licenseNumber: form.licenseNumber,
-          phone: form.phone,
-        };
-      } else {
-        // patient API is localized under /[locale]/api/patient
-        apiUrl = withLocale(locale, "/api/patient");
-        payload = {
-          email: form.email,
-          password: form.password,
-          fullName: form.name,
-          role: form.userType,
-          doctorId: form.doctorId,
-        };
-      }
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const apiUrl = form.userType === "doctor" ? "/api/doctor" : withLocale(locale, "/api/patient");
+      const payload = form.userType === "doctor" ? {
+        email: form.email, password: form.password, fullName: form.name,
+        licenseNumber: form.licenseNumber, phone: form.phone
+      } : {
+        email: form.email, password: form.password, fullName: form.name, role: form.userType, doctorId: form.doctorId
+      };
+
+      const res = await fetch(apiUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const data = await res.json();
       setLoading(false);
+
       if (!res.ok) {
         const code = data?.errorCode;
-        if (code === "EMAIL_ALREADY_USED") {
-          setError(t("signup.errors.emailAlreadyUsed"));
-          return;
-        }
-        if (code === "PHONE_ALREADY_USED") {
-          setError(t("signup.errors.phoneAlreadyUsed"));
-          return;
-        }
-        if (code === "LICENSE_ALREADY_USED") {
-          setError(t("signup.errors.licenseAlreadyUsed"));
-          return;
-        }
-        setError(data.error || t("signup.errors.registrationFailed"));
-        return;
+        if (code === "EMAIL_ALREADY_USED") return setError(t("signup.errors.emailAlreadyUsed"));
+        if (code === "PHONE_ALREADY_USED") return setError(t("signup.errors.phoneAlreadyUsed"));
+        if (code === "LICENSE_ALREADY_USED") return setError(t("signup.errors.licenseAlreadyUsed"));
+        return setError(data.error || t("signup.errors.registrationFailed"));
       }
+
       setSuccess(t("signup.success"));
-      setTimeout(() => {
-        window.location.href = withLocale(locale, "/login");
-      }, 2000);
-    } catch (err) {
-      setLoading(false);
-      setError(t("signup.errors.serverConnection"));
+      setTimeout(() => { window.location.href = withLocale(locale, "/login"); }, 2000);
+    } catch {
+      setLoading(false); setError(t("signup.errors.serverConnection"));
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" dir={dir} lang={locale}>
-      {/* خلفية متدرجة بالوردي والبنفسجي */}
-      <div className="fixed inset-0 z-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(/icons/bluesignup.png)' }}
-        />
-      </div>
-
-      {/* الفورم المحصور في المنتصف */}
+    <div className="min-h-screen flex items-center justify-center p-4 relative" dir={dir} lang={locale}>
+      {/* Background (component-scoped) */}
+      <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icons/bluesignup.jpg)' }} />
       <div className="relative z-10 w-full max-w-md">
-        <form
-          onSubmit={handleSubmit}
-          className="w-full glass-morph bg-background/15 backdrop-blur-lg rounded-3xl shadow-2xl border border-(--ui-border) p-8 max-h-[90vh] overflow-y-auto"
-        >
-          {/* Section 1: Header */}
+        <form onSubmit={handleSubmit} className={glassContainer} aria-live="polite">
+
+          {/* Header */}
           <div className="mb-8 flex items-center justify-between gap-2">
             <div className="flex flex-col items-center gap-4 flex-1">
-              <div className="inline-block p-4 rounded-full glass-morph bg-background/20 shadow-xl">
-                <FaUserPlus className="text-4xl text-white" />
-              </div>
+              <div className="inline-block p-4 rounded-full"><FaUserPlus className="text-4xl text-green-400" /></div>
               <div className="text-center">
-                <h2 className="text-3xl font-bold text-white mb-1">{t("signup.title")}</h2>
-                <p className="text-white/90 text-base">{t("signup.subtitle")}</p>
+                <h2 className="text-3xl font-bold text-green-400 mb-1">{t("signup.title")}</h2>
+                <p className="text-green-100/90 text-base">{t("signup.subtitle")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Link
-                href={locale === "en" ? "/en" : "/ar"}
-                className="w-10 h-10 flex items-center justify-center rounded-full glass-morph bg-background/20 text-white hover:bg-background/25 shadow-md border border-(--ui-border) transition-all focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/40"
-                title={t("ui.backHomeTitle")}
-                aria-label={t("ui.backHomeTitle")}
-                onClick={e => {
-                  const homePath = locale === "en" ? "/en" : "/ar";
-                  const current = window.location.pathname;
-                  if (current === homePath) {
-                    e.preventDefault();
-                    return;
-                  }
-                  if (
-                    current === `${homePath}/${locale}` ||
-                    current.startsWith(`${homePath}/`)
-                  ) {
-                    e.preventDefault();
-                    window.location.href = homePath;
-                  }
-                }}
-              >
-                <FaHouse className="text-xl" />
-              </Link>
-              <button
-                type="button"
-                onClick={toggleLocale}
-                className="flex items-center gap-2 px-3 py-2 rounded-full glass-morph bg-background/20 text-white hover:bg-background/25 transition-colors font-medium text-sm"
-                title={t("ui.switchLanguageTitle")}
-              >
-                <span>🌐</span>
-                <span>{t("ui.switchLanguageShort")}</span>
-              </button>
+              <Link href={withLocale(locale, "/")} className={backHomeBtn}><FaHouse className="text-xl text-green-400" /></Link>
+              <button type="button" onClick={toggleLocale} className="flex items-center gap-2 px-3 py-2 rounded-full glass-morph bg-background/20 text-green-200 hover:bg-background/25 transition-colors font-medium text-sm">🌐 <span>{t("ui.switchLanguageShort")}</span></button>
             </div>
           </div>
 
-          {/* Section 2: Social Login */}
-          <div className="mb-6 pb-6 border-b border-(--color-neutral)/20">
+          {/* Social Login */}
+          <div className="mb-6 pb-6 border-b border-green-500/20">
             <div className="flex items-center justify-center gap-4">
-              <button type="button" className="flex-1 max-w-40 h-12 rounded-xl glass-morph bg-background/15 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-(--ui-border) flex items-center justify-center gap-2 font-medium border border-(--ui-border)" title={t("social.facebook")}>
-                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-(--ui-info) shadow">
-                  <FaFacebook className="text-lg text-(--ui-info-foreground)" />
-                </span>
-                <span className="text-sm">{t("social.facebook")}</span>
-              </button>
-              <button type="button" className="flex-1 max-w-40 h-12 rounded-xl glass-morph bg-background/15 text-white shadow-lg transition-all hover:scale-105 ring-2 ring-(--ui-border) flex items-center justify-center gap-2 font-medium border border-(--ui-border)" title={t("social.google")}>
-                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-(--ui-danger) shadow">
-                  <FaGoogle className="text-lg text-(--ui-danger-foreground)" />
-                </span>
-                <span className="text-sm">{t("social.google")}</span>
-              </button>
-            </div>
-            <div className="flex items-center justify-center gap-3 mt-4">
-              <div className="h-px bg-(--ui-border) flex-1"></div>
-              <span className="text-white/90 text-sm font-medium">{t("signup.socialDivider")}</span>
-              <div className="h-px bg-(--ui-border) flex-1"></div>
+              <button type="button" className={socialButton}><FaFacebook className="text-lg text-green-500" /> {t("social.facebook")}</button>
+              <button type="button" className={socialButton}><FaGoogle className="text-lg text-green-500" /> {t("social.google")}</button>
             </div>
           </div>
 
-          {/* Section 3: Role Selection */}
-          <div className="mb-8">
-            <label className="block text-sm font-semibold text-white mb-4 text-center">{t("signup.roleLabel")}</label>
+          {/* Role Selection */}
+          <div className="mb-8 text-center">
+            <label className="block text-sm font-semibold text-green-300 mb-4">{t("signup.roleLabel")}</label>
             <div className="flex items-center justify-center gap-6">
-              <button
-                type="button"
-                onClick={() => handleUserTypeChange("doctor")}
-                className={`group flex items-center justify-center p-0 rounded-full transition-all duration-300 w-16 h-16 ${
-                  form.userType === "doctor"
-                    ? "ring-4 ring-(--ui-ring)/60 scale-110 shadow-xl"
-                    : "ring-2 ring-(--ui-border) hover:ring-(--ui-ring)/40 hover:scale-105"
-                }`}
-                title={t("signup.doctorRole")}
-              >
-                <span className="w-14 h-14 flex items-center justify-center rounded-full glass-morph bg-background/20 shadow-md">
-                  <FaStethoscope className="text-3xl text-white transition-transform group-hover:rotate-12" />
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleUserTypeChange("patient")}
-                className={`group flex items-center justify-center p-0 rounded-full transition-all duration-300 w-16 h-16 ${
-                  form.userType === "patient"
-                    ? "ring-4 ring-(--ui-ring)/60 scale-110 shadow-xl"
-                    : "ring-2 ring-(--ui-border) hover:ring-(--ui-ring)/40 hover:scale-105"
-                }`}
-                title={t("signup.patientRole")}
-              >
-                <span className="w-14 h-14 flex items-center justify-center rounded-full glass-morph bg-background/20 shadow-md">
-                  <FaBed className="text-3xl text-white transition-transform group-hover:rotate-12" />
-                </span>
-              </button>
+              <button type="button" onClick={() => handleUserTypeChange("doctor")} className={`group flex items-center justify-center p-0 rounded-full transition-all duration-300 w-16 h-16 ${form.userType==="doctor"?"ring-4 ring-green-500/60 scale-110 shadow-xl":"ring-2 ring-green-500/40 hover:ring-green-500/40 hover:scale-105"}`} title={t("signup.doctorRole")}><FaStethoscope className="text-3xl text-green-400" /></button>
+              <button type="button" onClick={() => handleUserTypeChange("patient")} className={`group flex items-center justify-center p-0 rounded-full transition-all duration-300 w-16 h-16 ${form.userType==="patient"?"ring-4 ring-green-500/60 scale-110 shadow-xl":"ring-2 ring-green-500/40 hover:ring-green-500/40 hover:scale-105"}`} title={t("signup.patientRole")}><FaBed className="text-3xl text-green-400" /></button>
             </div>
           </div>
 
-          {/* Section 4: Form Fields */}
+          {/* Form Fields */}
           <div className="space-y-3">
-            {/* Name Field */}
+            {/* Name */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-3">{t("signup.nameLabel")} *</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-background/20">
-                  <FaUser className="text-white text-lg" />
-                </span>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder={t("signup.namePlaceholder")}
-                  value={form.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-12 pr-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
-                />
-              </div>
+              <label className="block text-sm font-semibold text-green-300 mb-3">{t("signup.nameLabel")} *</label>
+              <div className="relative"><span className={iconBubble}><FaUser className="text-green-500 text-lg" /></span><input type="text" name="name" value={form.name} onChange={handleChange} required placeholder={t("signup.namePlaceholder")} className={inputBase} /></div>
             </div>
-            {/* Doctor License Number & Phone (only for doctors) */}
-            {form.userType === "doctor" && (
-              <>
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-3">{t("signup.licenseNumberLabel")} *</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-background/20">
-                      <FaStethoscope className="text-white text-lg" />
-                    </span>
-                    <input
-                      type="text"
-                      name="licenseNumber"
-                      placeholder={t("signup.licenseNumberPlaceholder")}
-                      value={form.licenseNumber}
-                      onChange={handleChange}
-                      required
-                      className="w-full pl-12 pr-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-3">{t("signup.phoneLabel")} *</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-background/20">
-                      <FaPhone className="text-white text-lg" />
-                    </span>
-                    <input
-                      type="tel"
-                      name="phone"
-                      placeholder={t("signup.phonePlaceholder")}
-                      value={form.phone}
-                      onChange={handleChange}
-                      required
-                      className="w-full pl-12 pr-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-            {/* Email Field */}
-            <div>
-              <label className="block text-sm font-semibold text-white mb-3">{t("signup.emailLabel")} *</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-background/20">
-                  <FaEnvelope className="text-white text-lg" />
-                </span>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder={t("signup.emailPlaceholder")}
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-12 pr-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
-                />
-              </div>
-            </div>
-            {/* Doctor Selection for Patients */}
-            {form.userType === "patient" && (
-              <div>
-                <label className="block text-sm font-semibold text-white mb-3">{t("signup.doctorPickerLabel")} *</label>
-                {doctorsLoading ? (
-                  <div className="w-full bg-(--color-neutral)/80 backdrop-blur border-2 border-(--ui-info-border) rounded-xl p-3 text-white text-sm text-center font-medium">
-                    {t("signup.doctorsLoading")}
-                  </div>
-                ) : doctorsError ? (
-                  <div className="w-full bg-(--color-neutral)/80 backdrop-blur border-2 border-(--ui-danger-border) rounded-xl p-3 text-white text-sm text-center font-medium">
-                    {doctorsError}
-                  </div>
-                ) : (
-                  <div ref={doctorPickerRef} className="relative">
-                    <button
-                      type="button"
-                      aria-haspopup="listbox"
-                      aria-expanded={doctorPickerOpen ? "true" : "false"}
-                      onClick={() => setDoctorPickerOpen((v) => !v)}
-                      className="w-full px-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base flex items-center justify-between gap-3"
-                    >
-                      <span className="truncate">
-                        {selectedDoctor
-                          ? `${selectedDoctor.name}${selectedDoctor.specialty ? ` - ${selectedDoctor.specialty}` : ""}`
-                          : t("signup.doctorPlaceholder")}
-                      </span>
-                      <svg className={`w-5 h-5 shrink-0 transition-transform ${doctorPickerOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
-                      </svg>
-                    </button>
 
-                    {doctorPickerOpen && (
-                      <div
-                        role="listbox"
-                        className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-(--ui-border) bg-(--color-background) text-(--color-text) shadow-(--shadow-lift)"
-                      >
-                        <div className="max-h-64 overflow-auto">
-                          <button
-                            type="button"
-                            role="option"
-                            aria-selected={form.doctorId ? "false" : "true"}
-                            onClick={() => {
-                              setForm((prev) => ({ ...prev, doctorId: "" }));
-                              setDoctorPickerOpen(false);
-                            }}
-                            className={`w-full text-left px-4 py-3 text-sm border-b border-(--ui-border) hover:bg-(--ui-surface) transition-colors ${!form.doctorId ? 'bg-(--ui-surface-2)' : ''}`}
-                          >
-                            {t("signup.doctorPlaceholder")}
-                          </button>
-                          {doctors.map((doc) => {
-                            const isSelected = String(doc.id) === String(form.doctorId);
-                            return (
-                              <button
-                                key={doc.id}
-                                type="button"
-                                role="option"
-                                aria-selected={isSelected ? "true" : "false"}
-                                onClick={() => {
-                                  setForm((prev) => ({ ...prev, doctorId: doc.id }));
-                                  setDoctorPickerOpen(false);
-                                }}
-                                className={`w-full text-left px-4 py-3 text-sm hover:bg-(--ui-surface) transition-colors ${isSelected ? 'bg-(--ui-surface-2)' : ''}`}
-                              >
-                                <span className="block truncate">
-                                  {doc.name}{doc.specialty ? ` - ${doc.specialty}` : ""}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+            {/* Doctor-specific fields */}
+            {form.userType==="doctor" && <>
+              <div><label className="block text-sm font-semibold text-green-300 mb-3">{t("signup.licenseNumberLabel")} *</label>
+                <div className="relative"><span className={iconBubble}><FaStethoscope className="text-green-500 text-lg" /></span><input type="text" name="licenseNumber" value={form.licenseNumber} onChange={handleChange} required placeholder={t("signup.licenseNumberPlaceholder")} className={inputBase} /></div>
               </div>
-            )}
-            {/* Password Field */}
-            <div>
-              <label className="block text-sm font-semibold text-white mb-3">{t("signup.passwordLabel")} *</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-background/20">
-                  <FaLock className="text-white text-lg" />
-                </span>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-12 pr-24 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-(--ui-ring) hover:text-white transition-colors"
-                  title={showPassword ? t("signup.passwordHide") : t("signup.passwordShow")}
-                >
-                  {showPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
-                </button>
+              <div><label className="block text-sm font-semibold text-green-300 mb-3">{t("signup.phoneLabel")} *</label>
+                <div className="relative"><span className={iconBubble}><FaPhone className="text-green-500 text-lg" /></span><input type="tel" name="phone" value={form.phone} onChange={handleChange} required placeholder={t("signup.phonePlaceholder")} className={inputBase} /></div>
               </div>
+            </>}
+
+            {/* Email */}
+            <div><label className="block text-sm font-semibold text-green-300 mb-3">{t("signup.emailLabel")} *</label>
+              <div className="relative"><span className={iconBubble}><FaEnvelope className="text-green-500 text-lg" /></span><input type="email" name="email" value={form.email} onChange={handleChange} required placeholder={t("signup.emailPlaceholder")} className={inputBase} /></div>
             </div>
-            {/* Confirm Password Field */}
-            <div>
-              <label className="block text-sm font-semibold text-white mb-3">{t("signup.confirmPasswordLabel")} *</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full glass-morph bg-background/20">
-                  <FaLock className="text-white text-lg" />
-                </span>
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  placeholder="••••••••"
-                  value={form.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-12 pr-24 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-background/15 text-white placeholder:text-white/60 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-(--ui-ring) hover:text-white transition-colors"
-                  title={showConfirmPassword ? t("signup.passwordHide") : t("signup.passwordShow")}
-                >
-                  {showConfirmPassword ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+
+            {/* Patient doctor picker */}
+            {form.userType==="patient" && <div>
+              <label className="block text-sm font-semibold text-green-300 mb-3">{t("signup.doctorPickerLabel")} *</label>
+              {doctorsLoading ? <div className="p-3 text-center text-green-200">{t("signup.doctorsLoading")}</div> :
+               doctorsError ? <div className="p-3 text-center text-green-200">{doctorsError}</div> :
+               <div ref={doctorPickerRef} className="relative">
+                <button type="button" onClick={()=>setDoctorPickerOpen(!doctorPickerOpen)} className="w-full px-4 py-4 border-2 border-green-500/30 rounded-xl text-green-200 flex items-center justify-between hover:bg-green-500/10 transition">
+                  <span>{selectedDoctor ? `${selectedDoctor.name}${selectedDoctor.specialty ? ` - ${selectedDoctor.specialty}` : ""}` : t("signup.doctorPlaceholder")}</span>
+                  <span className="text-green-400">{doctorPickerOpen ? "▲" : "▼"}</span>
                 </button>
-              </div>
+                {doctorPickerOpen && <div className="absolute w-full mt-2 max-h-64 overflow-auto border border-green-500/30 rounded-xl bg-background/90 backdrop-blur-sm">
+                  <button type="button" onClick={()=>{setForm({...form, doctorId:""}); setDoctorPickerOpen(false);}} className="w-full px-4 py-2 text-left text-green-200 hover:bg-green-500/20">{t("signup.doctorPlaceholder")}</button>
+                  {doctors.map(doc => <button key={doc.id} type="button" onClick={()=>{setForm({...form, doctorId:doc.id}); setDoctorPickerOpen(false);}} className="w-full px-4 py-2 text-left text-green-200 hover:bg-green-500/20">{doc.name}{doc.specialty ? ` - ${doc.specialty}` : ""}</button>)}
+                </div>}
+               </div>}
+            </div>}
+
+            {/* Password */}
+            <div><label className="block text-sm font-semibold text-green-300 mb-3">{t("signup.passwordLabel")} *</label>
+              <div className="relative"><span className={iconBubble}><FaLock className="text-green-500 text-lg" /></span><input type={showPassword ? "text":"password"} name="password" value={form.password} onChange={handleChange} required placeholder={t("signup.passwordPlaceholder")} className={inputBasePassword} />
+              <button type="button" onClick={()=>setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">{showPassword?<FaEyeSlash className="text-xl"/>:<FaEye className="text-xl"/>}</button></div>
             </div>
-            {/* شريط قوة كلمة المرور مع emoji */}
-            {form.password && (
-              <div className="bg-background/15 backdrop-blur rounded-xl p-4 space-y-3 border-2 border-(--ui-border)">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-bold text-white">{passwordStrengthLabel}</p>
-                  <span className="text-lg">
-                    {(() => {
-                      const checks = [passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length;
-                      if (checks <= 1) return "😞";
-                      if (checks === 2) return "😐";
-                      if (checks === 3) return "🙂";
-                      return "😍";
-                    })()}
-                  </span>
-                </div>
-                <div className="w-full h-3 bg-(--ui-surface-2) rounded-full overflow-hidden">
-                  <div
-                    style={{
-                      width: `${[passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length * 25}%`,
-                      backgroundColor: (() => {
-                        const checks = [passwordChecks.length, passwordChecks.uppercase, passwordChecks.number, passwordChecks.symbol].filter(Boolean).length;
-                        if (checks <= 1) return "var(--ui-danger)";
-                        if (checks <= 3) return "var(--ui-warning)";
-                        return "var(--ui-success)";
-                      })()
-                    }}
-                    className="h-3 rounded-full transition-all duration-300"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <span className={passwordChecks.length ? "text-(--ui-success) font-bold" : "text-white/60"}>
-                    {passwordChecks.length ? "✔" : "✗"} {passwordHints[0]}
-                  </span>
-                  <span className={passwordChecks.uppercase ? "text-(--ui-success) font-bold" : "text-white/60"}>
-                    {passwordChecks.uppercase ? "✔" : "✗"} {passwordHints[1]}
-                  </span>
-                  <span className={passwordChecks.number ? "text-(--ui-success) font-bold" : "text-white/60"}>
-                    {passwordChecks.number ? "✔" : "✗"} {passwordHints[2]}
-                  </span>
-                  <span className={passwordChecks.symbol ? "text-(--ui-success) font-bold" : "text-white/60"}>
-                    {passwordChecks.symbol ? "✔" : "✗"} {passwordHints[3]}
-                  </span>
-                </div>
-              </div>
-            )}
+
+            {/* Confirm Password */}
+            <div><label className="block text-sm font-semibold text-green-300 mb-3">{t("signup.confirmPasswordLabel")} *</label>
+              <div className="relative"><span className={iconBubble}><FaLock className="text-green-500 text-lg" /></span><input type={showConfirmPassword?"text":"password"} name="confirmPassword" value={form.confirmPassword} onChange={handleChange} required placeholder={t("signup.confirmPasswordPlaceholder")} className={inputBasePassword} />
+              <button type="button" onClick={()=>setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">{showConfirmPassword?<FaEyeSlash className="text-xl"/>:<FaEye className="text-xl"/>}</button></div>
+            </div>
           </div>
-          {/* Section 5: Messages & Submit Button */}
-          <div className="border-t border-(--color-neutral)/20 pt-6 space-y-4 mt-6">
-            {/* رسائل الأخطاء والنجاح */}
-            {error && (
-              <div className="w-full bg-(--color-neutral)/80 backdrop-blur border-2 border-(--ui-danger-border) rounded-xl p-3 text-white text-sm text-center font-medium">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="w-full bg-(--color-neutral)/80 backdrop-blur border-2 border-(--ui-success-border) rounded-xl p-3 text-white text-sm flex items-center justify-center gap-2 font-medium">
-                <FaCheck className="text-base shrink-0" />
-                <span>{success}</span>
-              </div>
-            )}
-            {/* زر الإنشاء */}
-            <button
-              type="submit"
-              disabled={loading || !Object.values(passwordChecks).every(Boolean)}
-              className="w-full px-8 py-4 rounded-xl btn-gradient text-white font-bold text-lg shadow-xl transition-all hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3"
-            >
-              {loading ? (
-                <>
-                  <span className="inline-block w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  {t("signup.loading")}
-                </>
-              ) : (
-                <>
-                  <FaUserPlus className="text-xl" />
-                  {t("signup.submit")}
-                </>
-              )}
+
+          {/* Messages & Submit */}
+          <div className="border-t border-green-500/20 pt-6 space-y-4 mt-6">
+            {error && <div role="alert" className="p-3 text-center text-green-200">{error}</div>}
+            {success && <div role="status" className="p-3 flex items-center justify-center gap-2 text-green-200"><FaCheck className="text-green-400"/>{success}</div>}
+            <button type="submit" disabled={loading || !Object.values(passwordChecks).every(Boolean)} className={btnPrimary}>
+              {loading ? <span>{t("signup.loading")}</span> : <><FaUserPlus className="text-green-100"/>{t("signup.submit")}</>}
             </button>
-            {/* رابط تسجيل الدخول */}
-            <div className="text-center text-white/80 text-base">
-              {haveAccountText}{" "}
-              <Link href={withLocale(locale, "/login")} className="text-white hover:text-(--ui-ring) font-bold transition-colors underline">
-                {loginText}
-              </Link>
+
+            <div className="text-center text-green-200/80 text-base mt-2">
+              {t("signup.haveAccount")} <Link href={withLocale(locale,"/login")} className="underline text-green-400 hover:text-green-300">{t("signup.loginCta")}</Link>
             </div>
-            {/* روابط الخصوصية والشروط */}
-            <div className="text-center text-white/80 text-sm mt-4">
-              <p>
-                {t("signup.termsAgreement")} {" "}
-                <Link href={withLocale(locale, "/privacy")} className="text-(--ui-info) hover:text-white font-bold transition-colors underline">
-                  {t("signup.privacyPolicy")}
-                </Link>
-                {" "}{t("signup.and")}{" "}
-                <Link href={withLocale(locale, "/terms")} className="text-(--ui-info) hover:text-white font-bold transition-colors underline">
-                  {t("signup.termsConditions")}
-                </Link>
-              </p>
+
+            <div className="text-center text-green-200/80 text-sm mt-4">
+              {t("signup.termsAgreement")} <Link href={withLocale(locale,"/privacy")} className="underline text-green-400 hover:text-green-300">{t("signup.privacyPolicy")}</Link> {t("signup.and")} <Link href={withLocale(locale,"/terms")} className="underline text-green-400 hover:text-green-300">{t("signup.termsConditions")}</Link>
             </div>
           </div>
         </form>
@@ -632,5 +242,3 @@ function SignUpForm() {
     </div>
   );
 }
-
-export default SignUpForm;

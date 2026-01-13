@@ -59,6 +59,8 @@
       "confirmPasswordLabel": "Confirm password",
       "passwordShow": "Show",
       "passwordHide": "Hide",
+      "passwordPlaceholder": "Enter your password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
       "passwordHint1": "At least 8 characters",
       "passwordHint2": "One uppercase letter",
       "passwordHint3": "One number",
@@ -91,6 +93,7 @@
         "serverConnection": "Server connection error"
       },
       "success": "Account created successfully! Redirecting...",
+      "error": "An error occurred",
       "haveAccount": "Already have an account?",
       "loginCta": "Login",
       "loading": "Creating...",
