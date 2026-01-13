@@ -74,12 +74,7 @@ import { useLocale, useTranslations } from "next-intl";
   
     const recentActivity = recentActivityTemplate;
   
-    const handleExport = () => {
-      showToast(t("toast.exportStart"), "info");
-      setTimeout(() => {
-        showToast(t("toast.exportSuccess"), "success");
-      }, 1500);
-    };
+    // Export removed: UI export button hidden per request.
   
     return (
       <DoctorLayout>
@@ -110,13 +105,7 @@ import { useLocale, useTranslations } from "next-intl";
                 <option value="year">{t("timeRange.year")}</option>
               </select>
 
-              <button
-                onClick={handleExport}
-                className="btn-gradient flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-(--ui-ring)"
-              >
-                <FaDownload />
-                {t("export")}
-              </button>
+              {/* Export button removed per request */}
             </div>
           </div>
 

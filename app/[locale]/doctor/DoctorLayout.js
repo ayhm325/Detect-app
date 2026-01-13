@@ -76,7 +76,6 @@ export default function DoctorLayout({
       <div
         className="min-h-screen bg-(--ui-surface-2) text-(--ui-foreground) flex"
         dir={locale === "ar" ? "rtl" : "ltr"}
-        style={isDark ? undefined : { backgroundColor: "#E9F5EE", ['--ui-surface']: '#E9F5EE', ['--ui-surface-2']: '#E9F5EE' }}
       >
       {/* Sidebar */}
       <div

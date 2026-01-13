@@ -35,10 +35,18 @@ export default function HeroSection() {
     }));
 
   // Initialize empty on the server to avoid hydration mismatches.
-  // Generate particles only on the client after mount.
+  // Generate particles only on the client after mount. Defer the state
+  // update with requestAnimationFrame to avoid synchronous setState in
+  // the effect (avoids cascading renders flagged by the linter).
   const [particles, setParticles] = useState([]);
   useEffect(() => {
-    setParticles(generateParticles());
+    let raf = null;
+    if (typeof window !== "undefined") {
+      raf = requestAnimationFrame(() => setParticles(generateParticles()));
+    }
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
   const withLocale = (path) => {
     const base = path.startsWith("/") ? path : `/${path}`;

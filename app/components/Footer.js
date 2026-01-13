@@ -62,18 +62,21 @@ export default function Footer() {
             </p>
             <div className="flex gap-3">
               {[
-                { icon: "📘", label: t("social.facebook") },
-                { icon: "🐦", label: t("social.twitter") },
-                { icon: "📷", label: t("social.instagram") },
-                { icon: "💼", label: t("social.linkedin") },
+                { src: "/icons/facebook.svg", label: t("social.facebook"), href: "https://www.facebook.com" },
+                { src: "/icons/twitter.svg", label: t("social.twitter"), href: "https://www.twitter.com" },
+                { src: "/icons/instagram.svg", label: t("social.instagram"), href: "https://www.instagram.com" },
+                { src: "/icons/linkedin.svg", label: t("social.linkedin"), href: "https://www.linkedin.com" },
               ].map((social, i) => (
-                <button
+                <a
                   key={i}
-                  className="w-10 h-10 rounded-lg bg-(--ui-surface-2) border border-(--ui-border) hover:bg-(--ui-surface) flex items-center justify-center transform hover:scale-110 transition-all duration-300"
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={social.label}
+                  className="w-24 h-24 rounded-md bg-transparent hover:bg-(--ui-surface) flex items-center justify-center transform hover:scale-105 transition-all duration-200"
                 >
-                  <span className="text-xl">{social.icon}</span>
-                </button>
+                  <Image src={social.src} alt={social.label} width={48} height={48} />
+                </a>
               ))}
             </div>
           </div>

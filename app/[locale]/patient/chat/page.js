@@ -432,7 +432,109 @@ export default function PatientChatPage() {
     }
   };
 
-  const handleFileChange = e => { const selected = e.target.files[0]; if(selected) setFile(selected); };
+  // send a file immediately after selection (no need to press send)
+  const sendFileImmediate = async (selectedFile) => {
+    if (!selectedFile) return;
+    let chatId = doctorChat && doctorChat.id;
+
+    if(!chatId) {
+      try {
+        const res = await fetch("/api/chat/patient", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+          credentials: "include"
+        });
+        const data = await res.json();
+        if(res.ok && data.chat && data.chat.id){
+          chatId = data.chat.id;
+          setDoctorChat(prev => ({ ...prev, id: chatId }));
+        } else {
+          showToast(data.error || t("createChatFailed"), "error");
+          return;
+        }
+      } catch(e){ showToast(t("connectionError"), "error"); return; }
+    }
+
+    const tempId = `tmpfile-${Date.now()}`;
+    const tempMsg = { id: tempId, chatId, sender: "patient", status: "sent", time: formatMsgTime(new Date().toISOString()), clientKey: tempId, file: selectedFile };
+    setMessages(prev => [...prev, tempMsg]);
+    setUploadProgress({ uploading: true, percent: 0, filename: selectedFile.name });
+
+    try {
+      const initRes = await fetch('/api/uploads/init', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ chatId, filename: selectedFile.name, contentType: selectedFile.type })
+      });
+      const initData = await initRes.json();
+      if (!initRes.ok || !initData?.uploadUrl) { setMessages(prev => prev.filter(m => m.id !== tempId)); showToast(initData?.error || t('errorSendFile'),'error'); setUploadProgress({ uploading:false, percent:0, filename:null }); return; }
+
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', initData.uploadUrl, true);
+        if (initData.provider === 's3' && selectedFile.type) xhr.setRequestHeader('Content-Type', selectedFile.type);
+        xhr.upload.onprogress = (ev) => {
+          if (ev.lengthComputable) {
+            const percent = Math.round((ev.loaded / ev.total) * 100);
+            setUploadProgress({ uploading: true, percent, filename: selectedFile.name });
+          }
+        };
+        xhr.onload = () => { if (xhr.status >= 200 && xhr.status < 300) resolve(); else reject(new Error('Upload failed')); };
+        xhr.onerror = () => reject(new Error('Upload failed'));
+        xhr.send(selectedFile);
+      });
+
+      const compRes = await fetch('/api/uploads/complete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ chatId, key: initData.key, filename: selectedFile.name, contentType: selectedFile.type, provider: initData.provider, bucket: initData.bucket, region: initData.region }) });
+      const compData = await compRes.json();
+      if (!compRes.ok || !compData?.url) { setMessages(prev => prev.filter(m => m.id !== tempId)); showToast(compData?.error || t('errorSendFile'),'error'); setUploadProgress({ uploading:false, percent:0, filename:null }); return; }
+
+      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, file: { ...selectedFile, url: compData.url } } : m));
+      setUploadProgress({ uploading: false, percent: 0, filename: null });
+
+      try {
+        if (socket && socket.connected) {
+          socket.sendMessage({ chatId, fileUrl: compData.url, mimeType: compData.contentType || selectedFile.type, fileName: compData.filename || selectedFile.name, clientKey: tempId }, (res) => {
+            if (res && res.ok && res.message) {
+              setMessages(prev => {
+                const filtered = prev.filter(x => x.id !== tempId && x.id !== res.message.id);
+                const serverMsg = { ...res.message, time: formatMsgTime(res.message.createdAt) };
+                return [...filtered, serverMsg];
+              });
+            } else {
+              (async () => {
+                try {
+                  const r = await fetch(`/api/chat/${chatId}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: compData.contentType || selectedFile.type, fileName: compData.filename || selectedFile.name, clientKey: tempId }) });
+                  if (r.ok) {
+                    const r2 = await fetch(`/api/chat/${chatId}/messages`, { credentials: 'include' });
+                    if (r2.ok) {
+                      const refreshed = await r2.json();
+                      setMessages((refreshed.messages || []).map((m) => ({ ...m, time: formatMsgTime(m.createdAt) })));
+                    }
+                  }
+                } catch (e) { console.error('fallback post message failed', e); }
+              })();
+            }
+          });
+        } else {
+          const r = await fetch(`/api/chat/${chatId}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ fileUrl: compData.url, mimeType: compData.contentType || selectedFile.type, fileName: compData.filename || selectedFile.name, clientKey: tempId }) });
+          if (r.ok) {
+            const r2 = await fetch(`/api/chat/${chatId}/messages`, { credentials: 'include' });
+            if (r2.ok) {
+              const refreshed = await r2.json();
+              setMessages((refreshed.messages || []).map((m) => ({ ...m, time: formatMsgTime(m.createdAt) })));
+            }
+          }
+        }
+      } catch (e) { console.error('notify message failed', e); }
+    } catch (e) {
+      console.error(e);
+      setMessages(prev => prev.filter(m => m.id !== tempId));
+      showToast(t('connectionError'), 'error');
+      setUploadProgress({ uploading: false, percent: 0, filename: null });
+    }
+  };
+
+  const handleFileChange = e => { const selected = e.target.files[0]; if(selected) { setFile(selected); sendFileImmediate(selected); } };
   const handleRetryUpload = async (messageId) => {
     const msg = messages.find(m => m.id === messageId);
     if (!msg || !msg.file) return;

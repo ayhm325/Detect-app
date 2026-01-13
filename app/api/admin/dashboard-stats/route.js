@@ -2,12 +2,13 @@ import prisma from "../../../../lib/prismaClient";
 import { withRBAC } from "../../../../lib/auth/withRBAC";
 import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
+import { NextResponse } from 'next/server';
 
 export const GET = withRBAC(async (request, user) => {
   const rl = await rateLimit(request);
   if (rl.limited) {
     logAudit({ event: "rate_limit_exceeded", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { endpoint: "GET /api/admin/dashboard-stats" } });
-    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
   try {
@@ -26,7 +27,7 @@ export const GET = withRBAC(async (request, user) => {
     ]);
 
     logAudit({ event: "admin_dashboard_stats", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { totalUsers, doctors, patients, todayScans, totalScans } });
-    return Response.json({
+    return NextResponse.json({
       totalUsers,
       doctors,
       patients,
@@ -35,6 +36,6 @@ export const GET = withRBAC(async (request, user) => {
     });
   } catch (error) {
     logAudit({ event: "admin_dashboard_stats_error", userId: user.id, ip: request.headers.get('x-forwarded-for'), details: { error: error?.message } });
-    return Response.json({ error: "حدث خطأ أثناء جلب الإحصائيات" }, { status: 500 });
+    return NextResponse.json({ error: "حدث خطأ أثناء جلب الإحصائيات" }, { status: 500 });
   }
 }, ["admin"]);

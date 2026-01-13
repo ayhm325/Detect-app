@@ -32,6 +32,30 @@ export default function DashboardHome({ serverData = {} }) {
   const placeholder = ui("placeholder");
 
   const socket = useSocket();
+  const [jwtToken, setJwtToken] = useState(null);
+  // fetch JWT token so the dashboard can connect to socket.io for live counters
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/token', { credentials: 'include' });
+        if (!mounted) return;
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (data?.token) setJwtToken(data.token);
+        }
+      } catch (e) {}
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+    try {
+      if (jwtToken) socket.connect({ token: jwtToken });
+      else socket.connect();
+    } catch (e) { try { socket.connect(); } catch (e2) {} }
+  }, [socket, jwtToken]);
   const seenMessageKeysRef = useRef(new Set());
   const [liveNewMessages, setLiveNewMessages] = useState(() => {
     const v = serverData?.counts?.newMessages;

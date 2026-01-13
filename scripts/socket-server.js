@@ -326,8 +326,34 @@ io.on('connection', (socket) => {
         if (sender === 'doctor') {
           const patient = await prisma.patient.findUnique({ where: { id: chat.patientId }, select: { userId: true } });
           if (patient?.userId) io.to(`user:${patient.userId}`).emit('message', { ...payloadOut, __scope: 'user' });
+          // also attempt direct emits to any connected sockets for that user (best-effort fallback)
+          try {
+            const uid = patient?.userId;
+            if (uid) {
+              for (const [, s] of io.sockets.sockets) {
+                try {
+                  if (s && s.user && String(s.user.id) === String(uid)) {
+                    s.emit('message', { ...payloadOut, __scope: 'user' });
+                  }
+                } catch (err) {}
+              }
+            }
+          } catch (err) {}
         } else if (sender === 'patient') {
           if (chat.doctorId) io.to(`user:${chat.doctorId}`).emit('message', { ...payloadOut, __scope: 'user' });
+          // also attempt direct emits to any connected sockets for the doctor (best-effort fallback)
+          try {
+            const uid = chat.doctorId;
+            if (uid) {
+              for (const [, s] of io.sockets.sockets) {
+                try {
+                  if (s && s.user && String(s.user.id) === String(uid)) {
+                    s.emit('message', { ...payloadOut, __scope: 'user' });
+                  }
+                } catch (err) {}
+              }
+            }
+          } catch (err) {}
         }
       } catch (e) {
         // best-effort

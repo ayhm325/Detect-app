@@ -19,7 +19,6 @@ export default function AdminLayout({ children, breadcrumbs, adminName, adminIma
       data-testid="admin-shell"
       className="min-h-screen bg-background text-foreground"
       dir={locale === "ar" ? "rtl" : "ltr"}
-      style={isDark ? undefined : { backgroundColor: "#E9F5EE", ['--ui-surface']: '#E9F5EE', ['--ui-surface-2']: '#E9F5EE' }}
     >
       <div style={{ position: "fixed", top: 0, [locale === "ar" ? "right" : "left"]: 0, height: "100vh", width: `${sidebarWidth}px`, zIndex: 50 }}>
         <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />

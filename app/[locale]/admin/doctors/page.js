@@ -233,36 +233,7 @@ function DoctorsPage() {
     }
   };
 
-  const handleExport = () => {
-    const headers = [
-      tDoctors('table.doctor'),
-      tDoctors('table.status'),
-      tDoctors('table.joinDate'),
-      tDoctors('table.lastVisit'),
-      tDoctors('table.actions')
-    ];
-    const csv = [
-      headers,
-      ...doctors.map((d) => [
-        d.licenseNumber,
-        d.name,
-        d.email,
-        d.phone,
-        specialtiesMap[d.specialty] || d.specialty,
-        d.experience,
-        statusesMap[d.status] || d.status,
-      ]),
-    ]
-      .map((row) => row.join(","))
-      .join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "doctors.csv";
-    a.click();
-    showSuccess(tDoctors('toast.exportStarted'));
-  };
+  // Export removed: UI export button hidden per request.
 
   const openEditModal = (doctor) => {
     // Always set id to userId (or fallback to id)
@@ -412,13 +383,6 @@ function DoctorsPage() {
             <p className="text-(--ui-muted-2) mt-2">{tDoctors('headerSubtitle')}</p>
           </div>
           <div className="flex gap-3">
-            <button
-              onClick={handleExport}
-              className="flex items-center gap-2 bg-(--ui-surface-2) hover:bg-(--ui-surface) text-foreground px-4 py-2 rounded-lg transition-colors border border-(--ui-border)"
-            >
-              <FaDownload />
-              <span>{tDoctors('exportButton')}</span>
-            </button>
             <button
               onClick={() => setShowAddModal(true)}
               className="flex items-center gap-2 btn-gradient px-4 py-2 rounded-lg transition-colors"

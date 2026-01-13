@@ -14,7 +14,7 @@ export const GET = withRBAC(async (request, user) => {
       ip: request.headers.get("x-forwarded-for"),
       details: { endpoint: "GET /api/admin/notifications" },
     });
-    return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
   try {
@@ -27,7 +27,7 @@ export const GET = withRBAC(async (request, user) => {
       take: 50,
     });
 
-    return Response.json({ notifications });
+    return NextResponse.json({ notifications });
   } catch (error) {
     logAudit({
       event: "admin_notifications_list_error",
@@ -35,7 +35,7 @@ export const GET = withRBAC(async (request, user) => {
       ip: request.headers.get("x-forwarded-for"),
       details: { error: error?.message },
     });
-    return Response.json({ error: "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }, ["admin"]);
 

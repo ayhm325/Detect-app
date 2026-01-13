@@ -144,67 +144,7 @@ export default function UsersPage() {
     }
   };
 
-  // Handler functions
-  const handleExport = () => {
-    try {
-      if (!users || users.length === 0) {
-        showToast(t('toast.notLoggedIn'), 'info');
-        return;
-      }
-
-      const headers = [
-        t('csv.headers.id'),
-        t('csv.headers.name'),
-        t('csv.headers.email'),
-        t('csv.headers.phone'),
-        t('csv.headers.role'),
-        t('csv.headers.status'),
-        t('csv.headers.joinDate'),
-        t('csv.headers.lastLogin'),
-        t('csv.headers.specialty'),
-        t('csv.headers.license'),
-        t('csv.headers.patientId')
-      ];
-
-      const escapeCell = (val) => {
-        if (val === null || val === undefined) return '';
-        const s = String(val);
-        if (s.includes(',') || s.includes('"') || s.includes('\n')) {
-          return '"' + s.replace(/"/g, '""') + '"';
-        }
-        return s;
-      };
-
-      const rows = users.map(u => [
-        u.id,
-        u.name,
-        u.email,
-        u.phone || '',
-        u.role || '',
-        u.status || '',
-        u.joinDate || '',
-        u.lastLogin || '',
-        u.specialty || '',
-        u.license || '',
-        u.patientId || ''
-      ].map(escapeCell).join(','));
-
-      const csv = [headers.join(','), ...rows].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const date = new Date().toISOString().slice(0,10);
-      a.download = t('csv.filename', { date });
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      showToast(t('toast.exportStarted'), 'success');
-    } catch (err) {
-      showToast(t('errors.exportFailed'), 'error');
-    }
-  };
+  // Export removed: UI export button hidden per request.
 
   const handleAddUser = () => {
     // In a real app, this would add the user to a database
@@ -314,13 +254,6 @@ export default function UsersPage() {
               <p className="text-(--ui-muted-2) mt-2">{t('subtitle')}</p>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={handleExport}
-                className="flex items-center gap-2 bg-(--ui-surface-2) hover:bg-(--ui-surface) text-foreground px-4 py-2 rounded-lg transition-colors border border-(--ui-border)"
-              >
-                <FaDownload />
-                <span>{t('exportButton')}</span>
-              </button>
               <button
                 onClick={() => setShowAddModal(true)}
                 className="flex items-center gap-2 btn-gradient px-4 py-2 rounded-lg transition-colors"

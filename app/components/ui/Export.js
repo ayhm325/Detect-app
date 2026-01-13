@@ -48,27 +48,8 @@ export const exportToJSON = (data, filename = "export", { emptyMessage } = {}) =
   URL.revokeObjectURL(url);
 };
 
-// مكون Export Button
-const ExportButton = ({ data, filename = "export", format = "csv" }) => {
-  const t = useTranslations("ui");
-
-  const handleExport = () => {
-    if (format === "csv") {
-      exportToCSV(data, filename, { emptyMessage: t("export.noData") });
-    } else if (format === "json") {
-      exportToJSON(data, filename, { emptyMessage: t("export.noData") });
-    }
-  };
-
-  return (
-    <button
-      onClick={handleExport}
-      className="inline-flex items-center gap-2 px-4 py-2 bg-(--ui-success) hover:bg-(--ui-success)/90 text-(--ui-success-foreground) rounded-lg transition"
-    >
-      <FaDownload size={14} />
-      {t("export.download")} {format.toUpperCase()}
-    </button>
-  );
-};
+// Export button intentionally disabled globally.
+// Returning null hides the button everywhere while keeping utility exports available.
+const ExportButton = () => null;
 
 export default ExportButton;

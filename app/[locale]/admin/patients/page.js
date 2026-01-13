@@ -183,14 +183,7 @@ export default function PatientsPage() {
     })();
   };
 
-  const handleExport = () => {
-    const headers = [tPatients('csvHeader_id'), tPatients('csvHeader_name'), tPatients('csvHeader_gender'), tPatients('csvHeader_birthDate'), tPatients('csvHeader_bloodType'), tPatients('csvHeader_phone'), tPatients('csvHeader_email'), tPatients('csvHeader_status'), tPatients('csvHeader_joinDate'), tPatients('csvHeader_doctor')];
-    const csv = [headers, ...normalizedPatients.map((p) => [p.medicalId, p.name, gendersMap[p.gender] || p.gender, p.birthDate, p.bloodType, p.phone, p.email, statusesMap[p.status] || p.status, p.joinDate, p.doctorName])].map((row) => row.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "patients.csv"; a.click();
-    showToast(tPatients('toast.exportStarted'), "success");
-  };
+  // Export removed: UI export button hidden per request.
 
   const openEditModal = (patient) => {
     setSelectedPatient(patient);
@@ -233,12 +226,6 @@ export default function PatientsPage() {
               <p className="text-(--ui-muted-2) text-lg font-medium">{tPatients('headerSubtitle')}</p>
             </div>
             <div className="flex items-center gap-4">
-              <button onClick={handleExport} className="group flex items-center gap-3 px-6 py-3 bg-(--ui-surface-2) text-foreground rounded-2xl shadow-(--shadow-soft) hover:shadow-(--shadow-lift) border border-(--ui-border) transition-all duration-300 hover:-translate-y-1">
-                <div className="p-2 bg-(--ui-success-bg) text-(--ui-success) border border-(--ui-success-border) rounded-xl group-hover:scale-110 transition-transform">
-                  <FaDownload size={18} />
-                </div>
-                <span className="font-semibold hidden sm:block">{tPatients('exportButton')}</span>
-              </button>
               <button onClick={() => { setShowPassword(false); setFormData({ ...emptyForm }); setShowAddModal(true); }} className="group flex items-center gap-3 px-6 py-3 btn-gradient text-white rounded-2xl shadow-(--shadow-lift) transition-all duration-300 hover:-translate-y-1">
                 <div className="bg-(--color-neutral)/20 p-2 rounded-xl group-hover:rotate-90 transition-transform duration-500">
                   <FaPlus size={18} />

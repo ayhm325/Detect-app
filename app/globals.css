@@ -32,6 +32,7 @@
 
 :root.light {
   color-scheme: light;
+  --color-background: #DFF2E5; /* Light-mode background requested */
 }
 
 /* Design tokens and animations */

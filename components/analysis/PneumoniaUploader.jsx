@@ -1,4 +1,5 @@
 "use client"
+import Image from "next/image"
 import { useState } from "react"
 
 export default function PneumoniaUploader() {
@@ -43,7 +44,14 @@ export default function PneumoniaUploader() {
           <p><strong>Label:</strong> {result.label}</p>
           <p><strong>Confidence:</strong> {(result.confidence || 0).toFixed(4)}</p>
           {result.heatmap && (
-            <img src={`data:image/png;base64,${result.heatmap}`} alt="grad-cam" style={{ maxWidth: '400px' }} />
+            <Image
+              src={`data:image/png;base64,${result.heatmap}`}
+              alt="grad-cam"
+              width={400}
+              height={300}
+              unoptimized
+              style={{ objectFit: 'contain', maxWidth: '100%' }}
+            />
           )}
         </div>
       )}

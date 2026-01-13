@@ -4,7 +4,7 @@ import Link from "next/link";
 import { createNavigation } from "next-intl/navigation";
 const { useRouter, usePathname } = createNavigation();
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { } from "react";
 import { useTheme } from "../theme-provider";
 
 /* =======================
@@ -54,7 +54,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
 
   /* تبديل اللغة مع الحفاظ على نفس الصفحة */
   function handleSwitchLocale() {
@@ -101,17 +101,17 @@ export default function Navbar() {
           
           {/* الكرات اللونية المتحركة (Orbs) */}
           {/* Orb 1: Primary Color */}
-          <div className="absolute top-[-10%] left-[-10%] w-125 h-125 bg-(--color-primary-500) rounded-full mix-blend-multiply filter blur-[100px] animate-float opacity-30" />
+          <div className="hidden sm:block absolute top-[-10%] left-[-10%] w-125 h-125 bg-(--color-primary-500) rounded-full mix-blend-multiply filter blur-[100px] animate-float opacity-30" />
           
           {/* Orb 2: Secondary Color */}
-          <div className="absolute bottom-[-10%] right-[-10%] w-125 h-125(--color-secondary-500) rounded-full mix-blend-multiply filter blur-[100px] animate-float-delayed opacity-30" />
+          <div className="hidden sm:block absolute bottom-[-10%] right-[-10%] w-125 h-125(--color-secondary-500) rounded-full mix-blend-multiply filter blur-[100px] animate-float-delayed opacity-30" />
           
           {/* Orb 3: Accent Color (Smaller, faster) */}
-          <div className="absolute top-[20%] right-[20%] w-75 h-75 bg-(--color-accent-500) rounded-full mix-blend-screen filter blur-[80px] animate-float opacity-20 animation-delay-2000" />
+          <div className="hidden sm:block absolute top-[20%] right-[20%] w-75 h-75 bg-(--color-accent-500) rounded-full mix-blend-screen filter blur-[80px] animate-float opacity-20 animation-delay-2000" />
         </div>
 
         {/* شعار الموقع */}
-        <a href={homeHref} className="flex items-center gap-2" onClick={handleLogoClick}>
+        <a href={homeHref} className="flex items-center gap-2 shrink-0" onClick={handleLogoClick}>
           <svg
             width="36"
             height="36"
@@ -128,14 +128,17 @@ export default function Navbar() {
               </linearGradient>
             </defs>
           </svg>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-1">
               <span className="text-xl" aria-label={t("logoIconAria")}>🫁</span>
-              <span className="font-black text-2xl brand-gradient-text">
+              <span className="font-black text-2xl brand-gradient-text truncate hidden sm:inline">
                 {t("brand")}
               </span>
+              <span className="font-black text-2xl brand-gradient-text sm:hidden">
+                {t("brandShort")}
+              </span>
             </div>
-            <div className="text-xs text-(--ui-muted-foreground) font-semibold mt-0.5">
+            <div className="text-xs text-(--ui-muted-foreground) font-semibold mt-0.5 hidden sm:block truncate">
               {t("navTagline")}
             </div>
           </div>
@@ -153,55 +156,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* زر القائمة للموبايل */}
-        <button
-          className="lg:hidden p-2 rounded-lg bg-(--ui-surface-2) border border-(--ui-border) absolute right-4 top-1/2 -translate-y-1/2"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label={t("menuToggleAria")}
-        >
-          <svg className="w-6 h-6 text-(--ui-foreground)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {mobileMenuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
-
-        {/* قائمة الموبايل */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 w-full bg-(--ui-surface) backdrop-blur-md border-b border-(--ui-border) shadow-xl">
-            <ul className="flex flex-col p-4 gap-3">
-              {!isHome && (
-                <li>
-                  <Link
-                    href={homeHref}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-(--ui-foreground)"
-                  >
-                    {/* يمكنك استبدال هذه الأيقونة إذا أردت */}
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                    {t("home")}
-                  </Link>
-                </li>
-              )}
-              <li className="px-4">
-                <ThemeToggleButton />
-              </li>
-              <li>
-                <button
-                  onClick={() => {
-                    handleSwitchLocale();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full px-4 py-3 rounded-xl font-bold btn-gradient"
-                >
-                  {t("langSwitch")}
-                </button>
-              </li>
-            </ul>
-          </div>
-        )}
+        
       </nav>
     </>
   );

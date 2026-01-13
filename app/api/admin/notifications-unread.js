@@ -1,4 +1,5 @@
 import prisma from '../../../../lib/prismaClient.js';
+import { NextResponse } from 'next/server';
 
 // GET /api/admin/notifications/unread-count
 export async function GET(req) {
@@ -12,5 +13,5 @@ export async function GET(req) {
       userRole: 'admin'
     }
   });
-  return Response.json({ unread: count });
+  return NextResponse.json({ unread: count });
 }
