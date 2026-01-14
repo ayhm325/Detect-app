@@ -1,9 +1,19 @@
 "use client";
 import { useState } from "react";
-import { FaEnvelope, FaShield, FaArrowLeft, FaHouse } from "react-icons/fa6";
+import { FaEnvelope, FaShield, FaHouse } from "react-icons/fa6";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useLocaleContext } from "../hooks/useLocaleContext";
+import {
+  glassContainer,
+  iconBubble,
+  inputBase,
+  btnPrimary,
+  backHomeBtn,
+  authText,
+  authIcon,
+} from "./authStyles";
+import AnimatedBackground from "./ui/AnimatedBackground";
 
 export default function ForgotPasswordForm() {
   const locale = useLocale();
@@ -50,152 +60,69 @@ export default function ForgotPasswordForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative no-scrollbar" dir={dir} lang={locale} style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {/* خلفية زرقاء خاصة بإعادة تعيين كلمة المرور */}
-      <div className="fixed inset-0 z-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(/icons/bluelogin.jpg)' }}
-        />
-        {/* أزلت طبقة التعتيم حتى تظهر الصورة بوضوح؛ الحقول ستحتوي على خلفية خفيفة للقراءة */}
-        <div className="absolute inset-0 bg-transparent pointer-events-none" />
-      </div>
-      
-      {/* الفورم المحصور في المنتصف */}
-      <div className="relative z-10 w-full max-w-md">
-        <form
-          onSubmit={handleSubmit}
-          className="w-full glass-morph bg-transparent backdrop-blur-3xl rounded-3xl shadow-none border border-(--color-neutral)/10 p-8"
-          style={{ backgroundClip: 'padding-box' }}
-        >
-          {/* Section 1: Header */}
-          <div className="mb-8 flex items-center justify-between gap-2">
-            <div className="flex flex-col items-center gap-4 flex-1">
-              <div className="inline-block p-4 rounded-full glass-morph bg-(--color-neutral)/30 shadow-xl">
-                <FaShield className="text-4xl text-white" />
-              </div>
-              <div className="text-center">
-                <h2 className="text-3xl font-bold text-white mb-1">{t("title")}</h2>
-                <p className="text-white/90 text-base">{t("subtitle")}</p>
-              </div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative" dir={dir} lang={locale}>
+      <AnimatedBackground className="fixed inset-0" />
+
+      <div className="relative z-10 w-full max-w-md flex items-center justify-center min-h-[80vh] mx-auto">
+        <form onSubmit={handleSubmit} className={glassContainer} aria-live="polite">
+
+          <div className="mb-8 flex flex-col items-center gap-4">
+            <div className="inline-block p-4 rounded-full" aria-hidden>
+              <FaShield className={`text-4xl ${authIcon}`} />
             </div>
-            <div className="flex items-center gap-2">
-              <Link
-                href={locale === "en" ? "/en" : "/ar"}
-                className="w-10 h-10 flex items-center justify-center rounded-full glass-morph bg-(--color-neutral)/30 text-white hover:bg-(--color-neutral)/40 shadow-md border border-(--color-neutral)/40 transition-all focus:outline-none focus:ring-2 focus:ring-(--color-neutral)/40"
-                title={t("ui.backHomeTitle")}
-                aria-label={t("ui.backHomeTitle")}
-                onClick={e => {
-                  const homePath = locale === "en" ? "/en" : "/ar";
-                  const current = window.location.pathname;
-                  if (current === homePath) {
-                    e.preventDefault();
-                    return;
-                  }
-                  if (
-                    current === `${homePath}/${locale}` ||
-                    current.startsWith(`${homePath}/`)
-                  ) {
-                    e.preventDefault();
-                    window.location.href = homePath;
-                  }
-                }}
-              >
-                <FaHouse className="text-xl" />
+            <div className="text-center">
+              <h2 className={`text-3xl font-bold ${authText} mb-1`}>{t("title")}</h2>
+              <p className={`${authText} text-base`}>{t("subtitle")}</p>
+            </div>
+
+            <div className="flex items-center gap-2 mt-2">
+              <Link href={withLocale("/")} className={backHomeBtn} title={t("ui.backHomeTitle")} aria-label={t("ui.backHomeTitle")}>
+                <FaHouse className={`text-xl ${authIcon}`} />
               </Link>
-              <button
-                type="button"
-                onClick={toggleLocale}
-                className="flex items-center gap-2 px-3 py-2 rounded-full glass-morph bg-(--color-neutral)/30 text-white hover:bg-(--color-neutral)/40 transition-colors font-medium text-sm"
-                title={t("ui.switchLanguageTitle")}
-              >
-                <span>🌐</span>
-                <span>{t("ui.switchLanguageShort")}</span>
+              <button type="button" onClick={toggleLocale} className={`${backHomeBtn} ${authIcon}`} aria-label={t("ui.switchLanguageShort")}>
+                <span className={`uppercase text-sm font-semibold ${authIcon}`}>{locale === 'ar' ? 'EN' : 'AR'}</span>
               </button>
             </div>
           </div>
 
-          {/* Success Message */}
           {success && (
-            <div className="bg-(--color-neutral)/80 backdrop-blur border-2 border-(--ui-success-border) rounded-xl p-4 text-white text-base flex items-start gap-3 mt-4">
-              <span className="text-xl shrink-0 mt-0.5">✅</span>
-              <div className="flex-1 space-y-2">
+            <div className={`p-3 flex items-start gap-3 mt-2 ${authText} border border-green-500 rounded-xl bg-green-50`}>
+              <span className="text-xl">✅</span>
+              <div>
                 <p className="font-semibold">{t("successMessage")}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSuccess(false);
-                    setForm({ email: "" });
-                  }}
-                  className="text-sm font-medium hover:underline"
-                >
-                  {t("tryAnother")}
-                </button>
+                <button type="button" onClick={() => { setSuccess(false); setForm({ email: "" }); }} className="text-sm font-medium hover:underline">{t("tryAnother")}</button>
               </div>
             </div>
           )}
 
-          {/* Email Field */}
           {!success && (
             <>
-              <div className="mb-4">
-                <label className="block text-sm font-semibold text-white mb-3">{t("emailLabel")}</label>
+              <div>
+                <label className={`block text-sm font-semibold ${authText} mb-3`}>{t("emailLabel")}</label>
                 <div className="relative">
-                  <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-xl" />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder={t("emailPlaceholder")}
-                    value={form.email}
-                    onChange={handleChange}
-                    required
-                    disabled={loading}
-                    className="w-full pl-12 pr-4 py-4 border-2 border-(--ui-border) rounded-xl glass-morph bg-(--color-neutral)/30 text-white placeholder:text-white/70 focus:outline-none focus:border-(--ui-ring) focus:ring-4 focus:ring-(--ui-ring)/20 transition-all text-base"
-                  />
+                  <span className={iconBubble}><FaEnvelope className={`text-lg ${authIcon}`} /></span>
+                  <input type="email" name="email" placeholder={t("emailPlaceholder")} value={form.email} onChange={handleChange} required disabled={loading} className={inputBase} />
                 </div>
               </div>
 
-              {/* Error Message */}
               {error && (
-                <div className="bg-(--ui-danger-bg) backdrop-blur border-2 border-(--ui-danger-border) rounded-xl p-4 text-white text-base flex items-center gap-3 mb-4">
-                  <span className="text-xl shrink-0">⚠️</span>
+                <div className={`p-3 flex items-center gap-3 mt-4 ${authText} border border-red-500 rounded-xl bg-red-50`} role="alert">
+                  <span className="text-xl">⚠️</span>
                   <span className="font-medium">{error}</span>
                 </div>
               )}
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-4 rounded-xl btn-gradient font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] mb-6"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    {t("loading")}
-                  </span>
-                ) : (
-                  t("submit")
-                )}
+              <button type="submit" disabled={loading} className={`${btnPrimary} mt-6`}>
+                {loading ? <span className="flex items-center justify-center gap-2"><span className={`inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin ${authIcon}`} />{t("loading")}</span> : <span className="text-green-100">{t("submit")}</span>}
               </button>
             </>
           )}
 
-          {/* Back to Login */}
-          <div className="flex flex-col gap-3 text-center text-sm">
-            <Link
-              href={withLocale("/login")}
-              className="flex items-center justify-center gap-2 text-(--ui-info) hover:text-white font-semibold transition-colors"
-            >
-              <FaArrowLeft className="text-lg" />
+          <div className="flex flex-col gap-3 text-center text-sm mt-6">
+            <Link href={withLocale("/login")} className={`${authIcon} hover:${authIcon} font-semibold`}>
               {t("backToLogin")}
             </Link>
-            <div className="text-white/80">
-              {t("noAccount")}{" "}
-              <Link href={withLocale("/signup")} className="text-(--ui-info) hover:text-white font-semibold transition-colors">
-                {t("signup")}
-              </Link>
-            </div>
+            <div className={`${authIcon}`}>{t("noAccount")} <Link href={withLocale("/signup")} className={`${authIcon} hover:${authIcon} font-semibold`}>{t("signup")}</Link></div>
           </div>
         </form>
       </div>

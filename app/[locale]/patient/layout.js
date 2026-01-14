@@ -106,7 +106,11 @@ export default function PatientLayout({ children }) {
       <div
         className="min-h-screen bg-(--ui-surface) text-(--ui-foreground) flex"
         dir={locale === "ar" ? "rtl" : "ltr"}
-        style={isDark ? undefined : { backgroundColor: "#E9F5EE", ['--ui-surface']: '#E9F5EE' }}
+        style={
+          isDark
+            ? undefined
+            : { backgroundColor: "#DFF2E5", ['--color-background']: '#DFF2E5' }
+        }
       >
         {/* Fixed Sidebar */}
         <div

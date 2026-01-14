@@ -346,7 +346,7 @@ export default function DashboardHome({ serverData = {} }) {
   return (
     <>
       <ToastContainer />
-      <div className="min-h-screen bg-(--ui-surface-2) text-(--ui-foreground) p-6">
+      <div className="min-h-screen bg-(--ui-surface-2) font-bold text-(--ui-foreground) p-6">
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -375,14 +375,14 @@ export default function DashboardHome({ serverData = {} }) {
                 >
                   <div className={`absolute top-0 right-0 h-20 w-20 translate-x-8 -translate-y-8 transform rounded-full ${stat.bgLight} opacity-50 transition-transform group-hover:scale-150`}></div>
                   <div className="relative">
-                    <div className="flex items-center justify-between">
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.color}`}>
-                        <Icon className="text-2xl text-white" />
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <div className="flex items-center gap-3 justify-center">
+                        <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.color}`}>
+                          <Icon className="text-2xl text-white" />
+                        </div>
+                        <p className="text-lg font-semibold text-(--ui-muted-foreground) text-center">{stat.title}</p>
                       </div>
-                    </div>
-                    <div className="mt-4">
-                      <p className="text-sm text-(--ui-muted-foreground)">{stat.title}</p>
-                      <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{stat.value}</p>
+                      <p className="mt-3 text-3xl font-semibold text-(--ui-foreground) text-center">{stat.value}</p>
                     </div>
                   </div>
                 </div>

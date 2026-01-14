@@ -215,9 +215,9 @@ export default function PatientDashboardPage() {
             <div key={i} className="card-glass border border-(--ui-border) p-6 rounded-xl">
               <div className={`flex items-center gap-3 justify-center mb-2 ${locale === "ar" ? "flex-row-reverse" : "flex-row"}`}>
                 <s.icon className="text-4xl text-(--ui-info)" style={{ order: locale === "ar" ? 2 : 1 }} />
-                <p className="text-(--ui-muted-foreground) text-2xl font-bold text-center w-full">{s.title}</p>
+                <p className="text-lg font-semibold text-(--ui-muted-foreground) text-center w-full">{s.title}</p>
               </div>
-              <p className="mt-1 text-4xl font-bold text-center">{s.value}</p>
+              <p className="mt-1 text-3xl font-semibold text-center">{s.value}</p>
             </div>
           ))}
         </div>
