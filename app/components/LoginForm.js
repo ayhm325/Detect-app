@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FaFacebook, FaGoogle, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaShield, FaHouse } from "react-icons/fa6";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaShield, FaHouse } from "react-icons/fa6";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useLocaleContext } from "../hooks/useLocaleContext";
@@ -103,28 +103,7 @@ export default function LoginForm() {
             </div>
           </div>
 
-          {/* Social Login */}
-          <div className="mb-6 pb-6 border-b border-green-600">
-            <div className="flex items-center justify-center gap-4">
-              <button type="button" className={socialButton} title={t("social.facebook")}>
-                  <span className="w-8 h-8 flex items-center justify-center rounded-full bg-green-200/30 shadow">
-                  <FaFacebook className={`text-lg ${authIcon}`} />
-                </span>
-                <span className={`${authText} font-semibold`}>{t("social.facebook")}</span>
-              </button>
-              <button type="button" className={socialButton} title={t("social.google")}>
-                  <span className="w-8 h-8 flex items-center justify-center rounded-full bg-green-200/30 shadow">
-                  <FaGoogle className={`text-lg ${authIcon}`} />
-                </span>
-                <span className={`${authText} font-semibold`}>{t("social.google")}</span>
-              </button>
-            </div>
-            <div className="flex items-center justify-center gap-3 mt-4">
-              <div className="h-px bg-green-200/30 flex-1"></div>
-              <span className={`${authText} text-sm font-medium`}>{t("auth.login.socialDivider")}</span>
-              <div className="h-px bg-green-200/30 flex-1"></div>
-            </div>
-          </div>
+          {/* Social login removed per request */}
 
           {/* Form Fields */}
           <div className="space-y-3">

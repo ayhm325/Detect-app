@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaCheck, FaStethoscope, FaBed, FaGoogle, FaFacebook, FaEye, FaEyeSlash, FaPhone, FaHouse } from "react-icons/fa6";
+import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaCheck, FaStethoscope, FaBed, FaEye, FaEyeSlash, FaPhone, FaHouse } from "react-icons/fa6";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useLocaleContext } from "../hooks/useLocaleContext";
@@ -148,12 +148,7 @@ export default function SignUpForm() {
             </div>
           </div>
 
-          <div className="mb-6 pb-6 border-b border-green-800">
-            <div className="flex items-center justify-center gap-4">
-              <button type="button" className={socialButton}><FaFacebook className={`text-lg ${authIcon}`} /> <span className={`${authText} font-semibold`}>{t("social.facebook")}</span></button>
-              <button type="button" className={socialButton}><FaGoogle className={`text-lg ${authIcon}`} /> <span className={`${authText} font-semibold`}>{t("social.google")}</span></button>
-            </div>
-          </div>
+          {/* Social login removed per request */}
 
           <div className="mb-8 text-center">
             <label className={`block text-sm font-semibold ${authText} mb-4`}>{t("signup.roleLabel")}</label>
