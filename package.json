@@ -51,6 +51,7 @@
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
     "@openapitools/openapi-generator-cli": "^2.25.2",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4",
@@ -69,5 +70,23 @@
     "supertest": "^7.1.4",
     "tailwindcss": "^4",
     "typescript": "5.9.3"
+  }
+  ,
+  "eslintConfig": {
+    "extends": "next/core-web-vitals",
+    "ignorePatterns": [
+      ".next/",
+      "out/",
+      "build/",
+      "next-env.d.ts",
+      ".venv/",
+      "python_model/venv/",
+      "**/__pycache__/**"
+    ]
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
   }
 }

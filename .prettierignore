@@ -1,0 +1,9 @@
+.next
+node_modules
+build
+out
+playwright
+playwright-report
+playwright-tests
+eslint-report.json
+logs

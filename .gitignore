@@ -62,3 +62,12 @@ next-env.d.ts
 
 # Backend dataset (do not upload)
 backend/dataset/
+
+# Reports and test artifacts
+eslint-report.json
+playwright-report/
+playwright/
+playwright-tests/
+playwright/.auth/
+desktop.ini
+logs/
