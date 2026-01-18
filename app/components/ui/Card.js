@@ -1,7 +1,4 @@
-export default function Card({ className = "", children }) {
-  return (
-    <div className={`rounded-lg card-glass p-4 ${className}`}>
-      {children}
-    </div>
-  );
+// Card component removed — replaced with a safe no-op stub to avoid import errors.
+export default function Card() {
+  return null;
 }

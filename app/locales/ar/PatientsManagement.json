@@ -112,16 +112,14 @@
   "csvHeader_email": "البريد الإلكتروني",
   "csvHeader_status": "الحالة",
   "csvHeader_joinDate": "تاريخ الانضمام",
-  "csvHeader_doctor": "الطبيب"
-  ,
+  "csvHeader_doctor": "الطبيب",
   "confirmDelete": {
     "title": "تأكيد تعليق المريض",
     "description": "هل أنت متأكد أنك تريد تعليق {name}؟ المرضى المعلقون لن يتمكنوا من تسجيل الدخول.",
     "processing": "جاري المعالجة…",
     "yes": "نعم، علّق",
     "no": "إلغاء"
-  }
-  ,
+  },
   "confirmToggle": {
     "disableTitle": "تعطيل المريض",
     "enableTitle": "تفعيل المريض",

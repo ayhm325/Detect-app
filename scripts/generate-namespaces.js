@@ -20,7 +20,12 @@ function walk(dir, fileList = []) {
     const fullPath = path.join(dir, file);
     if (fs.statSync(fullPath).isDirectory()) {
       walk(fullPath, fileList);
-    } else if (file.endsWith(".js") || file.endsWith(".jsx") || file.endsWith(".ts") || file.endsWith(".tsx")) {
+    } else if (
+      file.endsWith(".js") ||
+      file.endsWith(".jsx") ||
+      file.endsWith(".ts") ||
+      file.endsWith(".tsx")
+    ) {
       fileList.push(fullPath);
     }
   });
@@ -56,12 +61,12 @@ function ensureNamespaceFiles(namespace) {
         filePath,
         JSON.stringify(
           {
-            __TODO__: "TODO"
+            __TODO__: "TODO",
           },
           null,
-          2
+          2,
         ),
-        "utf8"
+        "utf8",
       );
 
       console.log(`✅ Created: ${path.relative(PROJECT_ROOT, filePath)}`);
@@ -73,9 +78,7 @@ function ensureNamespaceFiles(namespace) {
 
 console.log("🔍 Scanning project for useTranslations(...)");
 
-const files = SOURCE_DIRS.flatMap((dir) =>
-  walk(path.join(PROJECT_ROOT, dir))
-);
+const files = SOURCE_DIRS.flatMap((dir) => walk(path.join(PROJECT_ROOT, dir)));
 
 const namespaces = extractNamespaces(files);
 

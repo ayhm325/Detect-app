@@ -1,6 +1,5 @@
 "use client";
 
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -12,7 +11,10 @@ export default function ResultsSidebarItem() {
   const t = useTranslations("doctorSidebar");
 
   return (
-    <Link href={`${basePrefix}/doctor/results`} className="py-2 px-4 rounded hover:bg-(--ui-surface-2) font-medium block">
+    <Link
+      href={`${basePrefix}/doctor/results`}
+      className="py-2 px-4 rounded hover:bg-(--ui-surface-2) font-medium block"
+    >
       {t("results")}
     </Link>
   );

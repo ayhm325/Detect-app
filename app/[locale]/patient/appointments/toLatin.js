@@ -6,7 +6,7 @@ export default function toLatin(str) {
     // أرقام عربية
     if (code >= 0x0660 && code <= 0x0669) return code - 0x0660;
     // أرقام هندية
-    if (code >= 0x06F0 && code <= 0x06F9) return code - 0x06F0;
+    if (code >= 0x06f0 && code <= 0x06f9) return code - 0x06f0;
     return d;
   });
 }

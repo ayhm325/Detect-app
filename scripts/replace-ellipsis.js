@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const root = path.join(__dirname, '..', 'app', 'locales');
+const root = path.join(__dirname, "..", "app", "locales");
 
 function walk(dir) {
   const files = [];
@@ -10,7 +10,7 @@ function walk(dir) {
     const p = path.join(dir, name);
     const stat = fs.statSync(p);
     if (stat.isDirectory()) files.push(...walk(p));
-    else if (stat.isFile() && p.endsWith('.json')) files.push(p);
+    else if (stat.isFile() && p.endsWith(".json")) files.push(p);
   }
   return files;
 }
@@ -18,11 +18,11 @@ function walk(dir) {
 const files = walk(root);
 let changed = 0;
 for (const file of files) {
-  const content = fs.readFileSync(file, 'utf8');
-  if (content.includes('...')) {
-    const updated = content.split('...').join('…');
-    fs.writeFileSync(file, updated, 'utf8');
-    console.log('Updated', path.relative(process.cwd(), file));
+  const content = fs.readFileSync(file, "utf8");
+  if (content.includes("...")) {
+    const updated = content.split("...").join("…");
+    fs.writeFileSync(file, updated, "utf8");
+    console.log("Updated", path.relative(process.cwd(), file));
     changed++;
   }
 }

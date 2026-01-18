@@ -12,7 +12,11 @@
       "request": {
         "method": "POST",
         "header": [
-          { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
         ],
         "body": {
           "mode": "formdata",
@@ -27,7 +31,7 @@
         "url": {
           "raw": "{{baseUrl}}/api/analysis/analyze",
           "host": ["{{baseUrl}}"],
-          "path": ["api","analysis","analyze"]
+          "path": ["api", "analysis", "analyze"]
         }
       },
       "response": []
@@ -37,12 +41,16 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
         ],
         "url": {
           "raw": "{{baseUrl}}/api/analysis/history",
           "host": ["{{baseUrl}}"],
-          "path": ["api","analysis","history"]
+          "path": ["api", "analysis", "history"]
         }
       },
       "response": []

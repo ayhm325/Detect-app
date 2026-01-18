@@ -9,18 +9,15 @@ import {
   FaHeartbeat,
   FaArrowUp,
   FaArrowDown,
-  FaBell
+  FaBell,
 } from "react-icons/fa";
 import { useTranslations, useLocale } from "next-intl";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 function PatientFormModal() {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("patient");
   const { showSuccess, showError, showInfo, showWarning } = useToast();
-  // ToastContainer لم يعد مطلوبًا هنا إذا كان ToastProvider يلتف حول التطبيق
 
   const basePrefix = locale === "en" ? "/en" : "/ar";
 
@@ -36,27 +33,27 @@ function PatientFormModal() {
       value: "3",
       change: "+50%",
       icon: FaCalendarAlt,
-      trend: "up"
+      trend: "up",
     },
     {
       title: t("dashboard.stats.readyReports"),
       value: "8",
       change: "+33%",
       icon: FaFileAlt,
-      trend: "up"
+      trend: "up",
     },
     {
       title: t("dashboard.stats.newMessages"),
       value: "12",
       change: "+71%",
       icon: FaEnvelope,
-      trend: "up"
+      trend: "up",
     },
     {
       title: t("dashboard.stats.vitalSigns"),
       value: t("healthScoreValue"),
-      icon: FaHeartbeat
-    }
+      icon: FaHeartbeat,
+    },
   ];
 
   /* ================= Quick Actions ================= */
@@ -65,26 +62,26 @@ function PatientFormModal() {
       title: t("dashboard.quickActions.bookAppointment"),
       desc: t("dashboard.quickActions.desc.bookAppointment"),
       icon: "📅",
-      action: () => router.push(`${basePrefix}/patient/appointments`)
+      action: () => router.push(`${basePrefix}/patient/appointments`),
     },
     {
       title: t("dashboard.quickActions.uploadXray"),
       desc: t("dashboard.quickActions.desc.uploadXray"),
       icon: "🩻",
-      action: () => router.push(`${basePrefix}/patient/analysis`)
+      action: () => router.push(`${basePrefix}/patient/analysis`),
     },
     {
       title: t("dashboard.quickActions.viewReports"),
       desc: t("dashboard.quickActions.desc.viewReports"),
       icon: "📋",
-      action: () => router.push(`${basePrefix}/patient/results`)
+      action: () => router.push(`${basePrefix}/patient/results`),
     },
     {
       title: t("dashboard.quickActions.chatDoctor"),
       desc: t("dashboard.quickActions.desc.chatDoctor"),
       icon: "💬",
-      action: () => router.push(`${basePrefix}/patient/chat`)
-    }
+      action: () => router.push(`${basePrefix}/patient/chat`),
+    },
   ];
 
   /* ================= Helpers ================= */
@@ -96,15 +93,11 @@ function PatientFormModal() {
   /* ================= Render ================= */
   return (
     <>
-      <ToastContainer />
-
       <div className="min-h-screen bg-(--ui-surface) p-6 text-(--ui-foreground)">
         {/* Header */}
         <div className="flex justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">
-              {t("dashboard.welcome")} 👋
-            </h1>
+            <h1 className="text-3xl font-bold">{t("dashboard.welcome")} 👋</h1>
             <p className="text-(--ui-muted-foreground) mt-2">{todayDate}</p>
           </div>
 
@@ -122,7 +115,10 @@ function PatientFormModal() {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((s, i) => (
-            <div key={i} className="card-glass p-6 rounded-xl border border-(--ui-border)">
+            <div
+              key={i}
+              className="card-glass p-6 rounded-xl border border-(--ui-border)"
+            >
               <div className="flex justify-between mb-3">
                 <s.icon className="text-2xl text-(--ui-info)" />
                 {s.trend && (

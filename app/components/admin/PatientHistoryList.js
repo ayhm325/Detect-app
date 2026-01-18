@@ -6,9 +6,10 @@ export default function PatientHistoryList({ history }) {
   const tPatients = useTranslations("adminPatients");
   const noHistory = tPatients("history.noHistory");
   const title = tPatients("history.title");
-  if (!history || history.length === 0) return (
-    <div className="text-center text-(--ui-muted-2) py-4">{noHistory}</div>
-  );
+  if (!history || history.length === 0)
+    return (
+      <div className="text-center text-(--ui-muted-2) py-4">{noHistory}</div>
+    );
   return (
     <div className="card-glass p-6 border border-(--ui-border) mt-8">
       <h3 className="font-bold text-lg mb-4 text-foreground">{title}</h3>

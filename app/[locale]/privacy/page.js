@@ -1,7 +1,12 @@
-import LanguageToggle from "../../../components/ui/LanguageToggle";
+import LanguageToggle from "../../components/ui/LanguageToggle";
+import UnifiedCard from "../../components/ui/UnifiedCard";
 
 export default async function PrivacyPolicyPage(props) {
-  const params = props.params ? (typeof props.params.then === 'function' ? await props.params : props.params) : {};
+  const params = props.params
+    ? typeof props.params.then === "function"
+      ? await props.params
+      : props.params
+    : {};
   const locale = params?.locale;
   const t = (await import(`../../locales/${locale}/privacy.json`)).default;
   const dir = locale === "ar" ? "rtl" : "ltr";
@@ -21,16 +26,14 @@ export default async function PrivacyPolicyPage(props) {
         {/* Header */}
         <div className="text-center mb-16 animate-fadeIn">
           <h1 className="text-5xl font-bold mb-6">
-            <span className="brand-gradient-text">
-              {t.title}
-            </span>
+            <span className="brand-gradient-text">{t.title}</span>
           </h1>
           <p className="text-lg text-(--ui-muted-foreground)">
             {t.lastUpdate}: {new Date().toLocaleDateString(dateLocale)}
           </p>
         </div>
         {/* Content */}
-        <div className="card-glass rounded-3xl p-8 md:p-12 border border-(--ui-border) animate-slideUp">
+        <UnifiedCard className="rounded-3xl p-8 md:p-12 border border-(--ui-border) animate-slideUp" glass>
           <div className="max-w-none space-y-12">
             {/* Introduction */}
             <section>
@@ -39,13 +42,17 @@ export default async function PrivacyPolicyPage(props) {
             </section>
             {/* Information Collection */}
             <section>
-              <h2 className="section-title">{t.informationCollection?.title}</h2>
-              {Object.entries(t.informationCollection || {}).filter(([k]) => k !== "title").map(([key, val]) => (
-                <div key={key} className="mt-6">
-                  <h3 className="text-xl font-semibold mb-2">{val.title}</h3>
-                  <p>{val.content}</p>
-                </div>
-              ))}
+              <h2 className="section-title">
+                {t.informationCollection?.title}
+              </h2>
+              {Object.entries(t.informationCollection || {})
+                .filter(([k]) => k !== "title")
+                .map(([key, val]) => (
+                  <div key={key} className="mt-6">
+                    <h3 className="text-xl font-semibold mb-2">{val.title}</h3>
+                    <p>{val.content}</p>
+                  </div>
+                ))}
             </section>
             {/* Data Usage */}
             <section>
@@ -78,7 +85,7 @@ export default async function PrivacyPolicyPage(props) {
               <p>{t.contact?.content}</p>
             </section>
           </div>
-        </div>
+        </UnifiedCard>
         {/* Back to Home */}
         <div className="mt-10 text-center">
           <a

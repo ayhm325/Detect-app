@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useToast } from "../../../components/ui/Toast";
+import { useToast } from "../../../components/ui/ToastProvider";
 import {
   FaMagnifyingGlass,
   FaMessage,
@@ -63,7 +63,8 @@ export default function AdminChatPage() {
     const v = String(value || "").trim();
     if (!v) return t("errors.serverError");
     if (v === ADMIN_CHAT_ERROR_CODES.SERVER) return t("errors.serverError");
-    if (v === ADMIN_CHAT_ERROR_CODES.DELETE_FAILED) return t("errors.deleteFailed");
+    if (v === ADMIN_CHAT_ERROR_CODES.DELETE_FAILED)
+      return t("errors.deleteFailed");
     return t("errors.unknown");
   };
 
@@ -88,7 +89,8 @@ export default function AdminChatPage() {
     fetch("/api/chat/admin")
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data?.error || ADMIN_CHAT_ERROR_CODES.SERVER);
+        if (!res.ok)
+          throw new Error(data?.error || ADMIN_CHAT_ERROR_CODES.SERVER);
         return data;
       })
       .then((data) => {
@@ -133,7 +135,8 @@ export default function AdminChatPage() {
     try {
       const res = await fetch(`/api/chat/${chat.id}/messages`);
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || ADMIN_CHAT_ERROR_CODES.SERVER);
+      if (!res.ok)
+        throw new Error(data?.error || ADMIN_CHAT_ERROR_CODES.SERVER);
       setMessages(Array.isArray(data?.messages) ? data.messages : []);
     } catch {
       setMessages([]);
@@ -184,7 +187,9 @@ export default function AdminChatPage() {
                   <h1 className="text-xl md:text-2xl font-bold text-foreground">
                     {labels.title}
                   </h1>
-                  <p className="text-sm text-(--ui-muted-2)">{labels.subtitle}</p>
+                  <p className="text-sm text-(--ui-muted-2)">
+                    {labels.subtitle}
+                  </p>
                 </div>
               </div>
             </div>
@@ -206,29 +211,48 @@ export default function AdminChatPage() {
             <table className="min-w-full bg-(--ui-surface)">
               <thead>
                 <tr className="bg-(--ui-surface-2) text-(--ui-muted-2)">
-                  <th className="px-4 py-3 text-start text-xs font-semibold">{labels.tablePatient}</th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold">{labels.tableDoctor}</th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold">{labels.tableLast}</th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold">{labels.tableUpdated}</th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold">{labels.tableActions}</th>
+                  <th className="px-4 py-3 text-start text-xs font-semibold">
+                    {labels.tablePatient}
+                  </th>
+                  <th className="px-4 py-3 text-start text-xs font-semibold">
+                    {labels.tableDoctor}
+                  </th>
+                  <th className="px-4 py-3 text-start text-xs font-semibold">
+                    {labels.tableLast}
+                  </th>
+                  <th className="px-4 py-3 text-start text-xs font-semibold">
+                    {labels.tableUpdated}
+                  </th>
+                  <th className="px-4 py-3 text-start text-xs font-semibold">
+                    {labels.tableActions}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td className="px-4 py-6 text-sm text-(--ui-muted-2)" colSpan={5}>
+                    <td
+                      className="px-4 py-6 text-sm text-(--ui-muted-2)"
+                      colSpan={5}
+                    >
                       {labels.loading}
                     </td>
                   </tr>
                 ) : error ? (
                   <tr>
-                    <td className="px-4 py-6 text-sm text-(--ui-danger)" colSpan={5}>
+                    <td
+                      className="px-4 py-6 text-sm text-(--ui-danger)"
+                      colSpan={5}
+                    >
                       {renderError(error)}
                     </td>
                   </tr>
                 ) : filteredChats.length === 0 ? (
                   <tr>
-                    <td className="px-4 py-8 text-sm text-(--ui-muted-2)" colSpan={5}>
+                    <td
+                      className="px-4 py-8 text-sm text-(--ui-muted-2)"
+                      colSpan={5}
+                    >
                       {labels.empty}
                     </td>
                   </tr>
@@ -236,14 +260,25 @@ export default function AdminChatPage() {
                   filteredChats.map((c) => {
                     const last = c?.messages?.[0] || null;
                     return (
-                      <tr key={c.id} className="border-t border-(--ui-border) hover:bg-(--ui-surface-2)/60">
+                      <tr
+                        key={c.id}
+                        className="border-t border-(--ui-border) hover:bg-(--ui-surface-2)/60"
+                      >
                         <td className="px-4 py-3 text-sm text-foreground">
-                          <div className="font-medium">{c?.patient?.fullName || labels.placeholder}</div>
-                          <div className="text-xs text-(--ui-muted-2)">{c?.patient?.email || ""}</div>
+                          <div className="font-medium">
+                            {c?.patient?.fullName || labels.placeholder}
+                          </div>
+                          <div className="text-xs text-(--ui-muted-2)">
+                            {c?.patient?.email || ""}
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-sm text-foreground">
-                          <div className="font-medium">{c?.doctor?.user?.fullName || labels.placeholder}</div>
-                          <div className="text-xs text-(--ui-muted-2)">{c?.doctor?.user?.email || ""}</div>
+                          <div className="font-medium">
+                            {c?.doctor?.user?.fullName || labels.placeholder}
+                          </div>
+                          <div className="text-xs text-(--ui-muted-2)">
+                            {c?.doctor?.user?.email || ""}
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-sm text-(--ui-muted-2)">
                           {(() => {
@@ -255,7 +290,11 @@ export default function AdminChatPage() {
                           })()}
                         </td>
                         <td className="px-4 py-3 text-sm text-(--ui-muted-2)">
-                          {formatDateTime(c?.updatedAt, dateLocale, placeholder)}
+                          {formatDateTime(
+                            c?.updatedAt,
+                            dateLocale,
+                            placeholder,
+                          )}
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <div className="flex items-center gap-2">
@@ -291,10 +330,12 @@ export default function AdminChatPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="text-lg font-bold text-foreground">
-                  {(selectedChat?.doctor?.user?.fullName || labels.placeholder)} → {(selectedChat?.patient?.fullName || labels.placeholder)}
+                  {selectedChat?.doctor?.user?.fullName || labels.placeholder} →{" "}
+                  {selectedChat?.patient?.fullName || labels.placeholder}
                 </div>
                 <div className="text-sm text-(--ui-muted-2)">
-                  {selectedChat?.doctor?.user?.email || ""} • {selectedChat?.patient?.email || ""}
+                  {selectedChat?.doctor?.user?.email || ""} •{" "}
+                  {selectedChat?.patient?.email || ""}
                 </div>
               </div>
               <button
@@ -313,16 +354,24 @@ export default function AdminChatPage() {
 
             <div className="mt-5 rounded-2xl border border-(--ui-border) bg-(--ui-surface) p-4 max-h-[60vh] overflow-y-auto">
               {messagesLoading ? (
-                <div className="py-8 text-center text-sm text-(--ui-muted-2)">{labels.loading}</div>
+                <div className="py-8 text-center text-sm text-(--ui-muted-2)">
+                  {labels.loading}
+                </div>
               ) : messages.length === 0 ? (
-                <div className="py-8 text-center text-sm text-(--ui-muted-2)">{labels.empty}</div>
+                <div className="py-8 text-center text-sm text-(--ui-muted-2)">
+                  {labels.empty}
+                </div>
               ) : (
                 messages.map((m) => (
                   <ChatMessage
                     key={m.id}
                     message={{
                       ...m,
-                      time: formatDateTime(m.createdAt, dateLocale, placeholder),
+                      time: formatDateTime(
+                        m.createdAt,
+                        dateLocale,
+                        placeholder,
+                      ),
                     }}
                     isDoctor={m.sender === "doctor"}
                   />
@@ -338,8 +387,12 @@ export default function AdminChatPage() {
           <div className="card-glass w-full max-w-md p-5 md:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="text-lg font-bold text-foreground">{labels.deleteTitle}</div>
-                <div className="mt-1 text-sm text-(--ui-muted-2)">{labels.deleteBody}</div>
+                <div className="text-lg font-bold text-foreground">
+                  {labels.deleteTitle}
+                </div>
+                <div className="mt-1 text-sm text-(--ui-muted-2)">
+                  {labels.deleteBody}
+                </div>
               </div>
               <button
                 type="button"

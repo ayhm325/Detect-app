@@ -1,9 +1,7 @@
 // app/[locale]/patient/dashboard/page.js
 
-
 // ---- Client Component Wrapper ----
 "use client";
-
 
 // ---- Server Component Part ----
 // منع الكاش
@@ -13,12 +11,19 @@ export const headers = () => {
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "../../../components/ui/Toast";
-import { FaCalendarAlt, FaFileAlt, FaEnvelope, FaHeartbeat, FaArrowUp } from "react-icons/fa";
+import { useToast } from "../../../components/ui/ToastProvider";
+import {
+  FaCalendarAlt,
+  FaFileAlt,
+  FaEnvelope,
+  FaHeartbeat,
+  FaArrowUp,
+} from "react-icons/fa";
 import { useTranslations, useLocale } from "next-intl";
 import PatientDashboardWrapper from "../../../components/PatientDashboardWrapper";
 import NotificationBellButton from "../../../components/ui/NotificationBellButton";
 import useSocket from "../../../components/chat/useSocket.client";
+import UnifiedCard from "../../../components/ui/UnifiedCard";
 
 export default function PatientDashboardPage() {
   const router = useRouter();
@@ -34,35 +39,62 @@ export default function PatientDashboardPage() {
 
   const [patientName, setPatientName] = useState("");
 
-  const formatClinicalStatus = useCallback((value) => {
-    const raw = value == null ? "" : String(value).trim();
-    if (!raw) return placeholder;
-    const key = raw.toLowerCase();
-    if (key === "stable" || key === "critical" || key === "recovering") {
-      try {
-        return t(`dashboard.clinicalStatuses.${key}`);
-      } catch {
-        // fall through
+  const formatClinicalStatus = useCallback(
+    (value) => {
+      const raw = value == null ? "" : String(value).trim();
+      if (!raw) return placeholder;
+      const key = raw.toLowerCase();
+      if (key === "stable" || key === "critical" || key === "recovering") {
+        try {
+          return t(`dashboard.clinicalStatuses.${key}`);
+        } catch {
+          // fall through
+        }
       }
-    }
-    return placeholder;
-  }, [t, placeholder]);
+      return placeholder;
+    },
+    [t, placeholder],
+  );
 
   // تحويل الأرقام العربية إلى 0123456789
   function toWesternDigits(str) {
-    return str.replace(/[\u0660-\u0669]/g, d => "0123456789"[d.charCodeAt(0) - 0x0660]);
+    return str.replace(
+      /[\u0660-\u0669]/g,
+      (d) => "0123456789"[d.charCodeAt(0) - 0x0660],
+    );
   }
 
-  let today = new Date().toLocaleDateString(locale === "ar" ? "ar-JO" : "en-US", { dateStyle: "full" });
+  let today = new Date().toLocaleDateString(
+    locale === "ar" ? "ar-JO" : "en-US",
+    { dateStyle: "full" },
+  );
   if (locale === "ar") today = toWesternDigits(today);
-
 
   /* ===================== STATS ===================== */
   const [stats, setStats] = useState([
-    { title: t("dashboard.stats.upcomingAppointments"), value: placeholder, change: null, icon: FaCalendarAlt },
-    { title: t("dashboard.stats.readyReports"), value: placeholder, change: null, icon: FaFileAlt },
-    { title: t("dashboard.stats.newMessages"), value: placeholder, change: null, icon: FaEnvelope },
-    { title: t("dashboard.stats.vitalSigns"), value: placeholder, icon: FaHeartbeat },
+    {
+      title: t("dashboard.stats.upcomingAppointments"),
+      value: placeholder,
+      change: null,
+      icon: FaCalendarAlt,
+    },
+    {
+      title: t("dashboard.stats.readyReports"),
+      value: placeholder,
+      change: null,
+      icon: FaFileAlt,
+    },
+    {
+      title: t("dashboard.stats.newMessages"),
+      value: placeholder,
+      change: null,
+      icon: FaEnvelope,
+    },
+    {
+      title: t("dashboard.stats.vitalSigns"),
+      value: placeholder,
+      icon: FaHeartbeat,
+    },
   ]);
 
   // Unread notifications count
@@ -72,32 +104,55 @@ export default function PatientDashboardPage() {
     let mounted = true;
     async function fetchStats() {
       try {
-        const res = await fetch("/api/patient/dashboard-stats", { cache: "no-store" });
+        const res = await fetch("/api/patient/dashboard-stats", {
+          cache: "no-store",
+        });
         if (!res.ok) return;
         const data = await res.json();
         if (!mounted) return;
         setStats([
-          { title: t("dashboard.stats.upcomingAppointments"), value: data.upcomingAppointments ?? placeholder, change: null, icon: FaCalendarAlt },
-          { title: t("dashboard.stats.readyReports"), value: data.readyReports ?? placeholder, change: null, icon: FaFileAlt },
-          { title: t("dashboard.stats.newMessages"), value: data.newMessages ?? placeholder, change: null, icon: FaEnvelope },
-          { title: t("dashboard.stats.vitalSigns"), value: formatClinicalStatus(data.clinicalStatus), icon: FaHeartbeat },
+          {
+            title: t("dashboard.stats.upcomingAppointments"),
+            value: data.upcomingAppointments ?? placeholder,
+            change: null,
+            icon: FaCalendarAlt,
+          },
+          {
+            title: t("dashboard.stats.readyReports"),
+            value: data.readyReports ?? placeholder,
+            change: null,
+            icon: FaFileAlt,
+          },
+          {
+            title: t("dashboard.stats.newMessages"),
+            value: data.newMessages ?? placeholder,
+            change: null,
+            icon: FaEnvelope,
+          },
+          {
+            title: t("dashboard.stats.vitalSigns"),
+            value: formatClinicalStatus(data.clinicalStatus),
+            icon: FaHeartbeat,
+          },
         ]);
       } catch {}
     }
     const refresh = () => fetchStats();
-    const onVis = () => { if (typeof document !== 'undefined' && !document.hidden) fetchStats(); };
+    const onVis = () => {
+      if (typeof document !== "undefined" && !document.hidden) fetchStats();
+    };
 
     fetchStats();
     try {
-      window.addEventListener('focus', refresh);
-      document.addEventListener('visibilitychange', onVis);
+      window.addEventListener("focus", refresh);
+      document.addEventListener("visibilitychange", onVis);
     } catch {}
 
     return () => {
       mounted = false;
       try {
-        window.removeEventListener('focus', refresh);
-        document.removeEventListener('visibilitychange', onVis);
+        window.removeEventListener("focus", refresh);
+        document.removeEventListener("visibilitychange", onVis);
       } catch {}
     };
   }, [formatClinicalStatus, t, placeholder]);
@@ -109,11 +164,15 @@ export default function PatientDashboardPage() {
       try {
         if (!msg) return;
         // Patient unread count = incoming from doctor.
-        if (msg.sender === 'doctor') {
+        if (msg.sender === "doctor") {
           // Avoid double counting when the socket is joined to both `chat:<id>` and `user:<id>`.
           // We only count the user-scoped delivery for dashboard counters.
-          if (msg.__scope && msg.__scope !== 'user') return;
-          const key = msg.id ? `id:${msg.id}` : (msg.clientKey ? `ck:${msg.clientKey}` : null);
+          if (msg.__scope && msg.__scope !== "user") return;
+          const key = msg.id
+            ? `id:${msg.id}`
+            : msg.clientKey
+              ? `ck:${msg.clientKey}`
+              : null;
           if (key) {
             if (seenMessageKeysRef.current.has(key)) return;
             seenMessageKeysRef.current.add(key);
@@ -121,9 +180,14 @@ export default function PatientDashboardPage() {
           setStats((prev) => {
             if (!Array.isArray(prev) || prev.length < 3) return prev;
             const next = [...prev];
-            const current = next[2] || { title: t("dashboard.stats.newMessages"), value: 0, change: null, icon: FaEnvelope };
+            const current = next[2] || {
+              title: t("dashboard.stats.newMessages"),
+              value: 0,
+              change: null,
+              icon: FaEnvelope,
+            };
             const raw = current.value;
-            const n = typeof raw === 'number' ? raw : Number(raw);
+            const n = typeof raw === "number" ? raw : Number(raw);
             const base = Number.isFinite(n) ? n : 0;
             next[2] = { ...current, value: base + 1 };
             return next;
@@ -131,7 +195,11 @@ export default function PatientDashboardPage() {
         }
       } catch (e) {}
     });
-    return () => { try { off && off(); } catch (e) {} };
+    return () => {
+      try {
+        off && off();
+      } catch (e) {}
+    };
   }, [socket, t]);
 
   // Fetch unread notifications count
@@ -139,7 +207,9 @@ export default function PatientDashboardPage() {
     let mounted = true;
     async function fetchUnreadCount() {
       try {
-        const res = await fetch("/api/patient/notifications", { method: "HEAD" });
+        const res = await fetch("/api/patient/notifications", {
+          method: "HEAD",
+        });
         if (res.ok) {
           const count = res.headers.get("X-Unread-Count");
           if (mounted) setUnreadCount(Number(count) || 0);
@@ -147,19 +217,22 @@ export default function PatientDashboardPage() {
       } catch {}
     }
     const refresh = () => fetchUnreadCount();
-    const onVis = () => { if (typeof document !== 'undefined' && !document.hidden) fetchUnreadCount(); };
+    const onVis = () => {
+      if (typeof document !== "undefined" && !document.hidden)
+        fetchUnreadCount();
+    };
 
     fetchUnreadCount();
     try {
-      window.addEventListener('focus', refresh);
-      document.addEventListener('visibilitychange', onVis);
+      window.addEventListener("focus", refresh);
+      document.addEventListener("visibilitychange", onVis);
     } catch {}
 
     return () => {
       mounted = false;
       try {
-        window.removeEventListener('focus', refresh);
-        document.removeEventListener('visibilitychange', onVis);
+        window.removeEventListener("focus", refresh);
+        document.removeEventListener("visibilitychange", onVis);
       } catch {}
     };
   }, []);
@@ -183,12 +256,31 @@ export default function PatientDashboardPage() {
 
   /* ===================== QUICK ACTIONS ===================== */
   const quickActions = [
-    { title: t("dashboard.quickActions.bookAppointment"), desc: t("dashboard.quickActions.desc.bookAppointment"), icon: "📅", href: "/patient/appointments" },
-    { title: t("dashboard.quickActions.uploadXray"), desc: t("dashboard.quickActions.desc.uploadXray"), icon: "🩻", href: "/patient/analysis" },
-    { title: t("dashboard.quickActions.viewReports"), desc: t("dashboard.quickActions.desc.viewReports"), icon: "📋", href: "/patient/results" },
-    { title: t("dashboard.quickActions.chatDoctor"), desc: t("dashboard.quickActions.desc.chatDoctor"), icon: "💬", href: "/patient/chat" },
+    {
+      title: t("dashboard.quickActions.bookAppointment"),
+      desc: t("dashboard.quickActions.desc.bookAppointment"),
+      icon: "📅",
+      href: "/patient/appointments",
+    },
+    {
+      title: t("dashboard.quickActions.uploadXray"),
+      desc: t("dashboard.quickActions.desc.uploadXray"),
+      icon: "🩻",
+      href: "/patient/analysis",
+    },
+    {
+      title: t("dashboard.quickActions.viewReports"),
+      desc: t("dashboard.quickActions.desc.viewReports"),
+      icon: "📋",
+      href: "/patient/results",
+    },
+    {
+      title: t("dashboard.quickActions.chatDoctor"),
+      desc: t("dashboard.quickActions.desc.chatDoctor"),
+      icon: "💬",
+      href: "/patient/chat",
+    },
   ];
-
 
   return (
     <PatientDashboardWrapper>
@@ -197,7 +289,8 @@ export default function PatientDashboardPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-(--ui-foreground)">
-              {t("dashboard.welcome")}{patientName ? `${commaSpace}${patientName}` : ""} 👋
+              {t("dashboard.welcome")}
+              {patientName ? `${commaSpace}${patientName}` : ""} 👋
             </h1>
             <p className="text-(--ui-muted-foreground) mt-2">{today}</p>
           </div>
@@ -212,18 +305,33 @@ export default function PatientDashboardPage() {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
           {stats.map((s, i) => (
-            <div key={i} className="card-glass border border-(--ui-border) p-6 rounded-xl">
-              <div className={`flex items-center gap-3 justify-center mb-2 ${locale === "ar" ? "flex-row-reverse" : "flex-row"}`}>
-                <s.icon className="text-4xl text-(--ui-info)" style={{ order: locale === "ar" ? 2 : 1 }} />
-                <p className="text-lg font-semibold text-(--ui-muted-foreground) text-center w-full">{s.title}</p>
+            <UnifiedCard
+              key={i}
+              className="border border-(--ui-border) p-6 rounded-xl"
+              glass
+            >
+              <div
+                className={`flex items-center gap-3 justify-center mb-2 ${locale === "ar" ? "flex-row-reverse" : "flex-row"}`}
+              >
+                <s.icon
+                  className="text-4xl text-(--ui-info)"
+                  style={{ order: locale === "ar" ? 2 : 1 }}
+                />
+                <p className="text-lg font-semibold text-(--ui-muted-foreground) text-center w-full">
+                  {s.title}
+                </p>
               </div>
-              <p className="mt-1 text-3xl font-semibold text-center">{s.value}</p>
-            </div>
+              <p className="mt-1 text-3xl font-semibold text-center">
+                {s.value}
+              </p>
+            </UnifiedCard>
           ))}
         </div>
 
         {/* Quick Actions */}
-        <h2 className="text-2xl font-bold mb-4">{t("dashboard.quickActions.title")}</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          {t("dashboard.quickActions.title")}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {quickActions.map((a, i) => (
             <button

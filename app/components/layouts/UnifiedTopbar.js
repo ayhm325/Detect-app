@@ -24,7 +24,7 @@ export default function UnifiedTopbar({
         >
           ☰
         </button>
-        
+
         {/* Avatar */}
         <div className="relative h-10 w-10 overflow-hidden rounded-full border border-(--ui-border) bg-(--ui-surface-2)">
           {avatarUrl ? (
@@ -36,10 +36,12 @@ export default function UnifiedTopbar({
               className="object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-(--ui-muted-foreground)">👤</div>
+            <div className="flex h-full w-full items-center justify-center text-(--ui-muted-foreground)">
+              👤
+            </div>
           )}
         </div>
-        
+
         {/* User name */}
         <div className="text-base font-semibold text-(--ui-foreground)">
           {userName || ui("placeholder")}

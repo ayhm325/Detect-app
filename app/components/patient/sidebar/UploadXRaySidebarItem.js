@@ -8,6 +8,7 @@ export default function UploadXRaySidebarItem() {
   const locale = pathname?.startsWith("/en") ? "en" : "ar";
   const basePrefix = locale === "en" ? "/en" : "/ar";
 
+  // Navigation only, upload logic is unified in FileUpload.js
   return (
     <Link
       href={`${basePrefix}/patient/analysis`}

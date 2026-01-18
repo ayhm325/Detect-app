@@ -1,7 +1,6 @@
-
 import { NextResponse } from "next/server";
 import prisma from "./prismaClient";
-import bcrypt from "bcryptjs";
+import bcrypt from "../../../lib/auth/bcryptWrapper.mjs";
 import jwt from "jsonwebtoken";
 import { getJwtSecret } from "../../../lib/auth/jwtSecret.js";
 import { applyJwtClaimsToSignOptions } from "../../../lib/auth/jwtClaims.js";
@@ -16,14 +15,25 @@ export async function POST(request) {
   try {
     const { email, password } = await request.json();
     if (!email || !password) {
-      return NextResponse.json({ error: "يرجى إدخال البريد وكلمة المرور" }, { status: 400 });
+      return NextResponse.json(
+        { error: "يرجى إدخال البريد وكلمة المرور" },
+        { status: 400 },
+      );
     }
 
     // حماية brute-force: تحقق من عدد المحاولات
     const now = Date.now();
     const entry = loginAttempts.get(email) || { count: 0, first: now };
-    if (entry.count >= MAX_ATTEMPTS && now - entry.first < WINDOW_MINUTES * 60 * 1000) {
-      return NextResponse.json({ error: `تم تجاوز الحد الأقصى لمحاولات الدخول. يرجى المحاولة بعد ${WINDOW_MINUTES} دقيقة.` }, { status: 429 });
+    if (
+      entry.count >= MAX_ATTEMPTS &&
+      now - entry.first < WINDOW_MINUTES * 60 * 1000
+    ) {
+      return NextResponse.json(
+        {
+          error: `تم تجاوز الحد الأقصى لمحاولات الدخول. يرجى المحاولة بعد ${WINDOW_MINUTES} دقيقة.`,
+        },
+        { status: 429 },
+      );
     }
 
     const user = await prisma.user.findUnique({
@@ -35,22 +45,39 @@ export async function POST(request) {
       if (entry.count === 0 || now - entry.first > WINDOW_MINUTES * 60 * 1000) {
         loginAttempts.set(email, { count: 1, first: now });
       } else {
-        loginAttempts.set(email, { count: entry.count + 1, first: entry.first });
+        loginAttempts.set(email, {
+          count: entry.count + 1,
+          first: entry.first,
+        });
       }
-      return NextResponse.json({ error: "المستخدم غير موجود" }, { status: 404 });
+      return NextResponse.json(
+        { error: "المستخدم غير موجود" },
+        { status: 404 },
+      );
     }
-    if (process.env.DEBUG_AUTH === '1') {
-      console.log("[login] user found:", { id: user.id, email: user.email, isActive: user.isActive, doctorActive: user.doctor?.isActive });
+    if (process.env.DEBUG_AUTH === "1") {
+      console.log("[login] user found:", {
+        id: user.id,
+        email: user.email,
+        isActive: user.isActive,
+        doctorActive: user.doctor?.isActive,
+      });
     }
     if (user.role === "doctor") {
       if (!user.doctor) {
-        return NextResponse.json({ error: "حسابك قيد المراجعة من الإدارة" }, { status: 403 });
+        return NextResponse.json(
+          { error: "حسابك قيد المراجعة من الإدارة" },
+          { status: 403 },
+        );
       }
       if (user.doctor.status === "banned") {
         return NextResponse.json({ error: "تم رفض طلبك" }, { status: 403 });
       }
       if (user.doctor.status !== "active") {
-        return NextResponse.json({ error: "حسابك قيد المراجعة من الإدارة" }, { status: 403 });
+        return NextResponse.json(
+          { error: "حسابك قيد المراجعة من الإدارة" },
+          { status: 403 },
+        );
       }
     } else {
       if (!user.isActive) {
@@ -68,9 +95,15 @@ export async function POST(request) {
       if (entry.count === 0 || now - entry.first > WINDOW_MINUTES * 60 * 1000) {
         loginAttempts.set(email, { count: 1, first: now });
       } else {
-        loginAttempts.set(email, { count: entry.count + 1, first: entry.first });
+        loginAttempts.set(email, {
+          count: entry.count + 1,
+          first: entry.first,
+        });
       }
-      return NextResponse.json({ error: "كلمة المرور غير صحيحة" }, { status: 401 });
+      return NextResponse.json(
+        { error: "كلمة المرور غير صحيحة" },
+        { status: 401 },
+      );
     }
 
     // نجاح الدخول: إعادة تعيين العداد
@@ -87,9 +120,11 @@ export async function POST(request) {
             fullName: user.fullName,
             email: user.email,
             role: user.role,
-            ip: request.headers.get('x-forwarded-for') || request.headers.get('host'),
-          }
-        }
+            ip:
+              request.headers.get("x-forwarded-for") ||
+              request.headers.get("host"),
+          },
+        },
       });
     } catch (e) {
       // تجاهل الخطأ في تسجيل النشاط حتى لا يؤثر على عملية الدخول
@@ -98,7 +133,10 @@ export async function POST(request) {
 
     // إشعار أمني (مخفف) - مرة كل 12 ساعة
     try {
-      const ip = request.headers.get('x-forwarded-for') || request.headers.get('host') || null;
+      const ip =
+        request.headers.get("x-forwarded-for") ||
+        request.headers.get("host") ||
+        null;
       const since = new Date(Date.now() - 12 * 60 * 60 * 1000);
       const existing = await prisma.notification.findFirst({
         where: {
@@ -112,18 +150,18 @@ export async function POST(request) {
       if (!existing) {
         await createNotificationBestEffort(prisma, {
           userId: user.id,
-          type: 'warning',
+          type: "warning",
           message: {
-            ar: 'تنبيه أمني: تم تسجيل الدخول إلى حسابك.',
-            en: 'Security alert: a login to your account was detected.',
-            meta: { kind: 'security_login', ip }
-          }
+            ar: "تنبيه أمني: تم تسجيل الدخول إلى حسابك.",
+            en: "Security alert: a login to your account was detected.",
+            meta: { kind: "security_login", ip },
+          },
         });
       }
     } catch (e) {
       // best-effort
-      if (process.env.DEBUG_AUTH === '1') {
-        console.warn('[login] security notification failed', e && e.message);
+      if (process.env.DEBUG_AUTH === "1") {
+        console.warn("[login] security notification failed", e && e.message);
       }
     }
 
@@ -141,13 +179,13 @@ export async function POST(request) {
         isActive: !!user.isActive,
       },
       SECRET,
-      applyJwtClaimsToSignOptions({ expiresIn: '2h' }) // صلاحية التوكن ساعتان فقط
+      applyJwtClaimsToSignOptions({ expiresIn: "2h" }), // صلاحية التوكن ساعتان فقط
     );
 
     // تخزين JWT في HttpOnly Cookie
     const responseBody = { user: userData };
     // In development, also return token in body so client can use Bearer fallback if cookie isn't sent (debug only)
-    const isProd = process.env.NODE_ENV === 'production';
+    const isProd = process.env.NODE_ENV === "production";
     if (!isProd) {
       responseBody.tokenForDev = token;
     }
@@ -157,14 +195,14 @@ export async function POST(request) {
     // Choose SameSite based on environment:
     // - development: use 'lax' and secure=false so cookie works on http://localhost
     // - production: use 'none' and secure=true to allow cross-site usage when needed
-    const sameSite = isProd ? 'none' : 'lax';
+    const sameSite = isProd ? "none" : "lax";
     const secure = isProd;
 
-    response.cookies.set('token', token, {
+    response.cookies.set("token", token, {
       httpOnly: true,
       secure,
       sameSite,
-      path: '/',
+      path: "/",
       maxAge: 60 * 60 * 2, // ساعتان
     });
     return response;

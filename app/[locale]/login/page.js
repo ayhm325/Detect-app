@@ -17,7 +17,8 @@ export async function generateMetadata() {
 
 export default async function LoginPage() {
   const headerList = await headers();
-  const rawPath = headerList.get("x-forwarded-uri") || headerList.get("referer") || "/";
+  const rawPath =
+    headerList.get("x-forwarded-uri") || headerList.get("referer") || "/";
   const locale = rawPath.startsWith("/en") ? "en" : "ar";
   const dir = locale === "ar" ? "rtl" : "ltr";
   return (

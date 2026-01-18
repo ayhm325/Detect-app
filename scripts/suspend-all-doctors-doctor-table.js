@@ -4,7 +4,9 @@ async function suspendAllDoctors() {
   const updated = await prisma.doctor.updateMany({
     data: { isActive: false },
   });
-  console.log(`تم تعليق جميع الأطباء (Doctor.isActive = false): ${updated.count}`);
+  console.log(
+    `تم تعليق جميع الأطباء (Doctor.isActive = false): ${updated.count}`,
+  );
   process.exit(0);
 }
 

@@ -1,18 +1,18 @@
-import React from 'react';
-import Image from 'next/image';
-import styles from './ChatList.module.css';
-import { useTranslations } from 'next-intl';
+import React from "react";
+import Image from "next/image";
+import styles from "./ChatList.module.css";
+import { useTranslations } from "next-intl";
 
 export default function ChatList({ chats, selectedId, onSelect }) {
-  const t = useTranslations('doctorChat');
+  const t = useTranslations("doctorChat");
   return (
     <aside className={styles.list}>
-      <h3>{t('patientsTitle')}</h3>
+      <h3>{t("patientsTitle")}</h3>
       <ul>
-        {chats.map(chat => (
+        {chats.map((chat) => (
           <li
             key={chat.id}
-            className={selectedId === chat.id ? styles.selected : ''}
+            className={selectedId === chat.id ? styles.selected : ""}
             onClick={() => onSelect(chat.id)}
           >
             <Image

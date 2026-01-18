@@ -15,10 +15,12 @@ export default function useLocale() {
     (targetLocale, path) => {
       const effectivePath = path ?? pathname;
       const cleanPath = effectivePath.replace(/^\/(en|ar)/, "");
-      const normalized = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
+      const normalized = cleanPath.startsWith("/")
+        ? cleanPath
+        : `/${cleanPath}`;
       return `/${targetLocale}${normalized}`;
     },
-    [pathname]
+    [pathname],
   );
 
   const switchLocale = useCallback(() => {

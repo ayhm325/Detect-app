@@ -27,8 +27,8 @@
   "nav": {
     "home": "الصفحة الرئيسية",
     "appointments": "المواعيد",
-      "analysis": "التحليل",
-      "history": "التاريخ",
+    "analysis": "التحليل",
+    "history": "التاريخ",
     "results": "التقارير",
     "chat": "الدردشة",
     "profile": "الحساب",
@@ -52,7 +52,7 @@
       "label": "English"
     }
   },
-  "version":  "الإصدار 1.0.0",
+  "version": "الإصدار 1.0.0",
   "status": "كل الأنظمة تعمل",
   "healthScoreValue": "98%",
   "dashboard": {

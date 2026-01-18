@@ -1,7 +1,7 @@
 "use client";
 
 import DoctorLayout from "../DoctorLayout";
-import { useToast } from "../../../components/ui/Toast";
+import { useToast } from "../../../components/ui/ToastProvider";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -27,7 +27,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
 export default function DoctorResultsPage() {
-  const { showToast, ToastContainer } = useToast();
+  const { showSuccess, showError, showInfo, showWarning } = useToast();
   const locale = useLocale();
   const t = useTranslations("doctorResults");
   const ui = useTranslations("ui");
@@ -51,26 +51,35 @@ export default function DoctorResultsPage() {
   const [reviewClinicalStatus, setReviewClinicalStatus] = useState("stable");
   const [savingReview, setSavingReview] = useState(false);
 
-
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const url = patientId ? `/api/doctor/results?patientId=${encodeURIComponent(patientId)}` : "/api/doctor/results";
+    const url = patientId
+      ? `/api/doctor/results?patientId=${encodeURIComponent(patientId)}`
+      : "/api/doctor/results";
     fetch(url)
       .then(async (res) => {
         if (!res.ok) throw new Error("fetch_failed");
         const data = await res.json();
         // Transform API data to match UI expectations
         const inferTypeKey = (rawTitle, imageUrl) => {
-          const title = typeof rawTitle === "string" ? rawTitle.toLowerCase() : "";
-          const url = typeof imageUrl === "string" ? imageUrl.toLowerCase() : "";
+          const title =
+            typeof rawTitle === "string" ? rawTitle.toLowerCase() : "";
+          const url =
+            typeof imageUrl === "string" ? imageUrl.toLowerCase() : "";
           const blob = `${title} ${url}`;
           if (blob.includes("ct")) return "ct";
           if (blob.includes("mri")) return "mri";
-          if (blob.includes("ultra") || blob.includes("us")) return "ultrasound";
-          if (blob.includes("x-ray") || blob.includes("xray") || blob.includes("cxr")) return "xray";
+          if (blob.includes("ultra") || blob.includes("us"))
+            return "ultrasound";
+          if (
+            blob.includes("x-ray") ||
+            blob.includes("xray") ||
+            blob.includes("cxr")
+          )
+            return "xray";
           return null;
         };
 
@@ -79,7 +88,10 @@ export default function DoctorResultsPage() {
           const d = new Date(dt);
           if (Number.isNaN(d.getTime())) return "";
           try {
-            return d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+            return d.toLocaleTimeString(locale, {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
           } catch {
             return "";
           }
@@ -90,15 +102,18 @@ export default function DoctorResultsPage() {
           const typeKey = inferredTypeKey ?? "xray";
           const typeLabel = inferredTypeKey
             ? t(`scanTypes.${inferredTypeKey}`)
-            : (r.title || t("scanTypes.xray"));
+            : r.title || t("scanTypes.xray");
 
-          const confidence = typeof r.confidenceScore === "number" ? r.confidenceScore : null;
+          const confidence =
+            typeof r.confidenceScore === "number" ? r.confidenceScore : null;
           const score = confidence == null ? 0 : Math.round(confidence * 100);
           const ai = (r.aiResult || "").toString().toUpperCase();
 
           const status = r.reviewedByDoctor
             ? "completed"
-            : (ai === "POSITIVE" && (confidence == null || confidence >= 0.7) ? "urgent" : "pending");
+            : ai === "POSITIVE" && (confidence == null || confidence >= 0.7)
+              ? "urgent"
+              : "pending";
 
           const aiSummary = (() => {
             if (ai === "POSITIVE") return t("aiMessages.positive", { score });
@@ -107,16 +122,23 @@ export default function DoctorResultsPage() {
           })();
 
           const findings = (() => {
-            if (ai === "POSITIVE") return [{ type: "warning", text: t("findingsMessages.positive") }];
-            if (ai === "NEGATIVE") return [{ type: "normal", text: t("findingsMessages.negative") }];
-            return r.doctorNotes ? [{ type: "info", text: r.doctorNotes }] : [{ type: "info", text: t("findingsMessages.unknown") }];
+            if (ai === "POSITIVE")
+              return [
+                { type: "warning", text: t("findingsMessages.positive") },
+              ];
+            if (ai === "NEGATIVE")
+              return [{ type: "normal", text: t("findingsMessages.negative") }];
+            return r.doctorNotes
+              ? [{ type: "info", text: r.doctorNotes }]
+              : [{ type: "info", text: t("findingsMessages.unknown") }];
           })();
 
           return {
             id: r.id,
             patientName: r.patient?.name || placeholder,
             patientId: r.patient?.id || placeholder,
-            patientClinicalStatus: r.patientClinicalStatus || r.patient?.clinicalStatus || null,
+            patientClinicalStatus:
+              r.patientClinicalStatus || r.patient?.clinicalStatus || null,
             typeKey,
             typeLabel,
             bodyPart: t("defaults.bodyPart"),
@@ -134,7 +156,11 @@ export default function DoctorResultsPage() {
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message === "fetch_failed" ? t("errors.fetchResultsFailed") : err.message);
+        setError(
+          err.message === "fetch_failed"
+            ? t("errors.fetchResultsFailed")
+            : err.message,
+        );
         setLoading(false);
       });
   }, [patientId, locale, placeholder, t]);
@@ -154,33 +180,37 @@ export default function DoctorResultsPage() {
     }).length,
   };
 
-  const filteredScans = scans
-    .filter((scan) => {
-      if (filterType !== "all" && scan.typeKey !== filterType) return false;
-      if (filterStatus !== "all" && scan.status !== filterStatus) return false;
-      if (searchQuery) {
-        return (
-          (scan.patientName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (scan.patientId || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (scan.typeLabel || "").toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-      return true;
-    });
+  const filteredScans = scans.filter((scan) => {
+    if (filterType !== "all" && scan.typeKey !== filterType) return false;
+    if (filterStatus !== "all" && scan.status !== filterStatus) return false;
+    if (searchQuery) {
+      return (
+        (scan.patientName || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        (scan.patientId || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        (scan.typeLabel || "").toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    return true;
+  });
 
   const handleViewScan = (scan) => {
     setSelectedScan(scan);
     setReviewNotes(scan?.doctorNotes || "");
     setReviewClinicalStatus(scan?.patientClinicalStatus || "stable");
     setViewerOpen(true);
-    showToast(t("toast.viewingScan"), "info");
+    showInfo(t("toast.viewingScan"));
   };
 
   const handleMarkReviewed = async () => {
     if (!selectedScan?.id) return;
     setSavingReview(true);
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const res = await fetch("/api/doctor/results", {
         method: "PATCH",
         headers: {
@@ -196,12 +226,19 @@ export default function DoctorResultsPage() {
       });
 
       const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error || body.message || `HTTP ${res.status}`);
+      if (!res.ok)
+        throw new Error(body.error || body.message || `HTTP ${res.status}`);
 
-      const nextDoctorNotes = typeof reviewNotes === "string" ? reviewNotes.trim() : "";
+      const nextDoctorNotes =
+        typeof reviewNotes === "string" ? reviewNotes.trim() : "";
       const nextFindings = nextDoctorNotes
-        ? [{ type: "info", text: nextDoctorNotes }, ...(selectedScan.findings || []).filter((f) => f?.text !== nextDoctorNotes)]
-        : (selectedScan.findings || []);
+        ? [
+            { type: "info", text: nextDoctorNotes },
+            ...(selectedScan.findings || []).filter(
+              (f) => f?.text !== nextDoctorNotes,
+            ),
+          ]
+        : selectedScan.findings || [];
 
       const updatedScan = {
         ...selectedScan,
@@ -213,29 +250,48 @@ export default function DoctorResultsPage() {
       };
 
       setSelectedScan(updatedScan);
-      setScans((prev) => prev.map((s) => (s.id === selectedScan.id ? updatedScan : s)));
-      showToast(t("toast.reviewSaved"), "success");
+      setScans((prev) =>
+        prev.map((s) => (s.id === selectedScan.id ? updatedScan : s)),
+      );
+      showSuccess(t("toast.reviewSaved"));
     } catch (e) {
-      showToast(t("toast.reviewSaveFailed"), "error");
+      showError(t("toast.reviewSaveFailed"));
     } finally {
       setSavingReview(false);
     }
   };
 
   const handlePrint = (scan) => {
-    showToast(t("toast.printStart"), "info");
+    showInfo(t("toast.printStart"));
   };
 
   const getStatusBadge = (status) => {
     const config = {
-      completed: { label: t("statuses.completed"), color: "bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)", icon: FaCheckCircle },
-      pending: { label: t("statuses.pending"), color: "bg-(--ui-warning-bg) text-(--ui-warning) border-(--ui-warning-border)", icon: FaHourglassHalf },
-      urgent: { label: t("statuses.urgent"), color: "bg-(--ui-danger-bg) text-(--ui-danger) border-(--ui-danger-border)", icon: FaExclamationTriangle },
+      completed: {
+        label: t("statuses.completed"),
+        color:
+          "bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)",
+        icon: FaCheckCircle,
+      },
+      pending: {
+        label: t("statuses.pending"),
+        color:
+          "bg-(--ui-warning-bg) text-(--ui-warning) border-(--ui-warning-border)",
+        icon: FaHourglassHalf,
+      },
+      urgent: {
+        label: t("statuses.urgent"),
+        color:
+          "bg-(--ui-danger-bg) text-(--ui-danger) border-(--ui-danger-border)",
+        icon: FaExclamationTriangle,
+      },
     };
     const c = config[status] || config.pending;
     const Icon = c.icon;
     return (
-      <span className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium ${c.color}`}>
+      <span
+        className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium ${c.color}`}
+      >
         <Icon />
         {c.label}
       </span>
@@ -247,11 +303,16 @@ export default function DoctorResultsPage() {
       xray: { icon: "🩻", color: "bg-(--ui-info-bg) text-(--ui-info)" },
       ct: { icon: "🔬", color: "bg-(--ui-info-bg) text-(--ui-info)" },
       mri: { icon: "🧲", color: "bg-(--ui-success-bg) text-(--ui-success)" },
-      ultrasound: { icon: "📡", color: "bg-(--ui-warning-bg) text-(--ui-warning)" },
+      ultrasound: {
+        icon: "📡",
+        color: "bg-(--ui-warning-bg) text-(--ui-warning)",
+      },
     };
     const config = typeConfig[typeKey] || typeConfig.xray;
     return (
-      <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${config.color} text-xl`}>
+      <div
+        className={`flex h-10 w-10 items-center justify-center rounded-lg ${config.color} text-xl`}
+      >
         {config.icon}
       </div>
     );
@@ -260,9 +321,11 @@ export default function DoctorResultsPage() {
   if (loading) {
     return (
       <DoctorLayout>
-        <ToastContainer />
+
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-lg text-(--ui-muted-foreground)">{t("loading")}</div>
+          <div className="text-lg text-(--ui-muted-foreground)">
+            {t("loading")}
+          </div>
         </div>
       </DoctorLayout>
     );
@@ -271,9 +334,11 @@ export default function DoctorResultsPage() {
   if (error) {
     return (
       <DoctorLayout>
-        <ToastContainer />
+
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-lg text-(--ui-danger)">{t("error")} {error}</div>
+          <div className="text-lg text-(--ui-danger)">
+            {t("error")} {error}
+          </div>
         </div>
       </DoctorLayout>
     );
@@ -281,10 +346,8 @@ export default function DoctorResultsPage() {
 
   return (
     <DoctorLayout>
-      <ToastContainer />
-      <div
-        className="min-h-screen bg-(--ui-surface-2) text-(--ui-foreground) p-6"
-      >
+
+      <div className="min-h-screen bg-(--ui-surface-2) text-(--ui-foreground) p-6">
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -293,7 +356,9 @@ export default function DoctorResultsPage() {
                 <FaXRay className="text-(--ui-info)" />
                 {t("title")}
               </h1>
-              <p className="mt-2 text-(--ui-muted-foreground)">{t("subtitle")}</p>
+              <p className="mt-2 text-(--ui-muted-foreground)">
+                {t("subtitle")}
+              </p>
             </div>
           </div>
 
@@ -302,8 +367,12 @@ export default function DoctorResultsPage() {
             <div className="card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.total")}</p>
-                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{stats.total}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">
+                    {t("stats.total")}
+                  </p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">
+                    {stats.total}
+                  </p>
                 </div>
                 <FaXRay className="text-3xl text-(--ui-info)" />
               </div>
@@ -312,8 +381,12 @@ export default function DoctorResultsPage() {
             <div className="card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.completed")}</p>
-                  <p className="mt-1 text-3xl font-bold text-(--ui-success)">{stats.completed}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">
+                    {t("stats.completed")}
+                  </p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-success)">
+                    {stats.completed}
+                  </p>
                 </div>
                 <FaCheckCircle className="text-3xl text-(--ui-success)" />
               </div>
@@ -322,8 +395,12 @@ export default function DoctorResultsPage() {
             <div className="card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.pending")}</p>
-                  <p className="mt-1 text-3xl font-bold text-(--ui-warning)">{stats.pending}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">
+                    {t("stats.pending")}
+                  </p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-warning)">
+                    {stats.pending}
+                  </p>
                 </div>
                 <FaHourglassHalf className="text-3xl text-(--ui-warning)" />
               </div>
@@ -332,8 +409,12 @@ export default function DoctorResultsPage() {
             <div className="card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.today")}</p>
-                  <p className="mt-1 text-3xl font-bold text-(--ui-info)">{stats.today}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">
+                    {t("stats.today")}
+                  </p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-info)">
+                    {stats.today}
+                  </p>
                 </div>
                 <FaCalendarAlt className="text-3xl text-(--ui-info)" />
               </div>
@@ -356,7 +437,7 @@ export default function DoctorResultsPage() {
                   />
                 </div>
               </div>
-            
+
               {/* Status Filter */}
               <select
                 value={filterStatus}
@@ -374,7 +455,7 @@ export default function DoctorResultsPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredScans.map((scan, idx) => (
               <div
-                key={`${scan.id ?? 'scan'}-${idx}`}
+                key={`${scan.id ?? "scan"}-${idx}`}
                 className="group card-glass rounded-xl p-6 shadow-(--shadow-soft) border border-(--ui-border) transition-all hover:shadow-(--shadow-lift)"
               >
                 {/* Header */}
@@ -385,8 +466,12 @@ export default function DoctorResultsPage() {
 
                 {/* Patient Info */}
                 <div className="mb-4 space-y-2">
-                  <h3 className="text-lg font-bold text-(--ui-foreground)">{scan.patientName}</h3>
-                  <p className="text-sm text-(--ui-muted-foreground)">{t("patientId")} {scan.patientId}</p>
+                  <h3 className="text-lg font-bold text-(--ui-foreground)">
+                    {scan.patientName}
+                  </h3>
+                  <p className="text-sm text-(--ui-muted-foreground)">
+                    {t("patientId")} {scan.patientId}
+                  </p>
                   <div className="flex items-center gap-4 text-sm text-(--ui-muted-foreground)">
                     <div className="flex items-center gap-1">
                       <FaCalendarAlt className="text-(--ui-info)" />
@@ -402,19 +487,31 @@ export default function DoctorResultsPage() {
                 {/* Scan Details */}
                 <div className="mb-4 space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-(--ui-foreground)">{t("type")}</span>
-                    <span className="text-sm text-(--ui-muted-foreground)">{scan.typeLabel}</span>
+                    <span className="text-sm font-medium text-(--ui-foreground)">
+                      {t("type")}
+                    </span>
+                    <span className="text-sm text-(--ui-muted-foreground)">
+                      {scan.typeLabel}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-(--ui-foreground)">{t("bodyPart")}</span>
-                    <span className="text-sm text-(--ui-muted-foreground)">{scan.bodyPart}</span>
+                    <span className="text-sm font-medium text-(--ui-foreground)">
+                      {t("bodyPart")}
+                    </span>
+                    <span className="text-sm text-(--ui-muted-foreground)">
+                      {scan.bodyPart}
+                    </span>
                   </div>
                 </div>
 
                 {/* AI Summary */}
                 <div className="mb-4 rounded-lg bg-(--ui-info-bg) border border-(--ui-info-border) p-3">
-                  <p className="text-xs font-medium text-(--ui-info) mb-1">{t("aiSummary")}</p>
-                  <p className="text-sm text-(--ui-foreground)">{scan.aiSummary}</p>
+                  <p className="text-xs font-medium text-(--ui-info) mb-1">
+                    {t("aiSummary")}
+                  </p>
+                  <p className="text-sm text-(--ui-foreground)">
+                    {scan.aiSummary}
+                  </p>
                 </div>
 
                 {/* Findings */}
@@ -427,8 +524,8 @@ export default function DoctorResultsPage() {
                           finding.type === "normal"
                             ? "bg-(--ui-success-bg) text-(--ui-success)"
                             : finding.type === "warning"
-                            ? "bg-(--ui-warning-bg) text-(--ui-warning)"
-                            : "bg-(--ui-info-bg) text-(--ui-info)"
+                              ? "bg-(--ui-warning-bg) text-(--ui-warning)"
+                              : "bg-(--ui-info-bg) text-(--ui-info)"
                         }`}
                       >
                         • {finding.text}
@@ -454,7 +551,9 @@ export default function DoctorResultsPage() {
           {filteredScans.length === 0 && (
             <div className="card-glass rounded-xl p-12 text-center shadow-(--shadow-soft) border border-(--ui-border)">
               <FaXRay className="mx-auto mb-4 text-5xl text-(--ui-muted-foreground) opacity-50" />
-              <p className="text-lg text-(--ui-muted-foreground)">{t("emptyState")}</p>
+              <p className="text-lg text-(--ui-muted-foreground)">
+                {t("emptyState")}
+              </p>
             </div>
           )}
         </div>
@@ -463,11 +562,15 @@ export default function DoctorResultsPage() {
       {/* Image Viewer Modal */}
       {viewerOpen && selectedScan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-(--color-neutral)/90 p-4">
-          <div className={`relative card-glass rounded-xl shadow-(--shadow-lift) overflow-hidden border border-(--ui-border) ${isFullscreen ? "w-full h-full" : "max-w-5xl w-full max-h-[90vh]"}`}>
+          <div
+            className={`relative card-glass rounded-xl shadow-(--shadow-lift) overflow-hidden border border-(--ui-border) ${isFullscreen ? "w-full h-full" : "max-w-5xl w-full max-h-[90vh]"}`}
+          >
             {/* Viewer Header */}
             <div className="flex items-center justify-between border-b border-(--ui-border) bg-(--ui-surface) p-4">
               <div>
-                <h2 className="text-xl font-bold text-(--ui-foreground)">{selectedScan.patientName}</h2>
+                <h2 className="text-xl font-bold text-(--ui-foreground)">
+                  {selectedScan.patientName}
+                </h2>
                 <p className="text-sm text-(--ui-muted-foreground)">
                   {selectedScan.typeLabel} - {selectedScan.bodyPart}
                 </p>
@@ -476,7 +579,11 @@ export default function DoctorResultsPage() {
                 <button
                   onClick={() => setIsFullscreen(!isFullscreen)}
                   className="rounded-lg p-2 text-(--ui-muted-foreground) transition-all hover:bg-(--ui-surface-2)"
-                  title={isFullscreen ? t("viewer.exitFullscreen") : t("viewer.fullscreen")}
+                  title={
+                    isFullscreen
+                      ? t("viewer.exitFullscreen")
+                      : t("viewer.fullscreen")
+                  }
                 >
                   {isFullscreen ? <FaCompress /> : <FaExpand />}
                 </button>
@@ -492,7 +599,12 @@ export default function DoctorResultsPage() {
             </div>
 
             {/* Viewer Content */}
-            <div className="p-6 overflow-y-auto" style={{ maxHeight: isFullscreen ? "calc(100vh - 80px)" : "70vh" }}>
+            <div
+              className="p-6 overflow-y-auto"
+              style={{
+                maxHeight: isFullscreen ? "calc(100vh - 80px)" : "70vh",
+              }}
+            >
               <div className="mb-6 relative w-full overflow-hidden rounded-lg border border-(--ui-border) aspect-video bg-(--color-neutral)">
                 <Image
                   src={selectedScan.thumbnail}
@@ -509,13 +621,17 @@ export default function DoctorResultsPage() {
                   <FaFileAlt />
                   {t("viewer.aiAnalysis")}
                 </h3>
-                <p className="text-(--ui-foreground)">{selectedScan.aiSummary}</p>
+                <p className="text-(--ui-foreground)">
+                  {selectedScan.aiSummary}
+                </p>
               </div>
 
               {/* Findings */}
               {selectedScan.findings.length > 0 && (
                 <div className="rounded-lg bg-(--ui-surface-2) border border-(--ui-border) p-4">
-                  <h3 className="font-bold text-(--ui-foreground) mb-3">{t("viewer.findings")}: </h3>
+                  <h3 className="font-bold text-(--ui-foreground) mb-3">
+                    {t("viewer.findings")}:{" "}
+                  </h3>
                   <div className="space-y-2">
                     {selectedScan.findings.map((finding, idx) => (
                       <div
@@ -524,8 +640,8 @@ export default function DoctorResultsPage() {
                           finding.type === "normal"
                             ? "bg-(--ui-success-bg) border border-(--ui-success-border)"
                             : finding.type === "warning"
-                            ? "bg-(--ui-warning-bg) border border-(--ui-warning-border)"
-                            : "bg-(--ui-info-bg) border border-(--ui-info-border)"
+                              ? "bg-(--ui-warning-bg) border border-(--ui-warning-border)"
+                              : "bg-(--ui-info-bg) border border-(--ui-info-border)"
                         }`}
                       >
                         <p className="text-sm font-medium">{finding.text}</p>
@@ -538,7 +654,9 @@ export default function DoctorResultsPage() {
               {/* Doctor Review */}
               <div className="mt-4 rounded-lg bg-(--ui-surface-2) border border-(--ui-border) p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                  <h3 className="font-bold text-(--ui-foreground)">{t("viewer.review.title")}</h3>
+                  <h3 className="font-bold text-(--ui-foreground)">
+                    {t("viewer.review.title")}
+                  </h3>
                   <div className="flex items-center gap-2">
                     {selectedScan.reviewedByDoctor && (
                       <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)">
@@ -562,9 +680,15 @@ export default function DoctorResultsPage() {
                     onChange={(e) => setReviewClinicalStatus(e.target.value)}
                     className="w-full rounded-xl border border-(--ui-border) bg-(--ui-surface) px-4 py-3 text-sm font-medium text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring)/20"
                   >
-                    <option value="stable">{t("viewer.review.clinicalStatuses.stable")}</option>
-                    <option value="critical">{t("viewer.review.clinicalStatuses.critical")}</option>
-                    <option value="recovering">{t("viewer.review.clinicalStatuses.recovering")}</option>
+                    <option value="stable">
+                      {t("viewer.review.clinicalStatuses.stable")}
+                    </option>
+                    <option value="critical">
+                      {t("viewer.review.clinicalStatuses.critical")}
+                    </option>
+                    <option value="recovering">
+                      {t("viewer.review.clinicalStatuses.recovering")}
+                    </option>
                   </select>
                 </div>
 
@@ -583,7 +707,9 @@ export default function DoctorResultsPage() {
                     disabled={savingReview}
                     className="px-4 py-2 rounded-xl btn-gradient text-sm font-semibold disabled:opacity-60"
                   >
-                    {savingReview ? t("viewer.review.saving") : t("viewer.review.markReviewed")}
+                    {savingReview
+                      ? t("viewer.review.saving")
+                      : t("viewer.review.markReviewed")}
                   </button>
                 </div>
               </div>

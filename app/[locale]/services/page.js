@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import UnifiedCard from "../../components/ui/UnifiedCard";
 
 export default function ServicesPage() {
   const router = useRouter();
@@ -33,21 +34,28 @@ export default function ServicesPage() {
             {t("languageToggleLabel")}
           </button>
         </div>
-        <h1 className="text-4xl font-bold mb-6 text-center brand-gradient-text">{t("title")}</h1>
+        <h1 className="text-4xl font-bold mb-6 text-center brand-gradient-text">
+          {t("title")}
+        </h1>
         <p className="text-lg text-(--ui-muted-foreground) mb-12 text-center max-w-2xl mx-auto">
           {t("description")}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
           {services.map((service, idx) => (
-            <div
+            <UnifiedCard
               key={idx}
-              className="card-glass rounded-3xl p-10 border border-(--ui-border) flex flex-col items-center text-center hover:bg-(--ui-surface-2)/60 transition-colors animate-fadeIn min-h-65"
+              className="rounded-3xl p-10 border border-(--ui-border) flex flex-col items-center text-center hover:bg-(--ui-surface-2)/60 transition-colors animate-fadeIn min-h-65"
+              glass
               style={{ minWidth: 0 }}
             >
               {/* يمكنك إضافة أيقونات ثابتة أو حسب idx هنا */}
-              <h2 className="text-2xl md:text-3xl font-extrabold mb-4 text-(--ui-foreground)">{service.name}</h2>
-              <p className="text-(--ui-muted-foreground) text-lg md:text-xl font-medium leading-relaxed">{service.desc}</p>
-            </div>
+              <h2 className="text-2xl md:text-3xl font-extrabold mb-4 text-(--ui-foreground)">
+                {service.name}
+              </h2>
+              <p className="text-(--ui-muted-foreground) text-lg md:text-xl font-medium leading-relaxed">
+                {service.desc}
+              </p>
+            </UnifiedCard>
           ))}
         </div>
         <div className="flex justify-center">

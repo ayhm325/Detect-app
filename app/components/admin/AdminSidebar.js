@@ -21,17 +21,25 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
 
   const handleLogoutClick = async () => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-        headers: token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("adminToken")
+          : null;
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            }
+          : { "Content-Type": "application/json" },
         body: token ? JSON.stringify({ token }) : undefined,
       }).catch(() => {});
     } finally {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminUser');
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminUser");
         sessionStorage.clear();
       }
       router.replace(basePrefix);
@@ -43,52 +51,58 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
     {
       href: `${basePrefix}/admin/dashboard`,
       label: t("nav.dashboard"),
-      icon: "📊"
+      icon: "📊",
     },
     {
       href: `${basePrefix}/admin/users`,
       label: t("nav.users"),
-      icon: "👥"
+      icon: "👥",
     },
     {
       href: `${basePrefix}/admin/patients`,
       label: t("nav.patients"),
-      icon: "🧑‍🤝‍🧑"
+      icon: "🧑‍🤝‍🧑",
     },
     {
       href: `${basePrefix}/admin/doctors`,
       label: t("nav.doctors"),
-      icon: "🧑‍⚕️"
+      icon: "🧑‍⚕️",
     },
     {
       href: `${basePrefix}/admin/doctor-change-requests-page`,
       label: t("nav.doctorChangeRequests"),
-      icon: "📝"
+      icon: "📝",
     },
-    
+
     {
       href: `${basePrefix}/admin/settings`,
       label: t("nav.settings"),
-      icon: "⚙️"
+      icon: "⚙️",
     },
     {
       href: "__logout__",
       label: t("nav.logout"),
-      icon: "🚪"
+      icon: "🚪",
     },
   ];
   return (
-    <div className={`fixed top-0 h-screen card-glass transition-all duration-300 z-50 ${collapsed ? "w-20" : "w-64"} ${locale === "ar" ? "right-0" : "left-0"} border-r border-(--ui-border)`}>
+    <div
+      className={`fixed top-0 h-screen card-glass transition-all duration-300 z-50 ${collapsed ? "w-20" : "w-64"} ${locale === "ar" ? "right-0" : "left-0"} border-r border-(--ui-border)`}
+    >
       <div className="flex items-center justify-between h-16 px-4 border-b border-(--ui-border)">
         {!collapsed && (
           <div className="flex items-center gap-2">
             <div className="relative">
               <div className="absolute inset-0 brand-gradient rounded-full blur opacity-40" />
               <div className="relative flex items-center justify-center w-10 h-10 brand-gradient rounded-full shadow-(--shadow-soft)">
-                <span className="text-xl" aria-label={ui("aria.lungIcon")}>🫁</span>
+                <span className="text-xl" aria-label={ui("aria.lungIcon")}>
+                  🫁
+                </span>
               </div>
             </div>
-            <span className="font-black text-lg brand-gradient-text">{navbar("brand")}</span>
+            <span className="font-black text-lg brand-gradient-text">
+              {navbar("brand")}
+            </span>
           </div>
         )}
         <button
@@ -113,7 +127,9 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
                   title={collapsed ? item.label : ""}
                 >
                   <span className="text-lg shrink-0">{item.icon}</span>
-                  {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+                  {!collapsed && (
+                    <span className="text-sm font-medium">{item.label}</span>
+                  )}
                 </button>
               );
             }
@@ -129,7 +145,11 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
                 title={collapsed ? item.label : ""}
               >
                 <span className="text-lg shrink-0">{item.icon}</span>
-                {!collapsed && <span className="text-sm font-medium truncate">{item.label}</span>}
+                {!collapsed && (
+                  <span className="text-sm font-medium truncate">
+                    {item.label}
+                  </span>
+                )}
               </a>
             );
           })}
@@ -137,10 +157,16 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
           <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-(--ui-muted-2) hover:text-foreground hover:bg-(--ui-muted) transition-all w-full ${collapsed ? "justify-center" : ""}`}
-            title={collapsed ? (isDark ? t("ui.themeLight") : t("ui.themeDark")) : ""}
+            title={
+              collapsed ? (isDark ? t("ui.themeLight") : t("ui.themeDark")) : ""
+            }
           >
             <span className="text-lg shrink-0">{isDark ? "☀️" : "🌙"}</span>
-            {!collapsed && <span className="text-sm font-medium">{isDark ? t("ui.themeLight") : t("ui.themeDark")}</span>}
+            {!collapsed && (
+              <span className="text-sm font-medium">
+                {isDark ? t("ui.themeLight") : t("ui.themeDark")}
+              </span>
+            )}
           </button>
           {/* زر تبديل اللغة */}
           <button
@@ -149,7 +175,11 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
             title={collapsed ? t("ui.localeSwitchLabel") : ""}
           >
             <span className="text-lg shrink-0">🌐</span>
-            {!collapsed && <span className="text-sm font-medium">{t("ui.localeSwitchLabel")}</span>}
+            {!collapsed && (
+              <span className="text-sm font-medium">
+                {t("ui.localeSwitchLabel")}
+              </span>
+            )}
           </button>
         </div>
       </nav>

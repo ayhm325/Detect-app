@@ -48,8 +48,23 @@
     { "label": "رنين مغناطيسي", "count": 12, "percentage": 19 }
   ],
   "recentActivity": [
-    { "status": "completed", "actionLabel": "تمت مراجعة الفحص", "patient": "أحمد", "time": "قبل ساعتين" },
-    { "status": "pending", "actionLabel": "بانتظار المراجعة", "patient": "سارة", "time": "قبل 4 ساعات" },
-    { "status": "sent", "actionLabel": "تم إرسال التقرير", "patient": "خالد", "time": "أمس" }
+    {
+      "status": "completed",
+      "actionLabel": "تمت مراجعة الفحص",
+      "patient": "أحمد",
+      "time": "قبل ساعتين"
+    },
+    {
+      "status": "pending",
+      "actionLabel": "بانتظار المراجعة",
+      "patient": "سارة",
+      "time": "قبل 4 ساعات"
+    },
+    {
+      "status": "sent",
+      "actionLabel": "تم إرسال التقرير",
+      "patient": "خالد",
+      "time": "أمس"
+    }
   ]
 }

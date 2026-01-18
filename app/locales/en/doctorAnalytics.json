@@ -48,8 +48,23 @@
     { "label": "MRI", "count": 12, "percentage": 19 }
   ],
   "recentActivity": [
-    { "status": "completed", "actionLabel": "Scan reviewed", "patient": "Ahmed", "time": "2h ago" },
-    { "status": "pending", "actionLabel": "Awaiting review", "patient": "Sara", "time": "4h ago" },
-    { "status": "sent", "actionLabel": "Report sent", "patient": "Khaled", "time": "Yesterday" }
+    {
+      "status": "completed",
+      "actionLabel": "Scan reviewed",
+      "patient": "Ahmed",
+      "time": "2h ago"
+    },
+    {
+      "status": "pending",
+      "actionLabel": "Awaiting review",
+      "patient": "Sara",
+      "time": "4h ago"
+    },
+    {
+      "status": "sent",
+      "actionLabel": "Report sent",
+      "patient": "Khaled",
+      "time": "Yesterday"
+    }
   ]
 }

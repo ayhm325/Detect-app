@@ -12,7 +12,7 @@ function _uuid() {
   if (crypto && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
@@ -45,32 +45,27 @@ export async function runInference(file) {
     console.info(
       `[inference.service] using model: ${
         model?.name || (useMock ? "mock" : "python")
-      }`
+      }`,
     );
   } catch (_) {
     // ignore logging errors
   }
 
   const requestHeatmap =
-    file.with_heatmap === true ||
-    process.env.REQUEST_HEATMAP === "1";
+    file.with_heatmap === true || process.env.REQUEST_HEATMAP === "1";
 
   try {
     const json = await model.infer(prepared, {
-      with_heatmap: requestHeatmap
+      with_heatmap: requestHeatmap,
     });
 
     const end = Date.now();
 
     const pred =
-      json.prediction ||
-      (json.data && json.data.prediction) ||
-      "Unknown";
+      json.prediction || (json.data && json.data.prediction) || "Unknown";
 
     const probs =
-      json.probabilities ||
-      (json.data && json.data.probabilities) ||
-      null;
+      json.probabilities || (json.data && json.data.probabilities) || null;
 
     let rawConfidence = 0;
 
@@ -80,7 +75,7 @@ export async function runInference(file) {
       } else {
         rawConfidence =
           Math.max(
-            ...Object.values(probs).filter(v => typeof v === "number")
+            ...Object.values(probs).filter((v) => typeof v === "number"),
           ) || 0;
       }
     }
@@ -88,8 +83,7 @@ export async function runInference(file) {
     // 🔒 Clamp confidence to [82.7%, 97.2%]
     const confidence = clampConfidence(Number(rawConfidence) || 0);
 
-    const threshold =
-      Number(process.env.MODEL_CONFIDENCE_THRESHOLD) || 0.85;
+    const threshold = Number(process.env.MODEL_CONFIDENCE_THRESHOLD) || 0.85;
 
     const needs_review = confidence < threshold;
 
@@ -98,21 +92,13 @@ export async function runInference(file) {
       prediction: pred,
       confidence,
       needs_review,
-      display_label: needs_review
-        ? "Needs Radiologist Review"
-        : pred,
+      display_label: needs_review ? "Needs Radiologist Review" : pred,
       explanation: json.explanation ?? null,
-      heatmap_url:
-        json.heatmap_url ??
-        json.heatmapUrl ??
-        null,
+      heatmap_url: json.heatmap_url ?? json.heatmapUrl ?? null,
       model_version:
-        json.model_version ??
-        json.modelVersion ??
-        model?.name ??
-        "unknown",
+        json.model_version ?? json.modelVersion ?? model?.name ?? "unknown",
       inference_time_ms: end - start,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
   } catch (e) {
     throw e;

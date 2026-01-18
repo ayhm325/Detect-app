@@ -13,7 +13,9 @@ export async function GET(request) {
     // Accept token from cookie OR Authorization header (Bearer) as fallback
     let token = request.cookies.get("token")?.value;
     if (!token) {
-      const hdr = request.headers.get("authorization") || request.headers.get("Authorization");
+      const hdr =
+        request.headers.get("authorization") ||
+        request.headers.get("Authorization");
       if (hdr && hdr.startsWith("Bearer ")) token = hdr.slice(7).trim();
     }
     if (!token) {
@@ -36,7 +38,9 @@ export async function GET(request) {
       select: {
         id: true,
         updatedAt: true,
-        patient: { select: { id: true, fullName: true, email: true, status: true } },
+        patient: {
+          select: { id: true, fullName: true, email: true, status: true },
+        },
         doctor: {
           select: {
             userId: true,

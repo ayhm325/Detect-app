@@ -11,7 +11,9 @@ async function fixDoctors() {
 
   let created = 0;
   for (const user of users) {
-    const doctor = await prisma.doctor.findUnique({ where: { userId: user.id } });
+    const doctor = await prisma.doctor.findUnique({
+      where: { userId: user.id },
+    });
     if (!doctor) {
       await prisma.doctor.create({
         data: {

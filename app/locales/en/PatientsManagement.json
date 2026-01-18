@@ -41,11 +41,11 @@
     "patientUpdated": "Patient updated",
     "patientDisabled": "Patient disabled",
     "patientEnabled": "Patient enabled",
-      "selectDoctor": "Select Doctor",
-      "medicalId": "Medical ID",
-      "allergiesPlaceholder": "e.g. Milk, Eggs",
-      "chronicPlaceholder": "e.g. Hypertension, Diabetes",
-      "status": "Status",
+    "selectDoctor": "Select Doctor",
+    "medicalId": "Medical ID",
+    "allergiesPlaceholder": "e.g. Milk, Eggs",
+    "chronicPlaceholder": "e.g. Hypertension, Diabetes",
+    "status": "Status",
     "patientDeleted": "Patient deleted",
     "exportStarted": "Exporting data..."
   },
@@ -114,16 +114,14 @@
     "saveChanges": "Save Changes",
     "cancel": "Cancel",
     "save": "Save"
-  }
-  ,
+  },
   "confirmDelete": {
     "title": "Confirm Suspend Patient",
     "description": "Are you sure you want to suspend {name}? Suspended patients cannot log in.",
     "processing": "Processing…",
     "yes": "Yes, Suspend",
     "no": "Cancel"
-  }
-  ,
+  },
   "confirmToggle": {
     "disableTitle": "Disable Patient",
     "enableTitle": "Enable Patient",

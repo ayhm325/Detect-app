@@ -1,19 +1,20 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useToast } from "../../../components/ui/Toast";
+import { useToast } from "../../../components/ui/ToastProvider";
 import { useTranslations } from "next-intl";
 import { FaBell, FaTrash, FaCheck, FaCheckDouble } from "react-icons/fa";
 import { useLocale } from "next-intl";
 
 export default function PatientNotificationsPage() {
   const locale = useLocale();
-  const { showToast, ToastContainer } = useToast();
+  const { showSuccess, showError, showInfo, showWarning } = useToast();
   const [filter, setFilter] = useState("all");
   const t = useTranslations("notifications");
   const [nowMs, setNowMs] = useState(0);
   const labels = {
     pageTitle: t("pageTitle"),
-    unreadCount: (...args) => t("unreadCount", { unread: args[0], total: args[1] }),
+    unreadCount: (...args) =>
+      t("unreadCount", { unread: args[0], total: args[1] }),
     allRead: (...args) => t("allRead", { total: args[0] }),
     filterAll: t("filterAll"),
     filterUnread: t("filterUnread"),
@@ -39,7 +40,7 @@ export default function PatientNotificationsPage() {
       allDeleted: t("allDeleted"),
       markedRead: t("markedRead"),
       allMarkedRead: t("allMarkedRead"),
-      markedUnread: t("markedUnread")
+      markedUnread: t("markedUnread"),
     },
     confirmDeleteAll: t("confirmDeleteAll"),
     timeMinutesAgo: (mins) => t("timeMinutesAgo", { mins }),
@@ -52,7 +53,7 @@ export default function PatientNotificationsPage() {
   // ...existing code...
   // The following block is misplaced and should be removed or integrated into the i18n system.
   // Removed duplicate Arabic labels object.
-  
+
   const [notifications, setNotifications] = useState([]);
 
   const getLocalizedMessage = (raw) => {
@@ -60,11 +61,11 @@ export default function PatientNotificationsPage() {
     const str = String(raw);
     try {
       const parsed = JSON.parse(str);
-      if (parsed && typeof parsed === 'object') {
+      if (parsed && typeof parsed === "object") {
         const byLocale = parsed?.[locale];
-        if (typeof byLocale === 'string' && byLocale.trim()) return byLocale;
+        if (typeof byLocale === "string" && byLocale.trim()) return byLocale;
         const fallback = parsed?.en || parsed?.ar;
-        if (typeof fallback === 'string') return fallback;
+        if (typeof fallback === "string") return fallback;
       }
     } catch {}
     return str;
@@ -74,12 +75,16 @@ export default function PatientNotificationsPage() {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch("/api/patient/notifications", { cache: "no-store" });
+        const res = await fetch("/api/patient/notifications", {
+          cache: "no-store",
+        });
         if (!res.ok) return;
         const data = await res.json().catch(() => ({}));
         if (!mounted) return;
         setNowMs(Date.now());
-        setNotifications(Array.isArray(data?.notifications) ? data.notifications : []);
+        setNotifications(
+          Array.isArray(data?.notifications) ? data.notifications : [],
+        );
       } catch {}
     })();
     return () => {
@@ -87,7 +92,7 @@ export default function PatientNotificationsPage() {
     };
   }, []);
 
-  const filteredNotifications = notifications.filter(notif => {
+  const filteredNotifications = notifications.filter((notif) => {
     if (filter === "unread") return !notif.isRead;
     if (filter === "read") return notif.isRead;
     return true;
@@ -95,8 +100,8 @@ export default function PatientNotificationsPage() {
 
   const handleDelete = async (id) => {
     await fetch(`/api/patient/notifications?id=${id}`, { method: "DELETE" });
-    setNotifications(notifications.filter(n => n.id !== id));
-    showToast(labels.toast.notificationDeleted, "info");
+    setNotifications(notifications.filter((n) => n.id !== id));
+    showInfo(labels.toast.notificationDeleted);
   };
 
   const handleDeleteAll = async () => {
@@ -104,52 +109,64 @@ export default function PatientNotificationsPage() {
       // حذف من الباك-إند
       await fetch("/api/patient/notifications", { method: "DELETE" });
       setNotifications([]);
-      showToast(labels.toast.allDeleted, "success");
+      showSuccess(labels.toast.allDeleted);
     }
   };
 
   const handleMarkAsRead = async (id) => {
-    const res = await fetch(`/api/patient/notifications?id=${id}`, { method: "PUT", body: JSON.stringify({ isRead: true }), headers: { "Content-Type": "application/json" } });
+    const res = await fetch(`/api/patient/notifications?id=${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ isRead: true }),
+      headers: { "Content-Type": "application/json" },
+    });
     if (!res.ok) {
-      showToast(labels.toast.errorUpdate, "error");
+      showError(labels.toast.errorUpdate);
       return;
     }
     const data = await res.json();
     if (data.success) {
-      setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
-      showToast(labels.toast.markedRead, "info");
+      setNotifications(
+        notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
+      );
+      showInfo(labels.toast.markedRead);
     } else {
-      showToast(labels.toast.errorUpdate, "error");
+      showError(labels.toast.errorUpdate);
     }
   };
 
   const handleMarkAllAsRead = async () => {
     const res = await fetch("/api/patient/notifications", { method: "PUT" });
     if (!res.ok) {
-      showToast(labels.toast.errorUpdate, "error");
+      showError(labels.toast.errorUpdate);
       return;
     }
     const data = await res.json();
     if (data.success) {
-      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
-      showToast(labels.toast.allMarkedRead, "success");
+      setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
+      showSuccess(labels.toast.allMarkedRead);
     } else {
-      showToast(labels.toast.errorUpdate, "error");
+      showError(labels.toast.errorUpdate);
     }
   };
 
   const handleMarkAsUnread = async (id) => {
-    const res = await fetch(`/api/patient/notifications?id=${id}`, { method: "PUT", body: JSON.stringify({ isRead: false }), headers: { "Content-Type": "application/json" } });
+    const res = await fetch(`/api/patient/notifications?id=${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ isRead: false }),
+      headers: { "Content-Type": "application/json" },
+    });
     if (!res.ok) {
-      showToast(labels.toast.errorUpdate, "error");
+      showError(labels.toast.errorUpdate);
       return;
     }
     const data = await res.json();
     if (data.success) {
-      setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: false } : n));
-      showToast(labels.toast.markedUnread, "info");
+      setNotifications(
+        notifications.map((n) => (n.id === id ? { ...n, isRead: false } : n)),
+      );
+      showInfo(labels.toast.markedUnread);
     } else {
-      showToast(labels.toast.errorUpdate, "error");
+      showError(labels.toast.errorUpdate);
     }
   };
 
@@ -158,7 +175,7 @@ export default function PatientNotificationsPage() {
       info: "ℹ️",
       success: "✅",
       warning: "⚠️",
-      alert: "🚨"
+      alert: "🚨",
     };
     return icons[type] || "🔔";
   };
@@ -166,11 +183,17 @@ export default function PatientNotificationsPage() {
   const getTypeBadgeColor = (type) => {
     const colors = {
       info: "bg-(--ui-info-bg) text-(--ui-foreground) border border-(--ui-info-border)",
-      success: "bg-(--ui-success-bg) text-(--ui-foreground) border border-(--ui-success-border)",
-      warning: "bg-(--ui-warning-bg) text-(--ui-foreground) border border-(--ui-warning-border)",
-      alert: "bg-(--ui-danger)/10 text-(--ui-foreground) border border-(--ui-danger)/20"
+      success:
+        "bg-(--ui-success-bg) text-(--ui-foreground) border border-(--ui-success-border)",
+      warning:
+        "bg-(--ui-warning-bg) text-(--ui-foreground) border border-(--ui-warning-border)",
+      alert:
+        "bg-(--ui-danger)/10 text-(--ui-foreground) border border-(--ui-danger)/20",
     };
-    return colors[type] || "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border)";
+    return (
+      colors[type] ||
+      "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border)"
+    );
   };
 
   const getTypeLabel = (type) => {
@@ -178,12 +201,12 @@ export default function PatientNotificationsPage() {
       info: t("typeInfo"),
       success: t("typeSuccess"),
       warning: t("typeWarning"),
-      alert: t("typeAlert")
+      alert: t("typeAlert"),
     };
     return typeLabels[type] || t("typeInfo");
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
   const totalCount = notifications.length;
 
   const formatRelativeTime = (dateValue) => {
@@ -203,15 +226,19 @@ export default function PatientNotificationsPage() {
 
   return (
     <div className="min-h-screen bg-(--ui-surface) text-(--ui-foreground) py-8 px-4">
-      <ToastContainer />
-      
+
+
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-(--ui-foreground) mb-2">{labels.pageTitle}</h1>
+            <h1 className="text-4xl font-bold text-(--ui-foreground) mb-2">
+              {labels.pageTitle}
+            </h1>
             <p className="text-(--ui-muted-foreground)">
-              {unreadCount > 0 ? labels.unreadCount(unreadCount, totalCount) : labels.allRead(totalCount)}
+              {unreadCount > 0
+                ? labels.unreadCount(unreadCount, totalCount)
+                : labels.allRead(totalCount)}
             </p>
           </div>
           <FaBell size={32} className="text-(--ui-success)" />
@@ -247,7 +274,7 @@ export default function PatientNotificationsPage() {
                 : "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border) hover:bg-(--ui-surface-2)"
             }`}
           >
-            {labels.filterRead} ({notifications.filter(n => n.isRead).length})
+            {labels.filterRead} ({notifications.filter((n) => n.isRead).length})
           </button>
         </div>
 
@@ -275,11 +302,16 @@ export default function PatientNotificationsPage() {
         <div className="space-y-4">
           {filteredNotifications.length === 0 ? (
             <div className="card-glass border border-(--ui-border) rounded-xl p-12 text-center">
-              <FaBell size={48} className="mx-auto mb-4 text-(--ui-muted-foreground)" />
+              <FaBell
+                size={48}
+                className="mx-auto mb-4 text-(--ui-muted-foreground)"
+              />
               <p className="text-(--ui-muted-foreground) text-lg">
-                {filter === "unread" ? labels.noUnread : 
-                 filter === "read" ? labels.noRead : 
-                 labels.noNotifications}
+                {filter === "unread"
+                  ? labels.noUnread
+                  : filter === "read"
+                    ? labels.noRead
+                    : labels.noNotifications}
               </p>
             </div>
           ) : (
@@ -296,8 +328,12 @@ export default function PatientNotificationsPage() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
-                      <span className="text-2xl">{getTypeIcon(notif.type)}</span>
-                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${getTypeBadgeColor(notif.type)}`}>
+                      <span className="text-2xl">
+                        {getTypeIcon(notif.type)}
+                      </span>
+                      <span
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${getTypeBadgeColor(notif.type)}`}
+                      >
                         {getTypeLabel(notif.type)}
                       </span>
                       {!notif.isRead && (
@@ -344,7 +380,6 @@ export default function PatientNotificationsPage() {
             ))
           )}
         </div>
-
       </div>
     </div>
   );

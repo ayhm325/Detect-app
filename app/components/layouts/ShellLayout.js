@@ -15,9 +15,14 @@ export default function ShellLayout({
   const [overlayOpen, setOverlayOpen] = useState(overlayDefaultOpen);
   const ui = useTranslations("ui");
   return (
-    <div className="min-h-screen bg-(--ui-surface-2)" dir={rtl ? "rtl" : undefined}>
+    <div
+      className="min-h-screen bg-(--ui-surface-2)"
+      dir={rtl ? "rtl" : undefined}
+    >
       <div className="mx-auto max-w-7xl px-4 md:px-8">
-        <div className={`py-4 ${overlaySidebar ? "grid gap-4" : "grid gap-4 lg:grid-cols-[18rem,1fr] lg:gap-6"}`}>
+        <div
+          className={`py-4 ${overlaySidebar ? "grid gap-4" : "grid gap-4 lg:grid-cols-[18rem,1fr] lg:gap-6"}`}
+        >
           {overlaySidebar ? null : (
             <aside className="hidden lg:block sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto">
               {Sidebar ? <Sidebar /> : null}
@@ -44,7 +49,13 @@ export default function ShellLayout({
                 {/* الشريط الجانبي كـ Overlay */}
                 <div
                   className="hidden lg:block fixed right-0 top-0 z-40 h-screen"
-                  style={{ width: `${overlayWidthRem}rem`, transform: overlayOpen ? "translateX(0)" : "translateX(100%)", transition: "transform 200ms ease" }}
+                  style={{
+                    width: `${overlayWidthRem}rem`,
+                    transform: overlayOpen
+                      ? "translateX(0)"
+                      : "translateX(100%)",
+                    transition: "transform 200ms ease",
+                  }}
                 >
                   <Sidebar />
                 </div>

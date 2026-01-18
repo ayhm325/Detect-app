@@ -1,17 +1,17 @@
-  {
-    "ageSuffix": "سنة",
-    "genderSuffix": "",
-    "genders": {
-      "male": "ذكر",
-      "female": "أنثى"
-    },
-    "filters": {
-      "all": "الكل",
-      "stable": "مستقر",
-      "critical": "حرج",
-      "recovering": "يتعافى"
-    },
-    "title": "مرضاي",
+{
+  "ageSuffix": "سنة",
+  "genderSuffix": "",
+  "genders": {
+    "male": "ذكر",
+    "female": "أنثى"
+  },
+  "filters": {
+    "all": "الكل",
+    "stable": "مستقر",
+    "critical": "حرج",
+    "recovering": "يتعافى"
+  },
+  "title": "مرضاي",
   "subtitle": "قائمة المرضى المسجلين لديك",
   "searchPlaceholder": "ابحث عن مريض",
   "addButton": "إضافة مريض",

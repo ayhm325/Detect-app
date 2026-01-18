@@ -2,13 +2,9 @@
 // Pure mock model — Image -> Result
 // Async, simulates inference delay and returns a value that must conform to the contract.
 
-import crypto from 'crypto';
+import crypto from "crypto";
 
-const POSSIBLE_PREDICTIONS = [
-  "Pneumonia",
-  "Normal",
-  "COVID-19"
-];
+const POSSIBLE_PREDICTIONS = ["Pneumonia", "Normal", "COVID-19"];
 
 function randomPrediction() {
   const index = Math.floor(Math.random() * POSSIBLE_PREDICTIONS.length);
@@ -20,17 +16,18 @@ function randomConfidence() {
 }
 
 function _uuid() {
-  if (crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+  if (crypto && typeof crypto.randomUUID === "function")
+    return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
 
 export async function runMockModel(imageBuffer) {
   const startTime = Date.now();
-  await new Promise(resolve => setTimeout(resolve, 600));
+  await new Promise((resolve) => setTimeout(resolve, 600));
 
   const prediction = randomPrediction();
   const confidence = randomConfidence();
@@ -43,9 +40,10 @@ export async function runMockModel(imageBuffer) {
     confidence,
     explanation: "Mock analysis based on simulated pattern recognition.",
     // small transparent 1x1 PNG data URL to avoid missing static asset during development
-    heatmap_url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=",
+    heatmap_url:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=",
     model_version: "mock-v1",
     inference_time_ms: endTime - startTime,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
 }

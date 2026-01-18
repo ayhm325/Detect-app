@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -6,7 +5,6 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useTheme } from "../theme-provider";
-import dynamic from "next/dynamic";
 
 export default function HeroSection() {
   const t = useTranslations("hero");
@@ -24,7 +22,7 @@ export default function HeroSection() {
     { src: "/icons/hero3.jpeg" },
   ];
   const generateParticles = () =>
-    [...Array(20)].map((_, i) => ({
+    Array.from({ length: 20 }, (_, i) => ({
       id: i,
       width: Math.random() * 200 + 50,
       height: Math.random() * 200 + 50,
@@ -59,8 +57,9 @@ export default function HeroSection() {
 
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const heroLightBg = '#F0FAF4';
-  const heroGreenShadow = '0 24px 80px rgba(34,197,94,0.14), 0 6px 24px rgba(34,197,94,0.08)';
+  const heroLightBg = "#F0FAF4";
+  const heroGreenShadow =
+    "0 24px 80px rgba(34,197,94,0.14), 0 6px 24px rgba(34,197,94,0.08)";
 
   return (
     <section
@@ -105,7 +104,13 @@ export default function HeroSection() {
               className="relative p-4 sm:p-5 rounded-3xl card-glass shadow-2xl transform group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300"
               style={isDark ? undefined : { boxShadow: heroGreenShadow }}
             >
-              <Image src={icon.src} alt={icon.alt} width={48} height={48} className="sm:w-14 sm:h-14 drop-shadow-2xl" />
+              <Image
+                src={icon.src}
+                alt={icon.alt}
+                width={48}
+                height={48}
+                className="sm:w-14 sm:h-14 drop-shadow-2xl"
+              />
             </div>
           </div>
         ))}
@@ -146,10 +151,21 @@ export default function HeroSection() {
                 <div
                   key={i}
                   className="p-4 rounded-2xl card-glass shadow-sm"
-                  style={isDark ? undefined : { backgroundColor: heroLightBg, boxShadow: heroGreenShadow }}
+                  style={
+                    isDark
+                      ? undefined
+                      : {
+                          backgroundColor: heroLightBg,
+                          boxShadow: heroGreenShadow,
+                        }
+                  }
                 >
-                  <div className="text-xl sm:text-2xl font-black brand-gradient-text mb-1">{stat.number}</div>
-                  <div className="text-xs text-(--ui-muted-foreground) font-semibold">{stat.label}</div>
+                  <div className="text-xl sm:text-2xl font-black brand-gradient-text mb-1">
+                    {stat.number}
+                  </div>
+                  <div className="text-xs text-(--ui-muted-foreground) font-semibold">
+                    {stat.label}
+                  </div>
                 </div>
               ))}
             </div>
@@ -159,9 +175,19 @@ export default function HeroSection() {
           <div className="w-full md:w-1/2">
             <div className="sm:hidden grid grid-cols-1 gap-4 mb-4">
               {heroImages.map((img, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden shadow-lg bg-(--ui-surface-2)" style={isDark ? undefined : { boxShadow: heroGreenShadow }}>
+                <div
+                  key={i}
+                  className="rounded-2xl overflow-hidden shadow-lg bg-(--ui-surface-2)"
+                  style={isDark ? undefined : { boxShadow: heroGreenShadow }}
+                >
                   <div className="relative w-full h-44">
-                    <Image src={img.src} alt={`Hero ${i + 1}`} fill sizes="100vw" className="object-cover" />
+                    <Image
+                      src={img.src}
+                      alt={`Hero ${i + 1}`}
+                      fill
+                      sizes="100vw"
+                      className="object-cover"
+                    />
                   </div>
                 </div>
               ))}
@@ -170,22 +196,49 @@ export default function HeroSection() {
             {/* Desktop layout: large left image + two stacked on the right (left height = sum of two right images) */}
             <div className="hidden sm:grid grid-cols-2 gap-6 items-start h-72 md:h-88 lg:h-112">
               {/* Large image (spans left column) */}
-              <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full" style={isDark ? undefined : { boxShadow: heroGreenShadow }}>
+              <div
+                className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full"
+                style={isDark ? undefined : { boxShadow: heroGreenShadow }}
+              >
                 <div className="relative w-full h-full">
-                  <Image src={heroImages[0].src} alt={`Hero 1`} fill sizes="(max-width: 1024px) 60vw, 720px" className="object-cover" />
+                  <Image
+                    src={heroImages[0].src}
+                    alt={`Hero 1`}
+                    fill
+                    sizes="(max-width: 1024px) 60vw, 720px"
+                    className="object-cover"
+                  />
                 </div>
               </div>
 
               {/* Right column: two stacked images, each half of the container */}
               <div className="grid grid-rows-2 gap-6 h-full">
-                <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full" style={isDark ? undefined : { boxShadow: heroGreenShadow }}>
+                <div
+                  className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full"
+                  style={isDark ? undefined : { boxShadow: heroGreenShadow }}
+                >
                   <div className="relative w-full h-full">
-                    <Image src={heroImages[1].src} alt={`Hero 2`} fill sizes="(max-width: 1024px) 30vw, 360px" className="object-cover" />
+                    <Image
+                      src={heroImages[1].src}
+                      alt={`Hero 2`}
+                      fill
+                      sizes="(max-width: 1024px) 30vw, 360px"
+                      className="object-cover"
+                    />
                   </div>
                 </div>
-                <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full" style={isDark ? undefined : { boxShadow: heroGreenShadow }}>
+                <div
+                  className="rounded-2xl overflow-hidden shadow-2xl transform hover:-translate-y-2 hover:scale-105 h-full"
+                  style={isDark ? undefined : { boxShadow: heroGreenShadow }}
+                >
                   <div className="relative w-full h-full">
-                    <Image src={heroImages[2].src} alt={`Hero 3`} fill sizes="(max-width: 1024px) 30vw, 360px" className="object-cover" />
+                    <Image
+                      src={heroImages[2].src}
+                      alt={`Hero 3`}
+                      fill
+                      sizes="(max-width: 1024px) 30vw, 360px"
+                      className="object-cover"
+                    />
                   </div>
                 </div>
               </div>
@@ -196,8 +249,18 @@ export default function HeroSection() {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <svg className="w-6 h-6 text-(--ui-muted-foreground)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        <svg
+          className="w-6 h-6 text-(--ui-muted-foreground)"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 14l-7 7m0 0l-7-7m7 7V3"
+          />
         </svg>
       </div>
     </section>

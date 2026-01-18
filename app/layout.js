@@ -1,15 +1,24 @@
-import React from 'react';
+import React from "react";
 import "./globals.css";
 import { ToastProvider } from "./components/ui/ToastProvider";
 
 import { geistSans, geistMono } from "./fonts";
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000",
+  ),
   title: "Detect AI - AI-powered medical imaging analysis",
   description:
     "An AI system for medical image analysis with fast results and high accuracy.",
-  keywords: ["AI", "medical imaging", "diagnosis", "X-ray", "analysis", "health"],
+  keywords: [
+    "AI",
+    "medical imaging",
+    "diagnosis",
+    "X-ray",
+    "analysis",
+    "health",
+  ],
   authors: [{ name: "Detect AI Team" }],
   creator: "Detect AI",
   publisher: "Detect AI",
@@ -39,7 +48,6 @@ export const metadata = {
   },
 };
 
-
 export function generateViewport() {
   return {
     width: "device-width",
@@ -47,7 +55,6 @@ export function generateViewport() {
     maximumScale: 5,
   };
 }
-
 
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
@@ -59,9 +66,17 @@ export default async function RootLayout({ children, params }) {
   const dir = locale === "ar" ? "rtl" : "ltr";
   const messages = await getMessages();
   return (
-    <html suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`} lang={locale} dir={dir} data-scroll-behavior="smooth">
+    <html
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      lang={locale}
+      dir={dir}
+      data-scroll-behavior="smooth"
+    >
       <body>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
           try {
             if (typeof window === 'undefined' || typeof document === 'undefined') return;
             var key = 'app-theme';
@@ -77,8 +92,12 @@ export default async function RootLayout({ children, params }) {
             root.classList.add(theme);
             root.setAttribute('data-theme', theme);
           } catch (e) {}
-        })();` }} />
-        <script dangerouslySetInnerHTML={{ __html: `(function(){
+        })();`,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
           try {
             if (typeof window === 'undefined') return;
             const OrigWS = window.WebSocket;
@@ -100,18 +119,20 @@ export default async function RootLayout({ children, params }) {
             try { window.WebSocket.prototype = OrigWS.prototype; } catch(e) {}
             ['CONNECTING','OPEN','CLOSING','CLOSED'].forEach(k=>{ try{ window.WebSocket[k]=OrigWS[k]; }catch(e){} });
           } catch(e) {}
-        })();` }} />
+        })();`,
+          }}
+        />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LocaleProvider>
             <ThemeProvider>
-                <ToastProvider>
-                  {children}
-                </ToastProvider>
+              <ToastProvider>{children}</ToastProvider>
             </ThemeProvider>
           </LocaleProvider>
         </NextIntlClientProvider>
 
-        <script dangerouslySetInnerHTML={{ __html: `(function(){
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
           try {
             if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
@@ -177,7 +198,9 @@ export default async function RootLayout({ children, params }) {
             });
             observer.observe(document.documentElement, { childList: true, subtree: true });
           } catch (e) {}
-        })();` }} />
+        })();`,
+          }}
+        />
       </body>
     </html>
   );

@@ -1,31 +1,31 @@
 "use client";
-import React, { useMemo, useState } from 'react';
-import ChatList from './ChatList';
-import ChatMessage from './ChatMessage';
-import ChatInput from './ChatInput';
-import ChatAttachments from './ChatAttachments';
-import styles from './ChatPanel.module.css';
+import React, { useMemo, useState } from "react";
+import ChatList from "./ChatList";
+import ChatMessage from "./ChatMessage";
+import ChatInput from "./ChatInput";
+import ChatAttachments from "./ChatAttachments";
+import styles from "./ChatPanel.module.css";
 
-import { useLocale, useTranslations } from 'next-intl';
-import { formatTime } from '@/app/lib/date';
+import { useLocale, useTranslations } from "next-intl";
+import { formatTime } from "@/app/lib/date";
 
 export default function ChatPanel() {
   const locale = useLocale();
-  const ui = useTranslations('ui');
-  const t = useTranslations('doctorChat');
+  const ui = useTranslations("ui");
+  const t = useTranslations("doctorChat");
 
   const initialChats = useMemo(() => {
-    const items = t.raw('items');
+    const items = t.raw("items");
     if (!Array.isArray(items)) return [];
 
     return items.map((item, index) => {
-      const patientName = item?.patientName || ui('placeholder');
+      const patientName = item?.patientName || ui("placeholder");
       const messages = Array.isArray(item?.messages)
         ? item.messages.map((m, messageIndex) => ({
             id: messageIndex + 1,
-            sender: messageIndex % 2 === 0 ? 'patient' : 'doctor',
-            text: m?.text || ui('placeholder'),
-            time: m?.time || ui('placeholder'),
+            sender: messageIndex % 2 === 0 ? "patient" : "doctor",
+            text: m?.text || ui("placeholder"),
+            time: m?.time || ui("placeholder"),
           }))
         : [];
 
@@ -33,7 +33,7 @@ export default function ChatPanel() {
         id: index + 1,
         patient: {
           name: patientName,
-          profileImage: '/default-patient.png',
+          profileImage: "/default-patient.png",
         },
         messages,
       };
@@ -41,7 +41,9 @@ export default function ChatPanel() {
   }, [t, ui]);
 
   const [chats, setChats] = useState(initialChats);
-  const [selectedChatId, setSelectedChatId] = useState(() => (initialChats[0]?.id ? initialChats[0].id : null));
+  const [selectedChatId, setSelectedChatId] = useState(() =>
+    initialChats[0]?.id ? initialChats[0].id : null,
+  );
   const [attachments, setAttachments] = useState([]);
 
   const selectedChat = chats.find((c) => c.id === selectedChatId);
@@ -50,7 +52,11 @@ export default function ChatPanel() {
     if (!selectedChatId) return;
 
     const nowIso = new Date().toISOString();
-    const time = formatTime(nowIso, locale === 'en' ? 'en' : 'ar', ui('placeholder'));
+    const time = formatTime(
+      nowIso,
+      locale === "en" ? "en" : "ar",
+      ui("placeholder"),
+    );
 
     setChats((prev) =>
       prev.map((chat) => {
@@ -63,13 +69,13 @@ export default function ChatPanel() {
             ...(chat.messages || []),
             {
               id: nextId,
-              sender: 'doctor',
+              sender: "doctor",
               text: msg,
               time,
             },
           ],
         };
-      })
+      }),
     );
   };
 
@@ -79,12 +85,20 @@ export default function ChatPanel() {
 
   return (
     <div className={styles.panel}>
-      <ChatList chats={chats} selectedId={selectedChatId} onSelect={setSelectedChatId} />
+      <ChatList
+        chats={chats}
+        selectedId={selectedChatId}
+        onSelect={setSelectedChatId}
+      />
       <div className={styles.chatWindow}>
         <div className={styles.messages}>
           {selectedChat?.messages?.map((msg) => (
-            <ChatMessage key={msg.id} message={msg} patient={selectedChat.patient} />
-          )) || <div>{t('selectChatPrompt')}</div>}
+            <ChatMessage
+              key={msg.id}
+              message={msg}
+              patient={selectedChat.patient}
+            />
+          )) || <div>{t("selectChatPrompt")}</div>}
         </div>
         <ChatAttachments attachments={attachments} onAttach={handleAttach} />
         <ChatInput onSend={handleSend} />

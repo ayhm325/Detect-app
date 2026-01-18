@@ -31,7 +31,23 @@ app.add_middleware(
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "..", "backend", "best_densenet121_xray.pth")
+# Prefer consolidated models directory, fallback to backend or repo root
+FALLBACK_PATHS = [
+    os.path.join(BASE_DIR, '..', 'ai', 'models', 'best_densenet121_xray.pth'),
+    os.path.join(BASE_DIR, '..', 'backend', 'best_densenet121_xray.pth'),
+    os.path.join(BASE_DIR, '..', 'best_densenet121_xray.pth'),
+]
+
+MODEL_PATH = None
+for p in FALLBACK_PATHS:
+    p = os.path.normpath(p)
+    if os.path.exists(p):
+        MODEL_PATH = p
+        break
+
+if MODEL_PATH is None:
+    MODEL_PATH = os.path.join(BASE_DIR, '..', 'backend', 'best_densenet121_xray.pth')
+    print('WARNING: model not found in ai/models; using', MODEL_PATH)
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 HEATMAP_DIR = os.path.join(STATIC_DIR, "heatmaps")
 

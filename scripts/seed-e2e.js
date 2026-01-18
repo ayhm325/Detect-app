@@ -1,4 +1,4 @@
-import prisma from '../lib/prismaClient.js';
+import prisma from "../lib/prismaClient.js";
 
 async function seedE2E() {
   try {
@@ -7,9 +7,9 @@ async function seedE2E() {
     const doctorUser = await prisma.user.create({
       data: {
         email: doctorEmail,
-        password: 'changeme',
-        fullName: 'E2E Doctor',
-        role: 'doctor',
+        password: "changeme",
+        fullName: "E2E Doctor",
+        role: "doctor",
         isActive: true,
       },
     });
@@ -20,7 +20,7 @@ async function seedE2E() {
         userId: doctorUser.id,
         phone: doctorPhone,
         licenseNumber: `LIC-${Math.floor(Math.random() * 100000)}`,
-        status: 'active',
+        status: "active",
       },
     });
 
@@ -29,9 +29,9 @@ async function seedE2E() {
     const patientUser = await prisma.user.create({
       data: {
         email: patientEmail,
-        password: 'changeme',
-        fullName: 'E2E Patient',
-        role: 'patient',
+        password: "changeme",
+        fullName: "E2E Patient",
+        role: "patient",
         isActive: true,
       },
     });
@@ -43,7 +43,7 @@ async function seedE2E() {
         email: patientUser.email,
         doctorId: doctor.userId,
         phone: `05${Math.floor(100000000 + Math.random() * 899999999)}`,
-        status: 'active',
+        status: "active",
       },
     });
 
@@ -61,9 +61,16 @@ async function seedE2E() {
     const patientsCount = await prisma.patient.count();
     const chatsCount = await prisma.chat.count();
 
-    console.log(JSON.stringify({ doctorUserId: doctor.userId, patientId: patient.id, chatId: chat.id, counts: { usersCount, doctorsCount, patientsCount, chatsCount } }));
+    console.log(
+      JSON.stringify({
+        doctorUserId: doctor.userId,
+        patientId: patient.id,
+        chatId: chat.id,
+        counts: { usersCount, doctorsCount, patientsCount, chatsCount },
+      }),
+    );
   } catch (e) {
-    console.error('seed-e2e error', e && e.message ? e.message : e);
+    console.error("seed-e2e error", e && e.message ? e.message : e);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

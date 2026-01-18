@@ -71,7 +71,15 @@
   "calendar": {
     "title": "Appointments calendar",
     "addAppointment": "Add appointment",
-    "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    "days": [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
     "filters": {
       "patientPlaceholder": "Patient name",
       "allStatuses": "All statuses"

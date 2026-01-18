@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import AnalysisDetailsModal from "../../../components/analysis/AnalysisDetailsModal";
+import AnalysisDetailsModal from "../../components/analysis/AnalysisDetailsModal";
 import { useTranslations } from "next-intl";
 
 // Modern confidence bar with gradient + glow
@@ -11,8 +11,8 @@ function ConfidenceBar({ confidence = 0, label, labelTitle }) {
     pct >= 75
       ? "from-(--ui-success) to-(--ui-ring)"
       : pct >= 50
-      ? "from-(--ui-warning) to-(--ui-ring)"
-      : "from-(--ui-danger) to-(--ui-ring)";
+        ? "from-(--ui-warning) to-(--ui-ring)"
+        : "from-(--ui-danger) to-(--ui-ring)";
 
   return (
     <div>
@@ -143,10 +143,11 @@ export default function AnalysisPage() {
 
     const formData = new FormData();
     formData.append("image", selectedImage);
-    formData.append("with_heatmap", 'true');
+    formData.append("with_heatmap", "true");
 
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
       setUploadProgress(0);
       const xhr = new XMLHttpRequest();
       xhrRef.current = xhr;
@@ -199,7 +200,8 @@ export default function AnalysisPage() {
     }
   };
 
-  const formatMB = (bytes) => (bytes ? (bytes / 1024 / 1024).toFixed(2) : "0.00");
+  const formatMB = (bytes) =>
+    bytes ? (bytes / 1024 / 1024).toFixed(2) : "0.00";
   const formatEta = () => {
     if (!uploadLoaded || !uploadTotal || !uploadStartTime) return null;
     const now = Date.now();
@@ -221,11 +223,15 @@ export default function AnalysisPage() {
             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight brand-gradient-text">
               {t("analysis.title")}
             </h1>
-            <p className="mt-2 text-base text-(--ui-muted-foreground)">{t("analysis.subtitle")}</p>
+            <p className="mt-2 text-base text-(--ui-muted-foreground)">
+              {t("analysis.subtitle")}
+            </p>
           </div>
           <div className="text-right">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-(--ui-surface-2)/40 shadow-sm border border-(--ui-border)">
-              <span className="text-sm text-(--ui-muted-foreground)">{t("analysis.badge")}</span>
+              <span className="text-sm text-(--ui-muted-foreground)">
+                {t("analysis.badge")}
+              </span>
             </div>
           </div>
         </header>
@@ -264,8 +270,17 @@ export default function AnalysisPage() {
             <div className="rounded-3xl overflow-hidden card-glass transition-transform duration-300 hover:scale-[1.01]">
               <div className="p-4">
                 {previewUrl ? (
-                  <div className="relative w-full hover:scale-105 transition-transform duration-300" style={{ paddingBottom: "75%" }}>
-                    <Image src={previewUrl} alt={t("analysis.preview.alt") } fill className="object-cover absolute inset-0 rounded-xl" unoptimized />
+                  <div
+                    className="relative w-full hover:scale-105 transition-transform duration-300"
+                    style={{ paddingBottom: "75%" }}
+                  >
+                    <Image
+                      src={previewUrl}
+                      alt={t("analysis.preview.alt")}
+                      fill
+                      className="object-cover absolute inset-0 rounded-xl"
+                      unoptimized
+                    />
                   </div>
                 ) : (
                   <div className="w-full h-60 flex items-center justify-center bg-(--ui-surface-2)/40 text-(--ui-muted-foreground)">
@@ -275,9 +290,12 @@ export default function AnalysisPage() {
               </div>
 
               <div className="p-4 flex items-center justify-between">
-                <div className="text-base text-(--ui-muted-foreground) truncate">{selectedImage ? `${selectedImage.name}` : t("analysis.preview.noFile")}</div>
-                <div className="flex gap-3">                  
+                <div className="text-base text-(--ui-muted-foreground) truncate">
+                  {selectedImage
+                    ? `${selectedImage.name}`
+                    : t("analysis.preview.noFile")}
                 </div>
+                <div className="flex gap-3"></div>
               </div>
             </div>
 
@@ -290,7 +308,9 @@ export default function AnalysisPage() {
                   : "btn-gradient hover:scale-105"
               }`}
             >
-              {isLoading ? t("analysis.actions.analyzing") : t("analysis.actions.analyze")}
+              {isLoading
+                ? t("analysis.actions.analyzing")
+                : t("analysis.actions.analyze")}
             </button>
 
             {uploadProgress !== null && (
@@ -305,11 +325,17 @@ export default function AnalysisPage() {
                     aria-valuemax={100}
                   />
                   <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-(--ui-foreground) drop-shadow-sm">
-                    {uploadProgress}% • {formatMB(uploadLoaded)} MB / {formatMB(uploadTotal)} MB {formatEta() && `• ${t("analysis.progress.etaLabel")}: ${formatEta()}`}
+                    {uploadProgress}% • {formatMB(uploadLoaded)} MB /{" "}
+                    {formatMB(uploadTotal)} MB{" "}
+                    {formatEta() &&
+                      `• ${t("analysis.progress.etaLabel")}: ${formatEta()}`}
                   </div>
                 </div>
                 <div className="mt-2 text-right">
-                  <button onClick={handleCancelUpload} className="text-xs text-(--ui-danger) underline">
+                  <button
+                    onClick={handleCancelUpload}
+                    className="text-xs text-(--ui-danger) underline"
+                  >
                     {t("analysis.actions.cancelUpload")}
                   </button>
                 </div>
@@ -318,42 +344,70 @@ export default function AnalysisPage() {
           </div>
 
           {/* Results */}
-          <div className={`space-y-4 transition-all duration-700 ease-out transform ${resultsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
-            {analysisResult && (analysisResult.heatmap_url || analysisResult.heatmapUrl) && (
-              <div className="mb-2">
-                <h3 className="text-md font-semibold mb-2">{t("analysis.results.heatmap")}</h3>
-                <div className="rounded-3xl overflow-hidden card-glass shadow-sm p-4">
-                  <button type="button" onClick={() => setShowModal(true)} style={{ border: 'none', padding: 0, background: 'transparent' }} className="block w-full">
-                    <div className="relative" style={{ paddingBottom: '75%' }}>
-                      <Image
-                        src={analysisResult.heatmap_url ?? analysisResult.heatmapUrl}
-                        alt={t("analysis.results.heatmap")}
-                        fill
-                        className="object-cover rounded-xl absolute inset-0"
-                        unoptimized
-                      />
-                    </div>
-                  </button>
+          <div
+            className={`space-y-4 transition-all duration-700 ease-out transform ${resultsVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}
+          >
+            {analysisResult &&
+              (analysisResult.heatmap_url || analysisResult.heatmapUrl) && (
+                <div className="mb-2">
+                  <h3 className="text-md font-semibold mb-2">
+                    {t("analysis.results.heatmap")}
+                  </h3>
+                  <div className="rounded-3xl overflow-hidden card-glass shadow-sm p-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowModal(true)}
+                      style={{
+                        border: "none",
+                        padding: 0,
+                        background: "transparent",
+                      }}
+                      className="block w-full"
+                    >
+                      <div
+                        className="relative"
+                        style={{ paddingBottom: "75%" }}
+                      >
+                        <Image
+                          src={
+                            analysisResult.heatmap_url ??
+                            analysisResult.heatmapUrl
+                          }
+                          alt={t("analysis.results.heatmap")}
+                          fill
+                          className="object-cover rounded-xl absolute inset-0"
+                          unoptimized
+                        />
+                      </div>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
             {error && <p className="text-(--ui-danger) font-medium">{error}</p>}
 
             {analysisResult && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className={`p-6 rounded-3xl shadow-xl hover:scale-102 hover:shadow-2xl transition-transform duration-300
-                  ${analysisResult?.needs_review
-                    ? 'bg-(--ui-warning-bg) border border-(--ui-warning-border)'
-                    : (String(analysisResult.prediction).toLowerCase().includes("normal")
-                        ? 'bg-green-600 border-green-700 text-white font-bold'
-                        : (String(analysisResult.prediction).toLowerCase().includes("pneumonia")
-                          ? 'bg-red-600 border-red-700 text-white font-bold'
-                          : 'bg-(--ui-danger-bg) border border-(--ui-danger-border) font-bold')
-                      )
+                <div
+                  className={`p-6 rounded-3xl shadow-xl hover:scale-102 hover:shadow-2xl transition-transform duration-300
+                  ${
+                    analysisResult?.needs_review
+                      ? "bg-(--ui-warning-bg) border border-(--ui-warning-border)"
+                      : String(analysisResult.prediction)
+                            .toLowerCase()
+                            .includes("normal")
+                        ? "bg-green-600 border-green-700 text-white font-bold"
+                        : String(analysisResult.prediction)
+                              .toLowerCase()
+                              .includes("pneumonia")
+                          ? "bg-red-600 border-red-700 text-white font-bold"
+                          : "bg-(--ui-danger-bg) border border-(--ui-danger-border) font-bold"
                   }
-                `}>
+                `}
+                >
                   <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold mb-3 text-white">{t("analysis.results.diagnosis")}</h2>
+                    <h2 className="text-2xl font-bold mb-3 text-white">
+                      {t("analysis.results.diagnosis")}
+                    </h2>
                     {analysisResult?.needs_review && (
                       <span className="ml-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-(--ui-warning-bg) text-(--ui-foreground) text-sm font-semibold border border-(--ui-warning-border)">
                         ⚠ {t("analysis.results.needsReview")}
@@ -361,39 +415,60 @@ export default function AnalysisPage() {
                     )}
                   </div>
 
-                  <p className={`text-white text-center font-bold ${String(analysisResult.prediction).toLowerCase().includes("normal") || String(analysisResult.prediction).toLowerCase().includes("pneumonia") ? "text-3xl" : "text-lg"}`}>
+                  <p
+                    className={`text-white text-center font-bold ${String(analysisResult.prediction).toLowerCase().includes("normal") || String(analysisResult.prediction).toLowerCase().includes("pneumonia") ? "text-3xl" : "text-lg"}`}
+                  >
                     {analysisResult.display_label ?? analysisResult.prediction}
                   </p>
-                  {savedToHistory && <p className="text-white mt-3 font-bold text-center">{t("analysis.results.savedToHistory")}</p>}
+                  {savedToHistory && (
+                    <p className="text-white mt-3 font-bold text-center">
+                      {t("analysis.results.savedToHistory")}
+                    </p>
+                  )}
                 </div>
 
                 <div className="p-6 rounded-3xl shadow-xl card-glass hover:scale-102 transition-transform duration-300">
-                  <h2 className="text-2xl font-semibold mb-3 text-(--ui-foreground)">{t("analysis.results.confidence")}</h2>
+                  <h2 className="text-2xl font-semibold mb-3 text-(--ui-foreground)">
+                    {t("analysis.results.confidence")}
+                  </h2>
                   <ConfidenceBar
                     confidence={analysisResult.confidence}
                     label={t("analysis.results.confidence")}
                     labelTitle={t("analysis.results.confidenceTitle")}
                   />
                   {analysisResult.explanation && (
-                    <p className="mt-4 text-(--ui-muted-foreground) text-sm"><strong>{t("analysis.results.explanationLabel")}:</strong> {analysisResult.explanation}</p>
+                    <p className="mt-4 text-(--ui-muted-foreground) text-sm">
+                      <strong>{t("analysis.results.explanationLabel")}:</strong>{" "}
+                      {analysisResult.explanation}
+                    </p>
                   )}
                 </div>
               </div>
             )}
 
-            {analysisResult && !(analysisResult.heatmap_url || analysisResult.heatmapUrl) && (
-              <div className="mt-2">
-                <h1 className="text-md font-semibold mb-2">{t("analysis.results.heatmap")}</h1>
-                <div className="w-full h-72 rounded-3xl border border-dashed border-(--ui-border) flex items-center justify-center bg-(--ui-surface-2)/40">
-                  <span className="text-(--ui-muted-foreground) text-lg">{t("analysis.results.noHeatmap")}</span>
+            {analysisResult &&
+              !(analysisResult.heatmap_url || analysisResult.heatmapUrl) && (
+                <div className="mt-2">
+                  <h1 className="text-md font-semibold mb-2">
+                    {t("analysis.results.heatmap")}
+                  </h1>
+                  <div className="w-full h-72 rounded-3xl border border-dashed border-(--ui-border) flex items-center justify-center bg-(--ui-surface-2)/40">
+                    <span className="text-(--ui-muted-foreground) text-lg">
+                      {t("analysis.results.noHeatmap")}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
 
         {showModal && (
-          <AnalysisDetailsModal record={analysisResult} saved={savedToHistory} saveError={analysisResult?.saveError} onClose={() => setShowModal(false)} />
+          <AnalysisDetailsModal
+            record={analysisResult}
+            saved={savedToHistory}
+            saveError={analysisResult?.saveError}
+            onClose={() => setShowModal(false)}
+          />
         )}
       </div>
     </div>

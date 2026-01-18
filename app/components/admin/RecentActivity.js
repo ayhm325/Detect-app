@@ -25,7 +25,7 @@ export default function RecentActivity() {
     <div className="card-glass p-6 border border-(--ui-border) mt-8">
       <h3 className="font-bold text-lg mb-4 text-foreground">{title}</h3>
       <ul className="space-y-3">
-        {activities.map(act => (
+        {activities.map((act) => (
           <li key={act.id} className="flex justify-between text-foreground">
             <span>{act.text}</span>
             <span className="text-xs text-(--ui-muted-2)">{act.time}</span>

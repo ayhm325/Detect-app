@@ -7,7 +7,7 @@ export default function LogoutPage() {
   const pathname = usePathname();
   const locale = pathname?.startsWith("/en") ? "en" : "ar";
   const basePrefix = locale === "en" ? "/en" : "/ar";
-  
+
   useEffect(() => {
     // Clear admin session data
     if (typeof window !== "undefined") {

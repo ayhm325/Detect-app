@@ -1,10 +1,10 @@
-import prisma from '../lib/prismaClient.js';
-import { randomUUID } from 'crypto';
+import prisma from "../lib/prismaClient.js";
+import { randomUUID } from "crypto";
 
 async function backfill() {
   try {
     const patients = await prisma.patient.findMany();
-    console.log('Found', patients.length, 'patients');
+    console.log("Found", patients.length, "patients");
 
     for (const p of patients) {
       const updates = {};
@@ -32,15 +32,15 @@ async function backfill() {
         let whereClause = '"userId" = $' + paramIndex;
         params.push(p.userId);
 
-        const sql = `UPDATE "Patient" SET ${setParts.join(', ')} WHERE ${whereClause}`;
+        const sql = `UPDATE "Patient" SET ${setParts.join(", ")} WHERE ${whereClause}`;
         await prisma.$executeRawUnsafe(sql, ...params);
-        console.log('Backfilled patient (raw SQL)', p.userId || p.id, updates);
+        console.log("Backfilled patient (raw SQL)", p.userId || p.id, updates);
       }
     }
 
-    console.log('Backfill complete');
+    console.log("Backfill complete");
   } catch (e) {
-    console.error('Backfill error:', e);
+    console.error("Backfill error:", e);
   } finally {
     await prisma.$disconnect();
   }

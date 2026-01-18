@@ -37,7 +37,7 @@ function ensureNamespace(namespace) {
       fs.writeFileSync(
         file,
         JSON.stringify({ __AUTO__: "TODO" }, null, 2),
-        "utf8"
+        "utf8",
       );
       console.log(`✅ Created ${lang}/${namespace}.json`);
     }
@@ -45,7 +45,10 @@ function ensureNamespace(namespace) {
 }
 
 function inferNamespace(filePath) {
-  return path.basename(filePath).replace(/\.(js|jsx|ts|tsx)$/, "").toLowerCase();
+  return path
+    .basename(filePath)
+    .replace(/\.(js|jsx|ts|tsx)$/, "")
+    .toLowerCase();
 }
 
 // ---- RUN ----
@@ -67,7 +70,7 @@ files.forEach((file) => {
     modified = true;
 
     console.log(
-      `🛠 Fixed missing namespace in ${path.relative(ROOT, file)} → ${inferred}`
+      `🛠 Fixed missing namespace in ${path.relative(ROOT, file)} → ${inferred}`,
     );
 
     return `useTranslations("${inferred}")`;

@@ -53,9 +53,27 @@
     },
     "viewAll": "عرض كل الفحوصات",
     "defaults": [
-      { "id": 1, "patient": "عمر حسن", "typeKey": "xray", "dateKey": "today", "priority": "high" },
-      { "id": 2, "patient": "ليلى محمود", "typeKey": "ct", "dateKey": "today", "priority": "medium" },
-      { "id": 3, "patient": "يوسف علي", "typeKey": "mri", "dateKey": "yesterday", "priority": "low" }
+      {
+        "id": 1,
+        "patient": "عمر حسن",
+        "typeKey": "xray",
+        "dateKey": "today",
+        "priority": "high"
+      },
+      {
+        "id": 2,
+        "patient": "ليلى محمود",
+        "typeKey": "ct",
+        "dateKey": "today",
+        "priority": "medium"
+      },
+      {
+        "id": 3,
+        "patient": "يوسف علي",
+        "typeKey": "mri",
+        "dateKey": "yesterday",
+        "priority": "low"
+      }
     ]
   },
   "recentActivityTitle": "النشاط الأخير",

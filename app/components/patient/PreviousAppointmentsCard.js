@@ -3,7 +3,10 @@
 import { useTranslations } from "next-intl";
 import useLocale from "@/hooks/useLocale";
 
-export default function PreviousAppointmentsCard({ visits = [], onViewDetails }) {
+export default function PreviousAppointmentsCard({
+  visits = [],
+  onViewDetails,
+}) {
   const t = useTranslations("patient");
   const ui = useTranslations("ui");
   const { locale } = useLocale();
@@ -12,19 +15,32 @@ export default function PreviousAppointmentsCard({ visits = [], onViewDetails })
   return (
     <section className="card-glass rounded-xl border border-(--ui-border) shadow-sm">
       <header className="flex items-center justify-between border-b border-(--ui-border) p-4">
-        <h2 className="text-lg font-semibold text-(--ui-foreground)">{t("components.previousAppointments.title")}</h2>
+        <h2 className="text-lg font-semibold text-(--ui-foreground)">
+          {t("components.previousAppointments.title")}
+        </h2>
       </header>
       <ul className="divide-y divide-(--ui-border)">
         {visits.length === 0 ? (
-          <li className="p-4 text-(--ui-muted-foreground)">{t("components.previousAppointments.empty")}</li>
+          <li className="p-4 text-(--ui-muted-foreground)">
+            {t("components.previousAppointments.empty")}
+          </li>
         ) : (
           visits.map((v) => (
             <li key={v.id} className="flex items-center justify-between p-4">
               <div className="space-y-0.5">
-                <div className="text-sm text-(--ui-muted-foreground)">{t("components.previousAppointments.dateLabel")}</div>
-                <div className="text-base font-medium text-(--ui-foreground)">{formatDate(v.date, locale, placeholder)}</div>
-                <div className="text-sm text-(--ui-muted-foreground)">{v.type || placeholder}</div>
-                <div className="text-sm text-(--ui-muted-foreground)">{t("components.previousAppointments.doctorPrefix")} {v.doctorName || placeholder}</div>
+                <div className="text-sm text-(--ui-muted-foreground)">
+                  {t("components.previousAppointments.dateLabel")}
+                </div>
+                <div className="text-base font-medium text-(--ui-foreground)">
+                  {formatDate(v.date, locale, placeholder)}
+                </div>
+                <div className="text-sm text-(--ui-muted-foreground)">
+                  {v.type || placeholder}
+                </div>
+                <div className="text-sm text-(--ui-muted-foreground)">
+                  {t("components.previousAppointments.doctorPrefix")}{" "}
+                  {v.doctorName || placeholder}
+                </div>
               </div>
               <button
                 onClick={() => onViewDetails?.(v)}
@@ -43,7 +59,11 @@ export default function PreviousAppointmentsCard({ visits = [], onViewDetails })
 function formatDate(iso, locale, placeholder) {
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { year: "numeric", month: "short", day: "numeric" });
+    return d.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   } catch {
     return placeholder;
   }

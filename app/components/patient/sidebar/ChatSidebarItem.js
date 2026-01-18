@@ -9,7 +9,10 @@ export default function ChatSidebarItem() {
   const basePrefix = locale === "en" ? "/en" : "/ar";
 
   return (
-    <Link href={`${basePrefix}/patient/chat`} className="py-2 px-4 rounded hover:bg-(--ui-surface-2)/60 font-medium block text-(--ui-foreground)">
+    <Link
+      href={`${basePrefix}/patient/chat`}
+      className="py-2 px-4 rounded hover:bg-(--ui-surface-2)/60 font-medium block text-(--ui-foreground)"
+    >
       Chat with Doctor
     </Link>
   );

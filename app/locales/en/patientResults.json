@@ -5,15 +5,15 @@
     "pending": "Pending",
     "thisMonth": "This Month"
   },
-    "statusSynonyms": {
-      "ready": ["ready"],
-      "pending": ["pending", "under review", "in review"],
-      "urgent": ["urgent"]
-    },
-    "prioritySynonyms": {
-      "urgent": ["urgent"],
-      "normal": ["normal"]
-    },
+  "statusSynonyms": {
+    "ready": ["ready"],
+    "pending": ["pending", "under review", "in review"],
+    "urgent": ["urgent"]
+  },
+  "prioritySynonyms": {
+    "urgent": ["urgent"],
+    "normal": ["normal"]
+  },
   "status": {
     "ready": "ready",
     "pending": "pending"

@@ -3,13 +3,26 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useToast } from "../../../components/ui/Toast";
-import { FaFileAlt, FaXRay, FaSearch, FaFilter, FaDownload, FaEye, FaShare, FaPrint, FaTimes, FaCheckCircle, FaHourglassHalf } from "react-icons/fa";
+import { useToast } from "../../../components/ui/ToastProvider";
+import {
+  FaFileAlt,
+  FaXRay,
+  FaSearch,
+  FaFilter,
+  FaDownload,
+  FaEye,
+  FaShare,
+  FaPrint,
+  FaTimes,
+  FaCheckCircle,
+  FaHourglassHalf,
+} from "react-icons/fa";
 import { useLocale, useTranslations } from "next-intl";
+import UnifiedCard from "../../../components/ui/UnifiedCard";
 
 export default function PatientResultsPage() {
   const router = useRouter();
-  const { showToast, ToastContainer } = useToast();
+  const { showSuccess, showError, showInfo, showWarning } = useToast();
   const locale = useLocale();
   const t = useTranslations("patientResults");
 
@@ -38,7 +51,8 @@ export default function PatientResultsPage() {
           if (u.includes("mri")) return "mri";
           if (u.includes("ultra") || u.includes("us")) return "ultrasound";
           if (u.includes("lab")) return "lab";
-          if (u.includes("xray") || u.includes("x-ray") || u.includes("cxr")) return "xray";
+          if (u.includes("xray") || u.includes("x-ray") || u.includes("cxr"))
+            return "xray";
           return "xray";
         };
 
@@ -54,7 +68,10 @@ export default function PatientResultsPage() {
           const d = new Date(dt);
           if (Number.isNaN(d.getTime())) return "";
           try {
-            return d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+            return d.toLocaleTimeString(locale, {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
           } catch {
             return "";
           }
@@ -74,19 +91,31 @@ export default function PatientResultsPage() {
 
             const status = r.reviewedByDoctor ? "ready" : "pending";
             const ai = (r.aiResult || "").toString().toUpperCase();
-            const confidence = typeof r.confidenceScore === "number" ? r.confidenceScore : null;
+            const confidence =
+              typeof r.confidenceScore === "number" ? r.confidenceScore : null;
 
-            const priority = ai === "POSITIVE" && (confidence == null || confidence >= 0.7) ? "urgent" : "normal";
+            const priority =
+              ai === "POSITIVE" && (confidence == null || confidence >= 0.7)
+                ? "urgent"
+                : "normal";
 
             const aiSummary = (() => {
-              if (ai === "POSITIVE") return t("aiSummary.positive", { score: confidence == null ? "" : Math.round(confidence * 100) });
-              if (ai === "NEGATIVE") return t("aiSummary.negative", { score: confidence == null ? "" : Math.round(confidence * 100) });
+              if (ai === "POSITIVE")
+                return t("aiSummary.positive", {
+                  score: confidence == null ? "" : Math.round(confidence * 100),
+                });
+              if (ai === "NEGATIVE")
+                return t("aiSummary.negative", {
+                  score: confidence == null ? "" : Math.round(confidence * 100),
+                });
               return t("aiSummary.unknown");
             })();
 
             const findings = (() => {
-              if (ai === "POSITIVE") return [{ type: "warning", text: t("findings.positive") }];
-              if (ai === "NEGATIVE") return [{ type: "normal", text: t("findings.negative") }];
+              if (ai === "POSITIVE")
+                return [{ type: "warning", text: t("findings.positive") }];
+              if (ai === "NEGATIVE")
+                return [{ type: "normal", text: t("findings.negative") }];
               return [{ type: "info", text: t("findings.unknown") }];
             })();
 
@@ -94,18 +123,31 @@ export default function PatientResultsPage() {
               id: r.id,
               title: t("titles.default"),
               type: typeLabel,
-              typeIcon: typeKey === "xray" ? "🩻" : (typeKey === "ct" ? "🔬" : (typeKey === "mri" ? "🧲" : (typeKey === "ultrasound" ? "📡" : "📄"))),
+              typeIcon:
+                typeKey === "xray"
+                  ? "🩻"
+                  : typeKey === "ct"
+                    ? "🔬"
+                    : typeKey === "mri"
+                      ? "🧲"
+                      : typeKey === "ultrasound"
+                        ? "📡"
+                        : "📄",
               date: formatDate(r.createdAt),
               time: formatTime(r.createdAt),
               status,
               priority,
               doctor: r.doctor?.name || t("defaults.unknownDoctor"),
-              facility: r.doctor?.clinic || (r.doctor?.name ? t("defaults.clinicOfDoctor", { name: r.doctor.name }) : t("defaults.unknownFacility")),
+              facility:
+                r.doctor?.clinic ||
+                (r.doctor?.name
+                  ? t("defaults.clinicOfDoctor", { name: r.doctor.name })
+                  : t("defaults.unknownFacility")),
               aiSummary,
               findings,
               notes: r.doctorNotes || "",
               images: r.imageUrl ? [r.imageUrl] : [],
-              createdAt: r.createdAt // keep original date for sorting
+              createdAt: r.createdAt, // keep original date for sorting
             };
           })
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -120,13 +162,18 @@ export default function PatientResultsPage() {
     total: t("stats.total"),
     ready: t("stats.ready"),
     pending: t("stats.pending"),
-    thisMonth: t("stats.thisMonth")
+    thisMonth: t("stats.thisMonth"),
   };
 
-  const statusSynonyms = typeof t.raw === "function" ? (t.raw("statusSynonyms") || {}) : {};
-  const prioritySynonyms = typeof t.raw === "function" ? (t.raw("prioritySynonyms") || {}) : {};
+  const statusSynonyms =
+    typeof t.raw === "function" ? t.raw("statusSynonyms") || {} : {};
+  const prioritySynonyms =
+    typeof t.raw === "function" ? t.raw("prioritySynonyms") || {} : {};
 
-  const normalizeToken = (value) => String(value ?? "").trim().toLowerCase();
+  const normalizeToken = (value) =>
+    String(value ?? "")
+      .trim()
+      .toLowerCase();
   const tokenInList = (value, list) => {
     const token = normalizeToken(value);
     if (!token) return false;
@@ -177,29 +224,33 @@ export default function PatientResultsPage() {
       value: reports.length,
       icon: FaFileAlt,
       iconClass: "text-(--ui-info)",
-      bgClass: "bg-(--ui-info-bg)"
+      bgClass: "bg-(--ui-info-bg)",
     },
     {
       title: statsLabels.ready,
-      value: reports.filter(r => normalizeStatus(r.status) === "ready").length,
+      value: reports.filter((r) => normalizeStatus(r.status) === "ready")
+        .length,
       icon: FaCheckCircle,
       iconClass: "text-(--ui-success)",
-      bgClass: "bg-(--ui-success-bg)"
+      bgClass: "bg-(--ui-success-bg)",
     },
     {
       title: statsLabels.pending,
-      value: reports.filter(r => normalizeStatus(r.status) === "pending").length,
+      value: reports.filter((r) => normalizeStatus(r.status) === "pending")
+        .length,
       icon: FaHourglassHalf,
       iconClass: "text-(--ui-warning)",
-      bgClass: "bg-(--ui-warning-bg)"
+      bgClass: "bg-(--ui-warning-bg)",
     },
     {
       title: statsLabels.thisMonth,
-      value: reports.filter(r => new Date(r.date).getMonth() === new Date().getMonth()).length,
+      value: reports.filter(
+        (r) => new Date(r.date).getMonth() === new Date().getMonth(),
+      ).length,
       icon: FaXRay,
       iconClass: "text-(--ui-info)",
-      bgClass: "bg-(--ui-info-bg)"
-    }
+      bgClass: "bg-(--ui-info-bg)",
+    },
   ];
 
   const getStatusColor = (status) => {
@@ -253,18 +304,18 @@ export default function PatientResultsPage() {
   };
 
   const handleDownload = (reportId) => {
-    showToast(labels('toast.download'), "success");
+    showSuccess(labels("toast.download"));
   };
 
   const handleShare = (reportId) => {
-    showToast(labels('toast.share'), "success");
+    showSuccess(labels("toast.share"));
   };
 
   const handlePrint = (reportId) => {
-    showToast(labels('toast.print'), "info");
+    showInfo(labels("toast.print"));
   };
 
-  const filteredReports = reports.filter(report => {
+  const filteredReports = reports.filter((report) => {
     const q = searchQuery.toLowerCase();
     const matchesSearch =
       !q ||
@@ -272,26 +323,32 @@ export default function PatientResultsPage() {
       (report.doctor || "").toLowerCase().includes(q) ||
       (report.type || "").toLowerCase().includes(q);
     const matchesType = filterType === "all" || report.type === filterType;
-    const matchesStatus = filterStatus === "all" || normalizeStatus(report.status) === filterStatus;
+    const matchesStatus =
+      filterStatus === "all" || normalizeStatus(report.status) === filterStatus;
     return matchesSearch && matchesType && matchesStatus;
   });
 
   return (
     <>
-      <ToastContainer />
+
       <div className="min-h-screen bg-(--ui-surface) text-(--ui-foreground) p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-(--ui-foreground)">{labels("title")}</h1>
-          <p className="text-(--ui-muted-foreground) mt-2">{labels("subtitle")}</p>
+          <h1 className="text-3xl font-bold text-(--ui-foreground)">
+            {labels("title")}
+          </h1>
+          <p className="text-(--ui-muted-foreground) mt-2">
+            {labels("subtitle")}
+          </p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <div
+            <UnifiedCard
               key={index}
-              className="card-glass rounded-xl p-6 border border-(--ui-border)"
+              className="rounded-xl p-6 border border-(--ui-border)"
+              glass
             >
               <div className="flex items-center gap-4">
                 <div className={`p-3 rounded-lg ${stat.bgClass}`}>
@@ -302,12 +359,12 @@ export default function PatientResultsPage() {
                   <p className="text-3xl font-bold text-(--ui-foreground)">{stat.value}</p>
                 </div>
               </div>
-            </div>
+            </UnifiedCard>
           ))}
         </div>
 
         {/* Filters */}
-        <div className="card-glass rounded-xl p-6 mb-8 border border-(--ui-border)">
+        <UnifiedCard className="rounded-xl p-6 mb-8 border border-(--ui-border)" glass>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-(--ui-muted-foreground)" />
@@ -318,7 +375,7 @@ export default function PatientResultsPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pr-10 pl-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface) text-(--ui-foreground) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring)"
               />
-            </div>        
+            </div>
             <div className="relative">
               <FaFilter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-(--ui-muted-foreground)" />
               <select
@@ -326,40 +383,49 @@ export default function PatientResultsPage() {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="w-full pr-10 pl-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface) text-(--ui-foreground) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--ui-ring) appearance-none"
               >
-                <option value="all">{labels('filters.allStatuses')}</option>
-                <option value="ready">{labels('statuses.ready')}</option>
-                <option value="pending">{labels('statuses.pending')}</option>
+                <option value="all">{labels("filters.allStatuses")}</option>
+                <option value="ready">{labels("statuses.ready")}</option>
+                <option value="pending">{labels("statuses.pending")}</option>
               </select>
             </div>
           </div>
-        </div>
+        </UnifiedCard>
 
         {/* Reports Grid */}
         {filteredReports.length === 0 ? (
-          <div className="card-glass rounded-xl p-12 text-center border border-(--ui-border)">
+          <UnifiedCard className="rounded-xl p-12 text-center border border-(--ui-border)" glass>
             <FaFileAlt className="text-6xl text-(--ui-muted-foreground) mx-auto mb-4" />
             <p className="text-(--ui-muted-foreground) text-lg">{labels("emptyState")}</p>
-          </div>
+          </UnifiedCard>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredReports.map((report) => (
-              <div
+              <UnifiedCard
                 key={report.id}
-                className="card-glass rounded-xl p-6 border border-(--ui-border) hover:bg-(--ui-surface-2)/40 transition-colors"
+                className="rounded-xl p-6 border border-(--ui-border) hover:bg-(--ui-surface-2)/40 transition-colors"
+                glass
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start gap-3">
                     <div className="text-4xl">{report.typeIcon}</div>
                     <div>
-                      <h3 className="text-lg font-bold text-(--ui-foreground)">{report.title}</h3>
-                      <p className="text-sm text-(--ui-muted-foreground)">{report.type}</p>
+                      <h3 className="text-lg font-bold text-(--ui-foreground)">
+                        {report.title}
+                      </h3>
+                      <p className="text-sm text-(--ui-muted-foreground)">
+                        {report.type}
+                      </p>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs border font-bold drop-shadow-sm ${getStatusColor(report.status)} border-2! border-black/20! dark:border-white/30!`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs border font-bold drop-shadow-sm ${getStatusColor(report.status)} border-2! border-black/20! dark:border-white/30!`}
+                    >
                       {getStatusLabel(report.status)}
                     </span>
-                    <span className={`px-3 py-1 rounded-full text-xs border font-bold drop-shadow-sm ${getPriorityColor(report.priority)} border-2! border-black/20! dark:border-white/30!`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs border font-bold drop-shadow-sm ${getPriorityColor(report.priority)} border-2! border-black/20! dark:border-white/30!`}
+                    >
                       {getPriorityLabel(report.priority)}
                     </span>
                   </div>
@@ -367,34 +433,53 @@ export default function PatientResultsPage() {
 
                 <div className="space-y-2 mb-4 text-sm text-(--ui-muted-foreground)">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{labels('reportLabels.doctor')}</span>
+                    <span className="font-medium">
+                      {labels("reportLabels.doctor")}
+                    </span>
                     <span>{report.doctor}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{labels('reportLabels.facility')}</span>
+                    <span className="font-medium">
+                      {labels("reportLabels.facility")}
+                    </span>
                     <span>{report.facility}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{labels('reportLabels.date')}</span>
-                    <span>{report.date} - {report.time}</span>
+                    <span className="font-medium">
+                      {labels("reportLabels.date")}
+                    </span>
+                    <span>
+                      {report.date} - {report.time}
+                    </span>
                   </div>
                 </div>
 
                 {/* AI Summary */}
                 <div className="bg-(--ui-info-bg) rounded-lg p-4 mb-4 border border-(--ui-info-border)">
                   <div className="flex items-start gap-2">
-                    <span className="text-(--ui-info) font-bold text-sm">{labels('reportLabels.aiSummary')}:</span>
+                    <span className="text-(--ui-info) font-bold text-sm">
+                      {labels("reportLabels.aiSummary")}:
+                    </span>
                   </div>
-                  <p className="text-sm text-(--ui-foreground) mt-2">{report.aiSummary}</p>
+                  <p className="text-sm text-(--ui-foreground) mt-2">
+                    {report.aiSummary}
+                  </p>
                 </div>
 
                 {/* Findings */}
                 <div className="mb-4">
-                  <h4 className="font-bold text-(--ui-foreground) mb-2 text-sm">{labels('reportLabels.findings')}:</h4>
+                  <h4 className="font-bold text-(--ui-foreground) mb-2 text-sm">
+                    {labels("reportLabels.findings")}:
+                  </h4>
                   <div className="space-y-2">
                     {report.findings.map((finding, idx) => (
-                      <div key={idx} className={`flex items-start gap-2 text-sm ${getFindingColor(finding.type)}`}>
-                        <span className="font-bold">{getFindingIcon(finding.type)}</span>
+                      <div
+                        key={idx}
+                        className={`flex items-start gap-2 text-sm ${getFindingColor(finding.type)}`}
+                      >
+                        <span className="font-bold">
+                          {getFindingIcon(finding.type)}
+                        </span>
                         <span>{finding.text}</span>
                       </div>
                     ))}
@@ -404,8 +489,12 @@ export default function PatientResultsPage() {
                 {/* Notes */}
                 {report.notes && (
                   <div className="bg-(--ui-surface-2)/40 rounded-lg p-3 mb-4 border border-(--ui-border)">
-                    <p className="text-sm font-medium text-(--ui-foreground) mb-1">{labels('reportLabels.notes')}:</p>
-                    <p className="text-sm text-(--ui-muted-foreground)">{report.notes}</p>
+                    <p className="text-sm font-medium text-(--ui-foreground) mb-1">
+                      {labels("reportLabels.notes")}:
+                    </p>
+                    <p className="text-sm text-(--ui-muted-foreground)">
+                      {report.notes}
+                    </p>
                   </div>
                 )}
 
@@ -419,10 +508,10 @@ export default function PatientResultsPage() {
                     className="flex-1 btn-gradient px-4 py-2 rounded-lg text-sm flex items-center justify-center gap-2"
                   >
                     <FaEye />
-                    <span>{labels('actions.view')}</span>
+                    <span>{labels("actions.view")}</span>
                   </button>
                 </div>
-              </div>
+              </UnifiedCard>
             ))}
           </div>
         )}
@@ -430,11 +519,15 @@ export default function PatientResultsPage() {
         {/* Image Viewer Modal */}
         {showImageModal && selectedReport && (
           <div className="fixed inset-0 bg-(--color-neutral)/80 flex items-center justify-center z-50 p-4">
-            <div className="card-glass rounded-xl border border-(--ui-border) max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <UnifiedCard className="rounded-xl border border-(--ui-border) max-w-4xl w-full max-h-[90vh] overflow-y-auto" glass>
               <div className="sticky top-0 bg-(--ui-surface) border-b border-(--ui-border) p-6 flex items-center justify-between z-10">
                 <div>
-                  <h3 className="text-xl font-bold text-(--ui-foreground)">{selectedReport.title}</h3>
-                  <p className="text-sm text-(--ui-muted-foreground)">{selectedReport.type} - {selectedReport.date}</p>
+                  <h3 className="text-xl font-bold text-(--ui-foreground)">
+                    {selectedReport.title}
+                  </h3>
+                  <p className="text-sm text-(--ui-muted-foreground)">
+                    {selectedReport.type} - {selectedReport.date}
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowImageModal(false)}
@@ -443,21 +536,32 @@ export default function PatientResultsPage() {
                   <FaTimes className="text-xl text-(--ui-muted-foreground)" />
                 </button>
               </div>
-              
+
               <div className="p-6">
                 {/* AI Summary */}
                 <div className="bg-(--ui-info-bg) border border-(--ui-info-border) rounded-lg p-4 mb-6">
-                  <h4 className="font-bold text-(--ui-info) mb-2">{labels('reportLabels.aiSummary')}</h4>
-                  <p className="text-(--ui-foreground)">{selectedReport.aiSummary}</p>
+                  <h4 className="font-bold text-(--ui-info) mb-2">
+                    {labels("reportLabels.aiSummary")}
+                  </h4>
+                  <p className="text-(--ui-foreground)">
+                    {selectedReport.aiSummary}
+                  </p>
                 </div>
 
                 {/* Findings */}
                 <div className="mb-6">
-                  <h4 className="font-bold text-(--ui-foreground) mb-3">{labels('reportLabels.findings')}:</h4>
+                  <h4 className="font-bold text-(--ui-foreground) mb-3">
+                    {labels("reportLabels.findings")}:
+                  </h4>
                   <div className="space-y-2">
                     {selectedReport.findings.map((finding, idx) => (
-                      <div key={idx} className={`flex items-start gap-3 p-3 rounded-lg bg-(--ui-surface-2)/40 border border-(--ui-border) ${getFindingColor(finding.type)}`}>
-                        <span className="font-bold text-lg">{getFindingIcon(finding.type)}</span>
+                      <div
+                        key={idx}
+                        className={`flex items-start gap-3 p-3 rounded-lg bg-(--ui-surface-2)/40 border border-(--ui-border) ${getFindingColor(finding.type)}`}
+                      >
+                        <span className="font-bold text-lg">
+                          {getFindingIcon(finding.type)}
+                        </span>
                         <span>{finding.text}</span>
                       </div>
                     ))}
@@ -467,10 +571,15 @@ export default function PatientResultsPage() {
                 {/* Images */}
                 {selectedReport.images.length > 0 && (
                   <div className="mb-6">
-                    <h4 className="font-bold text-(--ui-foreground) mb-3">{t("modal.medicalImages")}</h4>
+                    <h4 className="font-bold text-(--ui-foreground) mb-3">
+                      {t("modal.medicalImages")}
+                    </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedReport.images.map((img, idx) => (
-                        <div key={idx} className="relative aspect-square bg-(--ui-surface-2) border border-(--ui-border) rounded-lg overflow-hidden">
+                        <div
+                          key={idx}
+                          className="relative aspect-square bg-(--ui-surface-2) border border-(--ui-border) rounded-lg overflow-hidden"
+                        >
                           <div className="absolute inset-0 flex items-center justify-center">
                             <FaXRay className="text-6xl text-(--ui-muted-foreground)" />
                           </div>
@@ -483,7 +592,9 @@ export default function PatientResultsPage() {
                             unoptimized
                             onError={(e) => {
                               // Hide broken images so the fallback icon shows.
-                              try { e.currentTarget.style.display = "none"; } catch {}
+                              try {
+                                e.currentTarget.style.display = "none";
+                              } catch {}
                             }}
                           />
                         </div>
@@ -494,20 +605,40 @@ export default function PatientResultsPage() {
 
                 {/* Doctor Info */}
                 <div className="bg-(--ui-surface-2)/40 border border-(--ui-border) rounded-lg p-4">
-                  <h4 className="font-bold text-(--ui-foreground) mb-2">{t("modal.doctorInformation")}</h4>
+                  <h4 className="font-bold text-(--ui-foreground) mb-2">
+                    {t("modal.doctorInformation")}
+                  </h4>
                   <div className="space-y-1 text-sm text-(--ui-muted-foreground)">
-                    <p><span className="font-medium">{labels('reportLabels.doctor')}</span> {selectedReport.doctor}</p>
-                    <p><span className="font-medium">{labels('reportLabels.facility')}</span> {selectedReport.facility}</p>
-                    <p><span className="font-medium">{labels('reportLabels.date')}</span> {selectedReport.date} - {selectedReport.time}</p>
+                    <p>
+                      <span className="font-medium">
+                        {labels("reportLabels.doctor")}
+                      </span>{" "}
+                      {selectedReport.doctor}
+                    </p>
+                    <p>
+                      <span className="font-medium">
+                        {labels("reportLabels.facility")}
+                      </span>{" "}
+                      {selectedReport.facility}
+                    </p>
+                    <p>
+                      <span className="font-medium">
+                        {labels("reportLabels.date")}
+                      </span>{" "}
+                      {selectedReport.date} - {selectedReport.time}
+                    </p>
                     {selectedReport.notes && (
                       <p className="mt-2 pt-2 border-t border-(--ui-border)">
-                        <span className="font-medium">{labels('reportLabels.notes')}:</span> {selectedReport.notes}
+                        <span className="font-medium">
+                          {labels("reportLabels.notes")}:
+                        </span>{" "}
+                        {selectedReport.notes}
                       </p>
                     )}
                   </div>
                 </div>
               </div>
-            </div>
+            </UnifiedCard>
           </div>
         )}
       </div>

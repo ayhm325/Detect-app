@@ -43,14 +43,19 @@ export default function AdminNotificationsPage() {
       setError(null);
 
       try {
-        const [unreadRes, doctorsRes, changeReqRes, notificationsRes, activitiesRes] =
-          await Promise.allSettled([
-            fetch("/api/admin/notifications-unread"),
-            fetch("/api/admin/doctors"),
-            fetch("/api/admin/doctor-change-requests"),
-            fetch("/api/admin/notifications"),
-            fetch("/api/admin/recent-activities"),
-          ]);
+        const [
+          unreadRes,
+          doctorsRes,
+          changeReqRes,
+          notificationsRes,
+          activitiesRes,
+        ] = await Promise.allSettled([
+          fetch("/api/admin/notifications-unread"),
+          fetch("/api/admin/doctors"),
+          fetch("/api/admin/doctor-change-requests"),
+          fetch("/api/admin/notifications"),
+          fetch("/api/admin/recent-activities"),
+        ]);
 
         const unreadJson =
           unreadRes.status === "fulfilled" && unreadRes.value.ok
@@ -80,7 +85,9 @@ export default function AdminNotificationsPage() {
         if (!mounted) return;
 
         const unread = Number(unreadJson?.unread || 0);
-        const badge = Number((unreadJson && (unreadJson.badge ?? unreadJson.unread)) || 0);
+        const badge = Number(
+          (unreadJson && (unreadJson.badge ?? unreadJson.unread)) || 0,
+        );
         setUnreadCount(unread);
         setBadgeCount(badge);
 
@@ -94,17 +101,32 @@ export default function AdminNotificationsPage() {
           : [];
         setPendingChangeRequestCount(pendingReqs.length);
 
-        setNotifications(Array.isArray(notificationsJson?.notifications) ? notificationsJson.notifications : []);
-        setActivities(Array.isArray(activitiesJson?.activities) ? activitiesJson.activities : []);
+        setNotifications(
+          Array.isArray(notificationsJson?.notifications)
+            ? notificationsJson.notifications
+            : [],
+        );
+        setActivities(
+          Array.isArray(activitiesJson?.activities)
+            ? activitiesJson.activities
+            : [],
+        );
 
         // If there are unread notifications, mark them read on page enter
         try {
-          const hasUnread = Array.isArray(notificationsJson?.notifications) && notificationsJson.notifications.some(n => !n.isRead);
+          const hasUnread =
+            Array.isArray(notificationsJson?.notifications) &&
+            notificationsJson.notifications.some((n) => !n.isRead);
           if (hasUnread) {
             // fire-and-forget; update UI optimistically
-            fetch('/api/admin/notifications', { method: 'PUT' }).catch(() => {});
+            fetch("/api/admin/notifications", { method: "PUT" }).catch(
+              () => {},
+            );
             // update local state to mark as read
-            if (mounted) setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            if (mounted)
+              setNotifications((prev) =>
+                prev.map((n) => ({ ...n, isRead: true })),
+              );
             setUnreadCount(0);
             setBadgeCount(0);
           }
@@ -144,10 +166,18 @@ export default function AdminNotificationsPage() {
         value: pendingChangeRequestCount,
         icon: FaExchangeAlt,
         accent: "brand-gradient",
-        onClick: () => router.push(`${basePrefix}/admin/doctor-change-requests-page`),
+        onClick: () =>
+          router.push(`${basePrefix}/admin/doctor-change-requests-page`),
       },
     ],
-    [t, unreadCount, pendingDoctorCount, pendingChangeRequestCount, router, basePrefix]
+    [
+      t,
+      unreadCount,
+      pendingDoctorCount,
+      pendingChangeRequestCount,
+      router,
+      basePrefix,
+    ],
   );
 
   const typeBadge = (type) => {
@@ -194,7 +224,9 @@ export default function AdminNotificationsPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">{t("title")}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+            {t("title")}
+          </h1>
           <p className="text-(--ui-muted-2) mt-2">{t("subtitle")}</p>
         </div>
 
@@ -224,15 +256,23 @@ export default function AdminNotificationsPage() {
             className="card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border) hover:shadow-(--shadow-lift) transition-shadow w-full text-start disabled:cursor-default"
           >
             <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-lg ${card.accent} shadow-(--shadow-soft)`}>
+              <div
+                className={`p-3 rounded-lg ${card.accent} shadow-(--shadow-soft)`}
+              >
                 <card.icon className="text-2xl text-white" />
               </div>
               <FaListAlt className="text-(--ui-muted-2)" />
             </div>
-            <h3 className="text-(--ui-muted-2) text-sm font-medium mb-2">{card.title}</h3>
-            <p className="text-3xl font-bold text-foreground">{loading ? "…" : card.value}</p>
+            <h3 className="text-(--ui-muted-2) text-sm font-medium mb-2">
+              {card.title}
+            </h3>
+            <p className="text-3xl font-bold text-foreground">
+              {loading ? "…" : card.value}
+            </p>
             {card.onClick && (
-              <p className="mt-2 text-sm text-(--ui-muted-2)">{t("summary.clickToOpen")}</p>
+              <p className="mt-2 text-sm text-(--ui-muted-2)">
+                {t("summary.clickToOpen")}
+              </p>
             )}
           </button>
         ))}
@@ -240,7 +280,9 @@ export default function AdminNotificationsPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border)">
-          <h2 className="text-xl font-bold text-foreground mb-4">{t("sections.notifications")}</h2>
+          <h2 className="text-xl font-bold text-foreground mb-4">
+            {t("sections.notifications")}
+          </h2>
 
           {loading ? (
             <div className="rounded-xl border border-(--ui-border) bg-(--ui-surface) p-6 text-(--ui-muted-2)">
@@ -277,7 +319,9 @@ export default function AdminNotificationsPage() {
                             </span>
                           )}
                         </div>
-                        <p className="text-foreground wrap-break-word">{deserializeLocalizedMessage(n.message, locale)}</p>
+                        <p className="text-foreground wrap-break-word">
+                          {deserializeLocalizedMessage(n.message, locale)}
+                        </p>
                       </div>
 
                       <div className="shrink-0 text-xs text-(--ui-muted-2) flex items-center gap-2">
@@ -293,7 +337,9 @@ export default function AdminNotificationsPage() {
         </div>
 
         <div className="card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border)">
-          <h2 className="text-xl font-bold text-foreground mb-4">{t("sections.recentActivity")}</h2>
+          <h2 className="text-xl font-bold text-foreground mb-4">
+            {t("sections.recentActivity")}
+          </h2>
 
           {loading ? (
             <div className="rounded-xl border border-(--ui-border) bg-(--ui-surface) p-6 text-(--ui-muted-2)">
@@ -306,7 +352,10 @@ export default function AdminNotificationsPage() {
           ) : (
             <div className="space-y-3">
               {activities.map((a) => (
-                <div key={a.id} className="rounded-xl border border-(--ui-border) bg-(--ui-surface) p-4">
+                <div
+                  key={a.id}
+                  className="rounded-xl border border-(--ui-border) bg-(--ui-surface) p-4"
+                >
                   <p className="text-foreground">
                     {formatActivityDescription(a, locale) || placeholder}
                   </p>

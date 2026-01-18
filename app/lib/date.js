@@ -1,15 +1,19 @@
-export function formatDateTime(iso, locale = 'ar-EG', placeholder = "") {
+export function formatDateTime(iso, locale = "ar-EG", placeholder = "") {
   if (!iso) return placeholder;
   try {
     const d = new Date(iso);
-    const l = String(locale || '').toLowerCase();
-    const resolved = l.startsWith('en') ? 'en-US' : l.startsWith('ar') ? 'ar-EG' : locale;
+    const l = String(locale || "").toLowerCase();
+    const resolved = l.startsWith("en")
+      ? "en-US"
+      : l.startsWith("ar")
+        ? "ar-EG"
+        : locale;
     return d.toLocaleString(resolved, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch (e) {
     console.error("Error formatting date time:", e);
@@ -17,16 +21,20 @@ export function formatDateTime(iso, locale = 'ar-EG', placeholder = "") {
   }
 }
 
-export function formatDate(iso, locale = 'ar-EG', placeholder = "") {
+export function formatDate(iso, locale = "ar-EG", placeholder = "") {
   if (!iso) return placeholder;
   try {
     const d = new Date(iso);
-    const l = String(locale || '').toLowerCase();
-    const resolved = l.startsWith('en') ? 'en-US' : l.startsWith('ar') ? 'ar-EG' : locale;
+    const l = String(locale || "").toLowerCase();
+    const resolved = l.startsWith("en")
+      ? "en-US"
+      : l.startsWith("ar")
+        ? "ar-EG"
+        : locale;
     return d.toLocaleDateString(resolved, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   } catch (e) {
     console.error("Error formatting date:", e);
@@ -34,15 +42,19 @@ export function formatDate(iso, locale = 'ar-EG', placeholder = "") {
   }
 }
 
-export function formatTime(iso, locale = 'ar-EG', placeholder = "") {
+export function formatTime(iso, locale = "ar-EG", placeholder = "") {
   if (!iso) return placeholder;
   try {
     const d = new Date(iso);
-    const l = String(locale || '').toLowerCase();
-    const resolved = l.startsWith('en') ? 'en-US' : l.startsWith('ar') ? 'ar-EG' : locale;
+    const l = String(locale || "").toLowerCase();
+    const resolved = l.startsWith("en")
+      ? "en-US"
+      : l.startsWith("ar")
+        ? "ar-EG"
+        : locale;
     return d.toLocaleTimeString(resolved, {
-      hour: '2-digit',
-      minute: '2-digit'
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch (e) {
     console.error("Error formatting time:", e);
@@ -51,5 +63,7 @@ export function formatTime(iso, locale = 'ar-EG', placeholder = "") {
 }
 
 // Keep old functions for backward compatibility
-export const formatDateTimeASCII = (iso, placeholder = "") => formatDateTime(iso, 'en', placeholder);
-export const formatDateASCII = (iso, placeholder = "") => formatDate(iso, 'en', placeholder);
+export const formatDateTimeASCII = (iso, placeholder = "") =>
+  formatDateTime(iso, "en", placeholder);
+export const formatDateASCII = (iso, placeholder = "") =>
+  formatDate(iso, "en", placeholder);

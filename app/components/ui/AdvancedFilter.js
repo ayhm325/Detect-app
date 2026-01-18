@@ -1,9 +1,13 @@
 "use client";
-import React, { useState } from "react";
-import { FaSlidersH, FaTimes } from "react-icons/fa";
+import { useState } from "react";
+import { FaSlidersH, FaTimes } from "react-icons/fa6";
 import { useTranslations } from "next-intl";
 
-const AdvancedFilter = ({ fields = [], onApply = () => {}, onReset = () => {} }) => {
+const AdvancedFilter = ({
+  fields = [],
+  onApply = () => {},
+  onReset = () => {},
+}) => {
   const ui = useTranslations("ui");
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({});
@@ -25,7 +29,9 @@ const AdvancedFilter = ({ fields = [], onApply = () => {}, onReset = () => {} })
     onReset();
   };
 
-  const activeFilters = Object.values(filters).filter((v) => v !== "" && v !== null).length;
+  const activeFilters = Object.values(filters).filter(
+    (v) => v !== "" && v !== null,
+  ).length;
 
   return (
     <div className="relative">
@@ -33,8 +39,8 @@ const AdvancedFilter = ({ fields = [], onApply = () => {}, onReset = () => {} })
         onClick={() => setShowFilter(!showFilter)}
         className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition ${
           showFilter || activeFilters > 0
-            ? "bg-(--ui-info) text-(--ui-info-foreground)"
-            : "bg-(--ui-surface-2) text-(--ui-foreground) hover:bg-(--ui-surface-2)/80"
+            ? "bg-[var(--ui-info)] text-[var(--ui-info-foreground)]"
+            : "bg-[var(--ui-surface-2)] text-[var(--ui-foreground)] hover:bg-[var(--ui-surface-2)]/80"
         }`}
       >
         <FaSlidersH size={14} />
@@ -42,12 +48,14 @@ const AdvancedFilter = ({ fields = [], onApply = () => {}, onReset = () => {} })
       </button>
 
       {showFilter && (
-        <div className="absolute top-full right-0 mt-2 bg-(--ui-surface) rounded-lg shadow-2xl p-6 z-50 w-80 border border-(--ui-border)">
+        <div className="absolute top-full right-0 mt-2 bg-[var(--ui-surface)] rounded-lg shadow-2xl p-6 z-50 w-80 border border-[var(--ui-border)]">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-(--ui-foreground)">{ui("filters.advancedTitle")}</h3>
+            <h3 className="font-bold text-[var(--ui-foreground)]">
+              {ui("filters.advancedTitle")}
+            </h3>
             <button
               onClick={() => setShowFilter(false)}
-              className="text-(--ui-muted-foreground) hover:text-(--ui-foreground)"
+              className="text-[var(--ui-muted-foreground)] hover:text-[var(--ui-foreground)]"
             >
               <FaTimes size={18} />
             </button>
@@ -56,7 +64,7 @@ const AdvancedFilter = ({ fields = [], onApply = () => {}, onReset = () => {} })
           <div className="space-y-4 max-h-96 overflow-y-auto">
             {fields.map((field) => (
               <div key={field.name} className="space-y-2">
-                <label className="block text-sm font-medium text-(--ui-muted-foreground)">
+                <label className="block text-sm font-medium text-[var(--ui-muted-foreground)]">
                   {field.label}
                 </label>
 
@@ -64,7 +72,7 @@ const AdvancedFilter = ({ fields = [], onApply = () => {}, onReset = () => {} })
                   <select
                     value={filters[field.name] || ""}
                     onChange={(e) => handleChange(field.name, e.target.value)}
-                    className="w-full px-3 py-2 border border-(--ui-border) bg-(--ui-surface-2) text-(--ui-foreground) rounded-lg focus:outline-none focus:ring-2 focus:ring-(--ui-ring)"
+                    className="w-full px-3 py-2 border border-[var(--ui-border)] bg-[var(--ui-surface-2)] text-[var(--ui-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ui-ring)]"
                   >
                     <option value="">{ui("filters.all")}</option>
                     {field.options?.map((opt) => (
@@ -80,7 +88,7 @@ const AdvancedFilter = ({ fields = [], onApply = () => {}, onReset = () => {} })
                     type="date"
                     value={filters[field.name] || ""}
                     onChange={(e) => handleChange(field.name, e.target.value)}
-                    className="w-full px-3 py-2 border border-(--ui-border) bg-(--ui-surface-2) text-(--ui-foreground) rounded-lg focus:outline-none focus:ring-2 focus:ring-(--ui-ring)"
+                    className="w-full px-3 py-2 border border-[var(--ui-border)] bg-[var(--ui-surface-2)] text-[var(--ui-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ui-ring)]"
                   />
                 )}
 
@@ -90,7 +98,7 @@ const AdvancedFilter = ({ fields = [], onApply = () => {}, onReset = () => {} })
                     placeholder={field.placeholder || ""}
                     value={filters[field.name] || ""}
                     onChange={(e) => handleChange(field.name, e.target.value)}
-                    className="w-full px-3 py-2 border border-(--ui-border) bg-(--ui-surface-2) text-(--ui-foreground) rounded-lg placeholder:opacity-70 placeholder:text-(--ui-muted-foreground) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)"
+                    className="w-full px-3 py-2 border border-[var(--ui-border)] bg-[var(--ui-surface-2)] text-[var(--ui-foreground)] rounded-lg placeholder:opacity-70 placeholder:text-[var(--ui-muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--ui-ring)]"
                   />
                 )}
 
@@ -117,7 +125,7 @@ const AdvancedFilter = ({ fields = [], onApply = () => {}, onReset = () => {} })
             </button>
             <button
               onClick={handleReset}
-              className="flex-1 px-4 py-2 bg-(--ui-surface-2) hover:bg-(--ui-surface-2)/80 text-(--ui-foreground) rounded-lg transition"
+              className="flex-1 px-4 py-2 bg-[var(--ui-surface-2)] hover:bg-[var(--ui-surface-2)]/80 text-[var(--ui-foreground)] rounded-lg transition"
             >
               {ui("filters.reset")}
             </button>

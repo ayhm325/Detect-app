@@ -9,7 +9,10 @@ export default function ThemeToggle() {
   return (
     <div className="flex items-center gap-3 my-6">
       <span className="font-bold">{t("label.mode")}</span>
-      <button className={`px-4 py-2 rounded-full font-bold border border-(--ui-border) transition-colors ${dark ? 'bg-(--ui-surface) text-foreground' : 'bg-(--ui-surface-2) text-foreground'}`} onClick={() => setDark(!dark)}>
+      <button
+        className={`px-4 py-2 rounded-full font-bold border border-(--ui-border) transition-colors ${dark ? "bg-(--ui-surface) text-foreground" : "bg-(--ui-surface-2) text-foreground"}`}
+        onClick={() => setDark(!dark)}
+      >
         {dark ? t("mode.dark") : t("mode.light")}
       </button>
     </div>

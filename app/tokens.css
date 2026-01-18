@@ -1,45 +1,45 @@
 /* Map design tokens to CSS variables for global use */
 :root {
-  --color-primary: #15803D;        /* Medical green */
-  --color-secondary: #0F766E;      /* Teal-green */
-  --color-accent: #4D7C0F;         /* Olive accent */
-  --color-bright: #F59E0B;         /* Warning amber */
-  --color-dark: #B91C1C;           /* Medical danger red */
-  --color-neutral: #022C22;
-  --color-text: #022C22;
-  --color-background: #FFFFFF;
+  --color-primary: #15803d; /* Medical green */
+  --color-secondary: #0f766e; /* Teal-green */
+  --color-accent: #4d7c0f; /* Olive accent */
+  --color-bright: #f59e0b; /* Warning amber */
+  --color-dark: #b91c1c; /* Medical danger red */
+  --color-neutral: #022c22;
+  --color-text: #022c22;
+  --color-background: #ffffff;
 
   /* Dark defaults (for pre-hydration / prefers-color-scheme) */
-  --color-background-dark: #022C22;
-  --color-text-dark: #ECFDF5;
+  --color-background-dark: #022c22;
+  --color-text-dark: #ecfdf5;
 
-  --color-primary-100: #DCFCE7;
-  --color-primary-500: #15803D;
-  --color-primary-900: #14532D;
+  --color-primary-100: #dcfce7;
+  --color-primary-500: #15803d;
+  --color-primary-900: #14532d;
 
-  --color-secondary-100: #CCFBF1;
-  --color-secondary-500: #0F766E;
-  --color-secondary-900: #134E4A;
+  --color-secondary-100: #ccfbf1;
+  --color-secondary-500: #0f766e;
+  --color-secondary-900: #134e4a;
 
-  --color-accent-100: #ECFCCB;
-  --color-accent-500: #4D7C0F;
+  --color-accent-100: #ecfccb;
+  --color-accent-500: #4d7c0f;
   --color-accent-900: #365314;
 
-  --color-bright-100: #FEF3C7;
-  --color-bright-500: #F59E0B;
-  --color-bright-900: #92400E;
+  --color-bright-100: #fef3c7;
+  --color-bright-500: #f59e0b;
+  --color-bright-900: #92400e;
 
-  --color-dark-100: #FEE2E2;
-  --color-dark-500: #B91C1C;
-  --color-dark-900: #7F1D1D;
+  --color-dark-100: #fee2e2;
+  --color-dark-500: #b91c1c;
+  --color-dark-900: #7f1d1d;
 
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  --shadow-soft: 0 8px 24px rgba(2,44,34,0.10);
-  --shadow-lift: 0 14px 36px rgba(2,44,34,0.18);
+  --shadow-soft: 0 8px 24px rgba(2, 44, 34, 0.1);
+  --shadow-lift: 0 14px 36px rgba(2, 44, 34, 0.18);
 
   /* ↓↓↓ شفافية أقل */
   --opacity-glass: 0.85;
@@ -52,29 +52,69 @@
   --ui-border-strong: color-mix(in srgb, var(--color-text) 26%, transparent);
   --ui-muted: color-mix(in srgb, var(--color-text) 70%, transparent);
   --ui-muted-2: color-mix(in srgb, var(--color-text) 55%, transparent);
-  --ui-surface: color-mix(in srgb, var(--color-background) 97%, var(--color-primary-100));
-  --ui-surface-2: color-mix(in srgb, var(--color-background) 94%, var(--color-secondary-100));
+  --ui-surface: color-mix(
+    in srgb,
+    var(--color-background) 97%,
+    var(--color-primary-100)
+  );
+  --ui-surface-2: color-mix(
+    in srgb,
+    var(--color-background) 94%,
+    var(--color-secondary-100)
+  );
   --ui-ring: var(--color-primary-500);
 
   /* Semantic UI tokens (derived from palette above; no new colors introduced) */
   --ui-info: var(--color-accent-500);
-  --ui-info-bg: color-mix(in srgb, var(--color-accent-500) 10%, var(--color-background));
-  --ui-info-border: color-mix(in srgb, var(--color-accent-500) 22%, transparent);
+  --ui-info-bg: color-mix(
+    in srgb,
+    var(--color-accent-500) 10%,
+    var(--color-background)
+  );
+  --ui-info-border: color-mix(
+    in srgb,
+    var(--color-accent-500) 22%,
+    transparent
+  );
   --ui-info-foreground: var(--color-background);
 
   --ui-success: var(--color-primary-500);
-  --ui-success-bg: color-mix(in srgb, var(--color-primary-500) 10%, var(--color-background));
-  --ui-success-border: color-mix(in srgb, var(--color-primary-500) 22%, transparent);
+  --ui-success-bg: color-mix(
+    in srgb,
+    var(--color-primary-500) 10%,
+    var(--color-background)
+  );
+  --ui-success-border: color-mix(
+    in srgb,
+    var(--color-primary-500) 22%,
+    transparent
+  );
   --ui-success-foreground: var(--color-background);
 
   --ui-warning: var(--color-bright-500);
-  --ui-warning-bg: color-mix(in srgb, var(--color-bright-500) 14%, var(--color-background));
-  --ui-warning-border: color-mix(in srgb, var(--color-bright-500) 26%, transparent);
+  --ui-warning-bg: color-mix(
+    in srgb,
+    var(--color-bright-500) 14%,
+    var(--color-background)
+  );
+  --ui-warning-border: color-mix(
+    in srgb,
+    var(--color-bright-500) 26%,
+    transparent
+  );
   --ui-warning-foreground: var(--color-neutral);
 
   --ui-danger: var(--color-dark-500);
-  --ui-danger-bg: color-mix(in srgb, var(--color-dark-500) 12%, var(--color-background));
-  --ui-danger-border: color-mix(in srgb, var(--color-dark-500) 24%, transparent);
+  --ui-danger-bg: color-mix(
+    in srgb,
+    var(--color-dark-500) 12%,
+    var(--color-background)
+  );
+  --ui-danger-border: color-mix(
+    in srgb,
+    var(--color-dark-500) 24%,
+    transparent
+  );
   --ui-danger-foreground: var(--color-background);
 }
 

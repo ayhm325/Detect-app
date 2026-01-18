@@ -27,7 +27,9 @@ export default function SidebarNavigation() {
           title={isDark ? t("theme.light") : t("theme.dark")}
         >
           <span className="text-xl">{isDark ? "☀️" : "🌙"}</span>
-          <span className="text-sm font-medium">{isDark ? t("theme.light") : t("theme.dark")}</span>
+          <span className="text-sm font-medium">
+            {isDark ? t("theme.light") : t("theme.dark")}
+          </span>
         </button>
         <LogoutSidebarItem />
       </nav>

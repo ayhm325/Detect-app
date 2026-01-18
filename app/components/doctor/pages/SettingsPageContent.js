@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import DoctorSettingsModal from "../../../[locale]/doctor/components/DoctorSettingsModal";
 import ErrorBoundary from "../../../[locale]/doctor/components/ErrorBoundary";
 import SkeletonLoader from "../../../[locale]/doctor/components/SkeletonLoader";
-import ConfirmationDialog from "../../../[locale]/doctor/components/ConfirmationDialog";
+import ConfirmDialog from "../../ui/ConfirmDialog";
 import { useTranslations } from "next-intl";
 
 export default function SettingsPageContent() {
@@ -40,8 +40,13 @@ export default function SettingsPageContent() {
   return (
     <ErrorBoundary fallbackMessage={ui("errors.unexpected")}>
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-(--ui-foreground)">{t("title")}</h1>
-        <button className="px-4 py-2 btn-gradient rounded" onClick={() => setModalOpen(true)}>
+        <h1 className="text-2xl font-bold text-(--ui-foreground)">
+          {t("title")}
+        </h1>
+        <button
+          className="px-4 py-2 btn-gradient rounded"
+          onClick={() => setModalOpen(true)}
+        >
           {t("demo.openModal")}
         </button>
         <button
@@ -57,10 +62,12 @@ export default function SettingsPageContent() {
           doctor={doctor}
           onSave={handleSave}
         />
-        <ConfirmationDialog
+        <ConfirmDialog
           open={showConfirm}
           message={t("demo.confirmSensitiveActionMessage")}
-          onConfirm={() => { setShowConfirm(false); /* تنفيذ الإجراء */ }}
+          onConfirm={() => {
+            setShowConfirm(false); /* تنفيذ الإجراء */
+          }}
           onCancel={() => setShowConfirm(false)}
         />
       </div>

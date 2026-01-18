@@ -1,16 +1,16 @@
-import React from 'react';
-import styles from './PatientSearchBar.module.css';
-import { useTranslations } from 'next-intl';
+import React from "react";
+import styles from "./PatientSearchBar.module.css";
+import { useTranslations } from "next-intl";
 
 export default function PatientSearchBar({ value, onChange }) {
-  const t = useTranslations('doctorPatients');
+  const t = useTranslations("doctorPatients");
   return (
     <input
       className={styles.searchBar}
       type="text"
-      placeholder={t('searchPlaceholder')}
+      placeholder={t("searchPlaceholder")}
       value={value}
-      onChange={e => onChange(e.target.value)}
+      onChange={(e) => onChange(e.target.value)}
     />
   );
 }

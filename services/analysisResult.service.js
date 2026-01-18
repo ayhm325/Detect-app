@@ -2,7 +2,7 @@
 // Service to save and fetch analysis results using Prisma client.
 
 async function _getPrisma() {
-  const mod = await import('../lib/prismaClient.js');
+  const mod = await import("../lib/prismaClient.js");
   return mod.default;
 }
 
@@ -17,9 +17,11 @@ async function saveAnalysisResult({ userId, imageUrl, analysisData }) {
       confidence: analysisData.confidence,
       explanation: analysisData.explanation,
       heatmapUrl: analysisData.heatmap_url ?? analysisData.heatmapUrl ?? null,
-      modelVersion: analysisData.model_version ?? analysisData.modelVersion ?? 'unknown',
-      inferenceTimeMs: analysisData.inference_time_ms ?? analysisData.inferenceTimeMs ?? 0
-    }
+      modelVersion:
+        analysisData.model_version ?? analysisData.modelVersion ?? "unknown",
+      inferenceTimeMs:
+        analysisData.inference_time_ms ?? analysisData.inferenceTimeMs ?? 0,
+    },
   });
 
   return created;
@@ -30,7 +32,7 @@ async function getAnalysisHistory(userId) {
 
   const results = await prisma.analysisResult.findMany({
     where: { userId },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: "desc" },
   });
 
   return results;
@@ -41,7 +43,7 @@ async function deleteAnalysisResult(userId, id) {
 
   // Use deleteMany to safely ensure the record belongs to the user
   const result = await prisma.analysisResult.deleteMany({
-    where: { id, userId }
+    where: { id, userId },
   });
 
   return result; // contains { count }
@@ -54,7 +56,7 @@ export { deleteAnalysisResult };
 // also export as ESM default for dynamic import compatibility
 const analysisResultService = {
   saveAnalysisResult,
-  getAnalysisHistory
+  getAnalysisHistory,
 };
 
 export default analysisResultService;

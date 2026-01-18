@@ -15,7 +15,11 @@
   border: 1px solid var(--ui-border);
 }
 .bubble {
-  background: color-mix(in srgb, var(--color-accent-100) 70%, var(--color-background));
+  background: color-mix(
+    in srgb,
+    var(--color-accent-100) 70%,
+    var(--color-background)
+  );
   color: var(--color-text);
   border-radius: var(--radius-md);
   border: 1px solid var(--ui-border);

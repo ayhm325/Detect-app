@@ -1,7 +1,7 @@
 "use client";
 
 import DoctorLayout from "../DoctorLayout";
-import { useToast } from "../../../components/ui/Toast";
+import { useToast } from "../../../components/ui/ToastProvider";
 import { useState, useEffect } from "react";
 import {
   FaUser,
@@ -17,8 +17,7 @@ import { useTranslations } from "next-intl";
 import useLocale from "../../../hooks/useLocale";
 
 export default function DoctorSettingsPage() {
-  const { showToast, ToastContainer } = useToast();
-  
+  const { showSuccess, showError, showInfo, showWarning } = useToast();
 
   // Use single namespace `doctorSettings` and access nested keys via `t(key)`
   const t = useTranslations("doctorSettings");
@@ -66,7 +65,7 @@ export default function DoctorSettingsPage() {
 
   // حفظ الملف الشخصي
   const handleSaveProfile = () => {
-    showToast(t("profile.toast.saved"), "success");
+    showSuccess(t("profile.toast.saved"));
   };
 
   // تغيير كلمة المرور
@@ -74,22 +73,22 @@ export default function DoctorSettingsPage() {
     const { currentPassword, newPassword, confirmPassword } = security;
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      showToast(t("security.toast.fillFields"), "error");
+      showError(t("security.toast.fillFields"));
       return;
     }
 
     if (currentPassword === newPassword) {
-      showToast(t("security.toast.sameAsOld"), "error");
+      showError(t("security.toast.sameAsOld"));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      showToast(t("security.toast.mismatch"), "error");
+      showError(t("security.toast.mismatch"));
       return;
     }
 
     if (newPassword.length < 8) {
-      showToast(t("security_min_length"), "error");
+      showError(t("security_min_length"));
       return;
     }
 
@@ -105,17 +104,27 @@ export default function DoctorSettingsPage() {
       .then(async (res) => {
         const data = await res.json();
         if (res.ok && data.success) {
-          showToast(t("security.toast.changedSuccess"), "success");
-          setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
+          showSuccess(t("security.toast.changedSuccess"));
+          setSecurity({
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+          });
 
           setTimeout(async () => {
             try {
-              const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+              const token =
+                typeof window !== "undefined"
+                  ? localStorage.getItem("token")
+                  : null;
               await fetch("/api/auth/logout", {
                 method: "POST",
                 credentials: "include",
                 headers: token
-                  ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }
+                  ? {
+                      Authorization: `Bearer ${token}`,
+                      "Content-Type": "application/json",
+                    }
                   : { "Content-Type": "application/json" },
                 body: token ? JSON.stringify({ token }) : undefined,
               }).catch(() => {});
@@ -129,20 +138,20 @@ export default function DoctorSettingsPage() {
           }, 1200);
         } else {
           if (data?.error === "same_password") {
-            showToast(t("security.toast.sameAsOld"), "error");
+            showError(t("security.toast.sameAsOld"));
           } else {
-            showToast(data?.message || data?.error || t("security.toast.changeFailed"), "error");
+            showError(data?.message || data?.error || t("security.toast.changeFailed"));
           }
         }
       })
       .catch(() => {
-        showToast(t("security.toast.changeFailed"), "error");
+        showError(t("security.toast.changeFailed"));
       });
   };
 
   return (
     <DoctorLayout>
-      <ToastContainer />
+
       <div className="min-h-screen bg-(--ui-surface-2) text-(--ui-foreground) p-6">
         <div className="mx-auto max-w-2xl flex flex-col gap-10">
           {/* Header */}
@@ -158,7 +167,9 @@ export default function DoctorSettingsPage() {
           <div className="card-glass rounded-xl p-8 shadow-(--shadow-soft) border border-(--ui-border)">
             <div className="mb-6 flex items-center gap-3">
               <FaUserMd className="text-2xl text-(--ui-info)" />
-              <h2 className="text-2xl font-bold text-(--ui-foreground)">{t("profile.header")}</h2>
+              <h2 className="text-2xl font-bold text-(--ui-foreground)">
+                {t("profile.header")}
+              </h2>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
@@ -169,7 +180,9 @@ export default function DoctorSettingsPage() {
                 <input
                   type="text"
                   value={profile.name}
-                  onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, name: e.target.value })
+                  }
                   className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-3 text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                 />
               </div>
@@ -181,7 +194,9 @@ export default function DoctorSettingsPage() {
                 <input
                   type="email"
                   value={profile.email}
-                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, email: e.target.value })
+                  }
                   className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-3 text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                 />
               </div>
@@ -193,7 +208,9 @@ export default function DoctorSettingsPage() {
                 <input
                   type="tel"
                   value={profile.phone}
-                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, phone: e.target.value })
+                  }
                   className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-3 text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                 />
               </div>
@@ -205,7 +222,9 @@ export default function DoctorSettingsPage() {
                 <input
                   type="text"
                   value={profile.licenseNumber}
-                  onChange={(e) => setProfile({ ...profile, licenseNumber: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, licenseNumber: e.target.value })
+                  }
                   className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-3 text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                 />
               </div>
@@ -217,7 +236,9 @@ export default function DoctorSettingsPage() {
                 <textarea
                   rows={4}
                   value={profile.bio}
-                  onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, bio: e.target.value })
+                  }
                   className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-3 text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                 />
               </div>
@@ -236,7 +257,9 @@ export default function DoctorSettingsPage() {
           <div className="card-glass rounded-xl p-8 shadow-(--shadow-soft) border border-(--ui-border)">
             <div className="mb-6 flex items-center gap-3">
               <FaLock className="text-2xl text-(--ui-info)" />
-              <h2 className="text-2xl font-bold text-(--ui-foreground)">{t("change_password")}</h2>
+              <h2 className="text-2xl font-bold text-(--ui-foreground)">
+                {t("change_password")}
+              </h2>
             </div>
 
             <div className="space-y-6">
@@ -249,12 +272,22 @@ export default function DoctorSettingsPage() {
                   <input
                     type={showPassword.current ? "text" : "password"}
                     value={security.currentPassword}
-                    onChange={(e) => setSecurity({ ...security, currentPassword: e.target.value })}
+                    onChange={(e) =>
+                      setSecurity({
+                        ...security,
+                        currentPassword: e.target.value,
+                      })
+                    }
                     className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-3 pr-12 text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword({ ...showPassword, current: !showPassword.current })}
+                    onClick={() =>
+                      setShowPassword({
+                        ...showPassword,
+                        current: !showPassword.current,
+                      })
+                    }
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-(--ui-muted-foreground) hover:text-(--ui-foreground)"
                   >
                     {showPassword.current ? <FaEyeSlash /> : <FaEye />}
@@ -271,12 +304,19 @@ export default function DoctorSettingsPage() {
                   <input
                     type={showPassword.new ? "text" : "password"}
                     value={security.newPassword}
-                    onChange={(e) => setSecurity({ ...security, newPassword: e.target.value })}
+                    onChange={(e) =>
+                      setSecurity({ ...security, newPassword: e.target.value })
+                    }
                     className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-3 pr-12 text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })}
+                    onClick={() =>
+                      setShowPassword({
+                        ...showPassword,
+                        new: !showPassword.new,
+                      })
+                    }
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-(--ui-muted-foreground) hover:text-(--ui-foreground)"
                   >
                     {showPassword.new ? <FaEyeSlash /> : <FaEye />}
@@ -296,12 +336,22 @@ export default function DoctorSettingsPage() {
                   <input
                     type={showPassword.confirm ? "text" : "password"}
                     value={security.confirmPassword}
-                    onChange={(e) => setSecurity({ ...security, confirmPassword: e.target.value })}
+                    onChange={(e) =>
+                      setSecurity({
+                        ...security,
+                        confirmPassword: e.target.value,
+                      })
+                    }
                     className="w-full rounded-lg border border-(--ui-border) bg-(--ui-surface) px-4 py-3 pr-12 text-(--ui-foreground) focus:border-(--ui-ring) focus:outline-none focus:ring-2 focus:ring-(--ui-ring)/20"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword({ ...showPassword, confirm: !showPassword.confirm })}
+                    onClick={() =>
+                      setShowPassword({
+                        ...showPassword,
+                        confirm: !showPassword.confirm,
+                      })
+                    }
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-(--ui-muted-foreground) hover:text-(--ui-foreground)"
                   >
                     {showPassword.confirm ? <FaEyeSlash /> : <FaEye />}

@@ -1,5 +1,5 @@
 import prisma from "../../../../lib/prismaClient.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "../../../../lib/auth/bcryptWrapper.mjs";
 
 export async function GET() {
   // Mock patient data; replace with DB/service integration.
@@ -60,8 +60,8 @@ export async function POST(request) {
           type: "register",
           description: `New user registered: ${user.fullName} (${user.email})`,
           userId: user.id,
-          meta: { role: user.role }
-        }
+          meta: { role: user.role },
+        },
       });
     } catch (e) {
       console.error("Error logging registration activity:", e);

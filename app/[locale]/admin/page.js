@@ -8,7 +8,7 @@ export default function AdminHomePage() {
   const pathname = usePathname();
   const locale = pathname?.startsWith("/en") ? "en" : "ar";
   const basePrefix = locale === "en" ? "/en" : "/ar";
-  
+
   useEffect(() => {
     router.replace(`${basePrefix}/admin/dashboard`);
   }, [router, basePrefix]);

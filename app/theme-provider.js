@@ -12,7 +12,9 @@ function normalizeTheme(value, fallback = "light") {
 }
 
 export function ThemeProvider({ children, defaultTheme = "light" }) {
-  const [theme, setTheme] = useState(() => normalizeTheme(defaultTheme, "light"));
+  const [theme, setTheme] = useState(() =>
+    normalizeTheme(defaultTheme, "light"),
+  );
   const [hasMounted, setHasMounted] = useState(false);
 
   // Reconcile stored theme AFTER hydration to avoid server/client render mismatch.
@@ -41,10 +43,10 @@ export function ThemeProvider({ children, defaultTheme = "light" }) {
       root.classList.add("light");
       root.classList.remove("dark");
     }
-    
+
     // Keep data-theme attribute for compatibility
     root.setAttribute("data-theme", theme);
-    
+
     try {
       window.localStorage.setItem(STORAGE_KEY, theme);
     } catch {

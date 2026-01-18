@@ -12,7 +12,9 @@ export default function MedicalRecordsList({ records = [], onView }) {
   return (
     <section className="card-glass rounded-xl border border-(--ui-border) shadow-sm">
       <header className="flex items-center justify-between border-b border-(--ui-border) p-4">
-        <h2 className="text-lg font-semibold text-(--ui-foreground)">{t("components.medicalRecords.title")}</h2>
+        <h2 className="text-lg font-semibold text-(--ui-foreground)">
+          {t("components.medicalRecords.title")}
+        </h2>
       </header>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-(--ui-border)">
@@ -28,7 +30,10 @@ export default function MedicalRecordsList({ records = [], onView }) {
           <tbody className="divide-y divide-(--ui-border) bg-(--ui-surface)">
             {records.length === 0 ? (
               <tr>
-                <td className="p-4 text-center text-(--ui-muted-foreground)" colSpan={5}>
+                <td
+                  className="p-4 text-center text-(--ui-muted-foreground)"
+                  colSpan={5}
+                >
                   {t("components.medicalRecords.empty")}
                 </td>
               </tr>
@@ -39,7 +44,11 @@ export default function MedicalRecordsList({ records = [], onView }) {
                   <Td>{typeLabel(r.type, t, placeholder)}</Td>
                   <Td>{formatDate(r.date, locale, placeholder)}</Td>
                   <Td>
-                    <StatusBadge status={r.status} t={t} placeholder={placeholder} />
+                    <StatusBadge
+                      status={r.status}
+                      t={t}
+                      placeholder={placeholder}
+                    />
                   </Td>
                   <Td>
                     <button
@@ -61,21 +70,41 @@ export default function MedicalRecordsList({ records = [], onView }) {
 
 function Th({ children }) {
   return (
-    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-(--ui-muted-foreground)">{children}</th>
+    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-(--ui-muted-foreground)">
+      {children}
+    </th>
   );
 }
 function Td({ children, className = "" }) {
-  return <td className={`px-4 py-3 text-right text-(--ui-foreground) ${className}`}>{children}</td>;
+  return (
+    <td className={`px-4 py-3 text-right text-(--ui-foreground) ${className}`}>
+      {children}
+    </td>
+  );
 }
 function StatusBadge({ status, t, placeholder }) {
   const map = {
-    ready: { label: t("components.medicalRecords.status.ready"), className: "bg-(--ui-success)/12 text-(--ui-success-foreground) ring-(--ui-success)/25" },
-    processing: { label: t("components.medicalRecords.status.processing"), className: "bg-(--ui-warning)/12 text-(--ui-warning-foreground) ring-(--ui-warning)/25" },
+    ready: {
+      label: t("components.medicalRecords.status.ready"),
+      className:
+        "bg-(--ui-success)/12 text-(--ui-success-foreground) ring-(--ui-success)/25",
+    },
+    processing: {
+      label: t("components.medicalRecords.status.processing"),
+      className:
+        "bg-(--ui-warning)/12 text-(--ui-warning-foreground) ring-(--ui-warning)/25",
+    },
   };
-  const fallback = { label: placeholder, className: "bg-(--ui-surface-2)/60 text-(--ui-muted-foreground) ring-(--ui-border)" };
+  const fallback = {
+    label: placeholder,
+    className:
+      "bg-(--ui-surface-2)/60 text-(--ui-muted-foreground) ring-(--ui-border)",
+  };
   const { label, className } = map[status] || fallback;
   return (
-    <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-sm font-medium ring-1 ring-inset ${className}`}>
+    <span
+      className={`inline-flex items-center rounded-md px-2.5 py-1 text-sm font-medium ring-1 ring-inset ${className}`}
+    >
       {label}
     </span>
   );
@@ -91,7 +120,11 @@ function typeLabel(type, t, placeholder) {
 function formatDate(iso, locale, placeholder) {
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { year: "numeric", month: "short", day: "numeric" });
+    return d.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   } catch {
     return placeholder;
   }

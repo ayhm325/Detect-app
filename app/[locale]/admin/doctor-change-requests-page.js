@@ -43,7 +43,9 @@ export default function DoctorChangeRequestsPage() {
     <>
       <div className="px-4 py-6 md:px-8">
         <div className="card-glass p-6 md:p-8">
-          <h1 className="text-xl md:text-2xl font-bold text-foreground mb-6">{t("title")}</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-foreground mb-6">
+            {t("title")}
+          </h1>
 
           {requests.length === 0 ? (
             <div className="rounded-2xl border border-(--ui-border) bg-(--ui-surface) p-8 text-center">
@@ -51,47 +53,70 @@ export default function DoctorChangeRequestsPage() {
                 size={48}
                 className="mx-auto mb-4 text-(--ui-muted-2)"
               />
-              <p className="text-(--ui-muted-2) text-lg">
-                {t("noRequests")}
-              </p>
+              <p className="text-(--ui-muted-2) text-lg">{t("noRequests")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto max-w-3xl rounded-2xl border border-(--ui-border)">
               <table className="w-full bg-(--ui-surface)">
                 <thead>
                   <tr className="bg-(--ui-surface-2) text-(--ui-muted-2)">
-                    <th className="p-3 text-start text-xs font-semibold">{t("table.patient")}</th>
-                    <th className="p-3 text-start text-xs font-semibold">{t("table.currentDoctor")}</th>
-                    <th className="p-3 text-start text-xs font-semibold">{t("table.requestedDoctor")}</th>
-                    <th className="p-3 text-start text-xs font-semibold">{t("table.reason")}</th>
-                    <th className="p-3 text-start text-xs font-semibold">{t("table.status")}</th>
-                    <th className="p-3 text-start text-xs font-semibold">{t("table.actions")}</th>
+                    <th className="p-3 text-start text-xs font-semibold">
+                      {t("table.patient")}
+                    </th>
+                    <th className="p-3 text-start text-xs font-semibold">
+                      {t("table.currentDoctor")}
+                    </th>
+                    <th className="p-3 text-start text-xs font-semibold">
+                      {t("table.requestedDoctor")}
+                    </th>
+                    <th className="p-3 text-start text-xs font-semibold">
+                      {t("table.reason")}
+                    </th>
+                    <th className="p-3 text-start text-xs font-semibold">
+                      {t("table.status")}
+                    </th>
+                    <th className="p-3 text-start text-xs font-semibold">
+                      {t("table.actions")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {requests.map((req) => (
-                    <tr key={req.id} className="border-t border-(--ui-border) hover:bg-(--ui-surface-2)/60">
-                      <td className="p-3 text-sm text-foreground">{req.patientName || placeholder}</td>
-                      <td className="p-3 text-sm text-foreground">{req.currentDoctorName || placeholder}</td>
-                      <td className="p-3 text-sm text-foreground">{req.requestedDoctorName || placeholder}</td>
-                      <td className="p-3 text-sm text-(--ui-muted-2)">{req.reason || placeholder}</td>
+                    <tr
+                      key={req.id}
+                      className="border-t border-(--ui-border) hover:bg-(--ui-surface-2)/60"
+                    >
+                      <td className="p-3 text-sm text-foreground">
+                        {req.patientName || placeholder}
+                      </td>
+                      <td className="p-3 text-sm text-foreground">
+                        {req.currentDoctorName || placeholder}
+                      </td>
+                      <td className="p-3 text-sm text-foreground">
+                        {req.requestedDoctorName || placeholder}
+                      </td>
+                      <td className="p-3 text-sm text-(--ui-muted-2)">
+                        {req.reason || placeholder}
+                      </td>
                       <td className="p-3 text-sm">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold border ${
-                          req.status === 'pending'
-                            ? 'bg-(--ui-warning-bg) text-(--ui-warning) border-(--ui-warning-border)'
-                            : req.status === 'approved'
-                            ? 'bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)'
-                            : 'bg-(--ui-danger-bg) text-(--ui-danger) border-(--ui-danger-border)'
-                        }`}>
-                          {req.status === 'pending'
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold border ${
+                            req.status === "pending"
+                              ? "bg-(--ui-warning-bg) text-(--ui-warning) border-(--ui-warning-border)"
+                              : req.status === "approved"
+                                ? "bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)"
+                                : "bg-(--ui-danger-bg) text-(--ui-danger) border-(--ui-danger-border)"
+                          }`}
+                        >
+                          {req.status === "pending"
                             ? t("pending")
-                            : req.status === 'approved'
-                            ? t("approved")
-                            : t("rejected")}
+                            : req.status === "approved"
+                              ? t("approved")
+                              : t("rejected")}
                         </span>
                       </td>
                       <td className="p-3 text-sm">
-                        {req.status === 'pending' ? (
+                        {req.status === "pending" ? (
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleApprove(req.id)}
@@ -109,7 +134,9 @@ export default function DoctorChangeRequestsPage() {
                             </button>
                           </div>
                         ) : (
-                          <span className="text-(--ui-muted-2)">{placeholder}</span>
+                          <span className="text-(--ui-muted-2)">
+                            {placeholder}
+                          </span>
                         )}
                       </td>
                     </tr>

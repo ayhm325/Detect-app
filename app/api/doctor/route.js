@@ -1,5 +1,5 @@
 import prisma from "../../../lib/prismaClient.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "../../../lib/auth/bcryptWrapper.mjs";
 
 export async function POST(request) {
   try {
@@ -18,13 +18,16 @@ export async function POST(request) {
     if (existingPhone) {
       return Response.json(
         { errorCode: "PHONE_ALREADY_USED", error: "رقم الهاتف مستخدم بالفعل" },
-        { status: 409 }
+        { status: 409 },
       );
     }
     if (existingLicense) {
       return Response.json(
-        { errorCode: "LICENSE_ALREADY_USED", error: "رقم الترخيص مستخدم بالفعل" },
-        { status: 409 }
+        {
+          errorCode: "LICENSE_ALREADY_USED",
+          error: "رقم الترخيص مستخدم بالفعل",
+        },
+        { status: 409 },
       );
     }
 
@@ -32,8 +35,11 @@ export async function POST(request) {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return Response.json(
-        { errorCode: "EMAIL_ALREADY_USED", error: "البريد الإلكتروني مستخدم بالفعل" },
-        { status: 409 }
+        {
+          errorCode: "EMAIL_ALREADY_USED",
+          error: "البريد الإلكتروني مستخدم بالفعل",
+        },
+        { status: 409 },
       );
     }
     // تشفير كلمة المرور
@@ -68,8 +74,8 @@ export async function POST(request) {
           type: "add_doctor",
           description: `إضافة طبيب جديد: ${user.fullName} (${user.email})`,
           userId: user.id,
-          meta: { licenseNumber, phone }
-        }
+          meta: { licenseNumber, phone },
+        },
       });
     } catch (e) {
       console.error("خطأ في تسجيل نشاط إضافة الطبيب:", e);
@@ -79,30 +85,43 @@ export async function POST(request) {
     console.error("تفاصيل الخطأ أثناء تسجيل الطبيب:", error);
 
     // Prisma unique constraint violations
-    if (error && typeof error === 'object' && error.code === 'P2002') {
+    if (error && typeof error === "object" && error.code === "P2002") {
       const target = error.meta?.target;
-      const fields = Array.isArray(target) ? target : (typeof target === 'string' ? [target] : []);
-      if (fields.some((f) => String(f).includes('phone'))) {
+      const fields = Array.isArray(target)
+        ? target
+        : typeof target === "string"
+          ? [target]
+          : [];
+      if (fields.some((f) => String(f).includes("phone"))) {
         return Response.json(
-          { errorCode: "PHONE_ALREADY_USED", error: "رقم الهاتف مستخدم بالفعل" },
-          { status: 409 }
+          {
+            errorCode: "PHONE_ALREADY_USED",
+            error: "رقم الهاتف مستخدم بالفعل",
+          },
+          { status: 409 },
         );
       }
-      if (fields.some((f) => String(f).includes('licenseNumber'))) {
+      if (fields.some((f) => String(f).includes("licenseNumber"))) {
         return Response.json(
-          { errorCode: "LICENSE_ALREADY_USED", error: "رقم الترخيص مستخدم بالفعل" },
-          { status: 409 }
+          {
+            errorCode: "LICENSE_ALREADY_USED",
+            error: "رقم الترخيص مستخدم بالفعل",
+          },
+          { status: 409 },
         );
       }
-      if (fields.some((f) => String(f).includes('email'))) {
+      if (fields.some((f) => String(f).includes("email"))) {
         return Response.json(
-          { errorCode: "EMAIL_ALREADY_USED", error: "البريد الإلكتروني مستخدم بالفعل" },
-          { status: 409 }
+          {
+            errorCode: "EMAIL_ALREADY_USED",
+            error: "البريد الإلكتروني مستخدم بالفعل",
+          },
+          { status: 409 },
         );
       }
       return Response.json(
         { errorCode: "DATA_ALREADY_USED", error: "بيانات مستخدمة بالفعل" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 

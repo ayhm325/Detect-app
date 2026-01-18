@@ -35,15 +35,29 @@ export default function AnalysisStatusBadge({ status }) {
 
   const normalizedStatus = normalizeStatus(status);
 
-  if (normalizedStatus === "completed") color = "bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)";
-  if (normalizedStatus === "pending") color = "bg-(--ui-warning-bg) text-(--ui-warning) border-(--ui-warning-border)";
-  if (normalizedStatus === "reviewing") color = "bg-(--ui-warning-bg) text-(--ui-warning) border-(--ui-warning-border)";
-  if (normalizedStatus === "failed") color = "bg-(--ui-danger-bg) text-(--ui-danger) border-(--ui-danger-border)";
-  if (normalizedStatus === "success") color = "bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)";
+  if (normalizedStatus === "completed")
+    color =
+      "bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)";
+  if (normalizedStatus === "pending")
+    color =
+      "bg-(--ui-warning-bg) text-(--ui-warning) border-(--ui-warning-border)";
+  if (normalizedStatus === "reviewing")
+    color =
+      "bg-(--ui-warning-bg) text-(--ui-warning) border-(--ui-warning-border)";
+  if (normalizedStatus === "failed")
+    color =
+      "bg-(--ui-danger-bg) text-(--ui-danger) border-(--ui-danger-border)";
+  if (normalizedStatus === "success")
+    color =
+      "bg-(--ui-success-bg) text-(--ui-success) border-(--ui-success-border)";
 
   const label = normalizedStatus ? labels[normalizedStatus] : placeholder;
 
   return (
-    <span className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-semibold ${color}`}>{label}</span>
+    <span
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-semibold ${color}`}
+    >
+      {label}
+    </span>
   );
 }

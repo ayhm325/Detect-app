@@ -14,7 +14,8 @@ import { getJwtVerifyOptions } from "../../../../lib/auth/jwtClaims.js";
 import { getTranslations } from "next-intl/server";
 
 export default async function DoctorDashboard({ params }) {
-  const resolvedParams = typeof params?.then === 'function' ? await params : params;
+  const resolvedParams =
+    typeof params?.then === "function" ? await params : params;
   const locale = resolvedParams?.locale;
   const basePrefix = `/${locale}`;
   const tNav = await getTranslations({ locale, namespace: "navigation" });
@@ -34,11 +35,13 @@ export default async function DoctorDashboard({ params }) {
     // fetch doctor and counts
     const doctor = await prisma.doctor.findUnique({
       where: { userId: user.id },
-      include: { user: true }
+      include: { user: true },
     });
 
     if (!doctor) {
-      const breadcrumbs = [{ label: tNav("home"), href: `${basePrefix}/doctor/dashboard` }];
+      const breadcrumbs = [
+        { label: tNav("home"), href: `${basePrefix}/doctor/dashboard` },
+      ];
       return (
         <DoctorDashboardWrapper>
           <DoctorLayout breadcrumbs={breadcrumbs}>
@@ -55,10 +58,22 @@ export default async function DoctorDashboard({ params }) {
 
     const doctorId = doctor.userId;
 
-    const [patientsCount, todayAppointmentsCount, pendingScansCount, newMessagesCount, todayAppointmentsList, recentActivity, pendingScansList] = await Promise.all([
+    const [
+      patientsCount,
+      todayAppointmentsCount,
+      pendingScansCount,
+      newMessagesCount,
+      todayAppointmentsList,
+      recentActivity,
+      pendingScansList,
+    ] = await Promise.all([
       prisma.patient.count({ where: { doctorId } }),
-      prisma.appointment.count({ where: { doctorId, scheduledAt: { gte: start, lte: end } } }),
-      prisma.medicalRecord.count({ where: { doctorId, reviewedByDoctor: false } }),
+      prisma.appointment.count({
+        where: { doctorId, scheduledAt: { gte: start, lte: end } },
+      }),
+      prisma.medicalRecord.count({
+        where: { doctorId, reviewedByDoctor: false },
+      }),
       prisma.message.count({
         where: {
           chat: { doctorId },
@@ -66,15 +81,24 @@ export default async function DoctorDashboard({ params }) {
           sender: "patient",
         },
       }),
-      prisma.appointment.findMany({ where: { doctorId, scheduledAt: { gte: start, lte: end } }, include: { patient: true }, orderBy: { scheduledAt: 'asc' }, take: 10 }),
-      prisma.activity.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 6 }),
+      prisma.appointment.findMany({
+        where: { doctorId, scheduledAt: { gte: start, lte: end } },
+        include: { patient: true },
+        orderBy: { scheduledAt: "asc" },
+        take: 10,
+      }),
+      prisma.activity.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: "desc" },
+        take: 6,
+      }),
       prisma.medicalRecord.findMany({
         where: { doctorId, reviewedByDoctor: false },
         include: {
           patient: { select: { fullName: true, clinicalStatus: true } },
           appointment: { select: { type: true } },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         take: 3,
       }),
     ]);
@@ -112,7 +136,9 @@ export default async function DoctorDashboard({ params }) {
     };
   }
 
-  const breadcrumbs = [{ label: tNav("home"), href: `${basePrefix}/doctor/dashboard` }];
+  const breadcrumbs = [
+    { label: tNav("home"), href: `${basePrefix}/doctor/dashboard` },
+  ];
 
   return (
     <DoctorDashboardWrapper>

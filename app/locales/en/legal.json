@@ -80,15 +80,32 @@
       "heading": "2. Information We Collect",
       "personal": {
         "title": "2.1 Personal Information",
-        "items": ["Full name", "Email address", "Phone number", "Date of birth", "Medical ID (if applicable)"]
+        "items": [
+          "Full name",
+          "Email address",
+          "Phone number",
+          "Date of birth",
+          "Medical ID (if applicable)"
+        ]
       },
       "medical": {
         "title": "2.2 Medical Information",
-        "items": ["Medical images (X-rays, CT scans, etc.)", "Medical history", "Allergies", "Current medications", "Analysis results"]
+        "items": [
+          "Medical images (X-rays, CT scans, etc.)",
+          "Medical history",
+          "Allergies",
+          "Current medications",
+          "Analysis results"
+        ]
       },
       "technical": {
         "title": "2.3 Technical Information",
-        "items": ["IP address", "Device information", "Browser type", "Access times and duration"]
+        "items": [
+          "IP address",
+          "Device information",
+          "Browser type",
+          "Access times and duration"
+        ]
       }
     },
     "dataUsage": {

@@ -1,6 +1,6 @@
-import React from 'react';
-import Image from 'next/image';
-import styles from './ScanCard.module.css';
+import React from "react";
+import Image from "next/image";
+import styles from "./ScanCard.module.css";
 
 export default function ScanCard({ scan }) {
   return (

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
-import createNextIntlPlugin from 'next-intl/plugin';
+import createNextIntlPlugin from "next-intl/plugin";
 
-const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig = {
   // experimental: {},
@@ -14,8 +14,8 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
+        protocol: "https",
+        hostname: "via.placeholder.com",
       },
     ],
   },
@@ -24,15 +24,15 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/:locale(en|ar)/:path*',
+        source: "/:locale(en|ar)/:path*",
         headers: [
           {
-            key: 'Content-Language',
-            value: 'ar', // ثابتة، غيّرها لـ 'en' إذا أردت
+            key: "Content-Language",
+            value: "ar", // ثابتة، غيّرها لـ 'en' إذا أردت
           },
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
         ],
       },

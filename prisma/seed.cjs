@@ -1,27 +1,27 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
+    where: { email: "admin@example.com" },
     update: {},
     create: {
-      email: 'admin@example.com',
-      password: 'changeme',
-      fullName: 'Admin User',
-      role: 'admin',
+      email: "admin@example.com",
+      password: "changeme",
+      fullName: "Admin User",
+      role: "admin",
       isActive: true,
     },
   });
 
   const doctorUser = await prisma.user.upsert({
-    where: { email: 'doctor@example.com' },
+    where: { email: "doctor@example.com" },
     update: {},
     create: {
-      email: 'doctor@example.com',
-      password: 'changeme',
-      fullName: 'Dr. John Doe',
-      role: 'doctor',
+      email: "doctor@example.com",
+      password: "changeme",
+      fullName: "Dr. John Doe",
+      role: "doctor",
       isActive: true,
     },
   });
@@ -31,20 +31,20 @@ async function main() {
     update: {},
     create: {
       userId: doctorUser.id,
-      phone: '0500000001',
-      licenseNumber: 'LIC-12345',
-      status: 'active',
+      phone: "0500000001",
+      licenseNumber: "LIC-12345",
+      status: "active",
     },
   });
 
   const patientUser = await prisma.user.upsert({
-    where: { email: 'patient@example.com' },
+    where: { email: "patient@example.com" },
     update: {},
     create: {
-      email: 'patient@example.com',
-      password: 'changeme',
-      fullName: 'Patient One',
-      role: 'patient',
+      email: "patient@example.com",
+      password: "changeme",
+      fullName: "Patient One",
+      role: "patient",
       isActive: true,
     },
   });
@@ -54,24 +54,28 @@ async function main() {
     update: {},
     create: {
       userId: patientUser.id,
-      fullName: 'Patient One',
-      email: 'patient@example.com',
+      fullName: "Patient One",
+      email: "patient@example.com",
       doctorId: doctor.userId,
     },
   });
 
   await prisma.chat.upsert({
-    where: { id: 'seed-chat-1' },
+    where: { id: "seed-chat-1" },
     update: {},
     create: {
-      id: 'seed-chat-1',
+      id: "seed-chat-1",
       doctorId: doctor.userId,
       patientId: patient.id,
     },
   });
 
-  console.log('Database seeded successfully');
-  console.log({ adminId: admin.id, doctorUserId: doctorUser.id, patientUserId: patientUser.id });
+  console.log("Database seeded successfully");
+  console.log({
+    adminId: admin.id,
+    doctorUserId: doctorUser.id,
+    patientUserId: patientUser.id,
+  });
 }
 
 main()

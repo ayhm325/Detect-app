@@ -6,13 +6,17 @@ export function preprocessImage(file) {
     throw new Error("No image provided");
   }
 
-  if (!file.mimetype || typeof file.mimetype !== 'string' || !file.mimetype.startsWith("image/")) {
+  if (
+    !file.mimetype ||
+    typeof file.mimetype !== "string" ||
+    !file.mimetype.startsWith("image/")
+  ) {
     throw new Error("Invalid file type");
   }
 
   return {
     buffer: file.buffer,
     originalName: file.originalname,
-    size: file.size
+    size: file.size,
   };
 }

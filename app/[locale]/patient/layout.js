@@ -1,5 +1,5 @@
 "use client";
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -27,24 +27,34 @@ export default function PatientLayout({ children }) {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch('/api/auth/token', { credentials: 'include' });
+        const res = await fetch("/api/auth/token", { credentials: "include" });
         if (!mounted) return;
         if (res.ok) {
           const data = await res.json();
           if (data?.token) {
-            try { socket.connect({ token: data.token }); } catch (e) { try { socket.connect(); } catch (e2) {} }
+            try {
+              socket.connect({ token: data.token });
+            } catch (e) {
+              try {
+                socket.connect();
+              } catch (e2) {}
+            }
             return;
           }
         }
       } catch (e) {
         // ignore
       }
-      try { socket.connect(); } catch (e) {}
+      try {
+        socket.connect();
+      } catch (e) {}
     })();
 
     return () => {
       mounted = false;
-      try { socket.disconnect && socket.disconnect(); } catch (e) {}
+      try {
+        socket.disconnect && socket.disconnect();
+      } catch (e) {}
     };
   }, [socket]);
 
@@ -92,7 +102,6 @@ export default function PatientLayout({ children }) {
     },
   ];
 
-
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       localStorage.clear();
@@ -109,7 +118,7 @@ export default function PatientLayout({ children }) {
         style={
           isDark
             ? undefined
-            : { backgroundColor: "#DFF2E5", ['--color-background']: '#DFF2E5' }
+            : { backgroundColor: "#DFF2E5", ["--color-background"]: "#DFF2E5" }
         }
       >
         {/* Fixed Sidebar */}
@@ -125,16 +134,24 @@ export default function PatientLayout({ children }) {
                 <div className="relative">
                   <div className="absolute inset-0 bg-(--ui-ring) rounded-full blur opacity-30" />
                   <div className="relative flex items-center justify-center w-10 h-10 btn-gradient rounded-full shadow-lg">
-                    <span className="text-xl" aria-label="Lung icon">🫁</span>
+                    <span className="text-xl" aria-label="Lung icon">
+                      🫁
+                    </span>
                   </div>
                 </div>
-                <span className="font-black text-lg brand-gradient-text">{t("brand")}</span>
+                <span className="font-black text-lg brand-gradient-text">
+                  {t("brand")}
+                </span>
               </div>
             )}
             <button
               onClick={() => setCollapsed(!collapsed)}
               className="p-2 hover:bg-(--ui-surface-2)/50 rounded-lg transition-colors text-(--ui-muted-foreground) hover:text-(--ui-foreground)"
-              title={collapsed ? t("layout.sidebar.expandTitle") : t("layout.sidebar.collapseTitle")}
+              title={
+                collapsed
+                  ? t("layout.sidebar.expandTitle")
+                  : t("layout.sidebar.collapseTitle")
+              }
             >
               {collapsed ? "←" : "→"}
             </button>
@@ -144,7 +161,8 @@ export default function PatientLayout({ children }) {
           <nav className="flex-1 overflow-y-auto py-4 px-3">
             <div className="space-y-1">
               {patientNavItems.map((item) => {
-                const normalize = (p) => (p || "").replace(/\/+$|^\s+|\s+$/g, '');
+                const normalize = (p) =>
+                  (p || "").replace(/\/+$|^\s+|\s+$/g, "");
                 const np = normalize(pathname);
                 const ih = normalize(item.href);
                 // Prevent parent 'analysis' from matching child '/analysis/history'
@@ -153,7 +171,7 @@ export default function PatientLayout({ children }) {
                   if (item.href === `${basePath}/patient/analysis`) {
                     return np === ih;
                   }
-                  return np === ih || np.startsWith(ih + '/');
+                  return np === ih || np.startsWith(ih + "/");
                 })();
                 const isLogout = item.href === "__logout__";
 
@@ -166,7 +184,11 @@ export default function PatientLayout({ children }) {
                       title={collapsed ? item.label : ""}
                     >
                       <span className="text-lg shrink-0">{item.icon}</span>
-                      {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+                      {!collapsed && (
+                        <span className="text-sm font-medium">
+                          {item.label}
+                        </span>
+                      )}
                     </button>
                   );
                 }
@@ -183,7 +205,11 @@ export default function PatientLayout({ children }) {
                     title={collapsed ? item.label : ""}
                   >
                     <span className="text-lg shrink-0">{item.icon}</span>
-                    {!collapsed && <span className="text-sm font-medium truncate">{item.label}</span>}
+                    {!collapsed && (
+                      <span className="text-sm font-medium truncate">
+                        {item.label}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
@@ -192,10 +218,16 @@ export default function PatientLayout({ children }) {
               <button
                 onClick={() => setTheme(isDark ? "light" : "dark")}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-(--ui-muted-foreground) hover:text-(--ui-foreground) hover:bg-(--ui-surface-2)/50 transition-all w-full"
-                title={collapsed ? (isDark ? t("theme.light") : t("theme.dark")) : ""}
+                title={
+                  collapsed ? (isDark ? t("theme.light") : t("theme.dark")) : ""
+                }
               >
                 <span className="text-lg shrink-0">{isDark ? "☀️" : "🌙"}</span>
-                {!collapsed && <span className="text-sm font-medium">{isDark ? t("theme.light") : t("theme.dark")}</span>}
+                {!collapsed && (
+                  <span className="text-sm font-medium">
+                    {isDark ? t("theme.light") : t("theme.dark")}
+                  </span>
+                )}
               </button>
               <button
                 onClick={toggleLocale}
@@ -203,7 +235,11 @@ export default function PatientLayout({ children }) {
                 title={collapsed ? t("layout.localeSwitch.title") : ""}
               >
                 <span className="text-lg shrink-0">🌐</span>
-                {!collapsed && <span className="text-sm font-medium">{t("layout.localeSwitch.label")}</span>}
+                {!collapsed && (
+                  <span className="text-sm font-medium">
+                    {t("layout.localeSwitch.label")}
+                  </span>
+                )}
               </button>
             </div>
           </nav>
@@ -220,7 +256,13 @@ export default function PatientLayout({ children }) {
         {/* Main Content */}
         <div
           className={`flex-1 transition-all duration-300 ${
-            collapsed ? (locale === "ar" ? "mr-20" : "ml-20") : (locale === "ar" ? "mr-64" : "ml-64")
+            collapsed
+              ? locale === "ar"
+                ? "mr-20"
+                : "ml-20"
+              : locale === "ar"
+                ? "mr-64"
+                : "ml-64"
           }`}
         >
           <div className="min-h-screen">{children}</div>

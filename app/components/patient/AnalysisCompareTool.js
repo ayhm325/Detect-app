@@ -3,13 +3,19 @@
 import Image from "next/image";
 import { useState } from "react";
 
-export default function AnalysisCompareTool({ leftImage, rightImage, comments }) {
+export default function AnalysisCompareTool({
+  leftImage,
+  rightImage,
+  comments,
+}) {
   const [slider, setSlider] = useState(50);
 
   return (
     <section className="card-glass rounded-xl border border-(--ui-border) shadow-sm">
       <header className="flex items-center justify-between border-b border-(--ui-border) p-4">
-        <h2 className="text-lg font-semibold text-(--ui-foreground)">أداة مقارنة الصور</h2>
+        <h2 className="text-lg font-semibold text-(--ui-foreground)">
+          أداة مقارنة الصور
+        </h2>
       </header>
       <div className="p-4">
         <div className="relative mx-auto h-80 max-w-3xl overflow-hidden rounded-lg border border-(--ui-border) bg-(--color-neutral)">
@@ -25,7 +31,10 @@ export default function AnalysisCompareTool({ leftImage, rightImage, comments })
           )}
           {/* صورة اليمين مع قصّ حسب السلايدر */}
           {rightImage && (
-            <div className="absolute left-0 top-0 h-full" style={{ width: `${slider}%` }}>
+            <div
+              className="absolute left-0 top-0 h-full"
+              style={{ width: `${slider}%` }}
+            >
               <div className="relative h-full w-full">
                 <Image
                   src={rightImage}
@@ -49,12 +58,16 @@ export default function AnalysisCompareTool({ leftImage, rightImage, comments })
         </div>
         {comments && (
           <div className="mt-4 rounded-md border border-(--ui-border) bg-(--ui-surface-2)/40 p-3 text-sm text-(--ui-foreground)">
-            <div className="mb-1 text-(--ui-muted-foreground)">تعليقات الطبيب</div>
+            <div className="mb-1 text-(--ui-muted-foreground)">
+              تعليقات الطبيب
+            </div>
             <div>{comments}</div>
           </div>
         )}
         <div className="mt-3">
-          <button className="btn-gradient rounded-md px-3 py-1.5 text-sm text-white">حفظ المقارنة</button>
+          <button className="btn-gradient rounded-md px-3 py-1.5 text-sm text-white">
+            حفظ المقارنة
+          </button>
         </div>
       </div>
     </section>

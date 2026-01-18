@@ -1,36 +1,36 @@
-import React from 'react';
-import styles from './AvailabilitySettings.module.css';
-import { useTranslations } from 'next-intl';
+import React from "react";
+import styles from "./AvailabilitySettings.module.css";
+import { useTranslations } from "next-intl";
 
 export default function AvailabilitySettings({ value, onChange }) {
-  const t = useTranslations('doctorSettings');
+  const t = useTranslations("doctorSettings");
 
   return (
     <div className={styles.availability}>
-      <h3>{t('availability.header')}</h3>
+      <h3>{t("availability.header")}</h3>
       <label>
-        {t('availability.workDays')}:
+        {t("availability.workDays")}:
         <input
           type="text"
-          value={value.days || ''}
-          onChange={e => onChange({ ...value, days: e.target.value })}
-          placeholder={t('availability.exampleDays')}
+          value={value.days || ""}
+          onChange={(e) => onChange({ ...value, days: e.target.value })}
+          placeholder={t("availability.exampleDays")}
         />
       </label>
       <label>
-        {t('availability.startTime')}:
+        {t("availability.startTime")}:
         <input
           type="time"
-          value={value.start || ''}
-          onChange={e => onChange({ ...value, start: e.target.value })}
+          value={value.start || ""}
+          onChange={(e) => onChange({ ...value, start: e.target.value })}
         />
       </label>
       <label>
-        {t('availability.endTime')}:
+        {t("availability.endTime")}:
         <input
           type="time"
-          value={value.end || ''}
-          onChange={e => onChange({ ...value, end: e.target.value })}
+          value={value.end || ""}
+          onChange={(e) => onChange({ ...value, end: e.target.value })}
         />
       </label>
     </div>

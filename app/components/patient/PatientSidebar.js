@@ -13,8 +13,16 @@ export default function PatientSidebar({ open = true, onClose }) {
   // ...existing code...
   // Use t("key") for all navigation labels
   const items = [
-    { href: withLocale("/patient/dashboard"), label: t("dashboard"), icon: "🏠" },
-    { href: withLocale("/patient/appointments"), label: t("appointments"), icon: "📅" },
+    {
+      href: withLocale("/patient/dashboard"),
+      label: t("dashboard"),
+      icon: "🏠",
+    },
+    {
+      href: withLocale("/patient/appointments"),
+      label: t("appointments"),
+      icon: "📅",
+    },
     { href: withLocale("/patient/results"), label: t("results"), icon: "📄" },
     { href: withLocale("/patient/chat"), label: t("chat"), icon: "💬" },
     { href: withLocale("/patient/profile"), label: t("profile"), icon: "👤" },
@@ -25,7 +33,9 @@ export default function PatientSidebar({ open = true, onClose }) {
       {/* شريط جانبي دائم على الشاشات الكبيرة */}
       <aside className="sticky top-4 hidden w-72 shrink-0 card-glass rounded-xl border border-(--ui-border) p-4 shadow-sm lg:block">
         <div className="mb-6 flex items-center justify-center">
-          <span className="text-2xl font-bold brand-gradient-text tracking-wide whitespace-nowrap">{navbar("brand")}</span>
+          <span className="text-2xl font-bold brand-gradient-text tracking-wide whitespace-nowrap">
+            {navbar("brand")}
+          </span>
         </div>
         <nav className="space-y-1">
           {items.map((item) => {
@@ -47,7 +57,9 @@ export default function PatientSidebar({ open = true, onClose }) {
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${
-                  active ? "bg-(--ui-surface-2)/70 text-(--ui-foreground)" : "text-(--ui-foreground) hover:bg-(--ui-surface-2)/60"
+                  active
+                    ? "bg-(--ui-surface-2)/70 text-(--ui-foreground)"
+                    : "text-(--ui-foreground) hover:bg-(--ui-surface-2)/60"
                 }`}
               >
                 <span aria-hidden>{item.icon}</span>
@@ -60,14 +72,19 @@ export default function PatientSidebar({ open = true, onClose }) {
 
       {/* شريط جانبي كـ Overlay على الشاشات الصغيرة */}
       {open && (
-        <div className="fixed inset-0 z-40 bg-(--color-neutral)/40 lg:hidden" onClick={onClose} />
+        <div
+          className="fixed inset-0 z-40 bg-(--color-neutral)/40 lg:hidden"
+          onClick={onClose}
+        />
       )}
       <aside
         className={`fixed inset-y-0 right-0 z-50 w-72 rounded-l-xl border border-(--ui-border) bg-(--ui-surface)/90 p-4 shadow-lg transition-transform lg:hidden`}
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
       >
         <div className="mb-6 flex items-center justify-center">
-          <span className="text-2xl font-bold brand-gradient-text tracking-wide whitespace-nowrap">{navbar("brand")}</span>
+          <span className="text-2xl font-bold brand-gradient-text tracking-wide whitespace-nowrap">
+            {navbar("brand")}
+          </span>
         </div>
         <nav className="space-y-1">
           {items.map((item) => {
@@ -92,7 +109,9 @@ export default function PatientSidebar({ open = true, onClose }) {
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${
-                  active ? "bg-(--ui-surface-2)/70 text-(--ui-foreground)" : "text-(--ui-foreground) hover:bg-(--ui-surface-2)/60"
+                  active
+                    ? "bg-(--ui-surface-2)/70 text-(--ui-foreground)"
+                    : "text-(--ui-foreground) hover:bg-(--ui-surface-2)/60"
                 }`}
                 onClick={onClose}
               >

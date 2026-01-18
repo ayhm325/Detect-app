@@ -1,4 +1,3 @@
-
 import DoctorLayout from "../DoctorLayout";
 import UploadXRayPageContent from "../../../components/doctor/pages/UploadXRayPageContent";
 

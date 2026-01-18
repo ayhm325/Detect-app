@@ -21,7 +21,25 @@ EPOCHS = 18
 LR = 1e-4
 NUM_CLASSES = 2
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-MODEL_PATH = "best_densenet121_xray.pth"
+
+# Resolve model path with sensible fallbacks to support consolidation into ai/models/
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FALLBACK_PATHS = [
+    os.path.join(BASE_DIR, '..', 'ai', 'models', 'best_densenet121_xray.pth'),
+    os.path.join(BASE_DIR, 'best_densenet121_xray.pth'),
+    os.path.join(BASE_DIR, '..', 'best_densenet121_xray.pth'),
+]
+
+MODEL_PATH = None
+for p in FALLBACK_PATHS:
+    p = os.path.normpath(p)
+    if os.path.exists(p):
+        MODEL_PATH = p
+        break
+
+if MODEL_PATH is None:
+    MODEL_PATH = 'best_densenet121_xray.pth'
+    print('NOTICE: saving/loading model to', MODEL_PATH, '(fallback)')
 
 # =====================
 # Transforms (X-ray friendly)

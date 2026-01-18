@@ -3,6 +3,7 @@ AI folder (Phase 1)
 Structure reserved for AI layer. Files are placeholders in Phase 1 — no logic included.
 
 Folders:
+
 - inference/
 - contracts/
 - utils/
@@ -17,15 +18,15 @@ Structure (literal):
 /ai
 │
 ├── inference/
-│   ├── index.js            # model switcher (mock <-> real)
-│   ├── mockModel.js        # fake model: input -> prediction, confidence, heatmap, explanation, model_version
-│   └── inference.service.js# orchestrator: prepares image, calls model, validates contract
+│ ├── index.js # model switcher (mock <-> real)
+│ ├── mockModel.js # fake model: input -> prediction, confidence, heatmap, explanation, model_version
+│ └── inference.service.js# orchestrator: prepares image, calls model, validates contract
 │
 ├── contracts/
-│   └── analysisResponse.contract.js # immutable response shape + validator
+│ └── analysisResponse.contract.js # immutable response shape + validator
 │
 ├── utils/
-│   └── imagePreprocessor.js # validate/prepare image (resize/normalize placeholder)
+│ └── imagePreprocessor.js # validate/prepare image (resize/normalize placeholder)
 │
 └── README.md
 
@@ -39,6 +40,7 @@ const result = await analyzeImage({ buffer, mimeType });
 // result matches contracts/analysisResponse.contract.js
 
 Notes
+
 - The mock model never performs DB or API calls.
 - Keep the contract stable: front-end and DB depend on it.
 - To switch models, set `AI_USE_MOCK=false` and provide a real model implementation at `ai/inference/*` that exports `infer(preparedImage)`.

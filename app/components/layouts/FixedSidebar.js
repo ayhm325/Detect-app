@@ -37,9 +37,13 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
           {!collapsed && (
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg btn-gradient flex items-center justify-center">
-                <span className="text-white font-bold text-sm">{navbar("brandShort")}</span>
+                <span className="text-white font-bold text-sm">
+                  {navbar("brandShort")}
+                </span>
               </div>
-              <span className="font-bold text-lg hidden lg:inline brand-gradient-text">{navbar("brand")}</span>
+              <span className="font-bold text-lg hidden lg:inline brand-gradient-text">
+                {navbar("brand")}
+              </span>
             </div>
           )}
           <button
@@ -67,7 +71,9 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
                     title={collapsed ? item.label : ""}
                   >
                     <span className="text-lg shrink-0">{item.icon}</span>
-                    {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+                    {!collapsed && (
+                      <span className="text-sm font-medium">{item.label}</span>
+                    )}
                   </button>
                 );
               }
@@ -84,7 +90,11 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
                   title={collapsed ? item.label : ""}
                 >
                   <span className="text-lg shrink-0">{item.icon}</span>
-                  {!collapsed && <span className="text-sm font-medium truncate">{item.label}</span>}
+                  {!collapsed && (
+                    <span className="text-sm font-medium truncate">
+                      {item.label}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -94,14 +104,18 @@ export default function FixedSidebar({ items = [], userRole = "patient" }) {
         {/* Footer Info */}
         {!collapsed && (
           <div className="border-t border-(--ui-border) p-3 text-xs text-(--ui-muted-foreground) space-y-1">
-            <div className="text-(--ui-muted-foreground)">{ui("footer.version")}</div>
-            <div className="text-(--ui-muted-foreground)">{ui("footer.statusOnline")}</div>
+            <div className="text-(--ui-muted-foreground)">
+              {ui("footer.version")}
+            </div>
+            <div className="text-(--ui-muted-foreground)">
+              {ui("footer.statusOnline")}
+            </div>
           </div>
         )}
       </div>
 
       {/* Main Content Area - Adjusted for fixed sidebar */}
-      <div 
+      <div
         className="main-content-wrapper transition-all duration-300"
         style={{ marginLeft: collapsed ? "80px" : "256px" }}
       />

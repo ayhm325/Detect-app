@@ -1,8 +1,8 @@
 "use client";
 
-import React from 'react';
-import Image from 'next/image';
-import styles from './ScanThumbnails.module.css';
+import React from "react";
+import Image from "next/image";
+import styles from "./ScanThumbnails.module.css";
 import { useTranslations } from "next-intl";
 
 export default function ScanThumbnails({ images, selected, onSelect }) {
@@ -17,7 +17,7 @@ export default function ScanThumbnails({ images, selected, onSelect }) {
           alt={t("scanViewer.thumbnailAlt", { index: idx + 1 })}
           width={96}
           height={72}
-          className={img === selected ? styles.selected : ''}
+          className={img === selected ? styles.selected : ""}
           onClick={() => onSelect(img)}
         />
       ))}

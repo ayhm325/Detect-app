@@ -1,4 +1,3 @@
-
 import { FaUserMd, FaUserPlus } from "react-icons/fa";
 import Button from "../ui/Button";
 import { Table, THead, TRow, TH, TD } from "../ui/Table";
@@ -6,7 +5,17 @@ import Pagination from "../ui/Pagination";
 
 import { useTranslations } from "next-intl";
 
-export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onAdd, onToggle, page = 1, pageCount = 1, onPageChange }) {
+export default function DoctorsTable({
+  doctors,
+  onEdit,
+  onDelete,
+  onDetails,
+  onAdd,
+  onToggle,
+  page = 1,
+  pageCount = 1,
+  onPageChange,
+}) {
   const t = useTranslations("doctorsTable");
   const ui = useTranslations("ui");
   return (
@@ -25,16 +34,25 @@ export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onA
         <tbody>
           {doctors.map((doctor, i) => {
             const name = doctor.user?.fullName || doctor.name;
-            const email = doctor.user?.email || doctor.email || ui("placeholder");
+            const email =
+              doctor.user?.email || doctor.email || ui("placeholder");
             // Handle both possible shapes: top-level or inside doctor.user
-            const licenseNumber = doctor.licenseNumber || doctor.user?.licenseNumber || ui("placeholder");
-            const phone = doctor.phone || doctor.user?.phone || ui("placeholder");
+            const licenseNumber =
+              doctor.licenseNumber ||
+              doctor.user?.licenseNumber ||
+              ui("placeholder");
+            const phone =
+              doctor.phone || doctor.user?.phone || ui("placeholder");
             return (
-              <TRow key={doctor.id || doctor.userId} className="hover:bg-(--ui-surface-2)/60 transition-colors">
+              <TRow
+                key={doctor.id || doctor.userId}
+                className="hover:bg-(--ui-surface-2)/60 transition-colors"
+              >
                 <TD className="py-2 px-4 text-center font-bold">{i + 1}</TD>
                 <TD className="py-2 px-4 text-center">
                   <span className="inline-flex items-center gap-2 justify-center">
-                    <FaUserMd className="text-(--ui-muted-2)" />{name}
+                    <FaUserMd className="text-(--ui-muted-2)" />
+                    {name}
                   </span>
                 </TD>
                 <TD className="py-2 px-4 text-center">{licenseNumber}</TD>
@@ -42,23 +60,50 @@ export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onA
                 <TD className="py-2 px-4 text-center">{email}</TD>
                 <TD className="py-2 px-4">
                   <div className="flex items-center justify-center gap-2 flex-wrap">
-                    {typeof onToggle === 'function' ? (
+                    {typeof onToggle === "function" ? (
                       // Show a single toggle button for enable/disable
                       <Button
                         variant="ghost"
                         className="px-3 py-2"
-                        title={doctor.status === 'active' ? t('disable') : t('enable')}
+                        title={
+                          doctor.status === "active"
+                            ? t("disable")
+                            : t("enable")
+                        }
                         onClick={() => onToggle(doctor)}
                       >
-                        {doctor.status === 'active' ? t('disable') : t('enable')}
+                        {doctor.status === "active"
+                          ? t("disable")
+                          : t("enable")}
                       </Button>
                     ) : (
                       <>
-                        <Button variant="ghost" className="px-3 py-2" title={t("edit")} onClick={() => onEdit && onEdit(doctor)}>{t("edit")}</Button>
-                        <Button variant="ghost" className="px-3 py-2 text-(--ui-danger)" title={t("delete")} onClick={() => onDelete && onDelete(doctor)}>{t("delete")}</Button>
+                        <Button
+                          variant="ghost"
+                          className="px-3 py-2"
+                          title={t("edit")}
+                          onClick={() => onEdit && onEdit(doctor)}
+                        >
+                          {t("edit")}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="px-3 py-2 text-(--ui-danger)"
+                          title={t("delete")}
+                          onClick={() => onDelete && onDelete(doctor)}
+                        >
+                          {t("delete")}
+                        </Button>
                       </>
                     )}
-                    <Button variant="ghost" className="px-3 py-2 text-(--ui-info)" title={t("details")} onClick={() => onDetails && onDetails(doctor)}>{t("details")}</Button>
+                    <Button
+                      variant="ghost"
+                      className="px-3 py-2 text-(--ui-info)"
+                      title={t("details")}
+                      onClick={() => onDetails && onDetails(doctor)}
+                    >
+                      {t("details")}
+                    </Button>
                   </div>
                 </TD>
               </TRow>
@@ -68,7 +113,11 @@ export default function DoctorsTable({ doctors, onEdit, onDelete, onDetails, onA
       </Table>
 
       <div className="flex items-center justify-end mt-6">
-        <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
+        <Pagination
+          page={page}
+          pageCount={pageCount}
+          onPageChange={onPageChange}
+        />
       </div>
     </div>
   );

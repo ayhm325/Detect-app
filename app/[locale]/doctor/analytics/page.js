@@ -1,7 +1,7 @@
 "use client";
 
 import DoctorLayout from "../DoctorLayout";
-import { useToast } from "../../../components/ui/Toast";
+import { useToast } from "../../../components/ui/ToastProvider";
 import { useMemo, useState } from "react";
 import {
   FaUserInjured,
@@ -17,72 +17,69 @@ import {
 } from "react-icons/fa";
 import { useLocale, useTranslations } from "next-intl";
 
-  export default function Page() {
-    const { showToast, ToastContainer } = useToast();
-    const t = useTranslations("doctorAnalytics");
-    const locale = useLocale();
-    const [timeRange, setTimeRange] = useState("week");
-    const [selectedMetric, setSelectedMetric] = useState("patients");
-  
-    // Statistics Data
-    const stats = {
-      week: {
-        patients: { current: 45, previous: 38, percentage: 18.4 },
-        scans: { current: 62, previous: 55, percentage: 12.7 },
-        completed: { current: 58, previous: 48, percentage: 20.8 },
-        pending: { current: 4, previous: 7, percentage: -42.9 },
-      },
-      month: {
-        patients: { current: 180, previous: 165, percentage: 9.1 },
-        scans: { current: 245, previous: 220, percentage: 11.4 },
-        completed: { current: 238, previous: 210, percentage: 13.3 },
-        pending: { current: 7, previous: 10, percentage: -30.0 },
-      },
-      year: {
-        patients: { current: 2160, previous: 1980, percentage: 9.1 },
-        scans: { current: 2940, previous: 2640, percentage: 11.4 },
-        completed: { current: 2856, previous: 2520, percentage: 13.3 },
-        pending: { current: 84, previous: 120, percentage: -30.0 },
-      },
-    };
-  
-    const currentStats = stats[timeRange];
-  
-    // Chart Data - Patient Distribution by Day
-    const patientChartDataTemplate = useMemo(
-      () => t("patientChartData", { returnObjects: true }),
-      [t]
-    );
-  
-    const patientChartData = patientChartDataTemplate;
-  
-    const maxValue = Math.max(...patientChartData.map((d) => d.value));
-  
-    // Scan Types Distribution
-    const scanTypesTemplate = useMemo(
-      () => t("scanTypes", { returnObjects: true }),
-      [t]
-    );
-  
-    const scanTypes = scanTypesTemplate;
-  
-    // Recent Activity
-    const recentActivityTemplate = useMemo(
-      () => t("recentActivity", { returnObjects: true }),
-      [t]
-    );
-  
-    const recentActivity = recentActivityTemplate;
-  
-    // Export removed: UI export button hidden per request.
-  
-    return (
-      <DoctorLayout>
-        <ToastContainer />
-        <div
-          className="min-h-screen bg-(--ui-surface-2) p-6 text-(--ui-foreground)"
-        >
-          <div className="mx-auto max-w-7xl space-y-6">
+export default function Page() {
+  const { showSuccess, showError, showInfo, showWarning } = useToast();
+  const t = useTranslations("doctorAnalytics");
+  const locale = useLocale();
+  const [timeRange, setTimeRange] = useState("week");
+  const [selectedMetric, setSelectedMetric] = useState("patients");
+
+  // Statistics Data
+  const stats = {
+    week: {
+      patients: { current: 45, previous: 38, percentage: 18.4 },
+      scans: { current: 62, previous: 55, percentage: 12.7 },
+      completed: { current: 58, previous: 48, percentage: 20.8 },
+      pending: { current: 4, previous: 7, percentage: -42.9 },
+    },
+    month: {
+      patients: { current: 180, previous: 165, percentage: 9.1 },
+      scans: { current: 245, previous: 220, percentage: 11.4 },
+      completed: { current: 238, previous: 210, percentage: 13.3 },
+      pending: { current: 7, previous: 10, percentage: -30.0 },
+    },
+    year: {
+      patients: { current: 2160, previous: 1980, percentage: 9.1 },
+      scans: { current: 2940, previous: 2640, percentage: 11.4 },
+      completed: { current: 2856, previous: 2520, percentage: 13.3 },
+      pending: { current: 84, previous: 120, percentage: -30.0 },
+    },
+  };
+
+  const currentStats = stats[timeRange];
+
+  // Chart Data - Patient Distribution by Day
+  const patientChartDataTemplate = useMemo(
+    () => t("patientChartData", { returnObjects: true }),
+    [t],
+  );
+
+  const patientChartData = patientChartDataTemplate;
+
+  const maxValue = Math.max(...patientChartData.map((d) => d.value));
+
+  // Scan Types Distribution
+  const scanTypesTemplate = useMemo(
+    () => t("scanTypes", { returnObjects: true }),
+    [t],
+  );
+
+  const scanTypes = scanTypesTemplate;
+
+  // Recent Activity
+  const recentActivityTemplate = useMemo(
+    () => t("recentActivity", { returnObjects: true }),
+    [t],
+  );
+
+  const recentActivity = recentActivityTemplate;
+
+  // Export removed: UI export button hidden per request.
+
+  return (
+    <DoctorLayout>
+      <div className="min-h-screen bg-(--ui-surface-2) p-6 text-(--ui-foreground)">
+        <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -90,7 +87,9 @@ import { useLocale, useTranslations } from "next-intl";
                 <FaChartLine className="text-(--ui-info)" />
                 {t("title")}
               </h1>
-              <p className="mt-2 text-(--ui-muted-foreground)">{t("subtitle")}</p>
+              <p className="mt-2 text-(--ui-muted-foreground)">
+                {t("subtitle")}
+              </p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -119,16 +118,26 @@ import { useLocale, useTranslations } from "next-intl";
                   <FaUserInjured className="text-4xl text-(--ui-info)" />
                   <div
                     className={`flex items-center gap-1 text-sm font-medium ${
-                      currentStats.patients.percentage > 0 ? "text-(--ui-success)" : "text-(--ui-danger)"
+                      currentStats.patients.percentage > 0
+                        ? "text-(--ui-success)"
+                        : "text-(--ui-danger)"
                     }`}
                   >
-                    {currentStats.patients.percentage > 0 ? <FaArrowUp /> : <FaArrowDown />}
+                    {currentStats.patients.percentage > 0 ? (
+                      <FaArrowUp />
+                    ) : (
+                      <FaArrowDown />
+                    )}
                     {Math.abs(currentStats.patients.percentage)}%
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.patients")}</p>
-                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{currentStats.patients.current}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">
+                    {t("stats.patients")}
+                  </p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">
+                    {currentStats.patients.current}
+                  </p>
                   <p className="mt-1 text-xs text-(--ui-muted-foreground)">
                     {t("stats.previous")}: {currentStats.patients.previous}
                   </p>
@@ -144,17 +153,29 @@ import { useLocale, useTranslations } from "next-intl";
                   <FaXRay className="text-4xl text-(--ui-info)" />
                   <div
                     className={`flex items-center gap-1 text-sm font-medium ${
-                      currentStats.scans.percentage > 0 ? "text-(--ui-success)" : "text-(--ui-danger)"
+                      currentStats.scans.percentage > 0
+                        ? "text-(--ui-success)"
+                        : "text-(--ui-danger)"
                     }`}
                   >
-                    {currentStats.scans.percentage > 0 ? <FaArrowUp /> : <FaArrowDown />}
+                    {currentStats.scans.percentage > 0 ? (
+                      <FaArrowUp />
+                    ) : (
+                      <FaArrowDown />
+                    )}
                     {Math.abs(currentStats.scans.percentage)}%
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.scans")}</p>
-                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{currentStats.scans.current}</p>
-                  <p className="mt-1 text-xs text-(--ui-muted-foreground)">{t("stats.previous")}: {currentStats.scans.previous}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">
+                    {t("stats.scans")}
+                  </p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">
+                    {currentStats.scans.current}
+                  </p>
+                  <p className="mt-1 text-xs text-(--ui-muted-foreground)">
+                    {t("stats.previous")}: {currentStats.scans.previous}
+                  </p>
                 </div>
               </div>
             </div>
@@ -167,16 +188,26 @@ import { useLocale, useTranslations } from "next-intl";
                   <FaCheckCircle className="text-4xl text-(--ui-success)" />
                   <div
                     className={`flex items-center gap-1 text-sm font-medium ${
-                      currentStats.completed.percentage > 0 ? "text-(--ui-success)" : "text-(--ui-danger)"
+                      currentStats.completed.percentage > 0
+                        ? "text-(--ui-success)"
+                        : "text-(--ui-danger)"
                     }`}
                   >
-                    {currentStats.completed.percentage > 0 ? <FaArrowUp /> : <FaArrowDown />}
+                    {currentStats.completed.percentage > 0 ? (
+                      <FaArrowUp />
+                    ) : (
+                      <FaArrowDown />
+                    )}
                     {Math.abs(currentStats.completed.percentage)}%
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.completed")}</p>
-                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{currentStats.completed.current}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">
+                    {t("stats.completed")}
+                  </p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">
+                    {currentStats.completed.current}
+                  </p>
                   <p className="mt-1 text-xs text-(--ui-muted-foreground)">
                     {t("stats.previous")}: {currentStats.completed.previous}
                   </p>
@@ -192,17 +223,29 @@ import { useLocale, useTranslations } from "next-intl";
                   <FaClock className="text-4xl text-(--ui-warning)" />
                   <div
                     className={`flex items-center gap-1 text-sm font-medium ${
-                      currentStats.pending.percentage < 0 ? "text-(--ui-success)" : "text-(--ui-danger)"
+                      currentStats.pending.percentage < 0
+                        ? "text-(--ui-success)"
+                        : "text-(--ui-danger)"
                     }`}
                   >
-                    {currentStats.pending.percentage < 0 ? <FaArrowDown /> : <FaArrowUp />}
+                    {currentStats.pending.percentage < 0 ? (
+                      <FaArrowDown />
+                    ) : (
+                      <FaArrowUp />
+                    )}
                     {Math.abs(currentStats.pending.percentage)}%
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-(--ui-muted-foreground)">{t("stats.pending")}</p>
-                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">{currentStats.pending.current}</p>
-                  <p className="mt-1 text-xs text-(--ui-muted-foreground)">{t("stats.previous")}: {currentStats.pending.previous}</p>
+                  <p className="text-sm text-(--ui-muted-foreground)">
+                    {t("stats.pending")}
+                  </p>
+                  <p className="mt-1 text-3xl font-bold text-(--ui-foreground)">
+                    {currentStats.pending.current}
+                  </p>
+                  <p className="mt-1 text-xs text-(--ui-muted-foreground)">
+                    {t("stats.previous")}: {currentStats.pending.previous}
+                  </p>
                 </div>
               </div>
             </div>
@@ -222,7 +265,9 @@ import { useLocale, useTranslations } from "next-intl";
               <div className="space-y-4">
                 {patientChartData.map((item, index) => (
                   <div key={index} className="flex items-center gap-4">
-                    <div className="w-20 text-sm font-medium text-(--ui-foreground)">{item.day}</div>
+                    <div className="w-20 text-sm font-medium text-(--ui-foreground)">
+                      {item.day}
+                    </div>
                     <div className="flex-1">
                       <div className="relative h-10 rounded-lg bg-(--ui-surface)">
                         <div
@@ -230,12 +275,16 @@ import { useLocale, useTranslations } from "next-intl";
                           style={{ width: `${(item.value / maxValue) * 100}%` }}
                         >
                           {item.value > 0 && (
-                            <span className="text-sm font-bold text-(--ui-info-foreground)">{item.value}</span>
+                            <span className="text-sm font-bold text-(--ui-info-foreground)">
+                              {item.value}
+                            </span>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="w-12 text-sm text-(--ui-muted-foreground)">{item.value} {t("units.patients")}</div>
+                    <div className="w-12 text-sm text-(--ui-muted-foreground)">
+                      {item.value} {t("units.patients")}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -251,9 +300,13 @@ import { useLocale, useTranslations } from "next-intl";
               <div className="space-y-4">
                 {scanTypes.map((scan, index) => (
                   <div key={index}>
-                  <div className="mb-2 flex items-center justify-between">
-                      <span className="text-sm font-medium text-(--ui-foreground)">{scan.label}</span>
-                      <span className="text-sm font-bold text-(--ui-foreground)">{scan.count}</span>
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-sm font-medium text-(--ui-foreground)">
+                        {scan.label}
+                      </span>
+                      <span className="text-sm font-bold text-(--ui-foreground)">
+                        {scan.count}
+                      </span>
                     </div>
                     <div className="relative h-3 rounded-full bg-(--ui-surface)">
                       <div
@@ -261,7 +314,9 @@ import { useLocale, useTranslations } from "next-intl";
                         style={{ width: `${scan.percentage}%` }}
                       ></div>
                     </div>
-                    <p className="mt-1 text-xs text-(--ui-muted-foreground)">{scan.percentage}% {t("scanTypesOfTotal")}</p>
+                    <p className="mt-1 text-xs text-(--ui-muted-foreground)">
+                      {scan.percentage}% {t("scanTypesOfTotal")}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -287,10 +342,10 @@ import { useLocale, useTranslations } from "next-intl";
                         activity.status === "completed"
                           ? "bg-(--ui-success-bg)"
                           : activity.status === "pending"
-                          ? "bg-(--ui-warning-bg)"
-                          : activity.status === "sent"
-                          ? "bg-(--ui-info-bg)"
-                          : "bg-(--ui-info-bg)"
+                            ? "bg-(--ui-warning-bg)"
+                            : activity.status === "sent"
+                              ? "bg-(--ui-info-bg)"
+                              : "bg-(--ui-info-bg)"
                       }`}
                     >
                       {activity.status === "completed" ? (
@@ -302,12 +357,18 @@ import { useLocale, useTranslations } from "next-intl";
                       )}
                     </div>
                     <div>
-                      <p className="font-medium text-(--ui-foreground)">{activity.actionLabel}</p>
-                      <p className="text-sm text-(--ui-muted-foreground)">{activity.patient}</p>
+                      <p className="font-medium text-(--ui-foreground)">
+                        {activity.actionLabel}
+                      </p>
+                      <p className="text-sm text-(--ui-muted-foreground)">
+                        {activity.patient}
+                      </p>
                     </div>
                   </div>
                   <div className="text-left">
-                    <p className="text-sm text-(--ui-muted-foreground)">{activity.time}</p>
+                    <p className="text-sm text-(--ui-muted-foreground)">
+                      {activity.time}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -315,7 +376,6 @@ import { useLocale, useTranslations } from "next-intl";
           </div>
         </div>
       </div>
-      </DoctorLayout>
-    );
-  }
-
+    </DoctorLayout>
+  );
+}

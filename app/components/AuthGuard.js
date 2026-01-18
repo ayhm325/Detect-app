@@ -12,14 +12,17 @@ export default function AuthGuard({ children }) {
 
     (async () => {
       try {
-        const res = await fetch('/api/auth/whoami', { cache: 'no-store', credentials: 'include' });
+        const res = await fetch("/api/auth/whoami", {
+          cache: "no-store",
+          credentials: "include",
+        });
         if (!res.ok) {
-          const localePrefix = pathname.startsWith('/en') ? '/en' : '/ar';
+          const localePrefix = pathname.startsWith("/en") ? "/en" : "/ar";
           router.replace(`${localePrefix}/login`);
         }
       } catch (e) {
         // On error, redirect to login as a safe fallback
-        const localePrefix = pathname.startsWith('/en') ? '/en' : '/ar';
+        const localePrefix = pathname.startsWith("/en") ? "/en" : "/ar";
         router.replace(`${localePrefix}/login`);
       }
     })();

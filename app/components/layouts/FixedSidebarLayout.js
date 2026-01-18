@@ -14,7 +14,11 @@ export default function FixedSidebarLayout({
   return (
     <div className="min-h-screen bg-(--ui-surface) text-(--ui-foreground)">
       {/* Fixed Sidebar */}
-      <FixedSidebar items={sidebarItems} userRole={userRole} collapsed={collapsed} />
+      <FixedSidebar
+        items={sidebarItems}
+        userRole={userRole}
+        collapsed={collapsed}
+      />
 
       {/* Main Content */}
       <div
@@ -22,9 +26,7 @@ export default function FixedSidebarLayout({
           collapsed ? "ml-20" : "ml-64"
         }`}
       >
-        <div className="min-h-screen">
-          {contentComponent || children}
-        </div>
+        <div className="min-h-screen">{contentComponent || children}</div>
       </div>
     </div>
   );

@@ -1,12 +1,12 @@
-import React from 'react';
-import Image from 'next/image';
-import styles from './PatientCard.module.css';
-import { useTranslations } from 'next-intl';
+import React from "react";
+import Image from "next/image";
+import styles from "./PatientCard.module.css";
+import { useTranslations } from "next-intl";
 
 export default function PatientCard({ patient }) {
-  const t = useTranslations('doctorPatients');
-  const ui = useTranslations('ui');
-  const placeholder = ui('placeholder');
+  const t = useTranslations("doctorPatients");
+  const ui = useTranslations("ui");
+  const placeholder = ui("placeholder");
 
   return (
     <div className={styles.card}>
@@ -19,7 +19,9 @@ export default function PatientCard({ patient }) {
       />
       <div>
         <div className={styles.name}>{patient.name || placeholder}</div>
-        <div className={styles.age}>{t('quickView.labels.age')}: {patient.age || placeholder}</div>
+        <div className={styles.age}>
+          {t("quickView.labels.age")}: {patient.age || placeholder}
+        </div>
       </div>
     </div>
   );

@@ -7,7 +7,9 @@ export default function Breadcrumbs({ items = [] }) {
         {items.map((item, idx) => (
           <li key={idx} className="flex items-center">
             {item}
-            {idx < items.length - 1 && <span className="mx-2 text-(--ui-muted-foreground)">/</span>}
+            {idx < items.length - 1 && (
+              <span className="mx-2 text-(--ui-muted-foreground)">/</span>
+            )}
           </li>
         ))}
       </ol>

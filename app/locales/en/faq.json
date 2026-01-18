@@ -6,25 +6,52 @@
     {
       "category": "General",
       "questions": [
-        { "q": "What is PneumoDetect?", "a": "PneumoDetect is an advanced system that uses AI to detect diseases by analyzing medical images like X-rays." },
-        { "q": "How does the system work?", "a": "It relies on deep learning models trained on millions of images and compares your upload to detect findings." },
-        { "q": "Is the system medically approved?", "a": "Yes, it is cleared for clinical use as a physician-assist tool. Always consult a doctor for confirmation." }
+        {
+          "q": "What is PneumoDetect?",
+          "a": "PneumoDetect is an advanced system that uses AI to detect diseases by analyzing medical images like X-rays."
+        },
+        {
+          "q": "How does the system work?",
+          "a": "It relies on deep learning models trained on millions of images and compares your upload to detect findings."
+        },
+        {
+          "q": "Is the system medically approved?",
+          "a": "Yes, it is cleared for clinical use as a physician-assist tool. Always consult a doctor for confirmation."
+        }
       ]
     },
     {
       "category": "Usage",
       "questions": [
-        { "q": "How do I upload an image?", "a": "After signing in, go to Upload X-ray and drag the file or pick it. JPG, PNG, DICOM are supported." },
-        { "q": "How long does analysis take?", "a": "Typically 10-30 seconds depending on image size and quality." },
-        { "q": "Can I save results?", "a": "Yes, every analysis is saved to your profile for later review." }
+        {
+          "q": "How do I upload an image?",
+          "a": "After signing in, go to Upload X-ray and drag the file or pick it. JPG, PNG, DICOM are supported."
+        },
+        {
+          "q": "How long does analysis take?",
+          "a": "Typically 10-30 seconds depending on image size and quality."
+        },
+        {
+          "q": "Can I save results?",
+          "a": "Yes, every analysis is saved to your profile for later review."
+        }
       ]
     },
     {
       "category": "Security & Privacy",
       "questions": [
-        { "q": "Is my data safe?", "a": "We use strong encryption and strict controls. Your images and medical data are protected." },
-        { "q": "Who can access my data?", "a": "Only you and your authorized physician. We never share without your consent." },
-        { "q": "How do you protect privacy?", "a": "We comply with medical data standards (HIPAA-like) and enforce strict privacy policies." }
+        {
+          "q": "Is my data safe?",
+          "a": "We use strong encryption and strict controls. Your images and medical data are protected."
+        },
+        {
+          "q": "Who can access my data?",
+          "a": "Only you and your authorized physician. We never share without your consent."
+        },
+        {
+          "q": "How do you protect privacy?",
+          "a": "We comply with medical data standards (HIPAA-like) and enforce strict privacy policies."
+        }
       ]
     },
     {
@@ -32,15 +59,27 @@
       "questions": [
         { "q": "Is signup free?", "a": "Yes, creating an account is free." },
         { "q": "What does analysis cost?", "a": "Free." },
-        { "q": "How do I cancel?", "a": "You can cancel anytime from account settings without extra fees." }
+        {
+          "q": "How do I cancel?",
+          "a": "You can cancel anytime from account settings without extra fees."
+        }
       ]
     },
     {
       "category": "Support",
       "questions": [
-        { "q": "How do I contact support?", "a": "Email support@detect-ai.com, use Contact page, or live chat." },
-        { "q": "What if I face a technical issue?", "a": "Contact support immediately; we'll help you resolve it quickly." },
-        { "q": "Is support 24/7?", "a": "Yes, our support team is available around the clock." }
+        {
+          "q": "How do I contact support?",
+          "a": "Email support@detect-ai.com, use Contact page, or live chat."
+        },
+        {
+          "q": "What if I face a technical issue?",
+          "a": "Contact support immediately; we'll help you resolve it quickly."
+        },
+        {
+          "q": "Is support 24/7?",
+          "a": "Yes, our support team is available around the clock."
+        }
       ]
     }
   ],

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-import Redis from 'ioredis';
+import Redis from "ioredis";
 
-const url = process.env.REDIS_URL || 'redis://localhost:6379';
+const url = process.env.REDIS_URL || "redis://localhost:6379";
 const redis = new Redis(url);
 
 async function main() {
   try {
-    const keys = await redis.keys('revoked:*');
+    const keys = await redis.keys("revoked:*");
     if (!keys || keys.length === 0) {
-      console.log('No revoked keys found');
+      console.log("No revoked keys found");
       return;
     }
     console.log(`Found ${keys.length} revoked keys:`);
@@ -22,6 +22,6 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error('Error checking revoked keys', e && e.message);
+  console.error("Error checking revoked keys", e && e.message);
   process.exit(1);
 });

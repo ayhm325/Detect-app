@@ -27,8 +27,8 @@
   "nav": {
     "home": "Home",
     "appointments": "Appointments",
-      "analysis": "Analysis",
-      "history": "History",
+    "analysis": "Analysis",
+    "history": "History",
     "results": "Reports",
     "chat": "Chat",
     "profile": "Account",

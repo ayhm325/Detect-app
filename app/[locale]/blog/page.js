@@ -26,7 +26,7 @@ export default function BlogPage() {
     <div
       className="flex min-h-screen items-center justify-center bg-cover bg-center py-20"
       style={{
-        backgroundImage: 'url(/icons/blog.jpg)',
+        backgroundImage: "url(/icons/blog.jpg)",
       }}
     >
       <div className="card-glass relative z-10 mx-auto w-full max-w-4xl rounded-3xl border border-(--ui-border) bg-(--ui-surface)/60 p-8 px-4 backdrop-blur-md shadow-(--shadow-lift)">
@@ -39,7 +39,9 @@ export default function BlogPage() {
             {t("languageToggleLabel")}
           </button>
         </div>
-        <h1 className="mb-6 text-center text-4xl font-bold text-(--ui-warning)">{t("title")}</h1>
+        <h1 className="mb-6 text-center text-4xl font-bold text-(--ui-warning)">
+          {t("title")}
+        </h1>
         <p className="mx-auto mb-12 max-w-2xl text-center text-lg text-(--ui-muted-foreground)">
           {t("description")}
         </p>
@@ -50,11 +52,20 @@ export default function BlogPage() {
               className="card-glass animate-fadeIn rounded-2xl border border-(--ui-border) bg-(--ui-surface)/60 p-6 backdrop-blur-sm shadow-(--shadow-soft) transition-transform hover:scale-[1.02]"
             >
               <div className="mb-2 flex flex-col md:flex-row md:items-center md:justify-between">
-                <h2 className="mb-2 text-2xl font-bold text-(--ui-warning) md:mb-0">{safeText(post?.title)}</h2>
-                <span className="text-sm text-(--ui-muted-foreground)">{safeText(post?.date)}</span>
+                <h2 className="mb-2 text-2xl font-bold text-(--ui-warning) md:mb-0">
+                  {safeText(post?.title)}
+                </h2>
+                <span className="text-sm text-(--ui-muted-foreground)">
+                  {safeText(post?.date)}
+                </span>
               </div>
-              <p className="mb-2 text-sm text-(--ui-muted-foreground)">{safeText(post?.excerpt)}</p>
-              <button className="cursor-not-allowed font-semibold text-(--ui-warning) hover:underline" disabled>
+              <p className="mb-2 text-sm text-(--ui-muted-foreground)">
+                {safeText(post?.excerpt)}
+              </p>
+              <button
+                className="cursor-not-allowed font-semibold text-(--ui-warning) hover:underline"
+                disabled
+              >
                 {t("comingSoon")}
               </button>
             </div>

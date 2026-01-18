@@ -1,10 +1,10 @@
 "use client";
-import React, { useState } from 'react';
-import styles from './ChatInput.module.css';
-import { useTranslations } from 'next-intl';
+import React, { useState } from "react";
+import styles from "./ChatInput.module.css";
+import { useTranslations } from "next-intl";
 
 export default function ChatInput({ onSend }) {
-  const t = useTranslations('doctorChat');
+  const t = useTranslations("doctorChat");
   const [msg, setMsg] = useState("");
 
   const handleSend = (e) => {
@@ -20,11 +20,13 @@ export default function ChatInput({ onSend }) {
       <input
         type="text"
         value={msg}
-        onChange={e => setMsg(e.target.value)}
-        placeholder={t('messageInput')}
+        onChange={(e) => setMsg(e.target.value)}
+        placeholder={t("messageInput")}
         className={styles.input}
       />
-      <button type="submit" className={styles.sendBtn}>{t('actions.send')}</button>
+      <button type="submit" className={styles.sendBtn}>
+        {t("actions.send")}
+      </button>
     </form>
   );
 }

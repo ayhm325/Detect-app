@@ -46,15 +46,43 @@
     "title": "System Features",
     "subtitle": "We offer the best diagnostic technologies for your convenience",
     "items": [
-      { "icon": "/icons/ai.svg", "title": "Instant Image Analysis", "desc": "Fast and accurate results upon upload." },
-      { "icon": "/icons/xray.svg", "title": "High Medical Accuracy", "desc": "Based on the latest medical AI research." },
-      { "icon": "/icons/result.svg", "title": "For Doctors and Patients", "desc": "Easy experience with organized records." }
+      {
+        "icon": "/icons/ai.svg",
+        "title": "Instant Image Analysis",
+        "desc": "Fast and accurate results upon upload."
+      },
+      {
+        "icon": "/icons/xray.svg",
+        "title": "High Medical Accuracy",
+        "desc": "Based on the latest medical AI research."
+      },
+      {
+        "icon": "/icons/result.svg",
+        "title": "For Doctors and Patients",
+        "desc": "Easy experience with organized records."
+      }
     ],
     "extras": [
-      { "icon": "🔒", "title": "High Security", "desc": "Your medical data stays protected." },
-      { "icon": "⚡", "title": "Super Fast", "desc": "Optimized processing and delivery." },
-      { "icon": "📊", "title": "Detailed Reports", "desc": "Clear and comprehensive medical summaries." },
-      { "icon": "🌐", "title": "Always Available", "desc": "24/7 cloud service with monitoring." }
+      {
+        "icon": "🔒",
+        "title": "High Security",
+        "desc": "Your medical data stays protected."
+      },
+      {
+        "icon": "⚡",
+        "title": "Super Fast",
+        "desc": "Optimized processing and delivery."
+      },
+      {
+        "icon": "📊",
+        "title": "Detailed Reports",
+        "desc": "Clear and comprehensive medical summaries."
+      },
+      {
+        "icon": "🌐",
+        "title": "Always Available",
+        "desc": "24/7 cloud service with monitoring."
+      }
     ]
   },
   "content": {
@@ -62,9 +90,21 @@
       "title": "How the System Works",
       "subtitle": "From upload to result in seconds",
       "steps": [
-        { "icon": "/icons/ai.svg", "title": "1. Upload X-ray", "desc": "Upload your medical image securely." },
-        { "icon": "/icons/xray.svg", "title": "2. AI Model Analysis", "desc": "The model analyzes with high accuracy." },
-        { "icon": "/icons/result.svg", "title": "3. Instant Result Display", "desc": "Get your diagnosis report immediately." }
+        {
+          "icon": "/icons/ai.svg",
+          "title": "1. Upload X-ray",
+          "desc": "Upload your medical image securely."
+        },
+        {
+          "icon": "/icons/xray.svg",
+          "title": "2. AI Model Analysis",
+          "desc": "The model analyzes with high accuracy."
+        },
+        {
+          "icon": "/icons/result.svg",
+          "title": "3. Instant Result Display",
+          "desc": "Get your diagnosis report immediately."
+        }
       ],
       "ctaTitle": "Ready to start?",
       "ctaSubtitle": "Start diagnosis now and don't waste more time"
@@ -73,10 +113,34 @@
       "title": "Key Numbers",
       "subtitle": "We care about speed, reliability, and accuracy",
       "cards": [
-        { "number": 99.8, "suffix": "%", "label": "Diagnosis Accuracy", "description": "Very high accuracy in detection", "icon": "🎯" },
-        { "number": 15000, "suffix": "+", "label": "Active Users", "description": "Doctors and patients trust us", "icon": "👥" },
-        { "number": 75000, "suffix": "+", "label": "Successful Analyses", "description": "Images analyzed with care", "icon": "📊" },
-        { "number": 24, "suffix": "/7", "label": "Direct Support", "description": "Available around the clock", "icon": "⏰" }
+        {
+          "number": 99.8,
+          "suffix": "%",
+          "label": "Diagnosis Accuracy",
+          "description": "Very high accuracy in detection",
+          "icon": "🎯"
+        },
+        {
+          "number": 15000,
+          "suffix": "+",
+          "label": "Active Users",
+          "description": "Doctors and patients trust us",
+          "icon": "👥"
+        },
+        {
+          "number": 75000,
+          "suffix": "+",
+          "label": "Successful Analyses",
+          "description": "Images analyzed with care",
+          "icon": "📊"
+        },
+        {
+          "number": 24,
+          "suffix": "/7",
+          "label": "Direct Support",
+          "description": "Available around the clock",
+          "icon": "⏰"
+        }
       ]
     }
   },
@@ -84,10 +148,34 @@
     "title": "What Our Users Say",
     "subtitle": "Real experiences from doctors and patients",
     "items": [
-      { "name": "Dr. Ahmed Mohamed", "role": "Radiology Consultant", "image": "/icons/ai.svg", "rating": 5, "text": "Excellent system that helps me diagnose with high accuracy. Easy interface and fast results." },
-      { "name": "Dr. Sarah Ahmed", "role": "Internal Medicine Doctor", "image": "/icons/xray.svg", "rating": 5, "text": "Advanced technology that saves time. I recommend it to all doctors." },
-      { "name": "Mohamed Ali", "role": "Patient", "image": "/icons/result.svg", "rating": 5, "text": "I got a quick and accurate diagnosis. Excellent service and helpful team." },
-      { "name": "Dr. Fatima Hassan", "role": "Pulmonology Consultant", "image": "/icons/settings.svg", "rating": 5, "text": "Best AI diagnostic platform. Accurate results and detailed reports." }
+      {
+        "name": "Dr. Ahmed Mohamed",
+        "role": "Radiology Consultant",
+        "image": "/icons/ai.svg",
+        "rating": 5,
+        "text": "Excellent system that helps me diagnose with high accuracy. Easy interface and fast results."
+      },
+      {
+        "name": "Dr. Sarah Ahmed",
+        "role": "Internal Medicine Doctor",
+        "image": "/icons/xray.svg",
+        "rating": 5,
+        "text": "Advanced technology that saves time. I recommend it to all doctors."
+      },
+      {
+        "name": "Mohamed Ali",
+        "role": "Patient",
+        "image": "/icons/result.svg",
+        "rating": 5,
+        "text": "I got a quick and accurate diagnosis. Excellent service and helpful team."
+      },
+      {
+        "name": "Dr. Fatima Hassan",
+        "role": "Pulmonology Consultant",
+        "image": "/icons/settings.svg",
+        "rating": 5,
+        "text": "Best AI diagnostic platform. Accurate results and detailed reports."
+      }
     ],
     "badges": [
       { "text": "Trusted by 15K+ users", "icon": "✓" },

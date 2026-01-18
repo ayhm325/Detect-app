@@ -1,5 +1,5 @@
 import prisma from "../lib/prismaClient.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "../lib/auth/bcryptWrapper.mjs";
 
 async function main() {
   const email = "ayhm@yahoo.com";
@@ -27,4 +27,7 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

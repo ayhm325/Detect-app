@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useToast } from "../../../components/ui/Toast";
+import { useToast } from "../../../components/ui/ToastProvider";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
@@ -24,7 +24,7 @@ import {
 } from "react-icons/fa";
 
 export default function DashboardHome({ serverData = {} }) {
-  const { showToast, ToastContainer } = useToast();
+  const { showSuccess, showError, showInfo, showWarning } = useToast();
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("doctorDashboard");
@@ -40,7 +40,7 @@ export default function DashboardHome({ serverData = {} }) {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch('/api/auth/token', { credentials: 'include' });
+        const res = await fetch("/api/auth/token", { credentials: "include" });
         if (!mounted) return;
         if (res.ok) {
           const data = await res.json().catch(() => ({}));
@@ -48,7 +48,9 @@ export default function DashboardHome({ serverData = {} }) {
         }
       } catch (e) {}
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -56,7 +58,11 @@ export default function DashboardHome({ serverData = {} }) {
     try {
       if (jwtToken) socket.connect({ token: jwtToken });
       else socket.connect();
-    } catch (e) { try { socket.connect(); } catch (e2) {} }
+    } catch (e) {
+      try {
+        socket.connect();
+      } catch (e2) {}
+    }
   }, [socket, jwtToken]);
   const seenMessageKeysRef = useRef(new Set());
   const [liveNewMessages, setLiveNewMessages] = useState(() => {
@@ -75,17 +81,25 @@ export default function DashboardHome({ serverData = {} }) {
         if (msg.sender === "patient") {
           // Avoid double counting when the socket is joined to both `chat:<id>` and `user:<id>`.
           // We only count the user-scoped delivery for dashboard counters.
-          if (msg.__scope && msg.__scope !== 'user') return;
-          const key = msg.id ? `id:${msg.id}` : (msg.clientKey ? `ck:${msg.clientKey}` : null);
+          if (msg.__scope && msg.__scope !== "user") return;
+          const key = msg.id
+            ? `id:${msg.id}`
+            : msg.clientKey
+              ? `ck:${msg.clientKey}`
+              : null;
           if (key) {
             if (seenMessageKeysRef.current.has(key)) return;
             seenMessageKeysRef.current.add(key);
           }
-          setLiveNewMessages((c) => (Number(c || 0) + 1));
+          setLiveNewMessages((c) => Number(c || 0) + 1);
         }
       } catch (e) {}
     });
-    return () => { try { off && off(); } catch (e) {} };
+    return () => {
+      try {
+        off && off();
+      } catch (e) {}
+    };
   }, [socket]);
 
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
@@ -94,7 +108,9 @@ export default function DashboardHome({ serverData = {} }) {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch("/api/doctor/notifications", { method: "HEAD" });
+        const res = await fetch("/api/doctor/notifications", {
+          method: "HEAD",
+        });
         if (!mounted) return;
         if (res.ok) {
           const count = res.headers.get("X-Unread-Count");
@@ -110,7 +126,9 @@ export default function DashboardHome({ serverData = {} }) {
   const safeRawObject = (key, fallback = {}) => {
     try {
       const val = t.raw(key);
-      return val && typeof val === "object" && !Array.isArray(val) ? val : fallback;
+      return val && typeof val === "object" && !Array.isArray(val)
+        ? val
+        : fallback;
     } catch {
       return fallback;
     }
@@ -166,24 +184,24 @@ export default function DashboardHome({ serverData = {} }) {
 
   const formattedDateRaw = new Date().toLocaleDateString(
     locale === "en" ? "en-US" : "ar-EG-u-nu-latn",
-    { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+    { weekday: "long", year: "numeric", month: "long", day: "numeric" },
   );
 
   const normalizeArabicMonthNames = (value) => {
-    if (!value || locale === 'en') return value;
+    if (!value || locale === "en") return value;
     const map = {
-      "يناير": "كانون الثاني",
-      "فبراير": "شباط",
-      "مارس": "آذار",
-      "أبريل": "نيسان",
-      "مايو": "أيار",
-      "يونيو": "حزيران",
-      "يوليو": "تموز",
-      "أغسطس": "آب",
-      "سبتمبر": "أيلول",
-      "أكتوبر": "تشرين الأول",
-      "نوفمبر": "تشرين الثاني",
-      "ديسمبر": "كانون الأول",
+      يناير: "كانون الثاني",
+      فبراير: "شباط",
+      مارس: "آذار",
+      أبريل: "نيسان",
+      مايو: "أيار",
+      يونيو: "حزيران",
+      يوليو: "تموز",
+      أغسطس: "آب",
+      سبتمبر: "أيلول",
+      أكتوبر: "تشرين الأول",
+      نوفمبر: "تشرين الثاني",
+      ديسمبر: "كانون الأول",
     };
 
     let out = value;
@@ -200,18 +218,28 @@ export default function DashboardHome({ serverData = {} }) {
   // Normalize date/time strings to avoid hydration mismatches between server and client
   const formatDateTime = (val) => {
     if (!val) return "";
-    const raw = typeof val === "string" ? val : new Date(val).toLocaleString(locale === 'en' ? 'en-US' : 'ar-EG-u-nu-latn');
+    const raw =
+      typeof val === "string"
+        ? val
+        : new Date(val).toLocaleString(
+            locale === "en" ? "en-US" : "ar-EG-u-nu-latn",
+          );
     // Remove Arabic comma (U+060C) and normalize whitespace so server and client match
-    return normalizeArabicMonthNames(raw.replace(/\u060C/g, "").replace(/\s+/g, " ").trim());
+    return normalizeArabicMonthNames(
+      raw
+        .replace(/\u060C/g, "")
+        .replace(/\s+/g, " ")
+        .trim(),
+    );
   };
 
   // Map DB appointment statuses to UI status keys we use for labels/colors
   const normalizeStatus = (s) => {
-    if (!s) return 'pending';
-    if (s === 'completed') return 'confirmed';
-    if (s === 'scheduled') return 'pending';
-    if (s === 'cancelled') return 'cancelled';
-    if (s === 'no_show') return 'no_show';
+    if (!s) return "pending";
+    if (s === "completed") return "confirmed";
+    if (s === "scheduled") return "pending";
+    if (s === "cancelled") return "cancelled";
+    if (s === "no_show") return "no_show";
     return s;
   };
 
@@ -251,66 +279,116 @@ export default function DashboardHome({ serverData = {} }) {
   ];
 
   // Use appointments provided by the server. If none, show an empty array so UI can display a no-data message.
-  const todayAppointments = (serverData.todayAppointments && serverData.todayAppointments.length)
-    ? serverData.todayAppointments.map((a, i) => ({ id: a.id || i, time: formatTime(a.time, locale === 'en' ? 'en-US' : 'ar-EG-u-nu-latn', placeholder), patient: a.patient, type: a.type || 'consult', status: a.status }))
-    : [];
+  const todayAppointments =
+    serverData.todayAppointments && serverData.todayAppointments.length
+      ? serverData.todayAppointments.map((a, i) => ({
+          id: a.id || i,
+          time: formatTime(
+            a.time,
+            locale === "en" ? "en-US" : "ar-EG-u-nu-latn",
+            placeholder,
+          ),
+          patient: a.patient,
+          type: a.type || "consult",
+          status: a.status,
+        }))
+      : [];
 
-  const defaultRecentActivity = useMemo(() => [
-    { id: 1, action: t("recentActivity.defaults.reviewXray"), time: t("recentActivity.times.min10"), icon: FaCheckCircle, color: "text-(--ui-success)" },
-    { id: 2, action: t("recentActivity.defaults.newAppointment"), time: t("recentActivity.times.min25"), icon: FaCalendarAlt, color: "text-(--ui-info)" },
-    { id: 3, action: t("recentActivity.defaults.newMessage"), time: t("recentActivity.times.min45"), icon: FaComments, color: "text-(--ui-info)" },
-    { id: 4, action: t("recentActivity.defaults.reportReady"), time: t("recentActivity.times.hour1"), icon: FaClipboardList, color: "text-(--ui-warning)" },
-  ], [t]);
-
-  const recentActivity = (serverData.recentActivity && serverData.recentActivity.length)
-    ? serverData.recentActivity.map((r, i) => ({
-        id: r.id || i,
-        action: formatActivityDescription({ type: r.type, description: r.description, meta: r.meta }, locale),
-        time: formatDateTime(r.time),
+  const defaultRecentActivity = useMemo(
+    () => [
+      {
+        id: 1,
+        action: t("recentActivity.defaults.reviewXray"),
+        time: t("recentActivity.times.min10"),
+        icon: FaCheckCircle,
+        color: "text-(--ui-success)",
+      },
+      {
+        id: 2,
+        action: t("recentActivity.defaults.newAppointment"),
+        time: t("recentActivity.times.min25"),
+        icon: FaCalendarAlt,
+        color: "text-(--ui-info)",
+      },
+      {
+        id: 3,
+        action: t("recentActivity.defaults.newMessage"),
+        time: t("recentActivity.times.min45"),
+        icon: FaComments,
+        color: "text-(--ui-info)",
+      },
+      {
+        id: 4,
+        action: t("recentActivity.defaults.reportReady"),
+        time: t("recentActivity.times.hour1"),
         icon: FaClipboardList,
-        color: 'text-(--ui-warning)',
-      }))
-    : defaultRecentActivity;
+        color: "text-(--ui-warning)",
+      },
+    ],
+    [t],
+  );
 
-  const pendingScans = (serverData.pendingScansList && serverData.pendingScansList.length)
-    ? serverData.pendingScansList.map((s, i) => {
-        const createdAt = s.createdAt ? new Date(s.createdAt) : null;
-        const now = new Date();
-        const isSameDay = (a, b) => a && b && a.toDateString() === b.toDateString();
-        const yesterday = new Date(now);
-        yesterday.setDate(now.getDate() - 1);
+  const recentActivity =
+    serverData.recentActivity && serverData.recentActivity.length
+      ? serverData.recentActivity.map((r, i) => ({
+          id: r.id || i,
+          action: formatActivityDescription(
+            { type: r.type, description: r.description, meta: r.meta },
+            locale,
+          ),
+          time: formatDateTime(r.time),
+          icon: FaClipboardList,
+          color: "text-(--ui-warning)",
+        }))
+      : defaultRecentActivity;
 
-        const dateLabel = isSameDay(createdAt, now)
-          ? labels.ui.today
-          : isSameDay(createdAt, yesterday)
-          ? labels.ui.yesterday
-          : createdAt
-          ? formatDateTime(createdAt)
-          : "";
+  const pendingScans =
+    serverData.pendingScansList && serverData.pendingScansList.length
+      ? serverData.pendingScansList.map((s, i) => {
+          const createdAt = s.createdAt ? new Date(s.createdAt) : null;
+          const now = new Date();
+          const isSameDay = (a, b) =>
+            a && b && a.toDateString() === b.toDateString();
+          const yesterday = new Date(now);
+          yesterday.setDate(now.getDate() - 1);
 
-        const score = typeof s.confidenceScore === 'number' ? s.confidenceScore : null;
-        const priority = score == null
-          ? 'low'
-          : score >= 0.85
-          ? 'high'
-          : score >= 0.65
-          ? 'medium'
-          : 'low';
+          const dateLabel = isSameDay(createdAt, now)
+            ? labels.ui.today
+            : isSameDay(createdAt, yesterday)
+              ? labels.ui.yesterday
+              : createdAt
+                ? formatDateTime(createdAt)
+                : "";
 
-        const typeLabel = s.type
-          ? (labels.todayAppointments.types?.[s.type] ?? s.type)
-          : "";
+          const score =
+            typeof s.confidenceScore === "number" ? s.confidenceScore : null;
+          const priority =
+            score == null
+              ? "low"
+              : score >= 0.85
+                ? "high"
+                : score >= 0.65
+                  ? "medium"
+                  : "low";
 
-        return {
-          id: s.id ?? i + 1,
-          patient: s.patient ?? placeholder,
-          type: typeLabel,
-          date: dateLabel,
-          priority,
-          clinicalStatus: s.patientClinicalStatus || s.patient?.clinicalStatus || s.clinicalStatus || "",
-        };
-      })
-    : [];
+          const typeLabel = s.type
+            ? (labels.todayAppointments.types?.[s.type] ?? s.type)
+            : "";
+
+          return {
+            id: s.id ?? i + 1,
+            patient: s.patient ?? placeholder,
+            type: typeLabel,
+            date: dateLabel,
+            priority,
+            clinicalStatus:
+              s.patientClinicalStatus ||
+              s.patient?.clinicalStatus ||
+              s.clinicalStatus ||
+              "",
+          };
+        })
+      : [];
 
   const quickActions = [
     {
@@ -345,7 +423,7 @@ export default function DashboardHome({ serverData = {} }) {
 
   return (
     <>
-      <ToastContainer />
+
       <div className="min-h-screen bg-(--ui-surface-2) font-bold text-(--ui-foreground) p-6">
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
@@ -355,7 +433,12 @@ export default function DashboardHome({ serverData = {} }) {
                 <FaUserMd className="text-(--ui-info)" />
                 {labels.title}
               </h1>
-              <p className="mt-2 text-(--ui-muted-foreground)">{labels.welcome} {serverData.doctor?.user?.fullName || labels.ui.sampleDoctorName} - {formattedDate}</p>
+              <p className="mt-2 text-(--ui-muted-foreground)">
+                {labels.welcome}{" "}
+                {serverData.doctor?.user?.fullName ||
+                  labels.ui.sampleDoctorName}{" "}
+                - {formattedDate}
+              </p>
             </div>
             <NotificationBellButton
               count={unreadNotificationsCount}
@@ -373,16 +456,24 @@ export default function DashboardHome({ serverData = {} }) {
                   key={index}
                   className="group relative overflow-hidden rounded-xl card-glass p-6 shadow-(--shadow-soft) border border-(--ui-border) transition-all hover:shadow-(--shadow-lift)"
                 >
-                  <div className={`absolute top-0 right-0 h-20 w-20 translate-x-8 -translate-y-8 transform rounded-full ${stat.bgLight} opacity-50 transition-transform group-hover:scale-150`}></div>
+                  <div
+                    className={`absolute top-0 right-0 h-20 w-20 translate-x-8 -translate-y-8 transform rounded-full ${stat.bgLight} opacity-50 transition-transform group-hover:scale-150`}
+                  ></div>
                   <div className="relative">
                     <div className="flex flex-col items-center justify-center text-center">
                       <div className="flex items-center gap-3 justify-center">
-                        <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.color}`}>
+                        <div
+                          className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.color}`}
+                        >
                           <Icon className="text-2xl text-white" />
                         </div>
-                        <p className="text-lg font-semibold text-(--ui-muted-foreground) text-center">{stat.title}</p>
+                        <p className="text-lg font-semibold text-(--ui-muted-foreground) text-center">
+                          {stat.title}
+                        </p>
                       </div>
-                      <p className="mt-3 text-3xl font-semibold text-(--ui-foreground) text-center">{stat.value}</p>
+                      <p className="mt-3 text-3xl font-semibold text-(--ui-foreground) text-center">
+                        {stat.value}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -405,7 +496,9 @@ export default function DashboardHome({ serverData = {} }) {
                     <FaArrowRight className="transition-transform group-hover:-translate-x-1" />
                   </div>
                   <h3 className="text-lg font-bold">{action.title}</h3>
-                  <p className="mt-1 text-sm opacity-90">{action.description}</p>
+                  <p className="mt-1 text-sm opacity-90">
+                    {action.description}
+                  </p>
                 </button>
               );
             })}
@@ -443,24 +536,37 @@ export default function DashboardHome({ serverData = {} }) {
                           <FaClock className="text-(--ui-info)" />
                         </div>
                         <div>
-                          <p className="font-bold text-(--ui-foreground)">{apt.patient}</p>
-                          <p className="text-sm text-(--ui-muted-foreground)">{apt.place || apt.location || labels.todayAppointments.types[apt.type] || apt.type}</p>
+                          <p className="font-bold text-(--ui-foreground)">
+                            {apt.patient}
+                          </p>
+                          <p className="text-sm text-(--ui-muted-foreground)">
+                            {apt.place ||
+                              apt.location ||
+                              labels.todayAppointments.types[apt.type] ||
+                              apt.type}
+                          </p>
                         </div>
                       </div>
                       <div className="text-left">
-                        <p className="font-medium text-(--ui-foreground)">{apt.time}</p>
+                        <p className="font-medium text-(--ui-foreground)">
+                          {apt.time}
+                        </p>
                         {(() => {
                           const displayStatus = normalizeStatus(apt.status);
-                          const badgeClass = displayStatus === 'confirmed'
-                            ? 'bg-(--ui-success-bg) text-(--ui-success)'
-                            : displayStatus === 'pending'
-                            ? 'bg-(--ui-warning-bg) text-(--ui-warning)'
-                            : displayStatus === 'cancelled'
-                            ? 'bg-(--ui-danger-bg) text-(--ui-danger)'
-                            : 'bg-(--ui-surface-2) text-(--ui-foreground)';
+                          const badgeClass =
+                            displayStatus === "confirmed"
+                              ? "bg-(--ui-success-bg) text-(--ui-success)"
+                              : displayStatus === "pending"
+                                ? "bg-(--ui-warning-bg) text-(--ui-warning)"
+                                : displayStatus === "cancelled"
+                                  ? "bg-(--ui-danger-bg) text-(--ui-danger)"
+                                  : "bg-(--ui-surface-2) text-(--ui-foreground)";
                           return (
-                            <span className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${badgeClass}`}>
-                              {labels.todayAppointments.status[displayStatus] || displayStatus}
+                            <span
+                              className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${badgeClass}`}
+                            >
+                              {labels.todayAppointments.status[displayStatus] ||
+                                displayStatus}
                             </span>
                           );
                         })()}
@@ -486,31 +592,40 @@ export default function DashboardHome({ serverData = {} }) {
                     className="rounded-lg border border-(--ui-border) p-4 transition-all hover:bg-(--ui-surface-2)"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <p className="font-bold text-(--ui-foreground)">{scan.patient}</p>
+                      <p className="font-bold text-(--ui-foreground)">
+                        {scan.patient}
+                      </p>
                       <span
                         className={`rounded-full px-2 py-1 text-xs font-medium ${
-                          (scan.clinicalStatus === "critical")
+                          scan.clinicalStatus === "critical"
                             ? "bg-(--ui-danger-bg) text-(--ui-danger)"
-                            : (scan.clinicalStatus === "recovering")
-                            ? "bg-(--ui-info-bg) text-(--ui-info) font-semibold text-sm px-3 py-1"
-                            : (scan.clinicalStatus === "stable")
-                            ? "bg-(--ui-success-bg) text-(--ui-success)"
-                            : (scan.priority === "high")
-                            ? "bg-(--ui-danger-bg) text-(--ui-danger)"
-                            : (scan.priority === "medium")
-                            ? "bg-(--ui-warning-bg) text-(--ui-warning)"
-                            : "bg-(--ui-info-bg) text-(--ui-info)"
+                            : scan.clinicalStatus === "recovering"
+                              ? "bg-(--ui-info-bg) text-(--ui-info) font-semibold text-sm px-3 py-1"
+                              : scan.clinicalStatus === "stable"
+                                ? "bg-(--ui-success-bg) text-(--ui-success)"
+                                : scan.priority === "high"
+                                  ? "bg-(--ui-danger-bg) text-(--ui-danger)"
+                                  : scan.priority === "medium"
+                                    ? "bg-(--ui-warning-bg) text-(--ui-warning)"
+                                    : "bg-(--ui-info-bg) text-(--ui-info)"
                         }`}
                       >
                         {scan.clinicalStatus
-                          ? (patientT(`clinicalStatuses.${scan.clinicalStatus}`) || scan.clinicalStatus)
-                          : (labels.pendingScans.priority[scan.priority] || scan.priority)}
+                          ? patientT(
+                              `clinicalStatuses.${scan.clinicalStatus}`,
+                            ) || scan.clinicalStatus
+                          : labels.pendingScans.priority[scan.priority] ||
+                            scan.priority}
                       </span>
                     </div>
                     {scan.type ? (
-                      <p className="text-sm text-(--ui-muted-foreground)">{scan.type}</p>
+                      <p className="text-sm text-(--ui-muted-foreground)">
+                        {scan.type}
+                      </p>
                     ) : null}
-                    <p className="text-xs text-(--ui-muted-foreground) mt-1">{scan.date}</p>
+                    <p className="text-xs text-(--ui-muted-foreground) mt-1">
+                      {scan.date}
+                    </p>
                   </div>
                 ))}
                 <button
@@ -547,7 +662,9 @@ export default function DashboardHome({ serverData = {} }) {
                         <p className="text-sm font-medium text-(--ui-foreground) truncate">
                           {activity.action}
                         </p>
-                        <p className="text-xs text-(--ui-muted-foreground) mt-1">{activity.time}</p>
+                        <p className="text-xs text-(--ui-muted-foreground) mt-1">
+                          {activity.time}
+                        </p>
                       </div>
                     </div>
                   </div>

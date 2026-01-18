@@ -1,7 +1,7 @@
 // scripts/checkUser.mjs
-import prisma from '../lib/prismaClient.js';
+import prisma from "../lib/prismaClient.js";
 
-const USER_ID = '7e5dc12f-4c87-4e2f-a4cd-66c412e77f1a';
+const USER_ID = "7e5dc12f-4c87-4e2f-a4cd-66c412e77f1a";
 
 (async () => {
   try {

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import prisma from '../lib/prismaClient.js';
+import prisma from "../lib/prismaClient.js";
 
 async function main() {
   const email = process.argv[2];
   if (!email) {
-    console.error('Usage: node scripts/query-user.js <email>');
+    console.error("Usage: node scripts/query-user.js <email>");
     process.exit(2);
   }
   const user = await prisma.user.findUnique({ where: { email } });
@@ -13,6 +13,6 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error('Error querying user:', e);
+  console.error("Error querying user:", e);
   process.exit(1);
 });

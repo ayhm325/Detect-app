@@ -11,19 +11,23 @@
   "statsTitle": "Key Stats",
   "backToHome": "Back to Home",
   "valuesList": [
-    { "title": "Integrity", "desc": "We act with honesty and strong moral principles." },
-    { "title": "Innovation", "desc": "We constantly seek new and better ways to serve our users." },
-    { "title": "Excellence", "desc": "We strive for the highest quality in everything we do." }
+    {
+      "title": "Integrity",
+      "desc": "We act with honesty and strong moral principles."
+    },
+    {
+      "title": "Innovation",
+      "desc": "We constantly seek new and better ways to serve our users."
+    },
+    {
+      "title": "Excellence",
+      "desc": "We strive for the highest quality in everything we do."
+    }
   ],
   "stats": [
     { "num": "1200", "label": "Users" },
     { "num": "35", "label": "Projects" },
     { "num": "99%", "label": "Accuracy" }
   ],
-  "techList": [
-    "React",
-    "Next.js",
-    "Tailwind CSS",
-    "TensorFlow"
-  ]
+  "techList": ["React", "Next.js", "Tailwind CSS", "TensorFlow"]
 }

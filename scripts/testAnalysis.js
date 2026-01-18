@@ -1,4 +1,4 @@
-import prisma from '../lib/prismaClient.js';
+import prisma from "../lib/prismaClient.js";
 
 async function run() {
   try {

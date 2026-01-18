@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './AnalyticsSummary.module.css';
+import React from "react";
+import styles from "./AnalyticsSummary.module.css";
 
 export default function AnalyticsSummary({ stats }) {
   return (

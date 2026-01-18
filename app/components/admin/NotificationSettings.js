@@ -10,7 +10,11 @@ export default function NotificationSettings() {
     <div className="card-glass rounded-2xl p-8 border border-(--ui-border) max-w-xl mx-auto mt-8">
       <h3 className="font-bold text-xl mb-4 text-(--ui-foreground)">{title}</h3>
       <label className="flex items-center gap-2 text-(--ui-foreground)">
-        <input type="checkbox" checked={enabled} onChange={() => setEnabled(!enabled)} />
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={() => setEnabled(!enabled)}
+        />
         {enableLabel}
       </label>
     </div>

@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl";
 
 function isValidImageUrl(url) {
   // رابط يبدأ بـ http أو /
-  return typeof url === "string" && (url.startsWith("http") || url.startsWith("/"));
+  return (
+    typeof url === "string" && (url.startsWith("http") || url.startsWith("/"))
+  );
 }
 
 export default function AnalysisViewer({ imageUrl }) {
@@ -13,7 +15,12 @@ export default function AnalysisViewer({ imageUrl }) {
   const noImageText = t("noImage");
   const imageLabel = t("imageLabel");
 
-  if (!imageUrl) return <div className="text-center text-(--ui-muted-foreground) py-4">{noImageText}</div>;
+  if (!imageUrl)
+    return (
+      <div className="text-center text-(--ui-muted-foreground) py-4">
+        {noImageText}
+      </div>
+    );
   if (!isValidImageUrl(imageUrl)) {
     // إذا كان رمز أو نص وليس رابط صورة
     return <div className="text-center text-6xl py-12">{imageUrl}</div>;

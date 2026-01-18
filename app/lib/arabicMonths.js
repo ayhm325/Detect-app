@@ -1,17 +1,17 @@
 // Arabic month names for Gregorian calendar
 const ARABIC_MONTHS = [
   "كانون الثاني", // January
-  "شباط",        // February
-  "آذار",        // March
-  "نيسان",       // April
-  "أيار",        // May
-  "حزيران",      // June
-  "تموز",        // July
-  "آب",          // August
-  "أيلول",       // September
+  "شباط", // February
+  "آذار", // March
+  "نيسان", // April
+  "أيار", // May
+  "حزيران", // June
+  "تموز", // July
+  "آب", // August
+  "أيلول", // September
   "تشرين الأول", // October
-  "تشرين الثاني",// November
-  "كانون الأول"  // December
+  "تشرين الثاني", // November
+  "كانون الأول", // December
 ];
 
 export function formatArabicDate(date) {

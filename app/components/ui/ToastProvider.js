@@ -1,6 +1,13 @@
+
 "use client";
 
-import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import { createPortal } from "react-dom";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -26,14 +33,26 @@ export function ToastProvider({ children }) {
         }, duration);
       }
     },
-    [removeToast]
+    [removeToast],
   );
 
   // اختصارات للأنواع
-  const showSuccess = useCallback((msg, duration) => addToast(msg, "success", duration), [addToast]);
-  const showError = useCallback((msg, duration) => addToast(msg, "error", duration), [addToast]);
-  const showWarning = useCallback((msg, duration) => addToast(msg, "warning", duration), [addToast]);
-  const showInfo = useCallback((msg, duration) => addToast(msg, "info", duration), [addToast]);
+  const showSuccess = useCallback(
+    (msg, duration) => addToast(msg, "success", duration),
+    [addToast],
+  );
+  const showError = useCallback(
+    (msg, duration) => addToast(msg, "error", duration),
+    [addToast],
+  );
+  const showWarning = useCallback(
+    (msg, duration) => addToast(msg, "warning", duration),
+    [addToast],
+  );
+  const showInfo = useCallback(
+    (msg, duration) => addToast(msg, "info", duration),
+    [addToast],
+  );
 
   return (
     <ToastContext.Provider value={{ showSuccess, showError, showWarning, showInfo }}>
@@ -70,39 +89,68 @@ export function ToastContainer({ toasts, removeToast }) {
       dir={dir}
     >
       {(toasts || []).map((toast) => (
-        <Toast key={toast.id} {...toast} onClose={() => removeToast(toast.id)} />
+        <Toast
+          key={toast.id}
+          {...toast}
+          onClose={() => removeToast(toast.id)}
+        />
       ))}
     </div>,
-    document.body
+    document.body,
   );
 }
 
 // ----------------------------------------
 // Toast individual
-function Toast({ id, message, type, onClose }) {
+export function Toast({ id, message, type, onClose }) {
   const t = useTranslations("ui");
 
   const types = {
     success: {
       bg: "bg-(--ui-success) text-(--ui-success-foreground)",
       icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 13l4 4L19 7"
+          />
         </svg>
       ),
     },
     error: {
       bg: "bg-(--ui-danger) text-(--ui-danger-foreground)",
       icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       ),
     },
     warning: {
       bg: "bg-(--ui-warning) text-(--ui-warning-foreground)",
       icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -115,8 +163,18 @@ function Toast({ id, message, type, onClose }) {
     info: {
       bg: "bg-(--ui-info) text-(--ui-info-foreground)",
       icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
       ),
     },
@@ -136,10 +194,21 @@ function Toast({ id, message, type, onClose }) {
         className="shrink-0 rounded-full p-1 transition-colors hover:bg-(--color-neutral)/10"
         aria-label={t("aria.close")}
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
     </div>
   );
 }
+export default ToastProvider;

@@ -37,6 +37,11 @@
     "confirm": "تأكيد",
     "cancel": "إلغاء"
   },
+  "confirmDialog": {
+    "defaultMessage": "هل أنت متأكد من المتابعة؟",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء"
+  },
   "status": {
     "ready": "جاهز",
     "processing": "قيد المعالجة",

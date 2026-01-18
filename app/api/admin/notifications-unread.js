@@ -1,5 +1,5 @@
-import prisma from '../../../../lib/prismaClient.js';
-import { NextResponse } from 'next/server';
+import prisma from "../../../../lib/prismaClient.js";
+import { NextResponse } from "next/server";
 
 // GET /api/admin/notifications/unread-count
 export async function GET(req) {
@@ -10,8 +10,8 @@ export async function GET(req) {
       isRead: false,
       isDeleted: false,
       // يمكن تخصيصها لاحقاً لنوع إشعار أو userId الأدمن
-      userRole: 'admin'
-    }
+      userRole: "admin",
+    },
   });
   return NextResponse.json({ unread: count });
 }

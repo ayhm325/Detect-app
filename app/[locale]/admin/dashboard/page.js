@@ -1,15 +1,23 @@
 "use client";
 
 export const headers = () => {
-  return [
-    ["Cache-Control", "no-store"]
-  ];
+  return [["Cache-Control", "no-store"]];
 };
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../components/ui/ToastProvider";
-import { FaUsers, FaUserMd, FaUserInjured, FaXRay, FaArrowUp, FaArrowDown, FaChartLine, FaCheckCircle, FaClock } from "react-icons/fa";
+import {
+  FaUsers,
+  FaUserMd,
+  FaUserInjured,
+  FaXRay,
+  FaArrowUp,
+  FaArrowDown,
+  FaChartLine,
+  FaCheckCircle,
+  FaClock,
+} from "react-icons/fa";
 import NotificationBellButton from "../../../components/ui/NotificationBellButton";
 import { useLocale, useTranslations } from "next-intl";
 import { formatActivityDescription } from "../../../lib/activityFormat";
@@ -27,15 +35,25 @@ export default function AdminDashboardPage() {
 
   const { showSuccess, showError } = useToast();
 
-
-  let formattedDate = new Date().toLocaleDateString(locale === "en" ? "en-US" : "ar-EG", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  let formattedDate = new Date().toLocaleDateString(
+    locale === "en" ? "en-US" : "ar-EG",
+    { weekday: "long", year: "numeric", month: "long", day: "numeric" },
+  );
 
   // جلب الإحصائيات الحقيقية من API
-  const [statsData, setStatsData] = useState({ totalUsers: 0, doctors: 0, patients: 0, todayScans: 0, totalScans: 0 });
+  const [statsData, setStatsData] = useState({
+    totalUsers: 0,
+    doctors: 0,
+    patients: 0,
+    todayScans: 0,
+    totalScans: 0,
+  });
 
   // Replace Arabic digits with Western digits if locale is Arabic
   if (locale === "ar") {
-    formattedDate = formattedDate.replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+    formattedDate = formattedDate.replace(/[٠-٩]/g, (d) =>
+      String("٠١٢٣٤٥٦٧٨٩".indexOf(d)),
+    );
   }
 
   useEffect(() => {
@@ -48,17 +66,67 @@ export default function AdminDashboardPage() {
   }, []);
 
   const stats = [
-    { title: t("stats.totalUsers"), value: statsData.totalUsers, change: "", changePercent: "", icon: FaUsers, trend: "up" },
-    { title: t("stats.doctors"), value: statsData.doctors, change: "", changePercent: "", icon: FaUserMd, trend: "up" },
-    { title: t("stats.patients"), value: statsData.patients, change: "", changePercent: "", icon: FaUserInjured, trend: "up" },
-    { title: t("stats.todayScans"), value: statsData.todayScans, change: "", changePercent: "", icon: FaXRay, trend: "down" },
-    { title: t("stats.totalScansAll"), value: statsData.totalScans, change: "", changePercent: "", icon: FaXRay, trend: "up" },
+    {
+      title: t("stats.totalUsers"),
+      value: statsData.totalUsers,
+      change: "",
+      changePercent: "",
+      icon: FaUsers,
+      trend: "up",
+    },
+    {
+      title: t("stats.doctors"),
+      value: statsData.doctors,
+      change: "",
+      changePercent: "",
+      icon: FaUserMd,
+      trend: "up",
+    },
+    {
+      title: t("stats.patients"),
+      value: statsData.patients,
+      change: "",
+      changePercent: "",
+      icon: FaUserInjured,
+      trend: "up",
+    },
+    {
+      title: t("stats.todayScans"),
+      value: statsData.todayScans,
+      change: "",
+      changePercent: "",
+      icon: FaXRay,
+      trend: "down",
+    },
+    {
+      title: t("stats.totalScansAll"),
+      value: statsData.totalScans,
+      change: "",
+      changePercent: "",
+      icon: FaXRay,
+      trend: "up",
+    },
   ];
 
   const quickActions = [
-    { title: t("quickActions.users.title"), description: t("quickActions.users.desc"), icon: "👥", action: () => router.push(`${basePrefix}/admin/users`) },
-    { title: t("quickActions.doctors.title"), description: t("quickActions.doctors.desc"), icon: "👨‍⚕️", action: () => router.push(`${basePrefix}/admin/doctors`) },
-    { title: t("quickActions.patients.title"), description: t("quickActions.patients.desc"), icon: "🏥", action: () => router.push(`${basePrefix}/admin/patients`) },
+    {
+      title: t("quickActions.users.title"),
+      description: t("quickActions.users.desc"),
+      icon: "👥",
+      action: () => router.push(`${basePrefix}/admin/users`),
+    },
+    {
+      title: t("quickActions.doctors.title"),
+      description: t("quickActions.doctors.desc"),
+      icon: "👨‍⚕️",
+      action: () => router.push(`${basePrefix}/admin/doctors`),
+    },
+    {
+      title: t("quickActions.patients.title"),
+      description: t("quickActions.patients.desc"),
+      icon: "🏥",
+      action: () => router.push(`${basePrefix}/admin/patients`),
+    },
     // analysis quick action removed because page was deleted
   ];
 
@@ -67,7 +135,7 @@ export default function AdminDashboardPage() {
     serverUptime: placeholder,
     responseTime: placeholder,
     memoryUsage: placeholder,
-    dbSize: placeholder
+    dbSize: placeholder,
   });
   useEffect(() => {
     fetch("/api/admin/system-status")
@@ -76,10 +144,30 @@ export default function AdminDashboardPage() {
       .catch(() => {});
   }, []);
   const systemStatus = [
-    { label: t("systemStatus.serverUptime"), value: systemStatusData.serverUptime, status: "success", icon: FaCheckCircle },
-    { label: t("systemStatus.responseTime"), value: systemStatusData.responseTime, status: "success", icon: FaClock },
-    { label: t("systemStatus.memoryUsage"), value: systemStatusData.memoryUsage, status: "success", icon: FaCheckCircle },
-    { label: t("systemStatus.dbSize"), value: systemStatusData.dbSize, status: "success", icon: FaCheckCircle }
+    {
+      label: t("systemStatus.serverUptime"),
+      value: systemStatusData.serverUptime,
+      status: "success",
+      icon: FaCheckCircle,
+    },
+    {
+      label: t("systemStatus.responseTime"),
+      value: systemStatusData.responseTime,
+      status: "success",
+      icon: FaClock,
+    },
+    {
+      label: t("systemStatus.memoryUsage"),
+      value: systemStatusData.memoryUsage,
+      status: "success",
+      icon: FaCheckCircle,
+    },
+    {
+      label: t("systemStatus.dbSize"),
+      value: systemStatusData.dbSize,
+      status: "success",
+      icon: FaCheckCircle,
+    },
   ];
 
   // جلب النشاطات الحقيقية من API
@@ -122,7 +210,7 @@ export default function AdminDashboardPage() {
               email: doc.user?.email || placeholder,
               createdAt: doc.user?.createdAt || null,
               licenseNumber: doc.licenseNumber,
-              phone: doc.phone
+              phone: doc.phone,
             }));
           setPendingApprovals(pending);
         } else {
@@ -155,7 +243,9 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     fetch("/api/admin/notifications-unread")
       .then((res) => res.json())
-      .then((data) => setUnreadCount((data && (data.badge ?? data.unread)) || 0))
+      .then((data) =>
+        setUnreadCount((data && (data.badge ?? data.unread)) || 0),
+      )
       .catch(() => setUnreadCount(0));
   }, []);
 
@@ -190,17 +280,17 @@ export default function AdminDashboardPage() {
                 <div className="p-3 rounded-lg brand-gradient shadow-(--shadow-soft)">
                   <stat.icon className="text-2xl text-white" />
                 </div>
-                <div className={`flex items-center gap-1 text-sm ${stat.trend === 'up' ? 'text-(--ui-success)' : 'text-(--ui-danger)'}`}>
-                  {stat.trend === 'up' ? <FaArrowUp /> : <FaArrowDown />}
+                <div
+                  className={`flex items-center gap-1 text-sm ${stat.trend === "up" ? "text-(--ui-success)" : "text-(--ui-danger)"}`}
+                >
+                  {stat.trend === "up" ? <FaArrowUp /> : <FaArrowDown />}
                   <span>{stat.changePercent}</span>
                 </div>
               </div>
               <h3 className="text-(--ui-muted-2) text-sm font-medium mb-2">
                 {stat.title}
               </h3>
-              <p className="text-3xl font-bold text-foreground">
-                {stat.value}
-              </p>
+              <p className="text-3xl font-bold text-foreground">{stat.value}</p>
               {/* تم حذف جملة (من الشهر الماضي) */}
             </div>
           ))}
@@ -208,7 +298,9 @@ export default function AdminDashboardPage() {
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-foreground mb-6">{t("quickActionsTitle")}</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-6">
+            {t("quickActionsTitle")}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickActions.map((action, index) => (
               <button
@@ -220,10 +312,14 @@ export default function AdminDashboardPage() {
                   {action.icon}
                 </div>
                 <h3 className="text-lg font-bold mb-2">{action.title}</h3>
-                <p className="text-sm text-(--ui-muted-2)">{action.description}</p>
+                <p className="text-sm text-(--ui-muted-2)">
+                  {action.description}
+                </p>
                 <div className="mt-4 flex items-center gap-2 text-(--ui-muted-2) group-hover:gap-3 transition-all">
                   <span className="text-sm">{t("more")}</span>
-                  <span className="group-hover:-translate-x-1 transition-transform">{locale === "en" ? "→" : "←"}</span>
+                  <span className="group-hover:-translate-x-1 transition-transform">
+                    {locale === "en" ? "→" : "←"}
+                  </span>
                 </div>
               </button>
             ))}
@@ -234,7 +330,9 @@ export default function AdminDashboardPage() {
           {/* System Status */}
           <div className="card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border)">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-foreground">{t("systemStatusTitle")}</h2>
+              <h2 className="text-xl font-bold text-foreground">
+                {t("systemStatusTitle")}
+              </h2>
               <FaChartLine className="text-2xl text-(--ui-info)" />
             </div>
             <div className="space-y-4">
@@ -245,7 +343,9 @@ export default function AdminDashboardPage() {
                 >
                   <div className="flex items-center gap-3">
                     <item.icon className={getStatusColor(item.status)} />
-                    <span className="text-foreground font-medium">{item.label}</span>
+                    <span className="text-foreground font-medium">
+                      {item.label}
+                    </span>
                   </div>
                   <span className={`font-bold ${getStatusColor(item.status)}`}>
                     {item.value}
@@ -258,9 +358,13 @@ export default function AdminDashboardPage() {
           {/* Pending Approvals */}
           <div className="card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border)">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-foreground">{t("pendingApprovalsTitle")}</h2>
+              <h2 className="text-xl font-bold text-foreground">
+                {t("pendingApprovalsTitle")}
+              </h2>
               <span className="bg-(--ui-warning-bg) text-(--ui-warning) border border-(--ui-warning-border) px-3 py-1 rounded-full text-sm font-bold">
-                {pendingLoading ? t("pendingApprovals.loading") : pendingApprovals.length}
+                {pendingLoading
+                  ? t("pendingApprovals.loading")
+                  : pendingApprovals.length}
               </span>
             </div>
             {pendingError && (
@@ -268,9 +372,13 @@ export default function AdminDashboardPage() {
             )}
             <div className="space-y-3">
               {pendingLoading ? (
-                <div className="text-(--ui-muted-2)">{t("pendingApprovals.loading")}</div>
+                <div className="text-(--ui-muted-2)">
+                  {t("pendingApprovals.loading")}
+                </div>
               ) : pendingApprovals.length === 0 ? (
-                <div className="text-(--ui-muted-2)">{t("pendingApprovals.empty")}</div>
+                <div className="text-(--ui-muted-2)">
+                  {t("pendingApprovals.empty")}
+                </div>
               ) : (
                 <>
                   {pendingApprovals.map((approval, idx) => (
@@ -280,17 +388,35 @@ export default function AdminDashboardPage() {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h3 className="font-bold text-foreground">{t("pendingApprovals.requestTitle")}</h3>
+                          <h3 className="font-bold text-foreground">
+                            {t("pendingApprovals.requestTitle")}
+                          </h3>
                           <p className="text-sm text-(--ui-muted-2)">
-                            <b>{t("pendingApprovals.fields.id")}</b> {approval.id?.toString() || placeholder} <br/>
-                            <b>{t("pendingApprovals.fields.name")}</b> {approval.fullName || placeholder} <br/>
-                            <b>{t("pendingApprovals.fields.email")}</b> {approval.email || placeholder} <br/>
-                            <b>{t("pendingApprovals.fields.license")}</b> {approval.licenseNumber || placeholder} <br/>
-                            <b>{t("pendingApprovals.fields.phone")}</b> {approval.phone || placeholder} <br/>
-                            <b>{t("pendingApprovals.fields.created")}</b> {approval.createdAt ? new Date(approval.createdAt).toLocaleString(locale === "en" ? "en-US" : "ar-EG") : placeholder}
+                            <b>{t("pendingApprovals.fields.id")}</b>{" "}
+                            {approval.id?.toString() || placeholder} <br />
+                            <b>{t("pendingApprovals.fields.name")}</b>{" "}
+                            {approval.fullName || placeholder} <br />
+                            <b>{t("pendingApprovals.fields.email")}</b>{" "}
+                            {approval.email || placeholder} <br />
+                            <b>{t("pendingApprovals.fields.license")}</b>{" "}
+                            {approval.licenseNumber || placeholder} <br />
+                            <b>{t("pendingApprovals.fields.phone")}</b>{" "}
+                            {approval.phone || placeholder} <br />
+                            <b>{t("pendingApprovals.fields.created")}</b>{" "}
+                            {approval.createdAt
+                              ? new Date(approval.createdAt).toLocaleString(
+                                  locale === "en" ? "en-US" : "ar-EG",
+                                )
+                              : placeholder}
                           </p>
                         </div>
-                        <span className="text-xs text-(--ui-muted-2)">{approval.createdAt ? new Date(approval.createdAt).toLocaleDateString(locale === "en" ? "en-US" : "ar-EG") : placeholder}</span>
+                        <span className="text-xs text-(--ui-muted-2)">
+                          {approval.createdAt
+                            ? new Date(approval.createdAt).toLocaleDateString(
+                                locale === "en" ? "en-US" : "ar-EG",
+                              )
+                            : placeholder}
+                        </span>
                       </div>
                       <div className="flex gap-2 mt-3">
                         <button
@@ -298,9 +424,14 @@ export default function AdminDashboardPage() {
                             await fetch("/api/admin/doctors", {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ id: approval.id, status: "active" })
+                              body: JSON.stringify({
+                                id: approval.id,
+                                status: "active",
+                              }),
                             });
-                            setPendingApprovals((prev) => prev.filter((d) => d.id !== approval.id));
+                            setPendingApprovals((prev) =>
+                              prev.filter((d) => d.id !== approval.id),
+                            );
                             showSuccess(t("toast.approved"));
                           }}
                           className="flex-1 btn-gradient px-3 py-2 rounded-lg text-sm transition-colors"
@@ -312,9 +443,14 @@ export default function AdminDashboardPage() {
                             await fetch("/api/admin/doctors", {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ id: approval.id, status: "banned" })
+                              body: JSON.stringify({
+                                id: approval.id,
+                                status: "banned",
+                              }),
                             });
-                            setPendingApprovals((prev) => prev.filter((d) => d.id !== approval.id));
+                            setPendingApprovals((prev) =>
+                              prev.filter((d) => d.id !== approval.id),
+                            );
                             showError(t("toast.rejected"));
                           }}
                           className="flex-1 bg-(--ui-danger) hover:opacity-90 text-white px-3 py-2 rounded-lg text-sm transition-colors"
@@ -328,7 +464,9 @@ export default function AdminDashboardPage() {
               )}
             </div>
             <button
-              onClick={() => router.push(`${basePrefix}/admin/doctors?pending=1`)}
+              onClick={() =>
+                router.push(`${basePrefix}/admin/doctors?pending=1`)
+              }
               className="w-full mt-4 text-(--ui-info) hover:underline text-sm font-medium"
             >
               {t("pendingApprovals.viewAll")}
@@ -338,14 +476,20 @@ export default function AdminDashboardPage() {
 
         {/* Recent Activities */}
         <div className="mt-8 card-glass rounded-xl shadow-(--shadow-soft) p-6 border border-(--ui-border)">
-          <h2 className="text-xl font-bold text-foreground mb-6">{t("recentActivity.title")}</h2>
+          <h2 className="text-xl font-bold text-foreground mb-6">
+            {t("recentActivity.title")}
+          </h2>
           <div className="space-y-4">
             {activitiesLoading ? (
-              <div className="text-(--ui-muted-2)">{t("recentActivity.loading")}</div>
+              <div className="text-(--ui-muted-2)">
+                {t("recentActivity.loading")}
+              </div>
             ) : activitiesError ? (
               <div className="text-(--ui-danger)">{activitiesError}</div>
             ) : recentActivities.length === 0 ? (
-              <div className="text-(--ui-muted-2)">{t("recentActivity.empty")}</div>
+              <div className="text-(--ui-muted-2)">
+                {t("recentActivity.empty")}
+              </div>
             ) : (
               recentActivities.map((activity) => (
                 <div
@@ -354,8 +498,14 @@ export default function AdminDashboardPage() {
                 >
                   <div className="text-3xl">📝</div>
                   <div className="flex-1">
-                    <p className="font-medium text-foreground">{formatActivityDescription(activity, locale)}</p>
-                    <p className="text-sm text-(--ui-muted-2)">{new Date(activity.createdAt).toLocaleString(locale === "en" ? "en-US" : "ar-EG")}</p>
+                    <p className="font-medium text-foreground">
+                      {formatActivityDescription(activity, locale)}
+                    </p>
+                    <p className="text-sm text-(--ui-muted-2)">
+                      {new Date(activity.createdAt).toLocaleString(
+                        locale === "en" ? "en-US" : "ar-EG",
+                      )}
+                    </p>
                   </div>
                 </div>
               ))

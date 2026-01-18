@@ -81,7 +81,16 @@ export default function ChatActionsPopover({
   const popup = (
     <div
       ref={popRef}
-      style={pos ? { position: "fixed", top: `${pos.top}px`, left: `${pos.left}px`, zIndex: 9999 } : { position: "fixed", visibility: "hidden" }}
+      style={
+        pos
+          ? {
+              position: "fixed",
+              top: `${pos.top}px`,
+              left: `${pos.left}px`,
+              zIndex: 9999,
+            }
+          : { position: "fixed", visibility: "hidden" }
+      }
     >
       <div className="card-glass w-48 rounded-md border border-(--ui-border) shadow-(--shadow-soft)">
         {!confirming ? (
@@ -93,7 +102,9 @@ export default function ChatActionsPopover({
           </button>
         ) : (
           <div className="px-4 py-2 text-sm">
-            <div className="mb-2 text-(--ui-foreground)">{resolvedConfirmText}</div>
+            <div className="mb-2 text-(--ui-foreground)">
+              {resolvedConfirmText}
+            </div>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirming(false)}

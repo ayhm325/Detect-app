@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { FaBell, FaTrash, FaCheck, FaCheckDouble } from "react-icons/fa";
 import { useLocale, useTranslations } from "next-intl";
 import { useToast } from "../../../components/ui/ToastProvider";
-import  DoctorLayout  from "../DoctorLayout";
-
+import DoctorLayout from "../DoctorLayout";
 
 export default function NotificationsPage() {
   const locale = useLocale();
@@ -39,11 +38,17 @@ export default function NotificationsPage() {
   const getTypeBadgeColor = (type) => {
     const colors = {
       info: "bg-(--ui-info-bg) text-(--ui-foreground) border border-(--ui-info-border)",
-      success: "bg-(--ui-success-bg) text-(--ui-foreground) border border-(--ui-success-border)",
-      warning: "bg-(--ui-warning-bg) text-(--ui-foreground) border border-(--ui-warning-border)",
-      alert: "bg-(--ui-danger)/10 text-(--ui-foreground) border border-(--ui-danger)/20",
+      success:
+        "bg-(--ui-success-bg) text-(--ui-foreground) border border-(--ui-success-border)",
+      warning:
+        "bg-(--ui-warning-bg) text-(--ui-foreground) border border-(--ui-warning-border)",
+      alert:
+        "bg-(--ui-danger)/10 text-(--ui-foreground) border border-(--ui-danger)/20",
     };
-    return colors[type] || "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border)";
+    return (
+      colors[type] ||
+      "bg-(--ui-surface-2)/60 text-(--ui-foreground) border border-(--ui-border)"
+    );
   };
 
   const getTypeLabel = (type) => {
@@ -75,12 +80,16 @@ export default function NotificationsPage() {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch("/api/doctor/notifications", { cache: "no-store" });
+        const res = await fetch("/api/doctor/notifications", {
+          cache: "no-store",
+        });
         if (!res.ok) return;
         const data = await res.json().catch(() => ({}));
         if (!mounted) return;
         setNowMs(Date.now());
-        setNotifications(Array.isArray(data?.notifications) ? data.notifications : []);
+        setNotifications(
+          Array.isArray(data?.notifications) ? data.notifications : [],
+        );
       } catch {}
     })();
     return () => {
@@ -99,7 +108,9 @@ export default function NotificationsPage() {
   const readCount = totalCount - unreadCount;
 
   const handleDelete = async (id) => {
-    const res = await fetch(`/api/doctor/notifications?id=${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/doctor/notifications?id=${id}`, {
+      method: "DELETE",
+    });
     if (!res.ok) {
       showInfo(t("errorUpdate"));
       return;
@@ -142,7 +153,9 @@ export default function NotificationsPage() {
     }
     const data = await res.json();
     if (data.success) {
-      setNotifications(notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+      setNotifications(
+        notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
+      );
       showInfo(t("markedRead"));
     } else {
       showInfo(t("errorUpdate"));
@@ -161,7 +174,9 @@ export default function NotificationsPage() {
     }
     const data = await res.json();
     if (data.success) {
-      setNotifications(notifications.map((n) => (n.id === id ? { ...n, isRead: false } : n)));
+      setNotifications(
+        notifications.map((n) => (n.id === id ? { ...n, isRead: false } : n)),
+      );
       showInfo(t("markedUnread"));
     } else {
       showInfo(t("errorUpdate"));
@@ -198,7 +213,7 @@ export default function NotificationsPage() {
         <div className="max-w-4xl">
           <div className="flex justify-between items-start mb-8">
             <div>
-      {/* <ToastContainer /> Removed react-toastify */}
+              {/* <ToastContainer /> Removed react-toastify */}
               <p className="text-(--ui-muted-foreground)">
                 {unreadCount > 0
                   ? t("unreadCount", { unread: unreadCount, total: totalCount })
@@ -263,9 +278,16 @@ export default function NotificationsPage() {
           <div className="space-y-4">
             {filteredNotifications.length === 0 ? (
               <div className="card-glass border border-(--ui-border) rounded-xl p-12 text-center">
-                <FaBell size={48} className="mx-auto mb-4 text-(--ui-muted-foreground)" />
+                <FaBell
+                  size={48}
+                  className="mx-auto mb-4 text-(--ui-muted-foreground)"
+                />
                 <p className="text-(--ui-muted-foreground) text-lg">
-                  {filter === "unread" ? t("noUnread") : filter === "read" ? t("noRead") : t("noNotifications")}
+                  {filter === "unread"
+                    ? t("noUnread")
+                    : filter === "read"
+                      ? t("noRead")
+                      : t("noNotifications")}
                 </p>
               </div>
             ) : (
@@ -278,20 +300,28 @@ export default function NotificationsPage() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4 min-w-0">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${getTypeBadgeColor(notif.type)}`}>
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${getTypeBadgeColor(notif.type)}`}
+                      >
                         {getTypeIcon(notif.type)}
                       </div>
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <h3 className="font-bold text-(--ui-foreground) truncate">{getTypeLabel(notif.type)}</h3>
+                          <h3 className="font-bold text-(--ui-foreground) truncate">
+                            {getTypeLabel(notif.type)}
+                          </h3>
                           {!notif.isRead && (
                             <span className="text-xs px-2 py-1 rounded-full bg-(--ui-danger) text-(--ui-danger-foreground)">
                               {t("new")}
                             </span>
                           )}
                         </div>
-                        <p className="text-(--ui-muted-foreground) text-sm wrap-break-word">{getLocalizedMessage(notif.message)}</p>
-                        <p className="text-(--ui-muted-foreground) text-xs mt-2">{formatRelativeTime(notif.createdAt)}</p>
+                        <p className="text-(--ui-muted-foreground) text-sm wrap-break-word">
+                          {getLocalizedMessage(notif.message)}
+                        </p>
+                        <p className="text-(--ui-muted-foreground) text-xs mt-2">
+                          {formatRelativeTime(notif.createdAt)}
+                        </p>
                       </div>
                     </div>
 
@@ -326,7 +356,6 @@ export default function NotificationsPage() {
               ))
             )}
           </div>
-
         </div>
       </div>
     </DoctorLayout>

@@ -1,4 +1,3 @@
-
 "use client";
 import Image from "next/image";
 import { useMemo } from "react";
@@ -35,25 +34,24 @@ export default function FeaturesSection() {
       { icon: "🌐", title: t("extra4.title"), desc: t("extra4.desc") },
     ],
   };
-  const particles = useMemo(
-    () =>
-      [...Array(8)].map((_, i) => ({
-        id: i,
-        width: 4 + (i % 4) * 1.5,
-        height: 4 + ((i + 1) % 4) * 1.2,
-        left: (i * 13 + 7) % 100,
-        top: (i * 17 + 11) % 100,
-        background:
-          i % 3 === 0
-            ? "color-mix(in srgb, var(--ui-ring) 60%, transparent)"
-            : i % 3 === 1
-              ? "color-mix(in srgb, var(--ui-warning) 60%, transparent)"
-              : "color-mix(in srgb, var(--ui-info) 60%, transparent)",
-        animationDuration: 15 + (i % 5) * 1.5,
-        animationDelay: (i % 4) * 0.6,
-      })),
-    []
-  );
+  const particles = useMemo(() => {
+    const colors = [
+      "color-mix(in srgb, var(--ui-ring) 60%, transparent)",
+      "color-mix(in srgb, var(--ui-warning) 60%, transparent)",
+      "color-mix(in srgb, var(--ui-info) 60%, transparent)",
+    ];
+
+    return Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      width: 4 + (i % 4) * 1.5,
+      height: 4 + ((i + 1) % 4) * 1.2,
+      left: (i * 13 + 7) % 100,
+      top: (i * 17 + 11) % 100,
+      background: colors[i % 3],
+      animationDuration: 15 + (i % 5) * 1.5,
+      animationDelay: (i % 4) * 0.6,
+    }));
+  }, []);
 
   return (
     <section className="relative w-full py-20 sm:py-24 bg-(--ui-surface) text-(--ui-foreground) overflow-hidden">
@@ -61,30 +59,45 @@ export default function FeaturesSection() {
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
         {/* Moving Holographic Gradients */}
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-0 left-0 w-125 h-125 bg-(--ui-ring)/15 rounded-full blur-3xl animate-float" style={{ animationDuration: '20s' }} />
-          <div className="absolute top-1/4 right-0 w-150 h-150 bg-(--ui-info)/15 rounded-full blur-3xl animate-float" style={{ animationDuration: '25s', animationDelay: '2s' }} />
-          <div className="absolute bottom-0 left-1/3 w-137.5 h-137.5 bg-(--ui-success)/15 rounded-full blur-3xl animate-float" style={{ animationDuration: '22s', animationDelay: '4s' }} />
+          <div
+            className="absolute top-0 left-0 w-125 h-125 bg-(--ui-ring)/15 rounded-full blur-3xl animate-float"
+            style={{ animationDuration: "20s" }}
+          />
+          <div
+            className="absolute top-1/4 right-0 w-150 h-150 bg-(--ui-info)/15 rounded-full blur-3xl animate-float"
+            style={{ animationDuration: "25s", animationDelay: "2s" }}
+          />
+          <div
+            className="absolute bottom-0 left-1/3 w-137.5 h-137.5 bg-(--ui-success)/15 rounded-full blur-3xl animate-float"
+            style={{ animationDuration: "22s", animationDelay: "4s" }}
+          />
         </div>
 
         {/* Holographic Grid Pattern */}
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: `
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `
             linear-gradient(90deg, color-mix(in srgb, var(--ui-ring) 14%, transparent) 1px, transparent 1px),
             linear-gradient(0deg, color-mix(in srgb, var(--ui-info) 14%, transparent) 1px, transparent 1px)
           `,
-          backgroundSize: '80px 80px',
-          animation: 'gridMove 30s linear infinite'
-        }} />
+            backgroundSize: "80px 80px",
+            animation: "gridMove 30s linear infinite",
+          }}
+        />
 
         {/* Radial Glow Effects */}
         <div className="absolute inset-0 opacity-40">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `
               radial-gradient(circle at 25% 25%, color-mix(in srgb, var(--ui-ring) 18%, transparent) 0%, transparent 50%),
               radial-gradient(circle at 75% 75%, color-mix(in srgb, var(--ui-info) 18%, transparent) 0%, transparent 50%),
               radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--ui-warning) 14%, transparent) 0%, transparent 60%)
             `,
-          }} />
+            }}
+          />
         </div>
 
         {/* Floating Holographic Particles */}
@@ -107,25 +120,74 @@ export default function FeaturesSection() {
         </div>
 
         {/* Animated Holographic Lines */}
-        <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          className="absolute inset-0 w-full h-full opacity-20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <defs>
             <linearGradient id="holoGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style={{ stopColor: 'var(--ui-ring)', stopOpacity: 0.8 }}>
-                <animate attributeName="offset" values="0;1;0" dur="10s" repeatCount="indefinite" />
+              <stop
+                offset="0%"
+                style={{ stopColor: "var(--ui-ring)", stopOpacity: 0.8 }}
+              >
+                <animate
+                  attributeName="offset"
+                  values="0;1;0"
+                  dur="10s"
+                  repeatCount="indefinite"
+                />
               </stop>
-              <stop offset="50%" style={{ stopColor: 'var(--ui-warning)', stopOpacity: 0.5 }}>
-                <animate attributeName="offset" values="0.5;1;0.5" dur="10s" repeatCount="indefinite" />
+              <stop
+                offset="50%"
+                style={{ stopColor: "var(--ui-warning)", stopOpacity: 0.5 }}
+              >
+                <animate
+                  attributeName="offset"
+                  values="0.5;1;0.5"
+                  dur="10s"
+                  repeatCount="indefinite"
+                />
               </stop>
-              <stop offset="100%" style={{ stopColor: 'var(--ui-info)', stopOpacity: 0.8 }}>
-                <animate attributeName="offset" values="1;0;1" dur="10s" repeatCount="indefinite" />
+              <stop
+                offset="100%"
+                style={{ stopColor: "var(--ui-info)", stopOpacity: 0.8 }}
+              >
+                <animate
+                  attributeName="offset"
+                  values="1;0;1"
+                  dur="10s"
+                  repeatCount="indefinite"
+                />
               </stop>
             </linearGradient>
           </defs>
-          <path d="M0,50 Q250,100 500,50 T1000,50" stroke="url(#holoGrad1)" strokeWidth="2" fill="none" opacity="0.6">
-            <animate attributeName="d" values="M0,50 Q250,100 500,50 T1000,50;M0,100 Q250,50 500,100 T1000,100;M0,50 Q250,100 500,50 T1000,50" dur="15s" repeatCount="indefinite" />
+          <path
+            d="M0,50 Q250,100 500,50 T1000,50"
+            stroke="url(#holoGrad1)"
+            strokeWidth="2"
+            fill="none"
+            opacity="0.6"
+          >
+            <animate
+              attributeName="d"
+              values="M0,50 Q250,100 500,50 T1000,50;M0,100 Q250,50 500,100 T1000,100;M0,50 Q250,100 500,50 T1000,50"
+              dur="15s"
+              repeatCount="indefinite"
+            />
           </path>
-          <path d="M0,150 Q250,200 500,150 T1000,150" stroke="url(#holoGrad1)" strokeWidth="2" fill="none" opacity="0.4">
-            <animate attributeName="d" values="M0,150 Q250,200 500,150 T1000,150;M0,200 Q250,150 500,200 T1000,200;M0,150 Q250,200 500,150 T1000,150" dur="18s" repeatCount="indefinite" />
+          <path
+            d="M0,150 Q250,200 500,150 T1000,150"
+            stroke="url(#holoGrad1)"
+            strokeWidth="2"
+            fill="none"
+            opacity="0.4"
+          >
+            <animate
+              attributeName="d"
+              values="M0,150 Q250,200 500,150 T1000,150;M0,200 Q250,150 500,200 T1000,200;M0,150 Q250,200 500,150 T1000,150"
+              dur="18s"
+              repeatCount="indefinite"
+            />
           </path>
         </svg>
       </div>
@@ -134,9 +196,7 @@ export default function FeaturesSection() {
         {/* Section Header */}
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4">
-            <span className="brand-gradient-text">
-              {featureCopy.title}
-            </span>
+            <span className="brand-gradient-text">{featureCopy.title}</span>
           </h2>
           <p className="text-lg text-(--ui-muted-foreground) max-w-2xl mx-auto">
             {featureCopy.subtitle}
@@ -153,19 +213,19 @@ export default function FeaturesSection() {
             >
               {/* Glow Effect */}
               <div className="absolute -inset-1 brand-gradient rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500" />
-              
+
               {/* Card */}
               <div className="relative h-full p-8 card-glass rounded-3xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300">
                 {/* Icon Container */}
                 <div className="relative mb-6 inline-flex">
                   <div className="absolute inset-0 brand-gradient rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
                   <div className="relative w-20 h-20 flex items-center justify-center bg-(--ui-surface-2) border border-(--ui-border) rounded-2xl shadow-xl group-hover:scale-110 transition-transform duration-300">
-                    <Image 
-                      src={feature.icon} 
-                      alt={feature.title} 
-                      width={48} 
-                      height={48} 
-                      className="drop-shadow-lg" 
+                    <Image
+                      src={feature.icon}
+                      alt={feature.title}
+                      width={48}
+                      height={48}
+                      className="drop-shadow-lg"
                     />
                   </div>
                 </div>
@@ -188,7 +248,10 @@ export default function FeaturesSection() {
         </div>
 
         {/* Additional Features List */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn" style={{ animationDelay: "0.4s" }}>
+        <div
+          className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn"
+          style={{ animationDelay: "0.4s" }}
+        >
           {featureCopy.extras.map((item, i) => (
             <div
               key={i}

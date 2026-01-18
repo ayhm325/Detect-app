@@ -1,11 +1,11 @@
 import prisma from "../lib/prismaClient.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "../lib/auth/bcryptWrapper.mjs";
 
 async function createTestDoctor() {
   const email = `testdoc${Date.now()}@example.com`;
   const password = await bcrypt.hash("Test1234!", 10);
   const fullName = "Test Doctor";
-  const licenseNumber = `LIC${Math.floor(Math.random()*100000)}`;
+  const licenseNumber = `LIC${Math.floor(Math.random() * 100000)}`;
   const phone = "0500000000";
 
   // إنشاء المستخدم
@@ -29,7 +29,11 @@ async function createTestDoctor() {
     },
   });
 
-  console.log("تم إنشاء طبيب تجريبي:", { email, password: "Test1234!", licenseNumber });
+  console.log("تم إنشاء طبيب تجريبي:", {
+    email,
+    password: "Test1234!",
+    licenseNumber,
+  });
   process.exit(0);
 }
 

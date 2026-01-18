@@ -5,7 +5,12 @@ export default function CompareViewer({ images }) {
   const t = useTranslations("compareViewer");
   const needTwoImages = t("needTwoImages");
 
-  if (!images || images.length < 2) return <div className="text-center text-(--ui-muted-foreground) py-4">{needTwoImages}</div>;
+  if (!images || images.length < 2)
+    return (
+      <div className="text-center text-(--ui-muted-foreground) py-4">
+        {needTwoImages}
+      </div>
+    );
   return (
     <div className="flex gap-8 justify-center mt-4">
       {images.map((img, idx) => (
@@ -19,7 +24,9 @@ export default function CompareViewer({ images }) {
               className="object-contain rounded-xl border border-(--ui-border) bg-(--ui-surface-2)/40"
             />
           </div>
-          <span className="text-sm text-(--ui-muted-foreground)">{t("imageWithIndex", { index: idx + 1 })}</span>
+          <span className="text-sm text-(--ui-muted-foreground)">
+            {t("imageWithIndex", { index: idx + 1 })}
+          </span>
         </div>
       ))}
     </div>

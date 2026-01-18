@@ -1,12 +1,19 @@
 import prisma from "../../../../lib/prismaClient";
-import { createNotificationBestEffort, formatDateTimeForLocale } from "../../../../lib/notifications";
+import {
+  createNotificationBestEffort,
+  formatDateTimeForLocale,
+} from "../../../../lib/notifications";
 
 function isAuthorized(request) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return false;
 
-  const auth = request.headers.get("authorization") || request.headers.get("Authorization") || "";
-  if (auth.startsWith("Bearer ") && auth.slice(7).trim() === secret) return true;
+  const auth =
+    request.headers.get("authorization") ||
+    request.headers.get("Authorization") ||
+    "";
+  if (auth.startsWith("Bearer ") && auth.slice(7).trim() === secret)
+    return true;
 
   try {
     const url = new URL(request.url);
@@ -42,7 +49,9 @@ async function runReminders({ now }) {
       },
       include: {
         patient: { select: { userId: true, fullName: true } },
-        doctor: { select: { userId: true, user: { select: { fullName: true } } } },
+        doctor: {
+          select: { userId: true, user: { select: { fullName: true } } },
+        },
       },
     });
 
@@ -75,7 +84,11 @@ async function runReminders({ now }) {
         message: {
           ar: `تذكير: لديك موعد${doctorName ? ` مع د. ${doctorName}` : ""} بتاريخ ${formatDateTimeForLocale(appt.scheduledAt, "ar")}.`,
           en: `Reminder: you have an appointment${doctorName ? ` with Dr. ${doctorName}` : ""} on ${formatDateTimeForLocale(appt.scheduledAt, "en")}.`,
-          meta: { kind: "appointment_reminder", appointmentId: appt.id, window: w.key },
+          meta: {
+            kind: "appointment_reminder",
+            appointmentId: appt.id,
+            window: w.key,
+          },
         },
       });
 
@@ -97,7 +110,10 @@ export async function GET(request) {
     const result = await runReminders({ now });
     return Response.json({ ok: true, now: now.toISOString(), ...result });
   } catch (e) {
-    return Response.json({ ok: false, error: e?.message || "server_error" }, { status: 500 });
+    return Response.json(
+      { ok: false, error: e?.message || "server_error" },
+      { status: 500 },
+    );
   }
 }
 

@@ -5,15 +5,15 @@
     "pending": "قيد المراجعة",
     "thisMonth": "هذا الشهر"
   },
-    "statusSynonyms": {
-      "ready": ["جاهز"],
-      "pending": ["قيد المراجعة"],
-      "urgent": ["عاجل"]
-    },
-    "prioritySynonyms": {
-      "urgent": ["عاجل"],
-      "normal": ["عادي"]
-    },
+  "statusSynonyms": {
+    "ready": ["جاهز"],
+    "pending": ["قيد المراجعة"],
+    "urgent": ["عاجل"]
+  },
+  "prioritySynonyms": {
+    "urgent": ["عاجل"],
+    "normal": ["عادي"]
+  },
   "status": {
     "ready": "جاهز",
     "pending": "قيد المراجعة"

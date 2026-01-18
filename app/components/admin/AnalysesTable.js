@@ -6,7 +6,15 @@ import { Table, THead, TRow, TH, TD } from "../ui/Table";
 import Pagination from "../ui/Pagination";
 import { useTranslations } from "next-intl";
 
-export default function AnalysesTable({ analyses, onView, onDetails, onCompare, page = 1, pageCount = 1, onPageChange }) {
+export default function AnalysesTable({
+  analyses,
+  onView,
+  onDetails,
+  onCompare,
+  page = 1,
+  pageCount = 1,
+  onPageChange,
+}) {
   const t = useTranslations("adminAnalyses");
 
   return (
@@ -27,12 +35,35 @@ export default function AnalysesTable({ analyses, onView, onDetails, onCompare, 
               <TD className="text-center font-bold">{i + 1}</TD>
               <TD className="text-center">{analysis.patientName}</TD>
               <TD className="text-center">{analysis.date}</TD>
-              <TD className="text-center"><AnalysisStatusBadge status={analysis.status} /></TD>
+              <TD className="text-center">
+                <AnalysisStatusBadge status={analysis.status} />
+              </TD>
               <TD>
                 <div className="flex items-center justify-center gap-2">
-                  <Button variant="ghost" className="px-3 py-2 text-(--ui-info)" title={t("actions.view")} onClick={() => onView(analysis)}>{t("actions.view")}</Button>
-                  <Button variant="ghost" className="px-3 py-2" title={t("actions.details")} onClick={() => onDetails(analysis)}>{t("actions.details")}</Button>
-                  <Button variant="ghost" className="px-3 py-2 text-(--ui-success)" title={t("actions.compare")} onClick={() => onCompare(analysis)}>{t("actions.compare")}</Button>
+                  <Button
+                    variant="ghost"
+                    className="px-3 py-2 text-(--ui-info)"
+                    title={t("actions.view")}
+                    onClick={() => onView(analysis)}
+                  >
+                    {t("actions.view")}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="px-3 py-2"
+                    title={t("actions.details")}
+                    onClick={() => onDetails(analysis)}
+                  >
+                    {t("actions.details")}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="px-3 py-2 text-(--ui-success)"
+                    title={t("actions.compare")}
+                    onClick={() => onCompare(analysis)}
+                  >
+                    {t("actions.compare")}
+                  </Button>
                 </div>
               </TD>
             </TRow>
@@ -40,7 +71,11 @@ export default function AnalysesTable({ analyses, onView, onDetails, onCompare, 
         </tbody>
       </Table>
       <div className="flex items-center justify-end mt-6">
-        <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
+        <Pagination
+          page={page}
+          pageCount={pageCount}
+          onPageChange={onPageChange}
+        />
       </div>
     </div>
   );

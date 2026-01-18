@@ -4,7 +4,6 @@ import Link from "next/link";
 import { createNavigation } from "next-intl/navigation";
 const { useRouter, usePathname } = createNavigation();
 import { useLocale, useTranslations } from "next-intl";
-import { } from "react";
 import { useTheme } from "../theme-provider";
 
 /* =======================
@@ -19,12 +18,25 @@ function ThemeToggleButton() {
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className="group relative p-2.5 rounded-full bg-(--ui-surface-2) border border-(--ui-border) hover:scale-110 transition-all shadow"
-      aria-label={isDark ? t("theme.switchToLightAria") : t("theme.switchToDarkAria")}
-      title={isDark ? t("theme.switchToLightAria") : t("theme.switchToDarkAria")}
+      aria-label={
+        isDark ? t("theme.switchToLightAria") : t("theme.switchToDarkAria")
+      }
+      title={
+        isDark ? t("theme.switchToLightAria") : t("theme.switchToDarkAria")
+      }
     >
       {isDark ? (
         // Show a clear sun icon when in dark mode (indicates switching to light)
-        <svg className="w-6 h-6 text-(--ui-foreground)" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg
+          className="w-6 h-6 text-(--ui-foreground)"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <circle cx="12" cy="12" r="4" />
           <path d="M12 2v2" />
           <path d="M12 20v2" />
@@ -37,7 +49,16 @@ function ThemeToggleButton() {
         </svg>
       ) : (
         // Show a clean crescent moon when in light mode (indicates switching to dark)
-        <svg className="w-6 h-6 text-(--ui-foreground)" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg
+          className="w-6 h-6 text-(--ui-foreground)"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
         </svg>
       )}
@@ -53,8 +74,6 @@ export default function Navbar() {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
-
-  
 
   /* تبديل اللغة مع الحفاظ على نفس الصفحة */
   function handleSwitchLocale() {
@@ -73,7 +92,9 @@ export default function Navbar() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @keyframes float {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }
@@ -92,26 +113,32 @@ export default function Navbar() {
         .animate-float-delayed {
           animation: float-delayed 25s infinite ease-in-out;
         }
-      ` }} />
+      `,
+        }}
+      />
       <nav className="w-full flex items-center justify-between py-2 px-4 lg:px-12 relative z-50 overflow-hidden text-(--ui-foreground)">
         {/* خلفية التدرج المتحركة الجديدة (Mesh Gradient) */}
         <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none opacity-60">
           {/* الخلفية الأساسية */}
           <div className="absolute inset-0 bg-(--ui-surface)" />
-          
+
           {/* الكرات اللونية المتحركة (Orbs) */}
           {/* Orb 1: Primary Color */}
           <div className="hidden sm:block absolute top-[-10%] left-[-10%] w-125 h-125 bg-(--color-primary-500) rounded-full mix-blend-multiply filter blur-[100px] animate-float opacity-30" />
-          
+
           {/* Orb 2: Secondary Color */}
-          <div className="hidden sm:block absolute bottom-[-10%] right-[-10%] w-125 h-125(--color-secondary-500) rounded-full mix-blend-multiply filter blur-[100px] animate-float-delayed opacity-30" />
-          
+          <div className="hidden sm:block absolute bottom-[-10%] right-[-10%] w-125 h-125 bg-(--color-secondary-500) rounded-full mix-blend-multiply filter blur-[100px] animate-float-delayed opacity-30" />
+
           {/* Orb 3: Accent Color (Smaller, faster) */}
           <div className="hidden sm:block absolute top-[20%] right-[20%] w-75 h-75 bg-(--color-accent-500) rounded-full mix-blend-screen filter blur-[80px] animate-float opacity-20 animation-delay-2000" />
         </div>
 
         {/* شعار الموقع */}
-        <a href={homeHref} className="flex items-center gap-2 shrink-0" onClick={handleLogoClick}>
+        <a
+          href={homeHref}
+          className="flex items-center gap-2 shrink-0"
+          onClick={handleLogoClick}
+        >
           <svg
             width="36"
             height="36"
@@ -122,7 +149,13 @@ export default function Navbar() {
             aria-hidden="true"
           >
             <defs>
-              <linearGradient id="lungGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient
+                id="lungGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
                 <stop offset="0%" stopColor="var(--color-bright-500)" />
                 <stop offset="100%" stopColor="var(--color-primary-500)" />
               </linearGradient>
@@ -130,7 +163,9 @@ export default function Navbar() {
           </svg>
           <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-1">
-              <span className="text-xl" aria-label={t("logoIconAria")}>🫁</span>
+              <span className="text-xl" aria-label={t("logoIconAria")}>
+                🫁
+              </span>
               <span className="font-black text-2xl brand-gradient-text truncate hidden sm:inline">
                 {t("brand")}
               </span>
@@ -155,8 +190,6 @@ export default function Navbar() {
             {t("langSwitch")}
           </button>
         </div>
-
-        
       </nav>
     </>
   );

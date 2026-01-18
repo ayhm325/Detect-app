@@ -3,7 +3,13 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-export default function PatientHeader({ fullName, avatarUrl, notificationsCount = 0, onSettings, onToggleSidebar }) {
+export default function PatientHeader({
+  fullName,
+  avatarUrl,
+  notificationsCount = 0,
+  onSettings,
+  onToggleSidebar,
+}) {
   const ui = useTranslations("ui");
   const placeholder = ui("placeholder");
 
@@ -28,10 +34,14 @@ export default function PatientHeader({ fullName, avatarUrl, notificationsCount 
               className="object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-(--ui-muted-foreground)">👤</div>
+            <div className="flex h-full w-full items-center justify-center text-(--ui-muted-foreground)">
+              👤
+            </div>
           )}
         </div>
-        <div className="text-base font-semibold text-(--ui-foreground)">{fullName || placeholder}</div>
+        <div className="text-base font-semibold text-(--ui-foreground)">
+          {fullName || placeholder}
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <button className="relative rounded-md border border-(--ui-border) bg-(--ui-surface) px-3 py-1.5 text-sm text-(--ui-foreground) hover:bg-(--ui-surface-2)/60">
@@ -42,7 +52,12 @@ export default function PatientHeader({ fullName, avatarUrl, notificationsCount 
             </span>
           )}
         </button>
-        <button onClick={onSettings} className="btn-gradient rounded-md px-3 py-1.5 text-sm text-white">{ui("topbar.settings")}</button>
+        <button
+          onClick={onSettings}
+          className="btn-gradient rounded-md px-3 py-1.5 text-sm text-white"
+        >
+          {ui("topbar.settings")}
+        </button>
       </div>
     </header>
   );

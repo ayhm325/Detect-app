@@ -10,19 +10,19 @@
  * - Meant as a development scaffold; in production run as a separate service behind HTTPS.
  */
 
-import http from 'http';
-import express from 'express';
-import { Server } from 'socket.io';
-import { createAdapter } from '@socket.io/redis-adapter';
-import Redis from 'ioredis';
-import jwt from 'jsonwebtoken';
-import prisma from '../lib/prismaClient.js';
-import { getJwtSecret } from '../lib/auth/jwtSecret.js';
-import { getJwtVerifyOptions } from '../lib/auth/jwtClaims.js';
+import http from "http";
+import express from "express";
+import { Server } from "socket.io";
+import { createAdapter } from "@socket.io/redis-adapter";
+import Redis from "ioredis";
+import jwt from "jsonwebtoken";
+import prisma from "../lib/prismaClient.js";
+import { getJwtSecret } from "../lib/auth/jwtSecret.js";
+import { getJwtVerifyOptions } from "../lib/auth/jwtClaims.js";
 
 const PORT = process.env.SOCKET_PORT ? Number(process.env.SOCKET_PORT) : 4000;
 const SECRET = getJwtSecret();
-const DEBUG_SOCKET = process.env.DEBUG_SOCKET === '1';
+const DEBUG_SOCKET = process.env.DEBUG_SOCKET === "1";
 
 const app = express();
 const server = http.createServer(app);
@@ -44,17 +44,17 @@ async function emitGlobalPresenceSnapshotToSocket(socket) {
     const selfId = String(socket.user?.id);
     let ids = [];
     if (redis) {
-      ids = await redis.smembers('online:users').catch(() => []);
+      ids = await redis.smembers("online:users").catch(() => []);
     } else {
       ids = Array.from(onlineUsers);
     }
     for (const id of ids) {
       if (!id) continue;
       if (selfId && String(id) === selfId) continue;
-      socket.emit('presence', { userId: id, online: true });
+      socket.emit("presence", { userId: id, online: true });
     }
   } catch (e) {
-    console.warn('global presence snapshot error', e?.message || e);
+    console.warn("global presence snapshot error", e?.message || e);
   }
 }
 
@@ -69,11 +69,11 @@ async function markUserOnline(socket) {
       await redis.sadd(key, socket.id);
       const count = await redis.scard(key).catch(() => 0);
       if (count === 1) {
-        await redis.sadd('online:users', id).catch(() => {});
-        io.emit('presence', { userId: id, online: true });
+        await redis.sadd("online:users", id).catch(() => {});
+        io.emit("presence", { userId: id, online: true });
       }
     } catch (e) {
-      console.warn('markUserOnline redis error', e?.message || e);
+      console.warn("markUserOnline redis error", e?.message || e);
     }
   } else {
     const prev = onlineUserCounts.get(id) || 0;
@@ -81,7 +81,7 @@ async function markUserOnline(socket) {
     onlineUserCounts.set(id, next);
     if (prev === 0) {
       onlineUsers.add(id);
-      io.emit('presence', { userId: id, online: true });
+      io.emit("presence", { userId: id, online: true });
     }
   }
 
@@ -99,11 +99,11 @@ async function markUserOffline(socket) {
       await redis.srem(key, socket.id).catch(() => {});
       const count = await redis.scard(key).catch(() => 0);
       if (count === 0) {
-        await redis.srem('online:users', id).catch(() => {});
-        io.emit('presence', { userId: id, online: false });
+        await redis.srem("online:users", id).catch(() => {});
+        io.emit("presence", { userId: id, online: false });
       }
     } catch (e) {
-      console.warn('markUserOffline redis error', e?.message || e);
+      console.warn("markUserOffline redis error", e?.message || e);
     }
   } else {
     const prev = onlineUserCounts.get(id) || 0;
@@ -111,7 +111,7 @@ async function markUserOffline(socket) {
     if (next === 0) {
       onlineUserCounts.delete(id);
       onlineUsers.delete(id);
-      io.emit('presence', { userId: id, online: false });
+      io.emit("presence", { userId: id, online: false });
     } else {
       onlineUserCounts.set(id, next);
     }
@@ -128,19 +128,23 @@ if (process.env.REDIS_URL) {
     redis.connect().catch(() => {});
     sub.connect().catch(() => {});
     io.adapter(createAdapter(redis, sub));
-    console.log('Socket.IO using Redis adapter');
+    console.log("Socket.IO using Redis adapter");
   } catch (e) {
-    console.warn('Failed to initialize Redis adapter', e.message || e);
+    console.warn("Failed to initialize Redis adapter", e.message || e);
     redis = null;
   }
 }
 
-function parseCookieString(cookie = '') {
-  return cookie.split(';').map(c => c.trim()).reduce((acc, cur) => {
-    const idx = cur.indexOf('=');
-    if (idx > -1) acc[cur.slice(0, idx)] = decodeURIComponent(cur.slice(idx + 1));
-    return acc;
-  }, {});
+function parseCookieString(cookie = "") {
+  return cookie
+    .split(";")
+    .map((c) => c.trim())
+    .reduce((acc, cur) => {
+      const idx = cur.indexOf("=");
+      if (idx > -1)
+        acc[cur.slice(0, idx)] = decodeURIComponent(cur.slice(idx + 1));
+      return acc;
+    }, {});
 }
 
 io.use(async (socket, next) => {
@@ -149,27 +153,46 @@ io.use(async (socket, next) => {
     let token = socket.handshake.auth && socket.handshake.auth.token;
     const cookieHeader = socket.handshake.headers?.cookie;
     if (DEBUG_SOCKET) {
-      console.log('[socket] auth token provided:', Boolean(token), 'cookie header present:', Boolean(cookieHeader));
+      console.log(
+        "[socket] auth token provided:",
+        Boolean(token),
+        "cookie header present:",
+        Boolean(cookieHeader),
+      );
     }
     if (!token) {
       // fallback: parse cookie header
-      const cookies = parseCookieString(cookieHeader || '');
+      const cookies = parseCookieString(cookieHeader || "");
       token = cookies.token;
     }
-    if (!token) return next(new Error('unauthenticated'));
+    if (!token) return next(new Error("unauthenticated"));
     const user = jwt.verify(token, SECRET, getJwtVerifyOptions());
-    if (DEBUG_SOCKET) console.log('[socket] auth success', { socketId: socket.id, userId: user && user.id, role: user && user.role });
+    if (DEBUG_SOCKET)
+      console.log("[socket] auth success", {
+        socketId: socket.id,
+        userId: user && user.id,
+        role: user && user.role,
+      });
     // attach minimal user info
     socket.user = { id: user.id, role: user.role, email: user.email };
     return next();
   } catch (err) {
-    if (DEBUG_SOCKET) console.warn('[socket] auth failed', { socketId: socket.id, err: err && err.message });
-    return next(new Error('invalid_token'));
+    if (DEBUG_SOCKET)
+      console.warn("[socket] auth failed", {
+        socketId: socket.id,
+        err: err && err.message,
+      });
+    return next(new Error("invalid_token"));
   }
 });
 
-io.on('connection', (socket) => {
-  console.log('socket connected', socket.id, 'user', socket.user && socket.user.id);
+io.on("connection", (socket) => {
+  console.log(
+    "socket connected",
+    socket.id,
+    "user",
+    socket.user && socket.user.id,
+  );
 
   // Always join a per-user room so we can deliver events even when the user
   // hasn't joined any chat rooms (e.g., dashboards).
@@ -181,17 +204,27 @@ io.on('connection', (socket) => {
   markUserOnline(socket).catch(() => {});
 
   // Debug helper: client can request its authenticated user info
-  socket.on('whoami', () => {
+  socket.on("whoami", () => {
     try {
-      console.log('[Socket WhoAmI]', { socketId: socket.id, user: socket.user });
-      socket.emit('me', { id: socket.user?.id, role: socket.user?.role, email: socket.user?.email });
+      console.log("[Socket WhoAmI]", {
+        socketId: socket.id,
+        user: socket.user,
+      });
+      socket.emit("me", {
+        id: socket.user?.id,
+        role: socket.user?.role,
+        email: socket.user?.email,
+      });
     } catch (e) {
-      console.warn('[Socket WhoAmI Error]', { socketId: socket.id, err: e && e.message });
-      socket.emit('me', { error: 'no_user' });
+      console.warn("[Socket WhoAmI Error]", {
+        socketId: socket.id,
+        err: e && e.message,
+      });
+      socket.emit("me", { error: "no_user" });
     }
   });
   // simple presence: notify rooms when user connects
-  socket.on('join', async (chatId) => {
+  socket.on("join", async (chatId) => {
     if (!chatId) return;
     const roomKey = `chat:${chatId}`;
     // Idempotency: if already in room, don't re-emit presence or re-log.
@@ -205,7 +238,9 @@ io.on('connection', (socket) => {
     try {
       let onlineIds = [];
       if (redis) {
-        onlineIds = await redis.smembers(`chat:${chatId}:online`).catch(() => []);
+        onlineIds = await redis
+          .smembers(`chat:${chatId}:online`)
+          .catch(() => []);
       } else {
         const set = onlineByChat.get(String(chatId));
         onlineIds = set ? Array.from(set) : [];
@@ -213,10 +248,10 @@ io.on('connection', (socket) => {
       for (const id of onlineIds) {
         if (!id) continue;
         if (String(id) === String(socket.user.id)) continue;
-        socket.emit('presence', { userId: id, online: true });
+        socket.emit("presence", { userId: id, online: true });
       }
     } catch (e) {
-      console.error('presence snapshot error', e);
+      console.error("presence snapshot error", e);
     }
 
     // persist presence in Redis set per chat for multi-instance
@@ -224,7 +259,9 @@ io.on('connection', (socket) => {
       if (redis) {
         await redis.sadd(`chat:${chatId}:online`, socket.user.id);
       }
-    } catch (e) { console.error('presence add error', e); }
+    } catch (e) {
+      console.error("presence add error", e);
+    }
 
     // Update in-memory presence
     try {
@@ -235,10 +272,12 @@ io.on('connection', (socket) => {
     } catch (e) {}
 
     // broadcast presence
-    socket.to(roomKey).emit('presence', { userId: socket.user.id, online: true });
+    socket
+      .to(roomKey)
+      .emit("presence", { userId: socket.user.id, online: true });
   });
 
-  socket.on('leave', (chatId) => {
+  socket.on("leave", (chatId) => {
     if (!chatId) return;
     const roomKey = `chat:${chatId}`;
     // Idempotency: ignore leaves for rooms we're not in.
@@ -250,7 +289,9 @@ io.on('connection', (socket) => {
       if (redis) {
         redis.srem(`chat:${chatId}:online`, socket.user.id).catch(() => {});
       }
-    } catch (e) { console.error('presence rem error', e); }
+    } catch (e) {
+      console.error("presence rem error", e);
+    }
     try {
       const key = String(chatId);
       const set = onlineByChat.get(key);
@@ -259,13 +300,17 @@ io.on('connection', (socket) => {
         if (set.size === 0) onlineByChat.delete(key);
       }
     } catch (e) {}
-    socket.to(roomKey).emit('presence', { userId: socket.user.id, online: false });
+    socket
+      .to(roomKey)
+      .emit("presence", { userId: socket.user.id, online: false });
   });
 
   // typing indicator
-  socket.on('typing', ({ chatId, typing }) => {
+  socket.on("typing", ({ chatId, typing }) => {
     if (!chatId) return;
-    socket.to(`chat:${chatId}`).emit('typing', { userId: socket.user.id, typing });
+    socket
+      .to(`chat:${chatId}`)
+      .emit("typing", { userId: socket.user.id, typing });
   });
 
   // rate-limiting: simple per-socket window
@@ -273,59 +318,92 @@ io.on('connection', (socket) => {
   const RATE_MAX = 10; // max messages per window
   if (!socket.rate) socket.rate = { timestamps: [] };
 
-  socket.on('message', async (payload, ack) => {
+  socket.on("message", async (payload, ack) => {
     // payload: { chatId, text?, fileUrl?, mimeType?, fileName?, clientKey? }
     try {
       // basic rate limiting
       const now = Date.now();
-      socket.rate.timestamps = socket.rate.timestamps.filter((ts) => now - ts < RATE_WINDOW_MS);
+      socket.rate.timestamps = socket.rate.timestamps.filter(
+        (ts) => now - ts < RATE_WINDOW_MS,
+      );
       if (socket.rate.timestamps.length >= RATE_MAX) {
-        return ack && ack({ error: 'rate_limited' });
+        return ack && ack({ error: "rate_limited" });
       }
       socket.rate.timestamps.push(now);
 
-      const { chatId, text, clientKey, fileUrl, mimeType, fileName } = payload || {};
-      if (!chatId || (!(text && text.trim()) && !fileUrl)) return ack && ack({ error: 'invalid_payload' });
+      const { chatId, text, clientKey, fileUrl, mimeType, fileName } =
+        payload || {};
+      if (!chatId || (!(text && text.trim()) && !fileUrl))
+        return ack && ack({ error: "invalid_payload" });
 
       // verify chat exists and user is participant
       const chat = await prisma.chat.findUnique({ where: { id: chatId } });
-      if (!chat) return ack && ack({ error: 'chat_not_found' });
+      if (!chat) return ack && ack({ error: "chat_not_found" });
 
       const user = socket.user;
-      if (user.role === 'doctor') {
-        if (chat.doctorId !== user.id) return ack && ack({ error: 'forbidden' });
-      } else if (user.role === 'patient') {
-        const patient = await prisma.patient.findUnique({ where: { userId: user.id } });
-        if (!patient || patient.id !== chat.patientId) return ack && ack({ error: 'forbidden' });
+      if (user.role === "doctor") {
+        if (chat.doctorId !== user.id)
+          return ack && ack({ error: "forbidden" });
+      } else if (user.role === "patient") {
+        const patient = await prisma.patient.findUnique({
+          where: { userId: user.id },
+        });
+        if (!patient || patient.id !== chat.patientId)
+          return ack && ack({ error: "forbidden" });
       } else {
-        return ack && ack({ error: 'forbidden' });
+        return ack && ack({ error: "forbidden" });
       }
 
-      const sender = user.role === 'doctor' ? 'doctor' : 'patient';
+      const sender = user.role === "doctor" ? "doctor" : "patient";
 
       // If clientKey provided, attempt idempotent lookup first
       if (clientKey) {
-        const existing = await prisma.message.findFirst({ where: { chatId, clientKey } });
+        const existing = await prisma.message.findFirst({
+          where: { chatId, clientKey },
+        });
         if (existing) {
           const payloadOut = { ...existing, time: existing.createdAt };
           // still emit to the room to ensure receivers have the message (safe)
-          io.to(`chat:${chatId}`).emit('message', { ...payloadOut, __scope: 'chat' });
+          io.to(`chat:${chatId}`).emit("message", {
+            ...payloadOut,
+            __scope: "chat",
+          });
           return ack && ack({ ok: true, message: payloadOut, existing: true });
         }
       }
 
-      const message = await prisma.message.create({ data: { chatId, sender, text: text || null, clientKey, fileUrl: fileUrl || null, mimeType: mimeType || null, fileName: fileName || null } });
+      const message = await prisma.message.create({
+        data: {
+          chatId,
+          sender,
+          text: text || null,
+          clientKey,
+          fileUrl: fileUrl || null,
+          mimeType: mimeType || null,
+          fileName: fileName || null,
+        },
+      });
 
       // broadcast to room with ackable payload
       const payloadOut = { ...message, time: message.createdAt };
-      io.to(`chat:${chatId}`).emit('message', { ...payloadOut, __scope: 'chat' });
+      io.to(`chat:${chatId}`).emit("message", {
+        ...payloadOut,
+        __scope: "chat",
+      });
 
       // Also notify the receiver via their user room so they can update UI
       // (e.g., unread counters) without joining chat rooms.
       try {
-        if (sender === 'doctor') {
-          const patient = await prisma.patient.findUnique({ where: { id: chat.patientId }, select: { userId: true } });
-          if (patient?.userId) io.to(`user:${patient.userId}`).emit('message', { ...payloadOut, __scope: 'user' });
+        if (sender === "doctor") {
+          const patient = await prisma.patient.findUnique({
+            where: { id: chat.patientId },
+            select: { userId: true },
+          });
+          if (patient?.userId)
+            io.to(`user:${patient.userId}`).emit("message", {
+              ...payloadOut,
+              __scope: "user",
+            });
           // also attempt direct emits to any connected sockets for that user (best-effort fallback)
           try {
             const uid = patient?.userId;
@@ -333,14 +411,18 @@ io.on('connection', (socket) => {
               for (const [, s] of io.sockets.sockets) {
                 try {
                   if (s && s.user && String(s.user.id) === String(uid)) {
-                    s.emit('message', { ...payloadOut, __scope: 'user' });
+                    s.emit("message", { ...payloadOut, __scope: "user" });
                   }
                 } catch (err) {}
               }
             }
           } catch (err) {}
-        } else if (sender === 'patient') {
-          if (chat.doctorId) io.to(`user:${chat.doctorId}`).emit('message', { ...payloadOut, __scope: 'user' });
+        } else if (sender === "patient") {
+          if (chat.doctorId)
+            io.to(`user:${chat.doctorId}`).emit("message", {
+              ...payloadOut,
+              __scope: "user",
+            });
           // also attempt direct emits to any connected sockets for the doctor (best-effort fallback)
           try {
             const uid = chat.doctorId;
@@ -348,7 +430,7 @@ io.on('connection', (socket) => {
               for (const [, s] of io.sockets.sockets) {
                 try {
                   if (s && s.user && String(s.user.id) === String(uid)) {
-                    s.emit('message', { ...payloadOut, __scope: 'user' });
+                    s.emit("message", { ...payloadOut, __scope: "user" });
                   }
                 } catch (err) {}
               }
@@ -360,18 +442,21 @@ io.on('connection', (socket) => {
       }
 
       // touch chat updatedAt
-      await prisma.chat.update({ where: { id: chatId }, data: { updatedAt: new Date() } });
+      await prisma.chat.update({
+        where: { id: chatId },
+        data: { updatedAt: new Date() },
+      });
 
       ack && ack({ ok: true, message: payloadOut });
     } catch (err) {
-      console.error('socket message error', err);
-      ack && ack({ error: 'server_error' });
+      console.error("socket message error", err);
+      ack && ack({ error: "server_error" });
     }
   });
 
   // delivered/read acknowledgements from clients
   // payload: { messageIds: [id,...] }
-  socket.on('delivered_ack', async ({ messageIds } = {}) => {
+  socket.on("delivered_ack", async ({ messageIds } = {}) => {
     try {
       if (!Array.isArray(messageIds) || !messageIds.length) return;
       for (const id of messageIds) {
@@ -379,16 +464,26 @@ io.on('connection', (socket) => {
           const msg = await prisma.message.findUnique({ where: { id } });
           if (!msg) continue;
           // upgrade status: sent -> delivered
-          if (msg.status === 'sent') {
-            await prisma.message.update({ where: { id }, data: { status: 'delivered' } });
-            io.to(`chat:${msg.chatId}`).emit('message_update', { id, status: 'delivered' });
+          if (msg.status === "sent") {
+            await prisma.message.update({
+              where: { id },
+              data: { status: "delivered" },
+            });
+            io.to(`chat:${msg.chatId}`).emit("message_update", {
+              id,
+              status: "delivered",
+            });
           }
-        } catch (e) { console.error('delivered_ack error', e); }
+        } catch (e) {
+          console.error("delivered_ack error", e);
+        }
       }
-    } catch (e) { console.error('delivered_ack handler error', e); }
+    } catch (e) {
+      console.error("delivered_ack handler error", e);
+    }
   });
 
-  socket.on('read_ack', async ({ messageIds } = {}) => {
+  socket.on("read_ack", async ({ messageIds } = {}) => {
     try {
       if (!Array.isArray(messageIds) || !messageIds.length) return;
       for (const id of messageIds) {
@@ -396,18 +491,32 @@ io.on('connection', (socket) => {
           const msg = await prisma.message.findUnique({ where: { id } });
           if (!msg) continue;
           // upgrade status to read
-          if (msg.status !== 'read') {
-            await prisma.message.update({ where: { id }, data: { status: 'read' } });
-            io.to(`chat:${msg.chatId}`).emit('message_update', { id, status: 'read' });
-            io.to(`chat:${msg.chatId}`).emit('message_read', { messageId: id, userId: socket.user.id, timestamp: new Date() });
+          if (msg.status !== "read") {
+            await prisma.message.update({
+              where: { id },
+              data: { status: "read" },
+            });
+            io.to(`chat:${msg.chatId}`).emit("message_update", {
+              id,
+              status: "read",
+            });
+            io.to(`chat:${msg.chatId}`).emit("message_read", {
+              messageId: id,
+              userId: socket.user.id,
+              timestamp: new Date(),
+            });
           }
-        } catch (e) { console.error('read_ack error', e); }
+        } catch (e) {
+          console.error("read_ack error", e);
+        }
       }
-    } catch (e) { console.error('read_ack handler error', e); }
+    } catch (e) {
+      console.error("read_ack handler error", e);
+    }
   });
 
-  socket.on('disconnect', (reason) => {
-    console.log('socket disconnected', socket.id, reason);
+  socket.on("disconnect", (reason) => {
+    console.log("socket disconnected", socket.id, reason);
 
     // Global presence: decrement refcount; only emit offline when last tab disconnects.
     markUserOffline(socket).catch(() => {});
@@ -416,8 +525,8 @@ io.on('connection', (socket) => {
     try {
       const rooms = Array.from(socket.rooms || []);
       rooms.forEach((r) => {
-        if (!r.startsWith('chat:')) return;
-        const chatId = r.split(':')[1];
+        if (!r.startsWith("chat:")) return;
+        const chatId = r.split(":")[1];
         if (redis) {
           redis.srem(`chat:${chatId}:online`, socket.user.id).catch(() => {});
         }
@@ -429,19 +538,25 @@ io.on('connection', (socket) => {
             if (set.size === 0) onlineByChat.delete(key);
           }
         } catch (e) {}
-        socket.to(r).emit('presence', { userId: socket.user.id, online: false });
+        socket
+          .to(r)
+          .emit("presence", { userId: socket.user.id, online: false });
       });
-    } catch (e) { console.error('disconnect presence cleanup failed', e); }
+    } catch (e) {
+      console.error("disconnect presence cleanup failed", e);
+    }
   });
 });
 
-server.on('error', (err) => {
-  if (err && err.code === 'EADDRINUSE') {
-    console.warn(`Socket.io port ${PORT} already in use — skipping socket server start.`);
+server.on("error", (err) => {
+  if (err && err.code === "EADDRINUSE") {
+    console.warn(
+      `Socket.io port ${PORT} already in use — skipping socket server start.`,
+    );
     // exit gracefully so developer workflow can continue (non-fatal)
     process.exit(0);
   }
-  console.error('Socket server error', err);
+  console.error("Socket server error", err);
   process.exit(1);
 });
 

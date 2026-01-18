@@ -44,7 +44,7 @@ export function LocaleProvider({ children }) {
       if (locale === currentLocale) return;
       router.push(replaceLocaleInPath(pathname, locale));
     },
-    [pathname, currentLocale, router]
+    [pathname, currentLocale, router],
   );
 
   const value = {
@@ -54,8 +54,6 @@ export function LocaleProvider({ children }) {
   };
 
   return (
-    <LocaleContext.Provider value={value}>
-      {children}
-    </LocaleContext.Provider>
+    <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
   );
 }

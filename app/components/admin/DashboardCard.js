@@ -1,11 +1,12 @@
 import React from "react";
+import UnifiedCard from "../ui/UnifiedCard";
 
 export default function DashboardCard({ icon, title, value, color }) {
   return (
-    <div className={`card-glass rounded-2xl p-6 flex flex-col items-center border ${color || 'border-[var(--ui-border)]'}`}>
+    <UnifiedCard className={`rounded-2xl flex flex-col items-center ${color || "border-(--ui-border)"}`} glass>
       <div className="mb-3 text-4xl">{icon}</div>
       <div className="text-2xl font-bold mb-1">{value}</div>
-      <div className="text-[var(--ui-muted)]">{title}</div>
-    </div>
+      <div className="text-(--ui-muted)">{title}</div>
+    </UnifiedCard>
   );
 }

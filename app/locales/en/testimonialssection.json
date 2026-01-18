@@ -3,10 +3,34 @@
     "title": "What Our Users Say",
     "subtitle": "Real experiences from clinicians and patients using our pneumonia detection tools",
     "items": [
-      { "name": "Dr. Ahmed Mohamed", "role": "Chest Radiologist", "image": "/icons/ai.svg", "rating": 5, "text": "The AI-assisted chest X‑ray analysis greatly improves pneumonia detection accuracy in our clinic. Fast, reliable, and integrates smoothly into our workflow." },
-      { "name": "Dr. Sarah Ahmed", "role": "Pulmonologist", "image": "/icons/xray.svg", "rating": 5, "text": "Helps triage suspected pneumonia cases quickly so we can start treatment earlier — a real time-saver for emergency care." },
-      { "name": "Mohamed Ali", "role": "Patient", "image": "/icons/result.svg", "rating": 5, "text": "I received a prompt pneumonia assessment from my X‑ray and clear guidance on next steps. The team and reports were very helpful." },
-      { "name": "Dr. Fatima Hassan", "role": "Pulmonologist", "image": "/icons/settings.svg", "rating": 5, "text": "Excellent tool for flagging pneumonia patterns on chest radiographs. The heatmaps and confidence scores support clinical decisions." }
+      {
+        "name": "Dr. Ahmed Mohamed",
+        "role": "Chest Radiologist",
+        "image": "/icons/ai.svg",
+        "rating": 5,
+        "text": "The AI-assisted chest X‑ray analysis greatly improves pneumonia detection accuracy in our clinic. Fast, reliable, and integrates smoothly into our workflow."
+      },
+      {
+        "name": "Dr. Sarah Ahmed",
+        "role": "Pulmonologist",
+        "image": "/icons/xray.svg",
+        "rating": 5,
+        "text": "Helps triage suspected pneumonia cases quickly so we can start treatment earlier — a real time-saver for emergency care."
+      },
+      {
+        "name": "Mohamed Ali",
+        "role": "Patient",
+        "image": "/icons/result.svg",
+        "rating": 5,
+        "text": "I received a prompt pneumonia assessment from my X‑ray and clear guidance on next steps. The team and reports were very helpful."
+      },
+      {
+        "name": "Dr. Fatima Hassan",
+        "role": "Pulmonologist",
+        "image": "/icons/settings.svg",
+        "rating": 5,
+        "text": "Excellent tool for flagging pneumonia patterns on chest radiographs. The heatmaps and confidence scores support clinical decisions."
+      }
     ],
     "badges": [
       { "text": "Trusted by 15K+ clinicians", "icon": "✓" },

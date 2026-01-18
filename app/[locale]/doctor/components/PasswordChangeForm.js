@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import styles from './PasswordChangeForm.module.css';
-import { useTranslations } from 'next-intl';
+import React, { useState } from "react";
+import styles from "./PasswordChangeForm.module.css";
+import { useTranslations } from "next-intl";
 
 export default function PasswordChangeForm({ onChange }) {
-  const t = useTranslations('doctorSettings');
+  const t = useTranslations("doctorSettings");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
@@ -18,22 +18,22 @@ export default function PasswordChangeForm({ onChange }) {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <h3>{t('change_password')}</h3>
+      <h3>{t("change_password")}</h3>
       <input
         type="password"
-        placeholder={t('current_password')}
+        placeholder={t("current_password")}
         value={oldPassword}
-        onChange={e => setOldPassword(e.target.value)}
+        onChange={(e) => setOldPassword(e.target.value)}
         required
       />
       <input
         type="password"
-        placeholder={t('new_password')}
+        placeholder={t("new_password")}
         value={newPassword}
-        onChange={e => setNewPassword(e.target.value)}
+        onChange={(e) => setNewPassword(e.target.value)}
         required
       />
-      <button type="submit">{t('passwordChange.submit')}</button>
+      <button type="submit">{t("passwordChange.submit")}</button>
     </form>
   );
 }

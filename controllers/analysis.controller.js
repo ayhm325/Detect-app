@@ -1,14 +1,17 @@
 // controllers/analysis.controller.js
 
 const { runInference } = require("../ai/inference/inference.service");
-const { saveAnalysisResult, getAnalysisHistory } = require("../services/analysisResult.service");
+const {
+  saveAnalysisResult,
+  getAnalysisHistory,
+} = require("../services/analysisResult.service");
 
 async function analyzeImage(req, res) {
   try {
     const file = req.file;
     const userId = req.user && req.user.id;
 
-    if (!userId) throw new Error('Unauthorized: missing user');
+    if (!userId) throw new Error("Unauthorized: missing user");
 
     const analysisResult = await runInference(file);
 
@@ -18,17 +21,17 @@ async function analyzeImage(req, res) {
     const savedResult = await saveAnalysisResult({
       userId,
       imageUrl,
-      analysisData: analysisResult
+      analysisData: analysisResult,
     });
 
     return res.status(200).json({
       success: true,
-      data: savedResult
+      data: savedResult,
     });
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 }
@@ -36,7 +39,7 @@ async function analyzeImage(req, res) {
 async function getAnalysisHistoryController(req, res) {
   try {
     const userId = req.user && req.user.id;
-    if (!userId) throw new Error('Unauthorized: missing user');
+    if (!userId) throw new Error("Unauthorized: missing user");
 
     const results = await getAnalysisHistory(userId);
 
@@ -48,5 +51,5 @@ async function getAnalysisHistoryController(req, res) {
 
 module.exports = {
   analyzeImage,
-  getAnalysisHistory: getAnalysisHistoryController
+  getAnalysisHistory: getAnalysisHistoryController,
 };

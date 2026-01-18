@@ -1,88 +1,73 @@
-
 "use client";
-
-
-// توحيد منطق الحالة للطبيب بناءً على الحقل الرسمي فقط
-const getDoctorStatus = (doctor) => {
-  // الحالة الرسمية الوحيدة هي doctor.status
-  // القيم: pending | active | banned
-  return doctor.status || "pending";
-};
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 // Page is rendered inside the route-level AdminLayout; avoid double-wrapping
 import DoctorDetailsCard from "../../../components/admin/DoctorDetailsCard";
 import DoctorsTable from "../../../components/admin/DoctorsTable";
-import { useToast, ToastContainer } from "../../../components/ui/ToastProvider";
-import {
-  FaUsers,
-  FaMagnifyingGlass,
-  FaPlus,
-  FaDownload,
-  FaEye,
-  FaPencil,
-  FaTrash,
-  FaX,
-  FaFloppyDisk,
-  FaEnvelope,
-  FaPhone,
-  FaCalendar,
-  FaClock,
-  FaVial,
-  FaStar,
-} from "react-icons/fa6";
-
+import { useToast } from "../../../components/ui/ToastProvider";
+import { FaMagnifyingGlass, FaPlus, FaX, FaFloppyDisk } from "react-icons/fa6";
 
 function DoctorsPage() {
-    // Add Doctor logic
-    const handleAddDoctor = async () => {
-      // Basic validation
-      if (!formData.name?.trim() || !formData.email?.trim() || !formData.phone?.trim() || !formData.licenseNumber?.trim() || !formData.status?.trim()) {
-        showError(tDoctors('toast.fillFields'));
-        return;
-      }
-      try {
-        const res = await fetch('/api/admin/doctors', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: formData.name.trim(),
-            email: formData.email.trim(),
-            phone: formData.phone.trim(),
-            licenseNumber: formData.licenseNumber.trim(),
-            status: formData.status.trim()
-          })
+  // توحيد منطق الحالة للطبيب بناءً على الحقل الرسمي فقط
+  const getDoctorStatus = (doctor) => {
+    // الحالة الرسمية الوحيدة هي doctor.status
+    // القيم: pending | active | banned
+    return doctor.status || "pending";
+  };
+  // Add Doctor logic
+  const handleAddDoctor = async () => {
+    // Basic validation
+    if (
+      !formData.name?.trim() ||
+      !formData.email?.trim() ||
+      !formData.phone?.trim() ||
+      !formData.licenseNumber?.trim() ||
+      !formData.status?.trim()
+    ) {
+      showError(tDoctors("toast.fillFields"));
+      return;
+    }
+    try {
+      const res = await fetch("/api/admin/doctors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          licenseNumber: formData.licenseNumber.trim(),
+          status: formData.status.trim(),
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDoctors([data.doctor, ...doctors]);
+        showSuccess(tDoctors("toast.doctorAdded"));
+        setShowAddModal(false);
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          licenseNumber: "",
+          status: "active",
+          specialty: "general",
+          experience: "",
         });
-        if (res.ok) {
-          const data = await res.json();
-          setDoctors([data.doctor, ...doctors]);
-          showSuccess(tDoctors('toast.doctorAdded'));
-          setShowAddModal(false);
-          setFormData({
-            name: '',
-            email: '',
-            phone: '',
-            licenseNumber: '',
-            status: 'active',
-            specialty: 'general',
-            experience: ''
-          });
-        } else {
-          const errorData = await res.json();
-          showError(errorData?.error || tDoctors('toast.addFailed'));
-        }
-      } catch (e) {
-        showError(e?.message || tDoctors('toast.addFailed'));
+      } else {
+        const errorData = await res.json();
+        showError(errorData?.error || tDoctors("toast.addFailed"));
       }
-    };
+    } catch (e) {
+      showError(e?.message || tDoctors("toast.addFailed"));
+    }
+  };
   const searchParams = useSearchParams();
   const { showSuccess, showError, showInfo } = useToast();
-  const tDoctors = useTranslations('DoctorsManagement');
+  const tDoctors = useTranslations("DoctorsManagement");
 
   // State
   const [search, setSearch] = useState("");
-  const [filterSpecialty, setFilterSpecialty] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -98,11 +83,8 @@ function DoctorsPage() {
     status: "active",
   });
 
-
   // جلب جميع الأطباء
   const [doctors, setDoctors] = useState([]);
-  const [patients, setPatients] = useState([]);
-  const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   // جلب الطلبات المعلقة فقط
   const [pendingDoctors, setPendingDoctors] = useState([]);
@@ -117,27 +99,22 @@ function DoctorsPage() {
         ]);
 
         const doctorsData = await doctorsRes.json().catch(() => ({}));
-        const patientsData = await patientsRes.json().catch(() => ([]));
-        const usersData = await usersRes.json().catch(() => ([]));
+        // حذف جلب المرضى والمدراء لأنهم غير مستخدمين
 
         if (!mounted) return;
 
-        const allDoctors = Array.isArray(doctorsData?.doctors) ? doctorsData.doctors : [];
+        const allDoctors = Array.isArray(doctorsData?.doctors)
+          ? doctorsData.doctors
+          : [];
         setDoctors(allDoctors);
-        setPendingDoctors(allDoctors.filter((d) => getDoctorStatus(d) === "pending"));
-
-        setPatients(Array.isArray(patientsData) ? patientsData : []);
-
-        const allUsers = Array.isArray(usersData) ? usersData : [];
-        setAdmins(allUsers.filter((u) => u?.role === "admin"));
-
+        setPendingDoctors(
+          allDoctors.filter((d) => getDoctorStatus(d) === "pending"),
+        );
         setLoading(false);
       } catch {
         if (!mounted) return;
         setDoctors([]);
         setPendingDoctors([]);
-        setPatients([]);
-        setAdmins([]);
         setLoading(false);
       }
     })();
@@ -147,105 +124,26 @@ function DoctorsPage() {
     };
   }, []);
 
-
-  // Helper Functions
-  const specialtiesMap = {
-    radiology: tDoctors('specialties.radiology'),
-    pulmonology: tDoctors('specialties.pulmonology'),
-    orthopedics: tDoctors('specialties.orthopedics'),
-    gynecology: tDoctors('specialties.gynecology'),
-    cardiology: tDoctors('specialties.cardiology'),
-    internal: tDoctors('specialties.internal'),
-    general: tDoctors('specialties.general'),
-  };
-  
-  const statusesMap = {
-    active: tDoctors('statuses.active'),
-    suspended: tDoctors('statuses.suspended'),
-    banned: tDoctors('statuses.banned'),
-    pending: tDoctors('statuses.pending'),
-  };
-  
-  const specialties = Object.keys(specialtiesMap);
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "active":
-        return "border-(--ui-success-border) bg-(--ui-success-bg) text-(--ui-success)";
-      case "suspended":
-        return "border-(--ui-warning-border) bg-(--ui-warning-bg) text-(--ui-warning)";
-      case "banned":
-        return "border-(--ui-danger-border) bg-(--ui-danger-bg) text-(--ui-danger)";
-      default:
-        return "border-(--ui-border) bg-(--ui-surface-2) text-(--ui-muted-2)";
-    }
-  };
-
-  const getRatingColor = (rating) => {
-    if (rating >= 4.5) return "text-(--ui-warning)";
-    return "text-(--ui-muted-2)";
-  };
-
-  // ...باقي الكود...
-// ...existing code continues...
-
-  const handleEditDoctor = async () => {
-    // Trim all fields before validation
-    const name = (formData.name || '').trim();
-    const email = (formData.email || '').trim();
-    const phone = (formData.phone || '').trim();
-    const status = (formData.status || '').trim();
-    const licenseNumber = (formData.licenseNumber || '').trim();
-    if (!name || !email || !phone || !status || !licenseNumber) {
-      showError(tDoctors('toast.fillFields'));
-      return;
-    }
-    if (!selectedDoctor) return;
-    // Always use userId for PATCH endpoint if available
-    const doctorId = selectedDoctor.userId || selectedDoctor.id;
-    if (!doctorId) {
-      showError(tDoctors('errors.missingDoctorId'));
-      return;
-    }
-    try {
-      const res = await fetch(`/api/admin/doctors/${doctorId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          status: formData.status,
-          licenseNumber: formData.licenseNumber
-        })
-      });
-      if (res.ok) {
-        setDoctors(doctors.map((d) => d.id === selectedDoctor.id ? { ...d, ...formData, status: formData.status } : d));
-        setSelectedDoctor((prev) => prev && prev.id === selectedDoctor.id ? { ...prev, ...formData, status: formData.status } : prev);
-        showSuccess(tDoctors('toast.doctorUpdated'));
-        setShowEditModal(false);
-      } else {
-        const errorData = await res.json();
-        showError(errorData?.error || tDoctors('toast.updateFailed'));
-      }
-    } catch (e) {
-      showError(e?.message || tDoctors('toast.updateFailed'));
-    }
-  };
-
   // Export removed: UI export button hidden per request.
 
   const openEditModal = (doctor) => {
     // Always set id to userId (or fallback to id)
     setSelectedDoctor({ ...doctor, id: doctor.userId || doctor.id });
     setFormData({
-      name: doctor.name || doctor.fullName || (doctor.user && (doctor.user.fullName || doctor.user.name)) || "",
+      name:
+        doctor.name ||
+        doctor.fullName ||
+        (doctor.user && (doctor.user.fullName || doctor.user.name)) ||
+        "",
       email: doctor.email || (doctor.user && doctor.user.email) || "",
       phone: doctor.phone || (doctor.user && doctor.user.phone) || "",
       specialty: doctor.specialty || "general",
       experience: doctor.experience || "",
       status: doctor.status || "active",
-      licenseNumber: doctor.licenseNumber || (doctor.user && doctor.user.licenseNumber) || ""
+      licenseNumber:
+        doctor.licenseNumber ||
+        (doctor.user && doctor.user.licenseNumber) ||
+        "",
     });
     setShowEditModal(true);
   };
@@ -260,7 +158,6 @@ function DoctorsPage() {
     setShowDetailsModal(true);
   };
 
-
   // فلترة الأطباء حسب البحث والفلاتر
   let filteredDoctors = [];
   if (!loading && Array.isArray(doctors)) {
@@ -270,17 +167,20 @@ function DoctorsPage() {
         doctor.email?.toLowerCase().includes(search.toLowerCase()) ||
         doctor.phone?.toLowerCase().includes(search.toLowerCase()) ||
         doctor.licenseNumber?.toLowerCase().includes(search.toLowerCase());
-      const matchSpecialty =
-        filterSpecialty === "all" || doctor.specialty === filterSpecialty;
-      const matchStatus = filterStatus === "all" || getDoctorStatus(doctor) === filterStatus;
-      return matchSearch && matchSpecialty && matchStatus;
+      const matchStatus =
+        filterStatus === "all" || getDoctorStatus(doctor) === filterStatus;
+      return matchSearch && matchStatus;
     });
   }
 
   // منطق عرض الطلبات المعلقة فقط
   const [showPendingOnly, setShowPendingOnly] = useState(false);
-  const displayedDoctors = Array.isArray(showPendingOnly ? pendingDoctors : filteredDoctors)
-    ? (showPendingOnly ? pendingDoctors : filteredDoctors)
+  const displayedDoctors = Array.isArray(
+    showPendingOnly ? pendingDoctors : filteredDoctors,
+  )
+    ? showPendingOnly
+      ? pendingDoctors
+      : filteredDoctors
     : [];
   // ... باقي الكود و JSX ...
 
@@ -296,15 +196,22 @@ function DoctorsPage() {
     if (res.ok) {
       const updatedDoctors = doctors.map((d) =>
         d.id === doctor.id
-          ? { ...d, status: "active", isActive: true, user: d.user ? { ...d.user, isActive: true } : d.user }
-          : d
+          ? {
+              ...d,
+              status: "active",
+              isActive: true,
+              user: d.user ? { ...d.user, isActive: true } : d.user,
+            }
+          : d,
       );
       setDoctors(updatedDoctors);
       // أعد تصفية قائمة المعلقين بناءً على الحالة الجديدة
-      setPendingDoctors(updatedDoctors.filter((d) => getDoctorStatus(d) === "pending"));
-      showSuccess(tDoctors('toast.doctorVerified'));
+      setPendingDoctors(
+        updatedDoctors.filter((d) => getDoctorStatus(d) === "pending"),
+      );
+      showSuccess(tDoctors("toast.doctorVerified"));
     } else {
-      showError(tDoctors('toast.activationFailed'));
+      showError(tDoctors("toast.activationFailed"));
     }
   };
   const handleRejectDoctor = async (doctor) => {
@@ -315,12 +222,16 @@ function DoctorsPage() {
       body: JSON.stringify({ id: userId, status: "banned" }),
     });
     if (res.ok) {
-      const updatedDoctors = doctors.map((d) => d.id === doctor.id ? { ...d, status: "banned" } : d);
+      const updatedDoctors = doctors.map((d) =>
+        d.id === doctor.id ? { ...d, status: "banned" } : d,
+      );
       setDoctors(updatedDoctors);
-      setPendingDoctors(updatedDoctors.filter((d) => getDoctorStatus(d) === "pending"));
-      showInfo(tDoctors('toast.doctorRejected'));
+      setPendingDoctors(
+        updatedDoctors.filter((d) => getDoctorStatus(d) === "pending"),
+      );
+      showInfo(tDoctors("toast.doctorRejected"));
     } else {
-      showError(tDoctors('toast.rejectFailed'));
+      showError(tDoctors("toast.rejectFailed"));
     }
   };
 
@@ -335,13 +246,13 @@ function DoctorsPage() {
       });
       if (res.ok) {
         setDoctors(doctors.filter((d) => d.id !== selectedDoctor.id));
-        showSuccess(tDoctors('toast.doctorDeleted'));
+        showSuccess(tDoctors("toast.doctorDeleted"));
         setShowDeleteModal(false);
       } else {
-        showError(tDoctors('toast.deleteFailed'));
+        showError(tDoctors("toast.deleteFailed"));
       }
     } catch (e) {
-      showError(tDoctors('toast.deleteFailed'));
+      showError(tDoctors("toast.deleteFailed"));
     }
   };
 
@@ -349,38 +260,54 @@ function DoctorsPage() {
   const handleToggleDoctor = async (doctor) => {
     if (!doctor) return;
     const userId = doctor.userId || doctor.id;
-    const currentStatus = getDoctorStatus(doctor) || 'active';
-    const targetStatus = currentStatus === 'active' ? 'banned' : 'active';
+    const currentStatus = getDoctorStatus(doctor) || "active";
+    const targetStatus = currentStatus === "active" ? "banned" : "active";
     try {
-      const res = await fetch('/api/admin/doctors', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: userId, status: targetStatus })
+      const res = await fetch("/api/admin/doctors", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: userId, status: targetStatus }),
       });
       if (res.ok) {
-        const updatedDoctors = doctors.map((d) => d.id === doctor.id ? { ...d, status: targetStatus, isActive: targetStatus === 'active' } : d);
+        const updatedDoctors = doctors.map((d) =>
+          d.id === doctor.id
+            ? {
+                ...d,
+                status: targetStatus,
+                isActive: targetStatus === "active",
+              }
+            : d,
+        );
         setDoctors(updatedDoctors);
-        setPendingDoctors(updatedDoctors.filter((d) => getDoctorStatus(d) === 'pending'));
-        showSuccess(targetStatus === 'active' ? tDoctors('toast.doctorActivated') : tDoctors('toast.doctorSuspended'));
+        setPendingDoctors(
+          updatedDoctors.filter((d) => getDoctorStatus(d) === "pending"),
+        );
+        showSuccess(
+          targetStatus === "active"
+            ? tDoctors("toast.doctorActivated")
+            : tDoctors("toast.doctorSuspended"),
+        );
       } else {
-        showError(tDoctors('toast.updateFailed'));
+        showError(tDoctors("toast.updateFailed"));
       }
     } catch (e) {
-      showError(tDoctors('toast.updateFailed'));
+      showError(tDoctors("toast.updateFailed"));
     }
   };
 
   return (
     <>
-      <ToastContainer />
+
       <div className="p-6">
-         
-       
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{tDoctors('headerTitle')}</h1>
-            <p className="text-(--ui-muted-2) mt-2">{tDoctors('headerSubtitle')}</p>
+            <h1 className="text-3xl font-bold text-foreground">
+              {tDoctors("headerTitle")}
+            </h1>
+            <p className="text-(--ui-muted-2) mt-2">
+              {tDoctors("headerSubtitle")}
+            </p>
           </div>
           <div className="flex gap-3">
             <button
@@ -388,7 +315,7 @@ function DoctorsPage() {
               className="flex items-center gap-2 btn-gradient px-4 py-2 rounded-lg transition-colors"
             >
               <FaPlus />
-              <span>{tDoctors('addButton')}</span>
+              <span>{tDoctors("addButton")}</span>
             </button>
           </div>
         </div>
@@ -400,30 +327,36 @@ function DoctorsPage() {
               <FaMagnifyingGlass className="absolute right-3 top-1/2 transform -translate-y-1/2 text-(--ui-muted-2)" />
               <input
                 type="text"
-                placeholder={tDoctors('filters.searchPlaceholder')}
+                placeholder={tDoctors("filters.searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pr-10 pl-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground focus:ring-2 focus:ring-(--ui-ring) focus:border-transparent"
               />
             </div>
-           
+
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
               className="w-full px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground focus:ring-2 focus:ring-(--ui-ring) focus:border-transparent"
             >
-              <option value="all">{tDoctors('filters.statusAll')}</option>
-              <option value="active">{statusesMap.active}</option>
-              <option value="suspended">{statusesMap.suspended}</option>
-              <option value="banned">{statusesMap.banned}</option>
+              <option value="all">{tDoctors("filters.statusAll")}</option>
+              <option value="active">{tDoctors("statuses.active")}</option>
+              <option value="suspended">{tDoctors("statuses.suspended")}</option>
+              <option value="banned">{tDoctors("statuses.banned")}</option>
             </select>
           </div>
         </div>
 
-
         {/* Doctors Table (with verification actions) */}
         <DoctorsTable
-          doctors={Array.isArray(displayedDoctors) ? displayedDoctors.map(d => ({ ...d, status: getDoctorStatus(d) })) : []}
+          doctors={
+            Array.isArray(displayedDoctors)
+              ? displayedDoctors.map((d) => ({
+                  ...d,
+                  status: getDoctorStatus(d),
+                }))
+              : []
+          }
           onEdit={openEditModal}
           onDelete={openDeleteModal}
           onDetails={openDetailsModal}
@@ -435,7 +368,11 @@ function DoctorsPage() {
 
         {displayedDoctors.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-(--ui-muted-2)">{showPendingOnly ? tDoctors('noPendingRequests') : tDoctors('table.noMatches')}</p>
+            <p className="text-(--ui-muted-2)">
+              {showPendingOnly
+                ? tDoctors("noPendingRequests")
+                : tDoctors("table.noMatches")}
+            </p>
           </div>
         )}
 
@@ -444,7 +381,9 @@ function DoctorsPage() {
           <div className="fixed inset-0 bg-(--color-neutral)/50 flex items-center justify-center z-50 p-4">
             <div className="card-glass rounded-xl shadow-(--shadow-lift) max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-foreground">{tDoctors('modals.addTitle')}</h3>
+                <h3 className="text-xl font-bold text-foreground">
+                  {tDoctors("modals.addTitle")}
+                </h3>
                 <button
                   onClick={() => setShowAddModal(false)}
                   className="p-2 hover:bg-(--ui-surface-2) rounded-lg"
@@ -454,57 +393,82 @@ function DoctorsPage() {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{tDoctors('modals.fullName')}</label>
+                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">
+                    {tDoctors("modals.fullName")}
+                  </label>
                   <input
                     type="text"
                     value={formData.name || ""}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{tDoctors('modals.email')}</label>
+                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">
+                    {tDoctors("modals.email")}
+                  </label>
                   <input
                     type="email"
                     value={formData.email || ""}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{tDoctors('modals.licenseNumber')}</label>
+                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">
+                    {tDoctors("modals.licenseNumber")}
+                  </label>
                   <input
                     type="text"
                     value={formData.licenseNumber || ""}
-                    onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        licenseNumber: e.target.value,
+                      })
+                    }
                     className="w-full px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{tDoctors('modals.phone')}</label>
+                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">
+                    {tDoctors("modals.phone")}
+                  </label>
                   <input
                     type="tel"
                     value={formData.phone || ""}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{tDoctors('modals.status')}</label>
+                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">
+                    {tDoctors("modals.status")}
+                  </label>
                   <div className="flex gap-3">
                     <button
                       type="button"
-                      className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors border ${formData.status === 'active' ? 'bg-(--ui-success) text-white border-(--ui-success-border)' : 'bg-(--ui-surface-2) text-foreground border-(--ui-border) hover:bg-(--ui-surface)'}`}
-                      onClick={() => setFormData({ ...formData, status: 'active' })}
+                      className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors border ${formData.status === "active" ? "bg-(--ui-success) text-white border-(--ui-success-border)" : "bg-(--ui-surface-2) text-foreground border-(--ui-border) hover:bg-(--ui-surface)"}`}
+                      onClick={() =>
+                        setFormData({ ...formData, status: "active" })
+                      }
                     >
-                      {statusesMap.active}
+                      {tDoctors("statuses.active")}
                     </button>
                     <button
                       type="button"
-                      className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors border ${formData.status === 'banned' ? 'bg-(--ui-danger) text-white border-(--ui-danger-border)' : 'bg-(--ui-surface-2) text-foreground border-(--ui-border) hover:bg-(--ui-surface)'}`}
-                      onClick={() => setFormData({ ...formData, status: 'banned' })}
+                      className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors border ${formData.status === "banned" ? "bg-(--ui-danger) text-white border-(--ui-danger-border)" : "bg-(--ui-surface-2) text-foreground border-(--ui-border) hover:bg-(--ui-surface)"}`}
+                      onClick={() =>
+                        setFormData({ ...formData, status: "banned" })
+                      }
                     >
-                      {statusesMap.banned}
+                      {tDoctors("statuses.banned")}
                     </button>
                   </div>
                 </div>
@@ -515,13 +479,13 @@ function DoctorsPage() {
                   className="flex-1 flex items-center justify-center gap-2 btn-gradient px-4 py-3 rounded-lg transition-colors"
                 >
                   <FaFloppyDisk />
-                  <span>{tDoctors('buttons.save')}</span>
+                  <span>{tDoctors("buttons.save")}</span>
                 </button>
                 <button
                   onClick={() => setShowAddModal(false)}
                   className="flex-1 bg-(--ui-surface-2) hover:bg-(--ui-surface) text-foreground px-4 py-3 rounded-lg transition-colors border border-(--ui-border)"
                 >
-                  {tDoctors('buttons.cancel')}
+                  {tDoctors("buttons.cancel")}
                 </button>
               </div>
             </div>
@@ -533,7 +497,9 @@ function DoctorsPage() {
           <div className="fixed inset-0 bg-(--color-neutral)/50 flex items-center justify-center z-50 p-4">
             <div className="card-glass rounded-xl shadow-(--shadow-lift) max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-foreground">{tDoctors('modals.editTitle')}</h3>
+                <h3 className="text-xl font-bold text-foreground">
+                  {tDoctors("modals.editTitle")}
+                </h3>
                 <button
                   onClick={() => setShowEditModal(false)}
                   className="p-2 hover:bg-(--ui-surface-2) rounded-lg"
@@ -543,57 +509,82 @@ function DoctorsPage() {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{tDoctors('modals.fullName')}</label>
+                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">
+                    {tDoctors("modals.fullName")}
+                  </label>
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{tDoctors('modals.email')}</label>
+                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">
+                    {tDoctors("modals.email")}
+                  </label>
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{tDoctors('modals.licenseNumber')}</label>
+                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">
+                    {tDoctors("modals.licenseNumber")}
+                  </label>
                   <input
                     type="text"
-                    value={formData.licenseNumber || ''}
-                    onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                    value={formData.licenseNumber || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        licenseNumber: e.target.value,
+                      })
+                    }
                     className="w-full px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{tDoctors('modals.phone')}</label>
+                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">
+                    {tDoctors("modals.phone")}
+                  </label>
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-(--ui-border) rounded-lg bg-(--ui-surface-2) text-foreground"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">{tDoctors('modals.status')}</label>
+                  <label className="block text-sm font-medium text-(--ui-muted-2) mb-2">
+                    {tDoctors("modals.status")}
+                  </label>
                   <div className="flex gap-3">
                     <button
                       type="button"
-                      className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors border ${formData.status === 'active' ? 'bg-(--ui-success) text-white border-(--ui-success-border)' : 'bg-(--ui-surface-2) text-foreground border-(--ui-border) hover:bg-(--ui-surface)'}`}
-                      onClick={() => setFormData({ ...formData, status: 'active' })}
+                      className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors border ${formData.status === "active" ? "bg-(--ui-success) text-white border-(--ui-success-border)" : "bg-(--ui-surface-2) text-foreground border-(--ui-border) hover:bg-(--ui-surface)"}`}
+                      onClick={() =>
+                        setFormData({ ...formData, status: "active" })
+                      }
                     >
-                      {statusesMap.active}
+                      {tDoctors("statuses.active")}
                     </button>
                     <button
                       type="button"
-                      className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors border ${formData.status === 'banned' ? 'bg-(--ui-danger) text-white border-(--ui-danger-border)' : 'bg-(--ui-surface-2) text-foreground border-(--ui-border) hover:bg-(--ui-surface)'}`}
-                      onClick={() => setFormData({ ...formData, status: 'banned' })}
+                      className={`flex-1 px-4 py-3 rounded-lg font-bold transition-colors border ${formData.status === "banned" ? "bg-(--ui-danger) text-white border-(--ui-danger-border)" : "bg-(--ui-surface-2) text-foreground border-(--ui-border) hover:bg-(--ui-surface)"}`}
+                      onClick={() =>
+                        setFormData({ ...formData, status: "banned" })
+                      }
                     >
-                      {statusesMap.banned}
+                      {tDoctors("statuses.banned")}
                     </button>
                   </div>
                 </div>
@@ -604,13 +595,13 @@ function DoctorsPage() {
                   className="flex-1 flex items-center justify-center gap-2 btn-gradient px-4 py-3 rounded-lg transition-colors"
                 >
                   <FaFloppyDisk />
-                  <span>{tDoctors('buttons.saveChanges')}</span>
+                  <span>{tDoctors("buttons.saveChanges")}</span>
                 </button>
                 <button
                   onClick={() => setShowEditModal(false)}
                   className="flex-1 bg-(--ui-surface-2) hover:bg-(--ui-surface) text-foreground px-4 py-3 rounded-lg transition-colors border border-(--ui-border)"
                 >
-                  {tDoctors('buttons.cancel')}
+                  {tDoctors("buttons.cancel")}
                 </button>
               </div>
             </div>
@@ -635,9 +626,13 @@ function DoctorsPage() {
             <div className="card-glass rounded-xl shadow-(--shadow-lift) max-w-md w-full p-6">
               <div className="text-center mb-6">
                 <div className="text-6xl mb-4">⚠️</div>
-                <h3 className="text-xl font-bold text-foreground mb-2">{tDoctors('confirmDelete.title')}</h3>
+                <h3 className="text-xl font-bold text-foreground mb-2">
+                  {tDoctors("confirmDelete.title")}
+                </h3>
                 <p className="text-(--ui-muted-2)">
-                  {tDoctors('confirmDelete.description', { name: selectedDoctor.name })}
+                  {tDoctors("confirmDelete.description", {
+                    name: selectedDoctor.name,
+                  })}
                 </p>
               </div>
               <div className="flex gap-3">
@@ -645,24 +640,20 @@ function DoctorsPage() {
                   onClick={handleDeleteDoctor}
                   className="flex-1 bg-(--ui-danger) hover:opacity-90 text-white px-4 py-3 rounded-lg transition-colors font-medium"
                 >
-                  {tDoctors('confirmDelete.yes')}
+                  {tDoctors("confirmDelete.yes")}
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(false)}
                   className="flex-1 bg-(--ui-surface-2) hover:bg-(--ui-surface) text-foreground px-4 py-3 rounded-lg transition-colors border border-(--ui-border)"
                 >
-                  {tDoctors('confirmDelete.no')}
+                  {tDoctors("confirmDelete.no")}
                 </button>
               </div>
             </div>
           </div>
         )}
-
       </div>
     </>
   );
 }
-
-
 export default DoctorsPage;
-

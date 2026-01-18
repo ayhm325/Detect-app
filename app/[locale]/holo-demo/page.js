@@ -1,5 +1,5 @@
 import Hero from "../../components/ui/Hero";
-import GlassCard from "../../components/ui/GlassCard";
+import UnifiedCard from "../../components/ui/UnifiedCard";
 import HoloButton from "../../components/ui/HoloButton";
 import ScanCard from "../../components/ui/ScanCard";
 import NeonBadge from "../../components/ui/NeonBadge";
@@ -13,16 +13,30 @@ export default async function HoloDemoPage() {
       <Hero />
       <section className="mx-auto max-w-5xl px-6">
         <div className="grid gap-6 md:grid-cols-2">
-          <GlassCard title={t("glassCard.title")} neonBadge={t("glassCard.badge")}>
+          <UnifiedCard
+            title={t("glassCard.title")}
+            badge={t("glassCard.badge")}
+            glass
+          >
             <p>{t("glassCard.description")}</p>
             <div className="mt-4 flex gap-3">
               <HoloButton>{t("glassCard.primaryCta")}</HoloButton>
-              <HoloButton variant="outline">{t("glassCard.secondaryCta")}</HoloButton>
+              <HoloButton variant="outline">
+                {t("glassCard.secondaryCta")}
+              </HoloButton>
             </div>
-          </GlassCard>
+          </UnifiedCard>
           <div className="space-y-4">
-            <ScanCard title={t("scanCards.xrayShoulder.title")} status="ready" description={t("scanCards.xrayShoulder.description")} />
-            <ScanCard title={t("scanCards.ctChest.title")} status="pending" description={t("scanCards.ctChest.description")} />
+            <ScanCard
+              title={t("scanCards.xrayShoulder.title")}
+              status="ready"
+              description={t("scanCards.xrayShoulder.description")}
+            />
+            <ScanCard
+              title={t("scanCards.ctChest.title")}
+              status="pending"
+              description={t("scanCards.ctChest.description")}
+            />
           </div>
         </div>
         <div className="mt-6">

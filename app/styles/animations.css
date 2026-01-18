@@ -1,6 +1,7 @@
 /* Animated gradient + hologram shimmer + floating shapes */
 .hologram-bg {
-  background-image: linear-gradient(135deg,
+  background-image: linear-gradient(
+    135deg,
     var(--color-secondary),
     var(--color-primary),
     var(--color-accent),
@@ -22,7 +23,8 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg,
+  background: linear-gradient(
+    120deg,
     transparent 0%,
     rgb(from var(--ui-foreground) r g b / var(--opacity-sheen)) 15%,
     transparent 30%
@@ -54,26 +56,48 @@
 }
 
 @keyframes hueShift {
-  0% { filter: hue-rotate(0deg) }
-  50% { filter: hue-rotate(45deg) }
-  100% { filter: hue-rotate(0deg) }
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    filter: hue-rotate(45deg);
+  }
+  100% {
+    filter: hue-rotate(0deg);
+  }
 }
 
 @keyframes gradientFlow {
-  0% { background-position: 0% 50% }
-  50% { background-position: 100% 50% }
-  100% { background-position: 0% 50% }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes holoSheen {
-  0% { background-position: -200% 0 }
-  100% { background-position: 200% 0 }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes floaty {
-  0% { transform: translateY(0) rotate(0deg) }
-  50% { transform: translateY(-6px) rotate(2deg) }
-  100% { transform: translateY(0) rotate(0deg) }
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
 }
 
 /* SignUpSide Enhanced Animations */
@@ -89,7 +113,8 @@
 }
 
 @keyframes glowPulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px color-mix(in srgb, var(--ui-info) 50%, transparent);
   }
   50% {
@@ -127,7 +152,8 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -137,7 +163,8 @@
 
 /* New Homepage Animations */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) translateX(0);
   }
   25% {
@@ -152,7 +179,8 @@
 }
 
 @keyframes floatParticle {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0);
     opacity: 0.3;
   }

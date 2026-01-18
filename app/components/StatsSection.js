@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 
 export default function StatsSection() {
-  const t = useTranslations('content');
+  const t = useTranslations("content");
   const [isVisible, setIsVisible] = useState(false);
   const [floaters, setFloaters] = useState([]);
   const sectionRef = useRef(null);
@@ -15,7 +15,7 @@ export default function StatsSection() {
           setIsVisible(true);
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
     const currentRef = sectionRef.current;
@@ -33,7 +33,7 @@ export default function StatsSection() {
   useEffect(() => {
     // Generate floating elements on client only
     setFloaters(
-      [...Array(15)].map((_, i) => ({
+      Array.from({ length: 15 }, (_, i) => ({
         id: i,
         width: Math.random() * 100 + 20,
         height: Math.random() * 100 + 20,
@@ -41,13 +41,13 @@ export default function StatsSection() {
         top: Math.random() * 100,
         delay: Math.random() * 5,
         duration: Math.random() * 10 + 10,
-      }))
+      })),
     );
   }, []);
 
-  const statsCopy = (t.raw ? t.raw("content.stats.cards") : null) || [];
+  const stats = (t.raw && t.raw("content.stats.cards")) || [];
 
-  const AnimatedNumber = ({ target, suffix }) => {
+  const AnimatedNumber = ({ target = 0, suffix = "" }) => {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
@@ -57,7 +57,7 @@ export default function StatsSection() {
       const steps = 60;
       const increment = target / steps;
       let current = 0;
-      
+
       const timer = setInterval(() => {
         current += increment;
         if (current >= target) {
@@ -69,28 +69,33 @@ export default function StatsSection() {
       }, duration / steps);
 
       return () => clearInterval(timer);
-    }, [target]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [target, isVisible]);
 
     return (
       <span>
-        {target < 100 ? count.toFixed(1) : count.toLocaleString()}{suffix}
+        {target < 100 ? (count / 1).toFixed(1) : count.toLocaleString()}
+        {suffix}
       </span>
     );
   };
 
   return (
-    <section 
+    <section
       ref={sectionRef}
       className="relative w-full py-20 sm:py-24 bg-linear-to-br from-(--color-bright-500) via-(--color-primary-500) to-(--color-dark-500) overflow-hidden"
     >
       {/* Animated Background Pattern */}
       <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
             radial-gradient(circle at 20% 50%, color-mix(in srgb, var(--color-background) 20%, transparent) 0%, transparent 50%),
             radial-gradient(circle at 80% 50%, color-mix(in srgb, var(--color-background) 15%, transparent) 0%, transparent 50%)
           `,
-        }} />
+          }}
+        />
       </div>
 
       {/* Floating Elements */}
@@ -124,13 +129,13 @@ export default function StatsSection() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          {statsCopy.map((stat, i) => (
+          {stats.map((stat, i) => (
             <div
               key={i}
-              className={`group animate-fadeIn ${isVisible ? 'opacity-100' : 'opacity-0'}`}
-              style={{ 
+              className={`group animate-fadeIn ${isVisible ? "opacity-100" : "opacity-0"}`}
+              style={{
                 animationDelay: `${i * 0.1}s`,
-                transition: 'opacity 0.5s ease-out'
+                transition: "opacity 0.5s ease-out",
               }}
             >
               {/* Card */}
@@ -155,9 +160,7 @@ export default function StatsSection() {
                 </div>
 
                 {/* Description */}
-                <div className="text-sm text-white/80">
-                  {stat.description}
-                </div>
+                <div className="text-sm text-white/80">{stat.description}</div>
 
                 {/* Decorative Element */}
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-(--ui-border) opacity-60 rounded-b-3xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
@@ -167,16 +170,19 @@ export default function StatsSection() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-16 text-center animate-fadeIn" style={{ animationDelay: "0.6s" }}>
+        <div
+          className="mt-16 text-center animate-fadeIn"
+          style={{ animationDelay: "0.6s" }}
+        >
           <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8 card-glass rounded-3xl border border-(--ui-border) shadow-2xl">
             <div className="text-6xl">🚀</div>
-              <div className="text-center sm:text-right">
-                <div className="text-2xl font-black text-white mb-2">
-                  {t("content.stats.ctaTitle")}
-                </div>
-                <div className="text-white/90">
-                  {t("content.stats.ctaSubtitle")}
-                </div>
+            <div className="text-center sm:text-right">
+              <div className="text-2xl font-black text-white mb-2">
+                {t("content.stats.ctaTitle")}
+              </div>
+              <div className="text-white/90">
+                {t("content.stats.ctaSubtitle")}
+              </div>
             </div>
           </div>
         </div>

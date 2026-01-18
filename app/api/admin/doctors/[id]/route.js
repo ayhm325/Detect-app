@@ -21,7 +21,7 @@ export async function PATCH(request, context) {
       data: {
         fullName: data.name,
         email: data.email,
-      }
+      },
     });
     // تحديث بيانات الطبيب
     await prisma.doctor.update({
@@ -29,8 +29,8 @@ export async function PATCH(request, context) {
       data: {
         phone: data.phone,
         licenseNumber: data.licenseNumber,
-        status: data.status
-      }
+        status: data.status,
+      },
     });
     // تحديث حالة المستخدم المرتبط عند الموافقة
     if (data.status === "active") {
@@ -45,13 +45,16 @@ export async function PATCH(request, context) {
           type: "update_doctor",
           description: `تم تعديل بيانات الطبيب: ${id}`,
           userId: id,
-          meta: { ...data }
-        }
+          meta: { ...data },
+        },
       });
     } catch (e) {}
     return Response.json({ success: true });
   } catch (error) {
-    return Response.json({ error: "حدث خطأ أثناء تعديل بيانات الطبيب" }, { status: 500 });
+    return Response.json(
+      { error: "حدث خطأ أثناء تعديل بيانات الطبيب" },
+      { status: 500 },
+    );
   }
 }
 import prisma from "../../../../../lib/prismaClient";
@@ -69,7 +72,10 @@ export async function DELETE(request, context) {
       return Response.json({ error: "الطبيب غير موجود" }, { status: 404 });
     }
     // حظر الطبيب فقط (عدم الحذف)
-    await prisma.doctor.update({ where: { userId: id }, data: { status: "banned" } });
+    await prisma.doctor.update({
+      where: { userId: id },
+      data: { status: "banned" },
+    });
     await prisma.user.update({ where: { id }, data: { isActive: false } });
     // تسجيل النشاط
     try {
@@ -78,12 +84,15 @@ export async function DELETE(request, context) {
           type: "block_doctor",
           description: `تم حظر طبيب: ${doctor.userId}`,
           userId: id,
-          meta: {}
-        }
+          meta: {},
+        },
       });
     } catch (e) {}
     return Response.json({ success: true });
   } catch (error) {
-    return Response.json({ error: "حدث خطأ أثناء حظر الطبيب" }, { status: 500 });
+    return Response.json(
+      { error: "حدث خطأ أثناء حظر الطبيب" },
+      { status: 500 },
+    );
   }
 }

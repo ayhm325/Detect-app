@@ -53,9 +53,27 @@
     },
     "viewAll": "View all scans",
     "defaults": [
-      { "id": 1, "patient": "Omar Hassan", "typeKey": "xray", "dateKey": "today", "priority": "high" },
-      { "id": 2, "patient": "Laila Mahmoud", "typeKey": "ct", "dateKey": "today", "priority": "medium" },
-      { "id": 3, "patient": "Youssef Ali", "typeKey": "mri", "dateKey": "yesterday", "priority": "low" }
+      {
+        "id": 1,
+        "patient": "Omar Hassan",
+        "typeKey": "xray",
+        "dateKey": "today",
+        "priority": "high"
+      },
+      {
+        "id": 2,
+        "patient": "Laila Mahmoud",
+        "typeKey": "ct",
+        "dateKey": "today",
+        "priority": "medium"
+      },
+      {
+        "id": 3,
+        "patient": "Youssef Ali",
+        "typeKey": "mri",
+        "dateKey": "yesterday",
+        "priority": "low"
+      }
     ]
   },
   "recentActivityTitle": "Recent activity",

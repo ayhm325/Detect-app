@@ -13,13 +13,17 @@ export default function PatientProfile() {
   };
   return (
     <aside className="w-full md:w-96 bg-(--ui-surface) rounded-xl shadow p-6 border border-(--ui-border)">
-      <h3 className="text-lg font-bold mb-2 text-(--ui-foreground)">Patient Profile</h3>
+      <h3 className="text-lg font-bold mb-2 text-(--ui-foreground)">
+        Patient Profile
+      </h3>
       <div className="mb-2">Name: {patient.name}</div>
       <div className="mb-2">Age: {patient.age}</div>
       <div className="mb-2 font-semibold">Analysis History:</div>
       <ul className="mb-2 text-sm">
         {patient.history.map((h, i) => (
-          <li key={i}>- {h.date}: {h.result} ({h.confidence})</li>
+          <li key={i}>
+            - {h.date}: {h.result} ({h.confidence})
+          </li>
         ))}
       </ul>
       <div className="mb-2 font-semibold">Last X-Ray:</div>
@@ -30,8 +34,12 @@ export default function PatientProfile() {
         height={128}
         className="w-32 h-32 object-contain mb-2"
       />
-      <div>Result: {patient.lastXray.result} ({patient.lastXray.confidence})</div>
-      <button className="mt-4 w-full py-2 rounded btn-gradient font-semibold">Upload New X-Ray</button>
+      <div>
+        Result: {patient.lastXray.result} ({patient.lastXray.confidence})
+      </div>
+      <button className="mt-4 w-full py-2 rounded btn-gradient font-semibold">
+        Upload New X-Ray
+      </button>
     </aside>
   );
 }
