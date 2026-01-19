@@ -27,19 +27,14 @@ export default function LanguageToggle({ currentLocale }) {
   return (
     <button
       onClick={handleToggle}
-      className="flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-colors font-medium"
+      className="px-5 py-2 rounded-full font-bold btn-gradient text-white shadow focus:outline-none focus:ring-2 focus:ring-(--color-primary-500) transition-all"
       aria-label={
         currentLocale === "ar"
           ? ui("language.switchToEnglish")
           : ui("language.switchToArabic")
       }
     >
-      <span>🌐</span>
-      <span>
-        {currentLocale === "ar"
-          ? ui("language.english")
-          : ui("language.arabic")}
-      </span>
+      {currentLocale === "ar" ? "EN" : "AR"}
     </button>
   );
 }

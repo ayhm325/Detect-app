@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { formatTime } from "../../../lib/date";
 
+
 export default function PatientChatPage() {
   const { locale } = useLocale();
   const { showSuccess, showError, showInfo, showWarning } = useToast();
@@ -43,6 +44,7 @@ export default function PatientChatPage() {
     filename: null,
   });
   const [jwtToken, setJwtToken] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0); // عداد الرسائل الجديدة
   const socket = useSocket();
   const messagesContainerRef = useRef(null);
   const presenceByUserIdRef = useRef(new Map());
@@ -364,13 +366,20 @@ export default function PatientChatPage() {
       }
     });
 
+    // --- تحديث عداد الرسائل الجديدة عند استقبال event من السيرفر ---
+    const offUnread = socket.on && socket.on("unread_count_update", (data) => {
+      if (data && typeof data.count === "number") setUnreadCount(data.count);
+    });
+
     return () => {
       offMsg && offMsg();
       offUpdate && offUpdate();
       offRead && offRead();
       offPresence && offPresence();
+      offUnread && offUnread();
     };
   }, [socket, jwtToken, chatId, doctorUserId, formatMsgTime]);
+
 
   // --- Auto scroll ---
   useEffect(() => {
@@ -382,6 +391,8 @@ export default function PatientChatPage() {
       el.scrollTop = el.scrollHeight;
     }
   }, [messages.length]);
+
+  // --- تم إلغاء Polling لأن التحديث يتم عبر Socket event ---
 
   // --- Send message ---
   const handleSendMessage = async () => {
@@ -991,6 +1002,11 @@ export default function PatientChatPage() {
                     <div className="w-10 h-10 rounded-full bg-(--ui-info-bg) border border-(--ui-info-border) flex items-center justify-center text-xl">
                       {doctorChat.avatar}
                     </div>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 shadow">
+                        {unreadCount}
+                      </span>
+                    )}
                   </div>
                   <div>
                     <h3 className="font-bold text-(--ui-foreground)">

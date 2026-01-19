@@ -7,11 +7,19 @@ export async function POST(req, { params }) {
     const chatId = resolved.chatId;
     const formData = await req.formData();
     const file = formData.get("file");
-    if (!file) {
-      return new Response(JSON.stringify({ error: "لم يتم اختيار ملف" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      // تحقق من وجود الملف
+      if (!file) {
+        return new Response(JSON.stringify({ error: "لم يتم اختيار ملف", code: "UP01" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      // تحقق من نوع وحجم الملف (مثال: حجم أقل من 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        return new Response(JSON.stringify({ error: "حجم الملف كبير جداً", code: "UP02" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
     }
     // تحديد اسم الملف ومساره
     const ext = file.name.split(".").pop();
@@ -28,14 +36,16 @@ export async function POST(req, { params }) {
     await writeFile(filePath, Buffer.from(arrayBuffer));
     // إنشاء رابط الملف
     const url = `/uploads/${fileName}`;
-    return new Response(JSON.stringify({ url }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+      // تم رفع الملف بنجاح
+      return new Response(JSON.stringify({ url }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
   } catch (e) {
-    return new Response(JSON.stringify({ error: "خطأ في رفع الملف" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+      // خطأ في رفع الملف
+      return new Response(JSON.stringify({ error: "خطأ في رفع الملف", code: "UP03" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
   }
 }

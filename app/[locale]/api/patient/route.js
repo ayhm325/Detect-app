@@ -2,17 +2,32 @@ import prisma from "../../../../lib/prismaClient.js";
 import bcrypt from "../../../../lib/auth/bcryptWrapper.mjs";
 
 export async function GET() {
-  // Mock patient data; replace with DB/service integration.
-  const patient = {
-    fullName: "Ahmed Mohammed Ali",
-    age: 42,
-    gender: "male",
-    patientId: "PAT-000123",
-    healthStatus: "attention",
-    avatarUrl: "/icons/patient-placeholder.png",
-    lastLogin: new Date().toISOString(),
-  };
-  return Response.json(patient, { status: 200 });
+  try {
+    // جلب أول مستخدم بدور "patient" من قاعدة البيانات
+    const user = await prisma.user.findFirst({
+      where: { role: "patient" },
+      include: {
+        patient: true,
+      },
+    });
+    if (!user) {
+      return Response.json({ error: "NO_PATIENT_FOUND" }, { status: 404 });
+    }
+    // يمكنك تخصيص البيانات حسب الحاجة
+    const patientData = {
+      fullName: user.fullName,
+      age: user.patient?.age ?? null,
+      gender: user.patient?.gender ?? null,
+      patientId: user.patient?.patientId ?? user.id,
+      healthStatus: user.patient?.healthStatus ?? null,
+      avatarUrl: user.patient?.avatarUrl ?? null,
+      lastLogin: user.lastLogin ?? null,
+      email: user.email,
+    };
+    return Response.json(patientData, { status: 200 });
+  } catch (error) {
+    return Response.json({ error: "SERVER_ERROR" }, { status: 500 });
+  }
 }
 
 export async function POST(request) {

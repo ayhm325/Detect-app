@@ -3,10 +3,13 @@ import prisma from "../../../../lib/prismaClient.js";
 import { withRBAC } from "../../../../lib/auth/withRBAC";
 import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
-import { createNotificationBestEffort } from "../../../../lib/notifications";
+import { getOrCreateChat, notifyChatCreated, getUnreadCount } from "../../../../lib/chatUtils.js";
 
+
+// جلب جميع محادثات المريض مع آخر رسالة وعدد الرسائل غير المقروءة
 export const GET = withRBAC(
   async (request, user) => {
+    // تحقق من الحد الأقصى للطلبات
     const rl = await rateLimit(request);
     if (rl.limited) {
       logAudit({
@@ -15,21 +18,21 @@ export const GET = withRBAC(
         ip: request.headers.get("x-forwarded-for"),
         details: { endpoint: "GET /api/chat/patient" },
       });
-      return NextResponse.json(
-        { error: "Rate limit exceeded" },
-        { status: 429 },
-      );
+      return NextResponse.json({ error: "rate_limit_exceeded", code: "RL01" }, { status: 429 });
     }
     try {
-      const patient = await prisma.patient.findUnique({
-        where: { userId: user.id },
-      });
-      if (!patient)
-        return NextResponse.json(
-          { error: "patient_not_found" },
-          { status: 404 },
-        );
+      // جلب بيانات المريض والتحقق من الحالة
+      const patient = await prisma.patient.findUnique({ where: { userId: user.id }, include: { user: true } });
+      if (!patient || !patient.user?.isActive) {
+        logAudit({
+          event: "patient_not_found",
+          userId: user.id,
+          ip: request.headers.get("x-forwarded-for"),
+        });
+        return NextResponse.json({ error: "patient_not_found", code: "PT01" }, { status: 404 });
+      }
 
+      // جلب جميع المحادثات مع آخر رسالة فقط
       const chats = await prisma.chat.findMany({
         where: { patientId: patient.id },
         include: {
@@ -55,28 +58,54 @@ export const GET = withRBAC(
         orderBy: { updatedAt: "desc" },
       });
 
+      // استعلام واحد لحساب الرسائل غير المقروءة
+      const chatIds = chats.map((c) => c.id);
+      let unreadCounts = {};
+      if (chatIds.length) {
+        const grouped = await prisma.message.groupBy({
+          by: ["chatId"],
+          where: {
+            chatId: { in: chatIds },
+            sender: "doctor",
+            status: { not: "read" },
+          },
+          _count: { _all: true },
+        });
+        for (const row of grouped) {
+          unreadCounts[row.chatId] = row._count?._all || 0;
+        }
+      }
+
+      // بناء الاستجابة النهائية
+      const chatsWithUnread = chats.map((chat) => ({
+        ...chat,
+        unreadCount: unreadCounts[chat.id] || 0,
+      }));
+
       logAudit({
         event: "patient_chats_listed",
         userId: user.id,
         ip: request.headers.get("x-forwarded-for"),
         details: { chatCount: chats.length },
       });
-      return NextResponse.json({ chats });
+      return NextResponse.json({ chats: chatsWithUnread });
     } catch (error) {
       logAudit({
         event: "patient_chats_list_error",
         userId: user.id,
         ip: request.headers.get("x-forwarded-for"),
-        details: { error: error.message },
+        details: { error: error.stack || error.message },
       });
-      return NextResponse.json({ error: "server_error" }, { status: 500 });
+      return NextResponse.json({ error: error.message || "server_error", code: "SRV01" }, { status: 500 });
     }
   },
   ["patient"],
 );
 
+// إنشاء أو جلب محادثة بين الطبيب والمريض مع إرسال إشعار
 export const POST = withRBAC(
   async (request, user) => {
+    // تحقق من الحد الأقصى للطلبات
     const rl = await rateLimit(request);
     if (rl.limited) {
       logAudit({
@@ -85,10 +114,7 @@ export const POST = withRBAC(
         ip: request.headers.get("x-forwarded-for"),
         details: { endpoint: "POST /api/chat/patient" },
       });
-      return NextResponse.json(
-        { error: "Rate limit exceeded" },
-        { status: 429 },
-      );
+      return NextResponse.json({ error: "rate_limit_exceeded", code: "RL02" }, { status: 429 });
     }
     try {
       const body = await request.json();
@@ -96,119 +122,57 @@ export const POST = withRBAC(
       if (user.role === "doctor") {
         const { patientId } = body || {};
         if (!patientId) {
-          return NextResponse.json(
-            { error: "missing_patient_id" },
-            { status: 400 },
-          );
+          return NextResponse.json({ error: "missing_patient_id", code: "PT02" }, { status: 400 });
         }
-
-        let chat = await prisma.chat.findFirst({
-          where: { doctorId: user.id, patientId },
-        });
-        let created = false;
-        if (!chat) {
-          chat = await prisma.chat.create({
-            data: { doctorId: user.id, patientId },
-          });
-          created = true;
+        // استخدام الدالة المشتركة
+        const { chat, created } = await getOrCreateChat(user.id, patientId);
+        // جلب بيانات المريض مرة واحدة فقط
+        const patient = await prisma.patient.findUnique({ where: { id: patientId }, select: { userId: true, fullName: true, user: { select: { isActive: true } } } });
+        if (!patient?.userId || patient.user?.isActive === false) {
+          return NextResponse.json({ error: "patient_inactive", code: "PT04" }, { status: 400 });
         }
-
         if (created) {
-          const patient = await prisma.patient.findUnique({
-            where: { id: patientId },
-            select: { userId: true },
-          });
-          if (patient?.userId) {
-            await createNotificationBestEffort(prisma, {
-              userId: patient.userId,
-              type: "info",
-              message: {
-                ar: "تم بدء محادثة جديدة مع طبيبك.",
-                en: "A new chat was started with your doctor.",
-                meta: { kind: "chat_created", chatId: chat.id },
-              },
-            });
-          }
+          await notifyChatCreated(patient.userId, chat.id, "patient");
+          await notifyChatCreated(user.id, chat.id, "doctor", patient?.fullName || null);
         }
-
         logAudit({
           event: "doctor_chat_created_or_reused",
           userId: user.id,
           ip: request.headers.get("x-forwarded-for"),
           details: { chatId: chat.id, patientId, created },
         });
-        return NextResponse.json(
-          { chat, created },
-          { status: created ? 201 : 200 },
-        );
+        return NextResponse.json({ chat, created }, { status: created ? 201 : 200 });
       }
 
       if (user.role === "patient") {
-        const patient = await prisma.patient.findUnique({
-          where: { userId: user.id },
-        });
-        if (!patient) {
-          return NextResponse.json(
-            { error: "patient_not_found" },
-            { status: 404 },
-          );
+        const patient = await prisma.patient.findUnique({ where: { userId: user.id }, include: { user: true } });
+        if (!patient || !patient.user?.isActive) {
+          logAudit({
+            event: "patient_not_found",
+            userId: user.id,
+            ip: request.headers.get("x-forwarded-for"),
+          });
+          return NextResponse.json({ error: "patient_not_found", code: "PT01" }, { status: 404 });
         }
         if (!patient.doctorId) {
-          return NextResponse.json(
-            { error: "no_doctor_linked" },
-            { status: 400 },
-          );
+          return NextResponse.json({ error: "no_doctor_linked", code: "PT03" }, { status: 400 });
         }
-
-        let chat = await prisma.chat.findFirst({
-          where: { doctorId: patient.doctorId, patientId: patient.id },
-        });
-        let created = false;
-        if (!chat) {
-          chat = await prisma.chat.create({
-            data: { doctorId: patient.doctorId, patientId: patient.id },
-          });
-          created = true;
-        }
-
+        // استخدام الدالة المشتركة
+        const { chat, created } = await getOrCreateChat(patient.doctorId, patient.id);
         if (created) {
-          await createNotificationBestEffort(prisma, {
-            userId: user.id,
-            type: "info",
-            message: {
-              ar: "تم بدء محادثة جديدة مع طبيبك.",
-              en: "A new chat was started with your doctor.",
-              meta: { kind: "chat_created", chatId: chat.id },
-            },
-          });
-
-          if (patient.doctorId) {
-            const patientName = patient?.fullName || null;
-            await createNotificationBestEffort(prisma, {
-              userId: patient.doctorId,
-              type: "info",
-              message: {
-                ar: `تم بدء محادثة جديدة من${patientName ? ` المريض ${patientName}` : " أحد المرضى"}.`,
-                en: `A new chat was started by${patientName ? ` patient ${patientName}` : " a patient"}.`,
-                meta: { kind: "chat_created", chatId: chat.id },
-              },
-            });
-          }
+          await notifyChatCreated(user.id, chat.id, "patient");
+          await notifyChatCreated(patient.doctorId, chat.id, "doctor", patient?.fullName || null);
         }
-
         logAudit({
           event: "patient_chat_created_or_reused",
           userId: user.id,
           ip: request.headers.get("x-forwarded-for"),
           details: { chatId: chat.id, created },
         });
-        return NextResponse.json(
-          { chat, created },
-          { status: created ? 201 : 200 },
-        );
+        return NextResponse.json({ chat, created }, { status: created ? 201 : 200 });
       }
 
-      return NextResponse.json({ error: "forbidden" }, { status: 403 });
+      return NextResponse.json({ error: "forbidden", code: "AUTH01" }, { status: 403 });
     } catch (error) {
       logAudit({
         event: "chat_patient_post_error",
@@ -216,13 +180,7 @@ export const POST = withRBAC(
         ip: request.headers.get("x-forwarded-for"),
         details: { error: error.message },
       });
-      if (process.env.NODE_ENV !== "production") {
-        return NextResponse.json(
-          { error: error.message || String(error) },
-          { status: 500 },
-        );
-      }
-      return NextResponse.json({ error: "server_error" }, { status: 500 });
+      return NextResponse.json({ error: error.message || "server_error", code: "SRV02" }, { status: 500 });
     }
   },
   ["doctor", "patient"],

@@ -33,13 +33,13 @@ export default function BlogPage() {
         <div className="mb-4 flex justify-end">
           <button
             onClick={toggleLocale}
-            className="rounded-full bg-(--ui-surface-2) px-4 py-2 font-semibold text-(--ui-foreground) shadow-(--shadow-soft) transition-colors hover:bg-(--ui-surface)"
+            className="px-5 py-2 rounded-full font-bold btn-gradient text-white shadow focus:outline-none focus:ring-2 focus:ring-(--color-primary-500) transition-all"
             aria-label={t("languageToggleAria")}
           >
-            {t("languageToggleLabel")}
+            {locale === "ar" ? "EN" : "AR"}
           </button>
         </div>
-        <h1 className="mb-6 text-center text-4xl font-bold text-(--ui-warning)">
+        <h1 className="mb-6 text-center text-4xl font-bold brand-gradient-text">
           {t("title")}
         </h1>
         <p className="mx-auto mb-12 max-w-2xl text-center text-lg text-(--ui-muted-foreground)">
@@ -52,18 +52,18 @@ export default function BlogPage() {
               className="card-glass animate-fadeIn rounded-2xl border border-(--ui-border) bg-(--ui-surface)/60 p-6 backdrop-blur-sm shadow-(--shadow-soft) transition-transform hover:scale-[1.02]"
             >
               <div className="mb-2 flex flex-col md:flex-row md:items-center md:justify-between">
-                <h2 className="mb-2 text-2xl font-bold text-(--ui-warning) md:mb-0">
+                <h2 className="mb-2 text-2xl font-bold text-(--color-primary-500) md:mb-0">
                   {safeText(post?.title)}
                 </h2>
-                <span className="text-sm text-(--ui-muted-foreground)">
+                <span className="text-sm text-(--ui-info)">
                   {safeText(post?.date)}
                 </span>
               </div>
-              <p className="mb-2 text-sm text-(--ui-muted-foreground)">
+              <p className="mb-2 text-sm text-(--ui-foreground)">
                 {safeText(post?.excerpt)}
               </p>
               <button
-                className="cursor-not-allowed font-semibold text-(--ui-warning) hover:underline"
+                className="cursor-not-allowed font-semibold text-(--color-primary-500) hover:underline"
                 disabled
               >
                 {t("comingSoon")}
@@ -74,7 +74,7 @@ export default function BlogPage() {
         <div className="flex justify-center">
           <Link
             href={`/${locale}`}
-            className="inline-block rounded-full bg-(--ui-warning) px-6 py-3 font-semibold text-(--ui-warning-foreground) shadow-(--shadow-soft) transition-opacity hover:opacity-90"
+            className="inline-block rounded-full btn-gradient px-6 py-3 font-semibold text-white shadow transition-opacity hover:opacity-90"
           >
             {t("backHome")}
           </Link>

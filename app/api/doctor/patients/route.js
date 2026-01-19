@@ -24,7 +24,6 @@ export const GET = withRBAC(
           medicalRecords: {
             where: { doctorId: user.id },
             orderBy: { createdAt: "desc" },
-            take: 1,
             select: {
               id: true,
               doctorNotes: true,
@@ -53,12 +52,18 @@ export const GET = withRBAC(
           : "";
         const diagnosisUpdatedAt = latest?.createdAt ? latest.createdAt : null;
 
+        // عدد الفحوصات هو عدد السجلات الطبية المرتبطة بالمريض
+        const medicalRecordsCount = Array.isArray(p.medicalRecords)
+          ? p.medicalRecords.length
+          : 0;
+
         // Avoid leaking relation details by default; UI should use explicit fields
         const { medicalRecords, ...rest } = p;
         return {
           ...rest,
           latestDoctorDiagnosis,
           diagnosisUpdatedAt,
+          medicalRecordsCount,
         };
       });
       logAudit({

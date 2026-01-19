@@ -34,7 +34,7 @@ const ToggleSwitch = ({ checked, onChange, label }) => (
 
 // --- الصفحة الرئيسية ---
 export default function SettingsPage() {
-  const { showToast } = useToast();
+  const { showError, showSuccess } = useToast();
   const { locale } = useLocale();
   const t = useTranslations("adminSettings");
   const isRTL = locale === "ar";
@@ -63,7 +63,7 @@ export default function SettingsPage() {
         const res = await fetch("/api/admin/settings");
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          showToast(err?.error || t("messages.saveFailed"), "error");
+          showError(err?.error || t("messages.saveFailed"));
           return;
         }
         const body = await res.json().catch(() => ({}));
@@ -73,13 +73,13 @@ export default function SettingsPage() {
         }
       } catch (e) {
         if (!mounted) return;
-        showToast(e?.message || t("messages.saveFailed"), "error");
+        showError(e?.message || t("messages.saveFailed"));
       }
     })();
     return () => {
       mounted = false;
     };
-  }, [showToast, t]);
+  }, [showError, t]);
 
   // التعامل مع تغيير الحقول
   const handleChange = (field, value) => {
@@ -105,13 +105,13 @@ export default function SettingsPage() {
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          showToast(err?.error || t("messages.saveFailed"), "error");
+          showError(err?.error || t("messages.saveFailed"));
           return;
         }
         const body = await res.json();
-        showToast(t("messages.success"), "success");
+        showSuccess(t("messages.success"));
       } catch (e) {
-        showToast(e.message || t("messages.saveFailed"), "error");
+        showError(e.message || t("messages.saveFailed"));
       }
     })();
   };

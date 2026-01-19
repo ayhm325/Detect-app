@@ -1,34 +1,39 @@
+// نقطة نهاية لتحليل صورة أشعة وإرجاع النتيجة وحفظها في قاعدة البيانات
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
-// generate UUID v4 without external dependency as a safe fallback
+// إنشاء UUID الإصدار 4 بدون تبعية خارجية كخيار احتياطي آمن
+// دالة لتوليد معرف فريد (UUID) للصورة المرفوعة
 function generateUUID() {
   if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") {
     return globalThis.crypto.randomUUID();
   }
   if (crypto && typeof crypto.randomUUID === "function")
     return crypto.randomUUID();
-  // fallback implementation (RFC4122 version 4 compatible-ish)
+  // تطبيق احتياطي (متوافق إلى حد ما مع الإصدار 4 من RFC4122)
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     const r = Math.floor(Math.random() * 16);
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
+// استيراد دوال التحقق من صلاحية التوكن، ودوال الذكاء الاصطناعي وحفظ النتائج
 import { isTokenRevoked } from "../../../../lib/auth/revocation.server.js";
 import { runInference } from "../../../../ai/inference/inference.service.js";
 import { saveAnalysisResult } from "../../../../services/analysisResult.service.js";
 import { getJwtSecret } from "../../../../lib/auth/jwtSecret.js";
 import { createNotificationBestEffort } from "../../../../lib/notifications.js";
 
+// دالة لجلب كائن Prisma (قاعدة البيانات)
 async function _getPrisma() {
   const mod = await import("../../../../lib/prismaClient.js");
   return mod.default;
 }
 
+// تحويل نتيجة الذكاء الاصطناعي إلى قيمة موجبة أو سالبة
 function toAiResult(prediction) {
   const p = String(prediction || "").toLowerCase();
   // Treat "normal"/"negative" as NEGATIVE; everything else defaults to POSITIVE
@@ -41,15 +46,18 @@ function toAiResult(prediction) {
   return "POSITIVE";
 }
 
+// ضبط قيمة الثقة بين 0 و 1
 function clamp01(value) {
   const n = Number(value);
   if (!Number.isFinite(n)) return 0;
   return Math.max(0, Math.min(1, n));
 }
 
+// دالة استقبال طلب تحليل صورة أشعة
 export async function POST(request) {
   try {
-    // auth: accept token from cookie OR Authorization header OR body
+   // المصادقة: قبول الرمز المميز من ملف تعريف الارتباط أو رأس المصادقة أو نص الطلب
+    // استخراج التوكن من الكوكيز أو الهيدر أو جسم الطلب
     let token = request.cookies.get("token")?.value;
     // (no dynamic import helpers or debug bypass in production code)
     if (!token) {
@@ -65,6 +73,7 @@ export async function POST(request) {
     if (!token)
       return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
+    // التحقق من أن التوكن غير ملغي (مستخدم محظور)
     try {
       const revoked = await isTokenRevoked(token);
       if (revoked)
@@ -77,6 +86,7 @@ export async function POST(request) {
     }
 
     let payload;
+    // فك تشفير التوكن والتحقق منه
     try {
       payload = jwt.verify(token, getJwtSecret());
     } catch (e) {
@@ -94,7 +104,7 @@ export async function POST(request) {
         { status: 401 },
       );
 
-    // parse multipart form (browser form-data)
+    // استخراج بيانات الصورة من النموذج المرسل (formData)
     const form = await request.formData();
     const file = form.get("image");
     if (!file)
@@ -103,7 +113,7 @@ export async function POST(request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Strict size limit: reject files larger than MAX_FILE_SIZE
+    // التحقق من حجم الصورة المرفوعة وعدم تجاوز الحد الأقصى
     const MAX_FILE_SIZE = Number(
       process.env.MAX_UPLOAD_BYTES || 10 * 1024 * 1024,
     ); // default 10MB
@@ -124,11 +134,11 @@ export async function POST(request) {
       size: buffer.length,
     };
 
-    // pass optional with_heatmap flag from the multipart form (checkbox)
+    // استخراج خيار توليد خريطة حرارية (heatmap) إذا تم تفعيله في النموذج
     try {
       const withHeatmapRaw = form.get("with_heatmap");
       if (withHeatmapRaw !== null) {
-        // form fields arrive as strings: 'true'/'false' or 'on'
+        // حقول النموذج تصل كسلاسل نصية: 'true'/'false' أو 'on'
         fileObj.with_heatmap =
           String(withHeatmapRaw) === "true" || String(withHeatmapRaw) === "on";
       }
@@ -136,7 +146,7 @@ export async function POST(request) {
       fileObj.with_heatmap = false;
     }
 
-    // detect file type from buffer (stronger than trusting the client-provided mime)
+    // محاولة اكتشاف نوع الملف المرفوع من البيانات وليس فقط من الامتداد
     let detected = null;
     try {
       const ft = await import("file-type");
@@ -144,20 +154,20 @@ export async function POST(request) {
         detected = await ft.fileTypeFromBuffer(buffer);
       }
     } catch (e) {
-      // file-type not installed or failed — we'll fallback to extension/mimetype heuristics
+      // لم يتم تثبيت مكتبة file-type أو فشلت — سنعود إلى استخدام الامتداد/نوع MIME كاحتياط
       detected = null;
     }
 
-    // --- Securely write uploaded file to public/uploads/ so Next.js can serve it ---
+    // حفظ الصورة المرفوعة في مجلد uploads بشكل آمن مع اسم فريد
     try {
       const uploadsDir = path.join(process.cwd(), "public", "uploads");
       if (!fs.existsSync(uploadsDir))
         fs.mkdirSync(uploadsDir, { recursive: true });
 
-      // generate unique filename (use internal helper)
+      // توليد اسم ملف فريد (استخدم دالة مساعدة داخلية)
       const uuid = generateUUID();
 
-      // strict allowed extensions & mapping
+      // امتدادات مسموح بها صارمة وخريطة
       const allowed = new Set([
         ".png",
         ".jpg",
@@ -169,7 +179,7 @@ export async function POST(request) {
         ".tiff",
       ]);
 
-      // prefer detected extension if available
+      // يفضل استخدام الامتداد المكتشف إن وجد
       let safeExt = "";
       let detectedMime = "";
       if (detected && detected.ext) {
@@ -178,7 +188,7 @@ export async function POST(request) {
         detectedMime = detected.mime || "";
       }
 
-      // fallback to client-provided extension or mimetype
+      // الرجوع إلى الامتداد أو نوع MIME الذي يوفره العميل إذا لم يتم الكشف عنه
       if (!safeExt) {
         const rawExt = path.extname(fileObj.originalname || "") || "";
         const ext = String(rawExt).toLowerCase();
@@ -199,7 +209,7 @@ export async function POST(request) {
         }
       }
 
-      // Strict check: reject unsupported/unknown image types
+      // فحص دقيق: رفض أنواع الصور غير المدعومة/غير المعروفة
       if (!safeExt || (!detectedMime && !fileObj.mimetype)) {
         return NextResponse.json(
           {
@@ -210,7 +220,7 @@ export async function POST(request) {
         );
       }
 
-      // if file-type returned a mime, ensure it's an image
+      // إذا أعاد نوع الملف نوع MIME، فتأكد من أنه صورة
       if (detectedMime && !String(detectedMime).startsWith("image/")) {
         return NextResponse.json(
           {
@@ -229,10 +239,9 @@ export async function POST(request) {
 
       await fs.promises.writeFile(filePath, buffer);
 
-      // expose URL path for frontend (served from public/uploads via Next.js static files)
-      // this will be available at /uploads/<filename>
+      // توليد رابط الصورة ليتمكن الواجهة من عرضها
       var imageUrl = `/uploads/${encodeURIComponent(safeFileName)}`;
-      // if enabled, generate a signed URL (note: enforcing signature requires middleware)
+      // في حال التفعيل، قم بإنشاء عنوان URL موقّع (ملاحظة: تطبيق التحقق من التوقيع يتطلب وجود Middleware)
       if (process.env.ENABLE_SIGNED_URLS === "1") {
         const signingSecret =
           process.env.UPLOAD_URL_SIGNING_SECRET || getJwtSecret();
@@ -245,7 +254,7 @@ export async function POST(request) {
         imageUrl = `/uploads/${encodeURIComponent(safeFileName)}?exp=${expires}&sig=${sig}`;
       }
 
-      // update fileObj for downstream usage
+      // تحديث كائن الملف للاستخدام في المراحل التالية
       fileObj.savedPath = filePath;
       fileObj.savedUrl = imageUrl;
     } catch (e) {
@@ -253,14 +262,14 @@ export async function POST(request) {
         "/api/analysis/analyze: failed to save uploaded file",
         e && e.message,
       );
-      // continue without failing the whole request; inference can still run on buffer
+      // الاستمرار حتى لو فشل الحفظ؛ يمكن للذكاء الاصطناعي أن يعمل على البيانات في الذاكرة
       var imageUrl = `/uploads/${fileObj.originalname}`;
     }
 
-    // call AI service (use ESM runInference)
+    // استدعاء خدمة الذكاء الاصطناعي لتحليل الصورة
     const rawAnalysisResult = await runInference(fileObj);
 
-    // normalize possible snake_case / camelCase fields to a single shape
+    // توحيد شكل نتيجة التحليل بغض النظر عن تنسيق الحقول
     const normalize = (r) => ({
       analysisId: r.analysis_id ?? r.analysisId ?? null,
       prediction: r.prediction ?? "Unknown",
@@ -277,13 +286,13 @@ export async function POST(request) {
 
     const analysisResult = normalize(rawAnalysisResult);
 
-    // imageUrl should have been set when saving the file above
-    // fallback to a generic path if saving failed
+    // التأكد من وجود رابط للصورة حتى لو فشل الحفظ
     const finalImageUrl =
       typeof imageUrl === "string"
         ? imageUrl
         : `/uploads/${fileObj.originalname}`;
 
+    // حفظ نتيجة التحليل في قاعدة البيانات (جدول التحليلات)
     let saved = null;
     let saveError = null;
     try {
@@ -295,11 +304,11 @@ export async function POST(request) {
     } catch (e) {
       saveError = e && (e.message ?? String(e));
       console.warn("Failed to save analysis result", saveError, e && e.stack);
-      // continue and return the normalized analysis result even if saving fails
+      // الاستمرار حتى لو فشل الحفظ
     }
 
-    // Also persist into MedicalRecord so patient/doctor results pages can display real reports.
-    // This is best-effort and should never break the analysis endpoint.
+    // إضافة نتيجة التحليل إلى سجل المريض الطبي (MedicalRecord)
+    // وإرسال إشعار للمريض والطبيب عند نجاح العملية
     try {
       const prisma = await _getPrisma();
       const patient = await prisma.patient.findUnique({
@@ -320,6 +329,7 @@ export async function POST(request) {
           },
         });
 
+        // إشعار المريض بوجود نتيجة فحص جديدة في سجله
         await createNotificationBestEffort(prisma, {
           userId,
           type: "success",
@@ -329,7 +339,7 @@ export async function POST(request) {
           },
         });
 
-        // Notify doctor (real notifications)
+         // إشعار الطبيب المسؤول بوجود نتيجة فحص جديدة لأحد مرضاه
         if (patient?.doctorId) {
           const patientName = patient?.fullName || null;
           await createNotificationBestEffort(prisma, {
@@ -349,7 +359,7 @@ export async function POST(request) {
       );
     }
 
-    // if saved, Prisma returns camelCase fields; otherwise return normalized object
+    // تجهيز الاستجابة النهائية للواجهة (تتضمن النتيجة وحالة الحفظ)
     const responsePayload = {
       success: true,
       data: saved ?? analysisResult,
@@ -360,7 +370,7 @@ export async function POST(request) {
 
     return NextResponse.json(responsePayload);
   } catch (e) {
-    // log full stack for debugging
+    // في حال حدوث خطأ غير متوقع، يتم تسجيله وإرجاع رسالة خطأ للواجهة
     console.error("/api/analysis/analyze error", e && e.message, e && e.stack);
     if (process.env.NODE_ENV !== "production") {
       return NextResponse.json(

@@ -244,12 +244,56 @@ io.on("connection", (socket) => {
       } else {
         const set = onlineByChat.get(String(chatId));
         onlineIds = set ? Array.from(set) : [];
-      }
+          // simple presence: notify rooms when user connects
+          // تحديث عداد الرسائل غير المقروءة للطرف الآخر
+          socket.on("send_message", async (data) => {
+            // ...existing code...
+            io.to(chatRoom).emit("message", savedMessage);
+            io.to(chatRoom).emit("message_update", { chatId: chatId });
+
+            try {
+              const unreadCount = await prisma.message.count({
+                where: {
+                  chatId: chatId,
+                  sender: data.sender === "doctor" ? "patient" : "doctor",
+                  status: { not: "read" },
+                },
+              });
+              io.to(chatRoom).emit("unread_count_update", {
+                chatId: chatId,
+                unreadCount,
+              });
+            } catch (e) {
+              console.error("Error emitting unread_count_update:", e);
+            }
+          });
       for (const id of onlineIds) {
         if (!id) continue;
         if (String(id) === String(socket.user.id)) continue;
         socket.emit("presence", { userId: id, online: true });
-      }
+          });
+  
+          // تحديث عداد الرسائل غير المقروءة بعد القراءة
+          socket.on("mark_read", async ({ chatId, userType }) => {
+            // ...existing code...
+            io.to(chatRoom).emit("message_update", { chatId });
+
+            try {
+              const unreadCount = await prisma.message.count({
+                where: {
+                  chatId: chatId,
+                  sender: userType === "doctor" ? "patient" : "doctor",
+                  status: { not: "read" },
+                },
+              });
+              io.to(chatRoom).emit("unread_count_update", {
+                chatId: chatId,
+                unreadCount,
+              });
+            } catch (e) {
+              console.error("Error emitting unread_count_update:", e);
+            }
+          });
     } catch (e) {
       console.error("presence snapshot error", e);
     }

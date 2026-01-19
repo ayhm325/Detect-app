@@ -1,3 +1,5 @@
+// نقطة نهاية API لإدارة سجل تحاليل الأشعة
+// يدعم جلب سجل التحاليل (GET) وحذف نتيجة محددة (DELETE)
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { isTokenRevoked } from "../../../../lib/auth/revocation.server.js";
@@ -7,9 +9,10 @@ import {
 } from "../../../../services/analysisResult.service.js";
 import { getJwtSecret } from "../../../../lib/auth/jwtSecret.js";
 
+// دالة جلب سجل التحاليل للمستخدم الحالي
 export async function GET(request) {
   try {
-    // extract token
+    // استخراج التوكن من الكوكيز أو الهيدر
     let token = request.cookies.get("token")?.value;
     if (!token) {
       const hdr =
@@ -20,6 +23,7 @@ export async function GET(request) {
     if (!token)
       return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
+    // التحقق من أن التوكن غير ملغي (مستخدم محظور)
     try {
       const revoked = await isTokenRevoked(token);
       if (revoked)
@@ -32,6 +36,7 @@ export async function GET(request) {
     }
 
     let payload;
+    // فك تشفير التوكن والتحقق منه
     try {
       payload = jwt.verify(token, getJwtSecret());
     } catch (e) {
@@ -45,10 +50,13 @@ export async function GET(request) {
         { status: 401 },
       );
 
+    // جلب سجل التحاليل من قاعدة البيانات
     const results = await getAnalysisHistory(userId);
 
+    // إرجاع النتائج للواجهة
     return NextResponse.json({ success: true, data: results });
   } catch (e) {
+    // في حال حدوث خطأ غير متوقع، يتم تسجيله وإرجاع رسالة خطأ للواجهة
     console.error("/api/analysis/history error", e && e.message, e && e.stack);
     if (process.env.NODE_ENV !== "production") {
       return NextResponse.json(
@@ -60,9 +68,10 @@ export async function GET(request) {
   }
 }
 
+// دالة حذف نتيجة تحليل من سجل المستخدم
 export async function DELETE(request) {
   try {
-    // auth same as GET
+    // نفس خطوات المصادقة كما في GET
     let token = request.cookies.get("token")?.value;
     if (!token) {
       const hdr =
@@ -73,6 +82,7 @@ export async function DELETE(request) {
     if (!token)
       return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
+    // التحقق من أن التوكن غير ملغي (مستخدم محظور)
     try {
       const revoked = await isTokenRevoked(token);
       if (revoked)
@@ -85,6 +95,7 @@ export async function DELETE(request) {
     }
 
     let payload;
+    // فك تشفير التوكن والتحقق منه
     try {
       payload = jwt.verify(token, getJwtSecret());
     } catch (e) {
@@ -98,7 +109,7 @@ export async function DELETE(request) {
         { status: 401 },
       );
 
-    // accept id from query or body
+    // قبول معرف النتيجة (id) من الاستعلام أو من جسم الطلب
     const url = new URL(request.url);
     let id = url.searchParams.get("id");
     if (!id) {
@@ -108,10 +119,13 @@ export async function DELETE(request) {
 
     if (!id) return NextResponse.json({ error: "missing_id" }, { status: 400 });
 
+    // حذف النتيجة من قاعدة البيانات
     const result = await deleteAnalysisResult(userId, id);
 
+    // إرجاع عدد النتائج المحذوفة
     return NextResponse.json({ success: true, deletedCount: result.count });
   } catch (e) {
+    // في حال حدوث خطأ غير متوقع، يتم تسجيله وإرجاع رسالة خطأ للواجهة
     console.error(
       "/api/analysis/history DELETE error",
       e && e.message,

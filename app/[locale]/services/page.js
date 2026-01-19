@@ -28,10 +28,10 @@ export default function ServicesPage() {
         <div className="flex justify-end mb-4">
           <button
             onClick={toggleLocale}
-            className="px-4 py-2 rounded-full border border-(--ui-border) bg-(--ui-surface) text-(--ui-foreground) font-semibold hover:bg-(--ui-surface-2)/60 transition-colors"
+            className="px-5 py-2 rounded-full font-bold btn-gradient text-white shadow focus:outline-none focus:ring-2 focus:ring-(--color-primary-500) transition-all"
             aria-label={t("languageToggleAria")}
           >
-            {t("languageToggleLabel")}
+            {locale === "ar" ? "EN" : "AR"}
           </button>
         </div>
         <h1 className="text-4xl font-bold mb-6 text-center brand-gradient-text">
@@ -40,23 +40,25 @@ export default function ServicesPage() {
         <p className="text-lg text-(--ui-muted-foreground) mb-12 text-center max-w-2xl mx-auto">
           {t("description")}
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
-          {services.map((service, idx) => (
-            <UnifiedCard
-              key={idx}
-              className="rounded-3xl p-10 border border-(--ui-border) flex flex-col items-center text-center hover:bg-(--ui-surface-2)/60 transition-colors animate-fadeIn min-h-65"
-              glass
-              style={{ minWidth: 0 }}
-            >
-              {/* يمكنك إضافة أيقونات ثابتة أو حسب idx هنا */}
-              <h2 className="text-2xl md:text-3xl font-extrabold mb-4 text-(--ui-foreground)">
-                {service.name}
-              </h2>
-              <p className="text-(--ui-muted-foreground) text-lg md:text-xl font-medium leading-relaxed">
-                {service.desc}
-              </p>
-            </UnifiedCard>
-          ))}
+        <div className="flex justify-center items-center min-h-[50vh]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-10 justify-center items-center">
+            {services.map((service, idx) => (
+              <UnifiedCard
+                key={idx}
+                className="rounded-3xl p-10 border border-(--ui-border) flex flex-col items-center text-center hover:scale-105 hover:shadow-lg hover:border-(--color-primary-500) transition-all animate-fadeIn min-h-65"
+                glass
+                style={{ minWidth: 0 }}
+              >
+                {/* يمكنك إضافة أيقونات ثابتة أو حسب idx هنا */}
+                <h2 className="text-2xl md:text-3xl font-extrabold mb-4 text-(--ui-foreground)">
+                  {service.name}
+                </h2>
+                <p className="text-(--ui-muted-foreground) text-lg md:text-xl font-medium leading-relaxed">
+                  {service.desc}
+                </p>
+              </UnifiedCard>
+            ))}
+          </div>
         </div>
         <div className="flex justify-center">
           <Link

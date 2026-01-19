@@ -1,0 +1,14 @@
+{
+  "systemName": "Detect AI Platform",
+  "defaultLanguage": "ar",
+  "registrationEnabled": true,
+  "allowPatientChangeDoctor": false,
+  "maxDoctorChangeRequests": 3,
+  "appointmentInterval": 15,
+  "rolePermissions": {
+    "doctor": true,
+    "patient": true
+  },
+  "sessionDuration": 30,
+  "enableTwoFactor": false
+}

@@ -7,7 +7,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const { email, password, fullName, phone, doctorId } = body;
-    if (!email || !password || !fullName) {
+    if (!email || !password || !fullName || !doctorId) {
       return NextResponse.json(
         { error: "جميع الحقول مطلوبة" },
         { status: 400 },
@@ -41,6 +41,7 @@ export async function POST(request) {
       },
       include: { patient: true },
     });
+    
     return NextResponse.json(
       {
         user: {

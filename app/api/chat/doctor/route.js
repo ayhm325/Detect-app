@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma from "../../../../lib/prismaClient.js";
+import { getOrCreateChat, getUnreadCount } from "../../../../lib/chatUtils.js";
 import { getJwtSecret } from "../../../../lib/auth/jwtSecret.js";
 import { getJwtVerifyOptions } from "../../../../lib/auth/jwtClaims.js";
 
@@ -10,12 +11,10 @@ export function POST() {
 
 export async function GET(request) {
   try {
-    // Accept token from cookie OR Authorization header (Bearer) as fallback
+    // استخراج التوكن والتحقق من الصلاحية
     let token = request.cookies.get("token")?.value;
     if (!token) {
-      const hdr =
-        request.headers.get("authorization") ||
-        request.headers.get("Authorization");
+      const hdr = request.headers.get("authorization") || request.headers.get("Authorization");
       if (hdr && hdr.startsWith("Bearer ")) token = hdr.slice(7).trim();
     }
     if (!token) {
@@ -33,9 +32,7 @@ export async function GET(request) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
 
-    // Ensure we return all patients assigned to this doctor.
-    // For patients without a Chat row yet, create one so doctor can start messaging.
-    // only include patients who are currently active
+    // جلب المرضى المرتبطين بالطبيب
     const patients = await prisma.patient.findMany({
       where: { doctorId: user.id, status: "active" },
       select: {
@@ -47,21 +44,15 @@ export async function GET(request) {
       },
     });
 
-    const chats = [];
-    for (const p of patients) {
-      let chat = await prisma.chat.findFirst({
-        where: { doctorId: user.id, patientId: p.id },
-        include: { messages: { orderBy: { createdAt: "desc" }, take: 1 } },
-      });
-      if (!chat) {
-        chat = await prisma.chat.create({
-          data: { doctorId: user.id, patientId: p.id },
-        });
-      }
-      chats.push({ id: chat.id, patient: p, messages: chat.messages || [] });
-    }
+    // جلب أو إنشاء المحادثات لكل مريض بشكل متوازي
+    const chats = await Promise.all(
+      patients.map(async (p) => {
+        const { chat } = await getOrCreateChat(user.id, p.id);
+        return { id: chat.id, patient: p };
+      })
+    );
 
-    // Also include any chats that might exist for this doctor but whose patient isn't linked via doctorId
+    // جلب أي محادثات إضافية للطبيب مع مرضى غير مرتبطين مباشرة
     const extraChats = await prisma.chat.findMany({
       where: { doctorId: user.id },
       include: {
@@ -74,60 +65,61 @@ export async function GET(request) {
             status: true,
           },
         },
-        messages: { orderBy: { createdAt: "desc" }, take: 1 },
       },
     });
     for (const c of extraChats) {
-      // avoid duplicates and only include if patient is active
       if (!chats.find((x) => x.id === c.id) && c.patient?.status === "active")
-        chats.push(c);
+        chats.push({ id: c.id, patient: c.patient });
     }
 
-    // sort by last updated (messages or chat.updatedAt)
-    chats.sort((a, b) => {
-      const ta =
-        a.messages && a.messages[0]?.createdAt
-          ? new Date(a.messages[0].createdAt).getTime()
-          : 0;
-      const tb =
-        b.messages && b.messages[0]?.createdAt
-          ? new Date(b.messages[0].createdAt).getTime()
-          : 0;
+    // جلب آخر رسالة لكل محادثة في استعلام واحد
+    const chatIds = chats.map((c) => c.id);
+    let lastMessages = [];
+    if (chatIds.length) {
+      lastMessages = await prisma.message.findMany({
+        where: { chatId: { in: chatIds } },
+        orderBy: [{ chatId: "asc" }, { createdAt: "desc" }],
+        distinct: ["chatId"],
+        take: chatIds.length,
+      });
+    }
+
+    // حساب الرسائل غير المقروءة لكل محادثة في استعلام واحد
+    let unreadCounts = {};
+    if (chatIds.length) {
+      const grouped = await prisma.message.groupBy({
+        by: ["chatId"],
+        where: {
+          chatId: { in: chatIds },
+          sender: "patient",
+          status: { not: "read" },
+        },
+        _count: { _all: true },
+      });
+      for (const row of grouped) {
+        unreadCounts[row.chatId] = row._count?._all || 0;
+      }
+    }
+
+    // بناء الاستجابة النهائية
+    const chatsWithDetails = chats.map((c) => {
+      const lastMsg = lastMessages.find((m) => m.chatId === c.id);
+      return {
+        id: c.id,
+        patient: c.patient,
+        messages: lastMsg ? [lastMsg] : [],
+        unreadCount: unreadCounts[c.id] || 0,
+      };
+    });
+
+    // ترتيب حسب آخر رسالة
+    chatsWithDetails.sort((a, b) => {
+      const ta = a.messages[0]?.createdAt ? new Date(a.messages[0].createdAt).getTime() : 0;
+      const tb = b.messages[0]?.createdAt ? new Date(b.messages[0].createdAt).getTime() : 0;
       return tb - ta;
     });
 
-    // Unread messages for doctor: messages sent by patient and not yet read.
-    const chatIds = chats.map((c) => c.id);
-    const unreadByChat = new Map();
-    try {
-      if (chatIds.length) {
-        const grouped = await prisma.message.groupBy({
-          by: ["chatId"],
-          where: {
-            chatId: { in: chatIds },
-            sender: "patient",
-            status: { not: "read" },
-          },
-          _count: { _all: true },
-        });
-        for (const row of grouped) {
-          unreadByChat.set(row.chatId, row._count?._all || 0);
-        }
-      }
-    } catch (e) {
-      // Best-effort: if groupBy isn't supported in this Prisma version, fall back to 0.
-      console.warn(
-        "/api/chat/doctor unreadCount compute failed",
-        e?.message || e,
-      );
-    }
-
-    const chatsWithUnread = chats.map((c) => ({
-      ...c,
-      unreadCount: unreadByChat.get(c.id) || 0,
-    }));
-
-    return NextResponse.json({ chats: chatsWithUnread });
+    return NextResponse.json({ chats: chatsWithDetails });
   } catch (error) {
     console.error("/api/chat/doctor error", error);
     return NextResponse.json({ error: "server_error" }, { status: 500 });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma from "../../../../lib/prismaClient.js";
+import { getUnreadCount } from "../../../../lib/chatUtils.js";
 import { getJwtSecret } from "../../../../lib/auth/jwtSecret.js";
 import { getJwtVerifyOptions } from "../../../../lib/auth/jwtClaims.js";
 
@@ -63,8 +64,14 @@ export async function GET(request) {
         },
       },
     });
-
-    return NextResponse.json({ chats });
+    // إضافة عدد الرسائل غير المقروءة لكل محادثة
+    const chatsWithUnread = await Promise.all(
+      chats.map(async (chat) => {
+        const unreadCount = await getUnreadCount(chat.id, null, null);
+        return { ...chat, unreadCount };
+      })
+    );
+    return NextResponse.json({ chats: chatsWithUnread });
   } catch (error) {
     console.error("/api/chat/admin error", error);
     return NextResponse.json({ error: "server_error" }, { status: 500 });
