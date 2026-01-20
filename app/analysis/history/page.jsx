@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import AnalysisDetailsModal from "../../../components/analysis/AnalysisDetailsModal";
-import AnalysisResultCard from "../../../components/analysis/AnalysisResultCard";
+import AnalysisDetailsModal from "../../components/analysis/AnalysisDetailsModal";
+import AnalysisResultCard from "../../components/analysis/AnalysisResultCard";
 
 export default function AnalysisHistoryPage() {
   const [isLoading, setIsLoading] = useState(false); // حالة التحميل
