@@ -4,15 +4,21 @@ export default function Loading() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-(--ui-surface) text-(--ui-foreground)">
       <div className="text-center">
-        {/* Animated Logo */}
+        {/* شعار متحرك */}
         <div className="relative w-32 h-32 mx-auto mb-8">
+          {/* خلفية متوهجة مع تأثير blur و pulse */}
           <div className="absolute inset-0 brand-gradient rounded-full animate-pulse opacity-20 blur-xl" />
+          
+          {/* دائرة دوارة مع تأثير gradient */}
           <div
             className="absolute inset-0 brand-gradient rounded-full animate-spin"
-            style={{ animationDuration: "3s" }}
+            style={{ animationDuration: "3s" }} // سرعة الدوران
           >
+            {/* طبقة داخلية لتفريغ وسط الدائرة */}
             <div className="absolute inset-2 bg-(--ui-surface) rounded-full" />
           </div>
+
+          {/* أيقونة في مركز الشعار */}
           <div className="absolute inset-0 flex items-center justify-center">
             <svg
               className="w-16 h-16 text-(--ui-ring)"
@@ -30,20 +36,18 @@ export default function Loading() {
           </div>
         </div>
 
-        {/* Loading Text intentionally omitted (root loading is locale-agnostic) */}
-
-        {/* Loading Bar */}
+        {/* شريط التحميل */}
         <div className="w-64 h-2 bg-(--ui-surface-2) rounded-full overflow-hidden mx-auto border border-(--ui-border)">
           <div className="h-full brand-gradient animate-gradient bg-size-[200%_100%]" />
         </div>
 
-        {/* Loading Dots */}
+        {/* نقاط التحميل المتحركة */}
         <div className="flex justify-center gap-2 mt-6">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
               className="w-3 h-3 bg-(--ui-ring) rounded-full animate-bounce"
-              style={{ animationDelay: `${i * 0.15}s` }}
+              style={{ animationDelay: `${i * 0.15}s` }} // تأخير متتابع للنقاط
             />
           ))}
         </div>

@@ -1,5 +1,5 @@
 {
-  "systemName": "Detect AI Platform",
+  "systemName": "PneumoDetect",
   "defaultLanguage": "ar",
   "registrationEnabled": true,
   "allowPatientChangeDoctor": false,

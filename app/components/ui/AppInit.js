@@ -1,17 +1,8 @@
-// app/layout.jsx
-import React from "react";
-import "./globals.css";
-import { ToastProvider } from "./components/ui/ToastProvider";
-import AppInit from "./components/ui/AppInit";
-import { geistSans, geistMono } from "./fonts";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
-import { LocaleProvider } from "./contexts/LocaleContext";
-import { ThemeProvider } from "./theme-provider";
+"use client";
+import { useEffect } from "react";
 
-// دالة لتطبيق الثيم من localStorage
+// استيراد الدوال من نفس ملف layout.js
 function applyThemeFromStorage() {
-  if (typeof window === "undefined") return;
   try {
     const theme = ["light", "dark"].includes(localStorage.getItem("app-theme"))
       ? localStorage.getItem("app-theme")
@@ -25,9 +16,7 @@ function applyThemeFromStorage() {
   }
 }
 
-// دالة لمنع WebSocket التطويرية
 function blockDevWebSocket() {
-  if (typeof window === "undefined") return;
   const OriginalWS = window.WebSocket;
   window.WebSocket = function (url, protocols) {
     try {
@@ -55,14 +44,10 @@ function blockDevWebSocket() {
   } catch {}
 }
 
-// دالة لتطبيق meta theme-color ديناميكي
 function applyMetaThemeColors() {
-  if (typeof window === "undefined") return;
   const root = document.documentElement;
-
   const readVar = (name) => getComputedStyle(root).getPropertyValue(name).trim();
   const resolveVar = (...names) => names.map(readVar).find(Boolean) || "";
-
   const ensureMeta = (media) => {
     let el = document.querySelector(`meta[name="theme-color"][media="${media}"]`);
     if (!el) {
@@ -73,14 +58,12 @@ function applyMetaThemeColors() {
     }
     return el;
   };
-
   const applyColors = () => {
     const light = resolveVar("--color-bright-500", "--color-bright", "--color-primary-500");
     const dark = resolveVar("--color-background-dark", "--color-neutral", "--color-background");
     if (light) ensureMeta("(prefers-color-scheme: light)").setAttribute("content", light);
     if (dark) ensureMeta("(prefers-color-scheme: dark)").setAttribute("content", dark);
   };
-
   applyColors();
   ["(prefers-color-scheme: light)", "(prefers-color-scheme: dark)"].forEach((media) => {
     const mql = window.matchMedia(media);
@@ -89,29 +72,11 @@ function applyMetaThemeColors() {
   });
 }
 
-export default async function RootLayout({ children }) {
-  const locale = await getLocale();
-  const dir = locale === "ar" ? "rtl" : "ltr";
-  const messages = await getMessages();
-
-  return (
-    <html
-      suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable}`}
-      lang={locale}
-      dir={dir}
-      data-scroll-behavior="smooth"
-    >
-      <body>
-        <AppInit />
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <LocaleProvider>
-            <ThemeProvider>
-              <ToastProvider>{children}</ToastProvider>
-            </ThemeProvider>
-          </LocaleProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
-  );
+export default function AppInit() {
+  useEffect(() => {
+    applyThemeFromStorage();
+    blockDevWebSocket();
+    applyMetaThemeColors();
+  }, []);
+  return null;
 }

@@ -2,23 +2,35 @@
 
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
 
+// المفتاح المستخدم في Local Storage لتخزين التيم
 const STORAGE_KEY = "app-theme";
 
-// Create context FIRST before using it
-const ThemeContext = createContext({ theme: "light", setTheme: () => {} });
+// إنشاء Context مع القيمة الافتراضية
+const ThemeContext = createContext({
+  theme: "light",      // التيم الحالي
+  setTheme: () => {},  // دالة لتغيير التيم
+});
 
+// دالة مساعدة للتحقق من صلاحية القيمة وإرجاع قيمة افتراضية إذا كانت غير صالحة
 function normalizeTheme(value, fallback = "light") {
   return value === "dark" || value === "light" ? value : fallback;
 }
 
+/**
+ * ThemeProvider - يلف التطبيق لتوفير Theme Context
+ * @param {React.ReactNode} children - عناصر التطبيق
+ * @param {string} defaultTheme - القيمة الافتراضية للتيم (light أو dark)
+ */
 export function ThemeProvider({ children, defaultTheme = "light" }) {
+  // الحالة الحالية للتيم
   const [theme, setTheme] = useState(() =>
-    normalizeTheme(defaultTheme, "light"),
+    normalizeTheme(defaultTheme, "light")
   );
+
+  // حالة للتأكد أن المكون تم تركيبه على المتصفح لتجنب مشاكل SSR
   const [hasMounted, setHasMounted] = useState(false);
 
-  // Reconcile stored theme AFTER hydration to avoid server/client render mismatch.
-  // This also prevents overwriting the pre-hydration <html> theme script.
+  // استرجاع التيم المخزن في LocalStorage بعد تركيبه على العميل
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -26,16 +38,19 @@ export function ThemeProvider({ children, defaultTheme = "light" }) {
         setTheme(stored);
       }
     } catch {
-      /* ignore */
+      // تجاهل أي أخطاء أثناء الوصول للـ LocalStorage
     } finally {
       setHasMounted(true);
     }
   }, []);
 
+  // مزامنة التيم مع الـ <html> بعد التركيب أو تغيير التيم
   useEffect(() => {
     if (!hasMounted) return;
+
     const root = document.documentElement;
-    // Sync explicit theme classes to override prefers-color-scheme media queries
+
+    // مزامنة الكلاسات لتجاوز media query
     if (theme === "dark") {
       root.classList.add("dark");
       root.classList.remove("light");
@@ -44,16 +59,18 @@ export function ThemeProvider({ children, defaultTheme = "light" }) {
       root.classList.remove("dark");
     }
 
-    // Keep data-theme attribute for compatibility
+    // الاحتفاظ بصفة data-theme لتوافق بعض المكتبات
     root.setAttribute("data-theme", theme);
 
+    // تخزين التيم في LocalStorage
     try {
       window.localStorage.setItem(STORAGE_KEY, theme);
     } catch {
-      /* ignore */
+      // تجاهل أي أخطاء
     }
   }, [theme, hasMounted]);
 
+  // استخدام useMemo لتحسين الأداء وعدم إعادة إنشاء القيمة إلا عند تغيير التيم
   const value = useMemo(() => ({ theme, setTheme }), [theme]);
 
   return (
@@ -61,6 +78,9 @@ export function ThemeProvider({ children, defaultTheme = "light" }) {
   );
 }
 
+/**
+ * useTheme - هوك لاستهلاك Theme Context بسهولة
+ */
 export function useTheme() {
   return useContext(ThemeContext);
 }

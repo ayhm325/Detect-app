@@ -5,17 +5,23 @@ import useLocale from "./hooks/useLocale";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
+/**
+ * صفحة الخطأ (Error Boundary) مع دعم i18n وRTL/LTR
+ */
 export default function Error({ error, reset }) {
-  const tr = useTranslations("rootError");
+  const tr = useTranslations("rootError"); // تحميل الترجمات الخاصة بالخطأ
+  const { locale } = useLocale(); // الحصول على اللغة الحالية
 
+  // تسجيل الخطأ في وضع التطوير
   useEffect(() => {
-    // Log the error to an error reporting service
     if (process.env.NODE_ENV === "development") {
       console.error(error);
     }
   }, [error]);
 
-  const { locale } = useLocale();
+  /**
+   * دالة لإضافة اللّوكال في المسارات تلقائياً
+   */
   const withLocale = (path) => {
     const base = path.startsWith("/") ? path : `/${path}`;
     if (base.startsWith("/en") || base.startsWith("/ar")) return base;
@@ -25,9 +31,13 @@ export default function Error({ error, reset }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="max-w-2xl w-full text-center card-glass px-6 py-10">
-        {/* Error Icon */}
+        {/* =====================
+            أيقونة الخطأ
+        ===================== */}
         <div className="relative w-32 h-32 mx-auto mb-8">
+          {/* خلفية نابضة */}
           <div className="absolute inset-0 bg-(--ui-muted) rounded-full animate-pulse blur-xl" />
+          {/* الأيقونة مع التدرج */}
           <div className="absolute inset-0 brand-gradient rounded-full flex items-center justify-center">
             <svg
               className="w-16 h-16 text-white"
@@ -45,23 +55,26 @@ export default function Error({ error, reset }) {
           </div>
         </div>
 
-        {/* Error Message */}
+        {/* =====================
+            رسالة الخطأ
+        ===================== */}
         <h1 className="text-4xl md:text-5xl font-black brand-gradient-text mb-4">
           {tr("title")}
         </h1>
-
         <p className="text-lg text-(--ui-muted-2) mb-8">
           {error.message || tr("fallbackMessage")}
         </p>
 
-        {/* Error Details (Dev Mode) */}
+        {/* تفاصيل الخطأ (وضع التطوير فقط) */}
         {process.env.NODE_ENV === "development" && (
           <div className="mb-8 p-4 rounded-lg border border-(--ui-border) text-left overflow-auto max-h-40 bg-(--ui-surface-2)">
             <pre className="text-xs text-foreground">{error.stack}</pre>
           </div>
         )}
 
-        {/* Action Buttons */}
+        {/* =====================
+            أزرار الإجراءات (Retry + Back Home)
+        ===================== */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={reset}
@@ -78,7 +91,9 @@ export default function Error({ error, reset }) {
           </Link>
         </div>
 
-        {/* Support Link */}
+        {/* =====================
+            رابط الدعم / الاتصال
+        ===================== */}
         <p className="mt-8 text-sm text-(--ui-muted-2)">
           {tr("supportPrefix")}{" "}
           <Link

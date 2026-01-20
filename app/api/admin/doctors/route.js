@@ -3,9 +3,19 @@ import { withRBAC } from "../../../../lib/auth/withRBAC";
 import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
 import { createNotificationBestEffort } from "../../../../lib/notifications";
+import { DoctorStatus } from "@prisma/client";
 
+/* ============================================================================
+   GET /api/admin/doctors
+   - جلب جميع الأطباء مع بيانات المستخدم المرتبطة
+   - مخصص للأدمن فقط
+   - مع Rate Limiting + Audit Log
+============================================================================ */
 export const GET = withRBAC(
   async (request, user) => {
+    // =========================
+    // Rate Limiting
+    // =========================
     const rl = await rateLimit(request);
     if (rl.limited) {
       logAudit({
@@ -16,9 +26,15 @@ export const GET = withRBAC(
       });
       return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
+
     try {
-      const doctors = await prisma.doctor.findMany({ include: { user: true } });
-      const doctorsWithUser = doctors.map((d) => ({
+      // جلب الأطباء مع المستخدم المرتبط (1-1)
+      const doctors = await prisma.doctor.findMany({
+        include: { user: true },
+      });
+
+      // إعادة تشكيل البيانات لتكون مناسبة للـ Admin UI
+      const normalized = doctors.map((d) => ({
         id: d.userId,
         licenseNumber: d.licenseNumber,
         phone: d.phone,
@@ -31,23 +47,25 @@ export const GET = withRBAC(
               email: d.user.email,
               createdAt: d.user.createdAt,
               isActive: d.user.isActive,
-              isDeleted: d.user.isDeleted,
             }
           : null,
       }));
+
+      // تسجيل عملية العرض في سجل التدقيق
       logAudit({
         event: "admin_doctors_listed",
         userId: user.id,
         ip: request.headers.get("x-forwarded-for"),
-        details: { count: doctorsWithUser.length },
+        details: { count: normalized.length },
       });
-      return Response.json({ doctors: doctorsWithUser });
+
+      return Response.json({ doctors: normalized });
     } catch (error) {
       logAudit({
         event: "admin_doctors_list_error",
         userId: user.id,
         ip: request.headers.get("x-forwarded-for"),
-        details: { error: error.message },
+        details: { error: error?.message },
       });
       return Response.json(
         { error: "حدث خطأ أثناء جلب الأطباء" },
@@ -58,6 +76,12 @@ export const GET = withRBAC(
   ["admin"],
 );
 
+/* ============================================================================
+   POST /api/admin/doctors
+   - إنشاء طبيب جديد
+   - إنشاء User + Doctor
+   - تفعيل الحساب مباشرة
+============================================================================ */
 export const POST = withRBAC(
   async (request, user) => {
     const rl = await rateLimit(request);
@@ -70,16 +94,20 @@ export const POST = withRBAC(
       });
       return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
+
     try {
       const { name, email, phone, licenseNumber, password } =
         await request.json();
+
+      // التحقق من البيانات الأساسية
       if (!name || !email || !phone || !licenseNumber) {
         return Response.json(
-          { error: "يرجى تعبئة جميع الحقول" },
+          { error: "يرجى تعبئة جميع الحقول المطلوبة" },
           { status: 400 },
         );
       }
 
+      // منع تكرار البريد الإلكتروني
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
         return Response.json(
@@ -88,53 +116,58 @@ export const POST = withRBAC(
         );
       }
 
+      // تحديد كلمة المرور
       const defaultPassword = process.env.DEFAULT_DOCTOR_PASSWORD;
       const rawPassword =
         password ||
         defaultPassword ||
         (process.env.NODE_ENV === "development" ? "doctor123" : null);
+
       if (!rawPassword) {
         return Response.json(
-          {
-            error:
-              "Missing password (set DEFAULT_DOCTOR_PASSWORD in production)",
-          },
+          { error: "كلمة المرور غير متوفرة" },
           { status: 400 },
         );
       }
 
+      // تشفير كلمة المرور
       const bcryptMod = await import("bcrypt");
-      const bcrypt = bcryptMod?.default || bcryptMod;
+      const bcrypt = bcryptMod.default || bcryptMod;
       const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
-      const userCreated = await prisma.user.create({
-        data: {
-          fullName: name,
-          email,
-          role: "doctor",
-          password: hashedPassword,
-          isActive: true,
-        },
-      });
+      // ====================================================
+      // إنشاء المستخدم والطبيب داخل Transaction
+      // ====================================================
+      const doctor = await prisma.$transaction(async (tx) => {
+        const userCreated = await tx.user.create({
+          data: {
+            fullName: name,
+            email,
+            role: "doctor",
+            password: hashedPassword,
+            isActive: true, // تفعيل الدخول
+          },
+        });
 
-      const doctor = await prisma.doctor.create({
-        data: {
-          userId: userCreated.id,
-          phone,
-          licenseNumber,
-          status: "active",
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-              createdAt: true,
-              isActive: true,
+        return tx.doctor.create({
+          data: {
+            userId: userCreated.id,
+            phone,
+            licenseNumber,
+            status: "active", // مصدر الحقيقة لحالة الطبيب
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+                createdAt: true,
+                isActive: true,
+              },
             },
           },
-        },
+        });
       });
 
       logAudit({
@@ -143,13 +176,14 @@ export const POST = withRBAC(
         ip: request.headers.get("x-forwarded-for"),
         details: { doctorId: doctor.userId },
       });
+
       return Response.json({ doctor });
     } catch (error) {
       logAudit({
         event: "admin_doctor_create_error",
         userId: user.id,
         ip: request.headers.get("x-forwarded-for"),
-        details: { error: error.message },
+        details: { error: error?.message },
       });
       return Response.json(
         { error: "حدث خطأ أثناء إضافة الطبيب" },
@@ -160,6 +194,12 @@ export const POST = withRBAC(
   ["admin"],
 );
 
+/* ============================================================================
+   PATCH /api/admin/doctors
+   - تغيير حالة الطبيب (active / banned / pending)
+   - مزامنة حالة الدخول isActive
+   - إشعار الطبيب
+============================================================================ */
 export const PATCH = withRBAC(
   async (request, user) => {
     const rl = await rateLimit(request);
@@ -172,46 +212,52 @@ export const PATCH = withRBAC(
       });
       return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
+
     try {
-      const body = await request.json();
-      const id = body?.id;
-      const status = body?.status;
+      const { id, status } = await request.json();
+
+      // التحقق من البيانات
       if (!id || !status) {
-        return Response.json({ error: "بيانات غير صالحة" }, { status: 400 });
+        return Response.json(
+          { error: "بيانات غير صالحة" },
+          { status: 400 },
+        );
       }
 
-      await prisma.doctor.update({ where: { userId: id }, data: { status } });
-      await prisma.user.update({
-        where: { id },
-        data: { isActive: status === "active" },
-      });
-      const affectedUser = await prisma.user.findUnique({ where: { id } });
+      // التحقق من أن الحالة من enum الرسمي
+      if (!Object.values(DoctorStatus).includes(status)) {
+        return Response.json(
+          { error: "حالة الطبيب غير صحيحة" },
+          { status: 400 },
+        );
+      }
 
-      try {
-        await prisma.activity.create({
+      // ====================================================
+      // تنفيذ التحديث داخل Transaction
+      // ====================================================
+      await prisma.$transaction(async (tx) => {
+        await tx.doctor.update({
+          where: { userId: id },
+          data: { status },
+        });
+
+        // isActive هو المصدر الوحيد للتحكم بتسجيل الدخول
+        await tx.user.update({
+          where: { id },
+          data: { isActive: status === "active" },
+        });
+
+        await tx.activity.create({
           data: {
-            type:
-              status === "active"
-                ? "approve_doctor"
-                : "reject_or_delete_doctor",
-            description:
-              status === "active"
-                ? `تمت الموافقة على طبيب: ${affectedUser?.fullName || id} (${affectedUser?.email || ""})`
-                : `تم رفض أو حذف طبيب: ${affectedUser?.fullName || id} (${affectedUser?.email || ""})`,
+            type: "update_doctor_status",
+            description: `تم تحديث حالة الطبيب إلى ${status}`,
             userId: id,
             meta: { status },
           },
         });
-      } catch (e) {
-        logAudit({
-          event: "admin_doctor_activity_log_error",
-          userId: user.id,
-          ip: request.headers.get("x-forwarded-for"),
-          details: { error: e.message },
-        });
-      }
+      });
 
-      // Security/account status notification to the doctor
+      // إشعار الطبيب بتغيير الحالة (Best Effort)
       await createNotificationBestEffort(prisma, {
         userId: id,
         type: status === "active" ? "success" : "warning",
@@ -219,12 +265,11 @@ export const PATCH = withRBAC(
           ar:
             status === "active"
               ? "تم تفعيل حساب الطبيب الخاص بك."
-              : "تم تعطيل/رفض حساب الطبيب الخاص بك.",
+              : "تم تعطيل أو حظر حساب الطبيب الخاص بك.",
           en:
             status === "active"
               ? "Your doctor account has been activated."
-              : "Your doctor account has been disabled/rejected.",
-          meta: { kind: "security_account_status", status },
+              : "Your doctor account has been disabled or banned.",
         },
       });
 
@@ -234,15 +279,19 @@ export const PATCH = withRBAC(
         ip: request.headers.get("x-forwarded-for"),
         details: { doctorId: id, status },
       });
+
       return Response.json({ success: true });
     } catch (error) {
       logAudit({
         event: "admin_doctor_status_update_error",
         userId: user.id,
         ip: request.headers.get("x-forwarded-for"),
-        details: { error: error.message },
+        details: { error: error?.message },
       });
-      return Response.json({ error: "حدث خطأ أثناء التحديث" }, { status: 500 });
+      return Response.json(
+        { error: "حدث خطأ أثناء التحديث" },
+        { status: 500 },
+      );
     }
   },
   ["admin"],

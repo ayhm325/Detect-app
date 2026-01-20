@@ -2,14 +2,19 @@ import { headers } from "next/headers";
 import { useLocale, useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 
-// Localized metadata for Terms
+/**
+ * ============================
+ * Metadata محلي للصفحة (SEO)
+ * ============================
+ */
 export async function generateMetadata() {
   const headerList = await headers();
   const rawPath =
     headerList.get("x-forwarded-uri") || headerList.get("referer") || "/";
-  const locale = rawPath.startsWith("/en") ? "en" : "ar";
+  const locale = rawPath.startsWith("/en") ? "en" : "ar"; // تحديد اللغة بناءً على المسار
   const t = await getTranslations({ locale, namespace: "termsPage" });
   const base = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
   return {
     title: t("title"),
     description: t("description"),
@@ -29,11 +34,16 @@ export async function generateMetadata() {
   };
 }
 
+/**
+ * ============================
+ * Component الصفحة
+ * ============================
+ */
 export default function TermsPage() {
   const locale = useLocale();
-  const dir = locale === "ar" ? "rtl" : "ltr";
-  const t = useTranslations("termsPage");
-  const tp = t.raw ? t.raw() : {};
+  const dir = locale === "ar" ? "rtl" : "ltr"; // تحديد اتجاه النص
+  const t = useTranslations("termsPage"); // الترجمة
+  const tp = t.raw ? t.raw() : {}; // الحصول على النصوص الكاملة (raw)
 
   return (
     <div
@@ -42,7 +52,9 @@ export default function TermsPage() {
       lang={locale}
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* =====================
+            رأس الصفحة
+        ===================== */}
         <div className="text-center mb-16 animate-fadeIn">
           <h1 className="text-5xl font-bold mb-6">
             <span className="brand-gradient-text">{t("title")}</span>
@@ -53,10 +65,13 @@ export default function TermsPage() {
           </p>
         </div>
 
-        {/* Content */}
+        {/* =====================
+            المحتوى
+        ===================== */}
         <div className="card-glass rounded-3xl p-8 md:p-12 shadow-2xl animate-slideUp">
           <div className="prose prose-lg max-w-none space-y-8 prose-headings:text-(--ui-foreground) prose-p:text-(--ui-muted-foreground) prose-li:text-(--ui-muted-foreground)">
-            {/* Section 1 */}
+
+            {/* Section 1: القبول */}
             <section>
               <h2 className="text-3xl font-bold mb-4 text-(--ui-foreground)">
                 {t("acceptance.heading")}
@@ -66,7 +81,7 @@ export default function TermsPage() {
               </p>
             </section>
 
-            {/* Section 2 */}
+            {/* Section 2: وصف الخدمة */}
             <section>
               <h2 className="text-3xl font-bold mb-4 text-(--ui-foreground)">
                 {t("serviceDescription.heading")}
@@ -81,7 +96,7 @@ export default function TermsPage() {
               </ul>
             </section>
 
-            {/* Section 3 */}
+            {/* Section 3: التسجيل */}
             <section>
               <h2 className="text-3xl font-bold mb-4 text-(--ui-foreground)">
                 {t("registration.heading")}
@@ -96,11 +111,13 @@ export default function TermsPage() {
               </ul>
             </section>
 
-            {/* Section 4 */}
+            {/* Section 4: استخدام الخدمة */}
             <section>
               <h2 className="text-3xl font-bold mb-4 text-(--ui-foreground)">
                 {t("serviceUsage.heading")}
               </h2>
+
+              {/* الاستخدام المسموح */}
               <h3 className="text-xl font-semibold text-(--ui-foreground) mb-3">
                 {t("serviceUsage.allowed.title")}
               </h3>
@@ -109,6 +126,8 @@ export default function TermsPage() {
                   <li key={idx}>{item}</li>
                 ))}
               </ul>
+
+              {/* الاستخدام الممنوع */}
               <h3 className="text-xl font-semibold text-(--ui-foreground) mb-3">
                 {t("serviceUsage.prohibited.title")}
               </h3>
@@ -119,7 +138,7 @@ export default function TermsPage() {
               </ul>
             </section>
 
-            {/* Section 5 */}
+            {/* Section 5: إخلاء المسؤولية الطبية */}
             <section>
               <div className="bg-(--ui-danger-bg) border-2 border-(--ui-danger-border) rounded-2xl p-6">
                 <h2 className="text-3xl font-bold mb-4 text-(--ui-danger-foreground)">
@@ -131,7 +150,7 @@ export default function TermsPage() {
               </div>
             </section>
 
-            {/* Section 6 */}
+            {/* Section 6: القيود */}
             <section>
               <h2 className="text-3xl font-bold mb-4 text-(--ui-foreground)">
                 {t("limitation.heading")}
@@ -143,7 +162,7 @@ export default function TermsPage() {
               </ul>
             </section>
 
-            {/* Section 7 */}
+            {/* Section 7: التغييرات */}
             <section>
               <h2 className="text-3xl font-bold mb-4 text-(--ui-foreground)">
                 {t("changes.heading")}
@@ -153,7 +172,7 @@ export default function TermsPage() {
               </p>
             </section>
 
-            {/* Section 8 */}
+            {/* Section 8: الاتصال */}
             <section>
               <h2 className="text-3xl font-bold mb-4 text-(--ui-foreground)">
                 {t("contact.heading")}
@@ -162,6 +181,7 @@ export default function TermsPage() {
                 {t("contact.content")}
               </p>
             </section>
+
           </div>
         </div>
       </div>

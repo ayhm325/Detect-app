@@ -199,6 +199,8 @@ model Notification {
   isDeleted Boolean          @default(false)
 
   createdAt DateTime @default(now())
+  readAt    DateTime?
+  archivedAt DateTime?
 
   user User @relation(fields: [userId], references: [id])
 }

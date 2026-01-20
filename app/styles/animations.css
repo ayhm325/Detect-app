@@ -1,4 +1,7 @@
-/* Animated gradient + hologram shimmer + floating shapes */
+/* ===========================
+   خلفيات هولوجرامية متحركة
+   + gradient animated + shimmer + floating shapes
+   =========================== */
 .hologram-bg {
   background-image: linear-gradient(
     135deg,
@@ -8,11 +11,11 @@
     var(--color-bright)
   );
   background-size: 200% 200%;
-  animation: gradientFlow 14s ease infinite;
+  animation: gradientFlow 14s ease infinite; /* تحريك التدرج */
 }
 
 .hue-animated {
-  animation: hueShift 10s linear infinite;
+  animation: hueShift 10s linear infinite; /* تغيير الألوان تدريجياً */
 }
 
 .holo-sheen {
@@ -33,14 +36,17 @@
   transform: translateX(-100%);
 }
 .holo-sheen:hover::after {
-  animation: holoSheen 1200ms ease forwards;
+  animation: holoSheen 1200ms ease forwards; /* shimmer عند hover */
 }
 
 .floaty-shape {
-  animation: floaty 6s ease-in-out infinite;
+  animation: floaty 6s ease-in-out infinite; /* حركة طفيفة للأشكال العائمة */
 }
 
-/* Motion accessibility */
+/* ===========================
+   إعدادات الوصول للحركة
+   يقلل الحركة إذا المستخدم اختار reduced motion
+   =========================== */
 @media (prefers-reduced-motion: reduce) {
   .hologram-bg,
   .hue-animated,
@@ -55,203 +61,110 @@
   }
 }
 
+/* ===========================
+   Keyframes للتحريك الأساسي
+   =========================== */
 @keyframes hueShift {
-  0% {
-    filter: hue-rotate(0deg);
-  }
-  50% {
-    filter: hue-rotate(45deg);
-  }
-  100% {
-    filter: hue-rotate(0deg);
-  }
+  0% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(45deg); }
+  100% { filter: hue-rotate(0deg); }
 }
 
 @keyframes gradientFlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 @keyframes holoSheen {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 @keyframes floaty {
-  0% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-6px) rotate(2deg);
-  }
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(2deg); }
+  100% { transform: translateY(0) rotate(0deg); }
 }
 
-/* SignUpSide Enhanced Animations */
+/* ===========================
+   SignUpSide / General Animations
+   =========================== */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes glowPulse {
-  0%,
-  100% {
-    box-shadow: 0 0 20px color-mix(in srgb, var(--ui-info) 50%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 40px color-mix(in srgb, var(--ui-info) 80%, transparent);
-  }
+  0%, 100% { box-shadow: 0 0 20px color-mix(in srgb, var(--ui-info) 50%, transparent); }
+  50% { box-shadow: 0 0 40px color-mix(in srgb, var(--ui-info) 80%, transparent); }
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
 }
 
 @keyframes typewriter {
-  0% {
-    width: 0;
-  }
-  100% {
-    width: 100%;
-  }
+  0% { width: 0; }
+  100% { width: 100%; }
 }
 
 @keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
-/* New Homepage Animations */
+/* ===========================
+   Homepage / Floating Animations
+   =========================== */
 @keyframes float {
-  0%,
-  100% {
-    transform: translateY(0) translateX(0);
-  }
-  25% {
-    transform: translateY(-10px) translateX(5px);
-  }
-  50% {
-    transform: translateY(-20px) translateX(0);
-  }
-  75% {
-    transform: translateY(-10px) translateX(-5px);
-  }
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-10px) translateX(5px); }
+  50% { transform: translateY(-20px) translateX(0); }
+  75% { transform: translateY(-10px) translateX(-5px); }
 }
 
 @keyframes floatParticle {
-  0%,
-  100% {
-    transform: translate(0, 0);
-    opacity: 0.3;
-  }
-  25% {
-    transform: translate(20px, -40px);
-    opacity: 0.8;
-  }
-  50% {
-    transform: translate(-30px, -80px);
-    opacity: 0.5;
-  }
-  75% {
-    transform: translate(10px, -120px);
-    opacity: 0.7;
-  }
+  0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+  25% { transform: translate(20px, -40px); opacity: 0.8; }
+  50% { transform: translate(-30px, -80px); opacity: 0.5; }
+  75% { transform: translate(10px, -120px); opacity: 0.7; }
 }
 
 @keyframes gridMove {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(80px, 80px);
-  }
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(80px, 80px); }
 }
 
 @keyframes dataFlow {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.8;
-  }
-  50% {
-    transform: translate(100px, -100px) scale(1.5);
-    opacity: 0.6;
-  }
-  90% {
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(200px, -200px) scale(1);
-    opacity: 0;
-  }
+  0% { transform: translate(0, 0) scale(1); opacity: 0; }
+  10% { opacity: 0.8; }
+  50% { transform: translate(100px, -100px) scale(1.5); opacity: 0.6; }
+  90% { opacity: 0.8; }
+  100% { transform: translate(200px, -200px) scale(1); opacity: 0; }
 }
 
 @keyframes scanLine {
-  0% {
-    top: -10%;
-  }
-  50% {
-    top: 110%;
-  }
-  100% {
-    top: -10%;
-  }
+  0% { top: -10%; }
+  50% { top: 110%; }
+  100% { top: -10%; }
 }
 
 @keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
+/* ===========================
+   Utility Classes لتطبيق الحركات
+   =========================== */
 .animate-float {
   animation: float 8s ease-in-out infinite;
 }

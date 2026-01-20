@@ -3,9 +3,16 @@ import { withRBAC } from "../../../../lib/auth/withRBAC";
 import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
 
-// GET /api/admin/notifications-unread
+/* ============================================================================
+   GET /api/admin/notifications-unread
+   - جلب عدد الإشعارات غير المقروءة
+   - حساب Badge للأدمن: مجموع الإشعارات + طلبات موافقة الأطباء + طلبات تغيير الطبيب المعلقة
+============================================================================ */
 export const GET = withRBAC(
   async (request, user) => {
+    // =========================
+    // التحكم بعدد الطلبات (Rate Limiting)
+    // =========================
     const rl = await rateLimit(request);
     if (rl.limited) {
       logAudit({
@@ -18,8 +25,12 @@ export const GET = withRBAC(
     }
 
     try {
+      // =========================
+      // جلب البيانات بالتوازي لتحسين الأداء
+      // =========================
       const [unread, pendingDoctorApprovals, pendingDoctorChangeRequests] =
         await Promise.all([
+          // عدد الإشعارات غير المقروءة للأدمن الحالي
           prisma.notification.count({
             where: {
               userId: user.id,
@@ -27,7 +38,13 @@ export const GET = withRBAC(
               isDeleted: false,
             },
           }),
-          prisma.doctor.count({ where: { status: "pending" } }),
+
+          // عدد الأطباء المعلقين (في انتظار الموافقة)
+          prisma.doctor.count({
+            where: { status: "pending" },
+          }),
+
+          // عدد طلبات تغيير الطبيب المعلقة
           prisma.changeRequest.count({
             where: {
               type: "doctor_change",
@@ -37,18 +54,21 @@ export const GET = withRBAC(
           }),
         ]);
 
-      const badge =
-        unread + pendingDoctorApprovals + pendingDoctorChangeRequests;
+      // مجموع "Badge" للأدمن
+      const badge = unread + pendingDoctorApprovals + pendingDoctorChangeRequests;
+
       return Response.json({ unread, badge });
     } catch (error) {
+      // تسجيل أي خطأ في سجل التدقيق
       logAudit({
         event: "admin_notifications_unread_error",
         userId: user.id,
         ip: request.headers.get("x-forwarded-for"),
         details: { error: error?.message },
       });
+
       return Response.json({ error: "Internal error" }, { status: 500 });
     }
   },
-  ["admin"],
+  ["admin"], // صلاحية الوصول: الأدمن فقط
 );

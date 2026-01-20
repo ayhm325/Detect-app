@@ -3,59 +3,57 @@ import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 
 export default function StatsSection() {
-  const t = useTranslations("content");
-  const [isVisible, setIsVisible] = useState(false);
-  const [floaters, setFloaters] = useState([]);
-  const sectionRef = useRef(null);
+  const t = useTranslations("content"); // استخدام مكتبة next-intl للترجمة
+  const [isVisible, setIsVisible] = useState(false); // لتحديد إذا كانت الـ section ظاهرة بالصفحة
+  const [floaters, setFloaters] = useState([]); // تخزين الجسيمات العائمة في الخلفية
+  const sectionRef = useRef(null); // مرجع DOM للـ section لمراقبة ظهوره
 
+  // مراقبة ظهور الـ section على الشاشة
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true);
+          setIsVisible(true); // عند ظهور القسم اجعل العناصر متحركة
         }
       },
-      { threshold: 0.2 },
+      { threshold: 0.2 }, // نسبة ظهور العنصر على الشاشة قبل التفعيل
     );
 
     const currentRef = sectionRef.current;
-    if (currentRef) {
-      observer.observe(currentRef);
-    }
+    if (currentRef) observer.observe(currentRef);
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
+      if (currentRef) observer.unobserve(currentRef);
     };
   }, []);
 
+  // توليد عناصر الجسيمات العائمة عند التحميل
   useEffect(() => {
-    // Generate floating elements on client only
     setFloaters(
       Array.from({ length: 15 }, (_, i) => ({
         id: i,
-        width: Math.random() * 100 + 20,
-        height: Math.random() * 100 + 20,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        delay: Math.random() * 5,
-        duration: Math.random() * 10 + 10,
+        width: Math.random() * 100 + 20, // عرض عشوائي
+        height: Math.random() * 100 + 20, // ارتفاع عشوائي
+        left: Math.random() * 100, // موضع أفقي عشوائي %
+        top: Math.random() * 100, // موضع عمودي عشوائي %
+        delay: Math.random() * 5, // تأخير بداية الحركة
+        duration: Math.random() * 10 + 10, // مدة الحركة
       })),
     );
   }, []);
 
-  const stats = (t.raw && t.raw("content.stats.cards")) || [];
+  const stats = (t.raw && t.raw("content.stats.cards")) || []; // بيانات البطاقات الإحصائية
 
+  // مكون داخلي لتحريك الأرقام تدريجياً عند ظهور القسم
   const AnimatedNumber = ({ target = 0, suffix = "" }) => {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
       if (!isVisible) return;
 
-      const duration = 2000;
-      const steps = 60;
-      const increment = target / steps;
+      const duration = 2000; // مدة التحريك بالمللي ثانية
+      const steps = 60; // عدد الخطوات
+      const increment = target / steps; // مقدار الزيادة في كل خطوة
       let current = 0;
 
       const timer = setInterval(() => {
@@ -69,8 +67,16 @@ export default function StatsSection() {
       }, duration / steps);
 
       return () => clearInterval(timer);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [target, isVisible]);
+    }, [target]);
+
+    // إذا كان الرقم 24 والدعم متواصل (suffix == "/7")، اعرضه بدون فاصلة عشرية
+    if (target === 24 && suffix === "/7") {
+      return (
+        <span>
+          24/7
+        </span>
+      );
+    }
 
     return (
       <span>
@@ -82,10 +88,10 @@ export default function StatsSection() {
 
   return (
     <section
-      ref={sectionRef}
-      className="relative w-full py-20 sm:py-24 bg-linear-to-br from-(--color-bright-500) via-(--color-primary-500) to-(--color-dark-500) overflow-hidden"
+      ref={sectionRef} // ربط المرجع لمراقبة ظهور القسم
+      className="relative w-full py-20 sm:py-24 bg-linear-to-br from-(--color-bright-300) via-(--color-primary-500) to-(--color-dark-300) overflow-hidden"
     >
-      {/* Animated Background Pattern */}
+      {/* نمط الخلفية المتحركة */}
       <div className="absolute inset-0 opacity-20">
         <div
           className="absolute inset-0"
@@ -98,7 +104,7 @@ export default function StatsSection() {
         />
       </div>
 
-      {/* Floating Elements */}
+      {/* الجسيمات العائمة */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {floaters.map((f) => (
           <div
@@ -117,7 +123,7 @@ export default function StatsSection() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
+        {/* رأس القسم */}
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4">
             {t("content.stats.title")}
@@ -127,7 +133,7 @@ export default function StatsSection() {
           </p>
         </div>
 
-        {/* Stats Grid */}
+        {/* شبكة الإحصائيات */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {stats.map((stat, i) => (
             <div
@@ -138,14 +144,14 @@ export default function StatsSection() {
                 transition: "opacity 0.5s ease-out",
               }}
             >
-              {/* Card */}
+              {/* بطاقة الإحصاء */}
               <div className="relative h-full p-8 card-glass rounded-3xl border border-(--ui-border) hover:bg-(--ui-surface-2)/40 shadow-2xl transform hover:-translate-y-2 hover:scale-105 transition-all duration-300">
-                {/* Icon */}
+                {/* أيقونة البطاقة */}
                 <div className="text-5xl mb-4 transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-300">
                   {stat.icon}
                 </div>
 
-                {/* Number */}
+                {/* الرقم المتحرك */}
                 <div className="text-4xl sm:text-5xl font-black text-white mb-2">
                   {isVisible ? (
                     <AnimatedNumber target={stat.number} suffix={stat.suffix} />
@@ -154,22 +160,22 @@ export default function StatsSection() {
                   )}
                 </div>
 
-                {/* Label */}
+                {/* عنوان البطاقة */}
                 <div className="text-xl font-bold text-white mb-2">
                   {stat.label}
                 </div>
 
-                {/* Description */}
+                {/* وصف البطاقة */}
                 <div className="text-sm text-white/80">{stat.description}</div>
 
-                {/* Decorative Element */}
+                {/* خط زخرفي أسفل البطاقة */}
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-(--ui-border) opacity-60 rounded-b-3xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
               </div>
             </div>
           ))}
         </div>
 
-        {/* Bottom CTA */}
+        {/* دعوة للإجراء في أسفل القسم */}
         <div
           className="mt-16 text-center animate-fadeIn"
           style={{ animationDelay: "0.6s" }}

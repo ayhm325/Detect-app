@@ -1,19 +1,34 @@
+// هذا السكريبت مخصص للاستخدام اليدوي فقط
+// وظيفته تهيئة قاعدة البيانات ببيانات تجريبية (admin, doctor, patient, chat)
+// لا يتم تشغيله تلقائيًا من أوامر npm أو prisma
+// لتشغيله يدويًا:
+//    node prisma/seed.cjs
+// استدعاء PrismaClient للتعامل مع قاعدة البيانات
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+/**
+ * الدالة الرئيسية التي تنفذ عملية seeding
+ * أي إنشاء بيانات أولية في قاعدة البيانات
+ */
 async function main() {
+  // إنشاء أو تحديث المستخدم الإداري (Admin)
   const admin = await prisma.user.upsert({
+    // نبحث عن مستخدم موجود بنفس البريد الإلكتروني
     where: { email: "admin@example.com" },
+    // إذا وجدناه، لا نحدث أي شيء (update فارغة)
     update: {},
+    // إذا لم يوجد، نقوم بإنشاء مستخدم جديد بالإعدادات التالية
     create: {
       email: "admin@example.com",
-      password: "changeme",
+      password: "changeme",  // يجب تغييرها لاحقًا
       fullName: "Admin User",
       role: "admin",
       isActive: true,
     },
   });
 
+  // إنشاء أو تحديث مستخدم طبيب (Doctor)
   const doctorUser = await prisma.user.upsert({
     where: { email: "doctor@example.com" },
     update: {},
@@ -26,17 +41,19 @@ async function main() {
     },
   });
 
+  // إنشاء أو تحديث بيانات الطبيب في جدول Doctor
   const doctor = await prisma.doctor.upsert({
     where: { userId: doctorUser.id },
     update: {},
     create: {
-      userId: doctorUser.id,
+      userId: doctorUser.id,        // الربط مع مستخدم الطبيب
       phone: "0500000001",
       licenseNumber: "LIC-12345",
-      status: "active",
+      status: "active",             // الحالة الحالية للطبيب
     },
   });
 
+  // إنشاء أو تحديث مستخدم مريض (Patient)
   const patientUser = await prisma.user.upsert({
     where: { email: "patient@example.com" },
     update: {},
@@ -49,19 +66,21 @@ async function main() {
     },
   });
 
+  // إنشاء أو تحديث بيانات المريض في جدول Patient
   const patient = await prisma.patient.upsert({
     where: { userId: patientUser.id },
     update: {},
     create: {
-      userId: patientUser.id,
+      userId: patientUser.id,      // الربط مع مستخدم المريض
       fullName: "Patient One",
       email: "patient@example.com",
-      doctorId: doctor.userId,
+      doctorId: doctor.userId,     // تعيين طبيب المريض
     },
   });
 
+  // إنشاء محادثة افتراضية بين الطبيب والمريض
   await prisma.chat.upsert({
-    where: { id: "seed-chat-1" },
+    where: { id: "seed-chat-1" }, // معرف ثابت للمحادثة التجريبية
     update: {},
     create: {
       id: "seed-chat-1",
@@ -70,6 +89,7 @@ async function main() {
     },
   });
 
+  // طباعة رسالة نجاح مع معرفات المستخدمين
   console.log("Database seeded successfully");
   console.log({
     adminId: admin.id,
@@ -78,11 +98,13 @@ async function main() {
   });
 }
 
+// تنفيذ الدالة الرئيسية مع معالجة الأخطاء
 main()
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
+    console.error(e); // طباعة أي خطأ قد يحدث
+    process.exit(1);  // إنهاء العملية برمز خطأ
   })
   .finally(async () => {
+    // فصل الاتصال بقاعدة البيانات بعد الانتهاء
     await prisma.$disconnect();
   });

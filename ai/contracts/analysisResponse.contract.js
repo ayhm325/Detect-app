@@ -1,23 +1,24 @@
 /*
-  This contract defines the fixed response structure for AI analysis results.
-  All inference models (mock or real) must comply with this contract.
+  هذا الملف يحدد "عقد" (Contract) ثابت لبنية الاستجابة لنتائج التحليل باستخدام الذكاء الاصطناعي.
+  جميع النماذج (سواء كانت وهمية أو حقيقية) يجب أن تلتزم بهذه البنية.
 
-  Canonical shape (do NOT change):
+  الشكل الرسمي (لا تغييره):
 
   {
-    "analysis_id": "string",
-    "prediction": "string",
-    "confidence": "number",
-    "explanation": "string",
-    "heatmap_url": "string | null",
-    "model_version": "string",
-    "inference_time_ms": "number",
-    "created_at": "datetime"
+    "analysis_id": "string",          // معرف فريد للتحليل
+    "prediction": "string",           // النتيجة المتوقعة من النموذج (مثلاً NORMAL / PNEUMONIA)
+    "confidence": "number",           // درجة الثقة (0 إلى 1)
+    "explanation": "string",          // أي توضيح أو تعليق من النموذج
+    "heatmap_url": "string | null",   // رابط صورة الـ heatmap أو null إذا لم يتوفر
+    "model_version": "string",        // إصدار النموذج
+    "inference_time_ms": "number",    // وقت التنفيذ بالمللي ثانية
+    "created_at": "datetime"          // تاريخ ووقت إنشاء التحليل
   }
 
-  This file provides a small validator utility to check compliance.
+  هذا الملف يوفر أداة صغيرة للتحقق من التزام أي كائن بهذا العقد.
 */
 
+// قائمة الحقول الثابتة (غير قابلة للتعديل)
 const FIELDS = Object.freeze([
   "analysis_id",
   "prediction",
@@ -29,43 +30,56 @@ const FIELDS = Object.freeze([
   "created_at",
 ]);
 
+// ===== دوال مساعدة لفحص نوع البيانات =====
+
+// تحقق من أن القيمة نصية (String)
 function _isString(v) {
   return typeof v === "string";
 }
+
+// تحقق من أن القيمة رقمية صالحة (Number)
 function _isNumber(v) {
   return typeof v === "number" && Number.isFinite(v);
 }
+
+// تحقق من أن القيمة null
 function _isNull(v) {
   return v === null;
 }
+
+// تحقق من أن القيمة تشبه التاريخ (Date أو ISO string)
 function _isDateLike(v) {
-  if (v instanceof Date && !isNaN(v.getTime())) return true;
-  if (typeof v === "string") return !isNaN(Date.parse(v));
+  if (v instanceof Date && !isNaN(v.getTime())) return true; // كائن Date صالح
+  if (typeof v === "string") return !isNaN(Date.parse(v)); // نص يمثل تاريخ صالح
   return false;
 }
 
+// ===== دالة التحقق الرئيسية =====
 function validate(obj) {
   const errors = [];
+
+  // تحقق أن المدخل هو كائن
   if (!obj || typeof obj !== "object") {
     errors.push("response:not_object");
     return { valid: false, errors };
   }
 
-  // required presence
+  // تحقق من وجود جميع الحقول المطلوبة
   for (const f of FIELDS) {
     if (!(f in obj)) errors.push(`missing.${f}`);
   }
 
-  // type checks
+  // ===== التحقق من نوع كل حقل =====
   if ("analysis_id" in obj && !_isString(obj.analysis_id))
     errors.push("analysis_id:string");
+
   if ("prediction" in obj && !_isString(obj.prediction))
     errors.push("prediction:string");
 
   if ("confidence" in obj) {
     if (!_isNumber(obj.confidence)) errors.push("confidence:number");
     else if (!(obj.confidence >= 0 && obj.confidence <= 1))
-      errors.push("confidence:0-1");
+      errors.push("confidence:0-1"); // يجب أن يكون بين 0 و 1
   }
 
   if ("explanation" in obj && !_isString(obj.explanation))
@@ -85,7 +99,9 @@ function validate(obj) {
   if ("created_at" in obj && !_isDateLike(obj.created_at))
     errors.push("created_at:datetime");
 
+  // إرجاع النتيجة النهائية: هل الكائن صالح؟ وما هي الأخطاء (إن وجدت)
   return { valid: errors.length === 0, errors };
 }
 
+// تصدير الحقول والدالة لاستخدامها في ملفات أخرى
 module.exports = { FIELDS, validate };

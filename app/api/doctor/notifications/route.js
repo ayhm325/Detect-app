@@ -3,29 +3,50 @@ import prisma from "../../../../lib/prismaClient.js";
 import { withRBAC } from "../../../../lib/auth/withRBAC";
 import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
+import { getNotificationCache, setNotificationCache, clearNotificationCache } from "../../../../lib/cache/notificationCache";
+
+
+// دالة مساعدة لتقليل التكرار: تحقق من rateLimit وسجل Audit
+async function checkRateLimitAndAudit(request, user, endpoint) {
+  const rl = await rateLimit(request);
+  if (rl.limited) {
+    logAudit({
+      event: "rate_limit_exceeded",
+      userId: user.id,
+      ip: request.headers.get("x-forwarded-for"),
+      details: { endpoint },
+    });
+    return true;
+  }
+  return false;
+}
 
 export const HEAD = withRBAC(
   async (request, user) => {
-    const rl = await rateLimit(request);
-    if (rl.limited) {
-      logAudit({
-        event: "rate_limit_exceeded",
-        userId: user.id,
-        ip: request.headers.get("x-forwarded-for"),
-        details: { endpoint: "HEAD /api/doctor/notifications" },
-      });
+    if (await checkRateLimitAndAudit(request, user, "HEAD /api/doctor/notifications")) {
       return new Response(null, {
         status: 429,
-        headers: { "X-Unread-Count": "0" },
+        headers: {
+          "X-Unread-Count": "0",
+          "Access-Control-Expose-Headers": "X-Unread-Count"
+        },
       });
     }
     try {
-      const unread = await prisma.notification.count({
-        where: { userId: user.id, isRead: false, isDeleted: false },
-      });
+      // استخدم cache إذا متاح
+      let unread = await getNotificationCache(user.id);
+      if (typeof unread !== "number") {
+        unread = await prisma.notification.count({
+          where: { userId: user.id, isRead: false, isDeleted: false },
+        });
+        setNotificationCache(user.id, unread);
+      }
       return new Response(null, {
         status: 200,
-        headers: { "X-Unread-Count": String(unread) },
+        headers: {
+          "X-Unread-Count": String(unread),
+          "Access-Control-Expose-Headers": "X-Unread-Count"
+        },
       });
     } catch (e) {
       logAudit({
@@ -36,7 +57,10 @@ export const HEAD = withRBAC(
       });
       return new Response(null, {
         status: 200,
-        headers: { "X-Unread-Count": "0" },
+        headers: {
+          "X-Unread-Count": "0",
+          "Access-Control-Expose-Headers": "X-Unread-Count"
+        },
       });
     }
   },
@@ -45,29 +69,42 @@ export const HEAD = withRBAC(
 
 export const GET = withRBAC(
   async (request, user) => {
-    const rl = await rateLimit(request);
-    if (rl.limited) {
-      logAudit({
-        event: "rate_limit_exceeded",
-        userId: user.id,
-        ip: request.headers.get("x-forwarded-for"),
-        details: { endpoint: "GET /api/doctor/notifications" },
-      });
+    if (await checkRateLimitAndAudit(request, user, "GET /api/doctor/notifications")) {
       return NextResponse.json({ error: "rate_limited" }, { status: 429 });
     }
     try {
-      const notifications = await prisma.notification.findMany({
-        where: { userId: user.id, isDeleted: false },
-        orderBy: { createdAt: "desc" },
-        take: 200,
-      });
+      // دعم pagination
+      const url = new URL(request.url);
+      const cursor = url.searchParams.get("cursor");
+      const take = Math.min(Number(url.searchParams.get("take")) || 20, 100);
+      let where = { userId: user.id, isDeleted: false };
+      let notifications, nextCursor;
+      if (cursor) {
+        notifications = await prisma.notification.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          take: take + 1,
+          cursor: { id: cursor },
+          skip: 1,
+        });
+      } else {
+        notifications = await prisma.notification.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          take: take + 1,
+        });
+      }
+      if (notifications.length > take) {
+        nextCursor = notifications[take].id;
+        notifications = notifications.slice(0, take);
+      }
       logAudit({
         event: "doctor_notifications_listed",
         userId: user.id,
         ip: request.headers.get("x-forwarded-for"),
         details: { count: notifications.length },
       });
-      return NextResponse.json({ notifications }, { status: 200 });
+      return NextResponse.json({ notifications, nextCursor }, { status: 200 });
     } catch (e) {
       logAudit({
         event: "doctor_notifications_list_error",
@@ -83,14 +120,7 @@ export const GET = withRBAC(
 
 export const PUT = withRBAC(
   async (request, user) => {
-    const rl = await rateLimit(request);
-    if (rl.limited) {
-      logAudit({
-        event: "rate_limit_exceeded",
-        userId: user.id,
-        ip: request.headers.get("x-forwarded-for"),
-        details: { endpoint: "PUT /api/doctor/notifications" },
-      });
+    if (await checkRateLimitAndAudit(request, user, "PUT /api/doctor/notifications")) {
       return NextResponse.json({ error: "rate_limited" }, { status: 429 });
     }
     try {
@@ -119,18 +149,20 @@ export const PUT = withRBAC(
         const updated = await prisma.notification.update({
           where: { id },
           data: {
-            ...(typeof nextIsRead === "boolean" ? { isRead: nextIsRead } : {}),
+            ...(typeof nextIsRead === "boolean" ? { isRead: nextIsRead, readAt: nextIsRead ? new Date() : null } : {}),
           },
         });
+        clearNotificationCache(user.id);
         return NextResponse.json({ success: true, updated }, { status: 200 });
       }
 
-      // Mark all as read
-      await prisma.notification.updateMany({
+      // Mark all as read (batch update)
+      const result = await prisma.notification.updateMany({
         where: { userId: user.id, isDeleted: false, isRead: false },
-        data: { isRead: true },
+        data: { isRead: true, readAt: new Date() },
       });
-      return NextResponse.json({ success: true }, { status: 200 });
+      clearNotificationCache(user.id);
+      return NextResponse.json({ success: true, updatedCount: result.count }, { status: 200 });
     } catch (e) {
       logAudit({
         event: "doctor_notifications_update_error",
@@ -146,14 +178,7 @@ export const PUT = withRBAC(
 
 export const DELETE = withRBAC(
   async (request, user) => {
-    const rl = await rateLimit(request);
-    if (rl.limited) {
-      logAudit({
-        event: "rate_limit_exceeded",
-        userId: user.id,
-        ip: request.headers.get("x-forwarded-for"),
-        details: { endpoint: "DELETE /api/doctor/notifications" },
-      });
+    if (await checkRateLimitAndAudit(request, user, "DELETE /api/doctor/notifications")) {
       return NextResponse.json({ error: "rate_limited" }, { status: 429 });
     }
     try {
@@ -167,16 +192,19 @@ export const DELETE = withRBAC(
         }
         await prisma.notification.update({
           where: { id },
-          data: { isDeleted: true },
+          data: { isDeleted: true, archivedAt: new Date() },
         });
+        clearNotificationCache(user.id);
         return NextResponse.json({ success: true }, { status: 200 });
       }
 
-      await prisma.notification.updateMany({
+      // batch soft delete + archive
+      const result = await prisma.notification.updateMany({
         where: { userId: user.id, isDeleted: false },
-        data: { isDeleted: true },
+        data: { isDeleted: true, archivedAt: new Date() },
       });
-      return NextResponse.json({ success: true }, { status: 200 });
+      clearNotificationCache(user.id);
+      return NextResponse.json({ success: true, deletedCount: result.count }, { status: 200 });
     } catch (e) {
       logAudit({
         event: "doctor_notifications_delete_error",

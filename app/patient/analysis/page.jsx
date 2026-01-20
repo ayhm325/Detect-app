@@ -1,12 +1,14 @@
 "use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import AnalysisDetailsModal from "../../components/analysis/AnalysisDetailsModal";
 import { useTranslations } from "next-intl";
 
-// Modern confidence bar with gradient + glow
+// شريط الثقة مع تدرج ولون متغير حسب النسبة
 function ConfidenceBar({ confidence = 0, label, labelTitle }) {
-  const pct = Math.round((Number(confidence) || 0) * 100);
+  const pct = Math.round(Number(confidence) * 100 || 0);
+
   const gradient =
     pct >= 75
       ? "from-(--ui-success) to-(--ui-ring)"
@@ -36,22 +38,25 @@ function ConfidenceBar({ confidence = 0, label, labelTitle }) {
 export default function AnalysisPage() {
   const t = useTranslations("patient");
 
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState(null);
-  const [savedToHistory, setSavedToHistory] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [error, setError] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(null);
-  const xhrRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const [uploadLoaded, setUploadLoaded] = useState(null);
-  const [uploadTotal, setUploadTotal] = useState(null);
-  const [uploadStartTime, setUploadStartTime] = useState(null);
-  const [resultsVisible, setResultsVisible] = useState(false);
-  // Always include heatmap
+  // ----------------------- حالات React -----------------------
+  const [selectedImage, setSelectedImage] = useState(null); // الصورة المختارة
+  const [previewUrl, setPreviewUrl] = useState(null);       // رابط معاينة الصورة
+  const [isLoading, setIsLoading] = useState(false);        // حالة التحليل جاري
+  const [analysisResult, setAnalysisResult] = useState(null); // نتيجة التحليل
+  const [savedToHistory, setSavedToHistory] = useState(false); // حفظ التاريخ
+  const [showModal, setShowModal] = useState(false);        // عرض مودال التفاصيل
+  const [error, setError] = useState(null);                // رسالة الخطأ
+  const [uploadProgress, setUploadProgress] = useState(null); // تقدم التحميل
+  const [uploadLoaded, setUploadLoaded] = useState(null); // حجم تم تحميله
+  const [uploadTotal, setUploadTotal] = useState(null);   // الحجم الكلي للملف
+  const [uploadStartTime, setUploadStartTime] = useState(null); // توقيت بدء التحميل
+  const [resultsVisible, setResultsVisible] = useState(false); // ظهور نتائج التحليل
 
+  const xhrRef = useRef(null);       // مرجع XMLHttpRequest للتحكم بالتحميل
+  const fileInputRef = useRef(null); // مرجع input لاختيار الصورة
+
+  // ----------------------- وظائف مساعدة -----------------------
+  // إعادة تعيين حالة واجهة التحميل
   const resetUploadUi = () => {
     setIsLoading(false);
     setUploadProgress(null);
@@ -60,16 +65,36 @@ export default function AnalysisPage() {
     setUploadStartTime(null);
   };
 
-  // Image selection
+  // تنسيق الحجم بالميغا بايت
+  const formatMB = (bytes) => (bytes ? (bytes / 1024 / 1024).toFixed(2) : "0.00");
+
+  // حساب الوقت المتبقي للتحميل
+  const formatEta = () => {
+    if (!uploadLoaded || !uploadTotal || !uploadStartTime) return null;
+    const now = Date.now();
+    const elapsedMs = Math.max(1, now - uploadStartTime);
+    const speedBps = uploadLoaded / (elapsedMs / 1000);
+    if (!speedBps || speedBps <= 0) return null;
+    const remaining = Math.max(0, uploadTotal - uploadLoaded);
+    const etaSec = remaining / speedBps;
+    const minutes = Math.floor(etaSec / 60);
+    const seconds = Math.floor(etaSec % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  // ----------------------- اختيار وإزالة الصورة -----------------------
   const handleImageChange = (e) => {
-    const file = e.target.files && e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
+
     if (xhrRef.current) {
       xhrRef.current.abort();
       xhrRef.current = null;
       resetUploadUi();
     }
+
     setSelectedImage(file);
+
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(URL.createObjectURL(file));
     setError(null);
@@ -92,17 +117,21 @@ export default function AnalysisPage() {
     setError(t("analysis.errors.uploadCanceled"));
   };
 
-  // cancel on navigation/unload
+  // ----------------------- إلغاء التحميل عند الانتقال بين الصفحات -----------------------
   useEffect(() => {
     const abortUpload = () => {
       if (xhrRef.current) xhrRef.current.abort();
       xhrRef.current = null;
     };
+
     window.addEventListener("beforeunload", abortUpload);
     window.addEventListener("pagehide", abortUpload);
+    window.addEventListener("popstate", abortUpload);
 
     const origPush = history.pushState;
     const origReplace = history.replaceState;
+
+    // كشف التنقل داخل SPA
     history.pushState = function (...args) {
       const res = origPush.apply(this, args);
       window.dispatchEvent(new Event("navigation"));
@@ -113,7 +142,6 @@ export default function AnalysisPage() {
       window.dispatchEvent(new Event("navigation"));
       return res;
     };
-    window.addEventListener("popstate", abortUpload);
     window.addEventListener("navigation", abortUpload);
 
     return () => {
@@ -126,7 +154,7 @@ export default function AnalysisPage() {
     };
   }, []);
 
-  // Animate results entrance
+  // ----------------------- عرض نتائج التحليل مع تأثير الدخول -----------------------
   useEffect(() => {
     if (analysisResult) {
       const id = setTimeout(() => setResultsVisible(true), 40);
@@ -135,9 +163,10 @@ export default function AnalysisPage() {
     setResultsVisible(false);
   }, [analysisResult]);
 
-  // Upload & analyze
+  // ----------------------- رفع الصورة وتحليلها -----------------------
   const handleAnalyze = async () => {
     if (!selectedImage) return;
+
     setIsLoading(true);
     setError(null);
 
@@ -146,9 +175,9 @@ export default function AnalysisPage() {
     formData.append("with_heatmap", "true");
 
     try {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       setUploadProgress(0);
+
       const xhr = new XMLHttpRequest();
       xhrRef.current = xhr;
       xhr.open("POST", "/api/analysis/analyze");
@@ -166,10 +195,8 @@ export default function AnalysisPage() {
 
       xhr.onload = () => {
         setIsLoading(false);
-        setUploadProgress(null);
-        setUploadLoaded(null);
-        setUploadTotal(null);
-        setUploadStartTime(null);
+        resetUploadUi();
+
         try {
           const data = JSON.parse(xhr.responseText || "{}");
           if (xhr.status >= 200 && xhr.status < 300) {
@@ -185,10 +212,7 @@ export default function AnalysisPage() {
 
       xhr.onerror = () => {
         setIsLoading(false);
-        setUploadProgress(null);
-        setUploadLoaded(null);
-        setUploadTotal(null);
-        setUploadStartTime(null);
+        resetUploadUi();
         setError(t("analysis.errors.networkUpload"));
       };
 
@@ -196,28 +220,15 @@ export default function AnalysisPage() {
     } catch (err) {
       setError(err.message || String(err));
       setIsLoading(false);
-      setUploadProgress(null);
+      resetUploadUi();
     }
   };
 
-  const formatMB = (bytes) =>
-    bytes ? (bytes / 1024 / 1024).toFixed(2) : "0.00";
-  const formatEta = () => {
-    if (!uploadLoaded || !uploadTotal || !uploadStartTime) return null;
-    const now = Date.now();
-    const elapsedMs = Math.max(1, now - uploadStartTime);
-    const speedBps = uploadLoaded / (elapsedMs / 1000);
-    if (!speedBps || speedBps <= 0) return null;
-    const remaining = Math.max(0, uploadTotal - uploadLoaded);
-    const etaSec = remaining / speedBps;
-    const minutes = Math.floor(etaSec / 60);
-    const seconds = Math.floor(etaSec % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
-
+  // ----------------------- واجهة المستخدم -----------------------
   return (
     <div className="min-h-[85vh] py-14 bg-(--ui-surface) text-(--ui-foreground)">
       <div className="max-w-7xl mx-auto p-8 card-glass rounded-3xl">
+        {/* عنوان الصفحة */}
         <header className="flex items-start justify-between gap-6 mb-8">
           <div>
             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight brand-gradient-text">
@@ -236,7 +247,7 @@ export default function AnalysisPage() {
           </div>
         </header>
 
-        {/* Controls */}
+        {/* أزرار اختيار الصورة وإزالتها */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
           <input
             ref={fileInputRef}
@@ -252,7 +263,6 @@ export default function AnalysisPage() {
           >
             📁 {t("analysis.controls.chooseImage")}
           </button>
-
           {previewUrl && (
             <button
               onClick={handleRemoveImage}
@@ -263,9 +273,9 @@ export default function AnalysisPage() {
           )}
         </div>
 
-        {/* Layout: two columns on large screens so preview and results sit side-by-side */}
+        {/* تخطيط الصفحة: معاينة الصورة ونتائج التحليل */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Preview + Heatmap side by side */}
+          {/* معاينة الصورة والتحميل */}
           <div>
             <div className="rounded-3xl overflow-hidden card-glass transition-transform duration-300 hover:scale-[1.01]">
               <div className="p-4">
@@ -291,11 +301,8 @@ export default function AnalysisPage() {
 
               <div className="p-4 flex items-center justify-between">
                 <div className="text-base text-(--ui-muted-foreground) truncate">
-                  {selectedImage
-                    ? `${selectedImage.name}`
-                    : t("analysis.preview.noFile")}
+                  {selectedImage ? selectedImage.name : t("analysis.preview.noFile")}
                 </div>
-                <div className="flex gap-3"></div>
               </div>
             </div>
 
@@ -308,11 +315,10 @@ export default function AnalysisPage() {
                   : "btn-gradient hover:scale-105"
               }`}
             >
-              {isLoading
-                ? t("analysis.actions.analyzing")
-                : t("analysis.actions.analyze")}
+              {isLoading ? t("analysis.actions.analyzing") : t("analysis.actions.analyze")}
             </button>
 
+            {/* شريط التقدم عند التحميل */}
             {uploadProgress !== null && (
               <div className="mt-4">
                 <div className="relative w-full h-10 bg-(--ui-surface-2)/40 rounded-2xl overflow-hidden border border-(--ui-border)">
@@ -325,17 +331,12 @@ export default function AnalysisPage() {
                     aria-valuemax={100}
                   />
                   <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-(--ui-foreground) drop-shadow-sm">
-                    {uploadProgress}% • {formatMB(uploadLoaded)} MB /{" "}
-                    {formatMB(uploadTotal)} MB{" "}
-                    {formatEta() &&
-                      `• ${t("analysis.progress.etaLabel")}: ${formatEta()}`}
+                    {uploadProgress}% • {formatMB(uploadLoaded)} MB / {formatMB(uploadTotal)} MB{" "}
+                    {formatEta() && `• ${t("analysis.progress.etaLabel")}: ${formatEta()}`}
                   </div>
                 </div>
                 <div className="mt-2 text-right">
-                  <button
-                    onClick={handleCancelUpload}
-                    className="text-xs text-(--ui-danger) underline"
-                  >
+                  <button onClick={handleCancelUpload} className="text-xs text-(--ui-danger) underline">
                     {t("analysis.actions.cancelUpload")}
                   </button>
                 </div>
@@ -343,81 +344,63 @@ export default function AnalysisPage() {
             )}
           </div>
 
-          {/* Results */}
-          <div
-            className={`space-y-4 transition-all duration-700 ease-out transform ${resultsVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}
-          >
-            {analysisResult &&
-              (analysisResult.heatmap_url || analysisResult.heatmapUrl) && (
-                <div className="mb-2">
-                  <h3 className="text-md font-semibold mb-2">
-                    {t("analysis.results.heatmap")}
-                  </h3>
-                  <div className="rounded-3xl overflow-hidden card-glass shadow-sm p-4">
-                    <button
-                      type="button"
-                      onClick={() => setShowModal(true)}
-                      style={{
-                        border: "none",
-                        padding: 0,
-                        background: "transparent",
-                      }}
-                      className="block w-full"
-                    >
-                      <div
-                        className="relative"
-                        style={{ paddingBottom: "75%" }}
-                      >
-                        <Image
-                          src={
-                            analysisResult.heatmap_url ??
-                            analysisResult.heatmapUrl
-                          }
-                          alt={t("analysis.results.heatmap")}
-                          fill
-                          className="object-cover rounded-xl absolute inset-0"
-                          unoptimized
-                        />
-                      </div>
-                    </button>
-                  </div>
+          {/* نتائج التحليل */}
+          <div className={`space-y-4 transition-all duration-700 ease-out transform ${resultsVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}>
+            {/* Heatmap */}
+            {analysisResult && (analysisResult.heatmap_url || analysisResult.heatmapUrl) && (
+              <div className="mb-2">
+                <h3 className="text-md font-semibold mb-2">{t("analysis.results.heatmap")}</h3>
+                <div className="rounded-3xl overflow-hidden card-glass shadow-sm p-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(true)}
+                    style={{ border: "none", padding: 0, background: "transparent" }}
+                    className="block w-full"
+                  >
+                    <div className="relative" style={{ paddingBottom: "75%" }}>
+                      <Image
+                        src={analysisResult.heatmap_url ?? analysisResult.heatmapUrl}
+                        alt={t("analysis.results.heatmap")}
+                        fill
+                        className="object-cover rounded-xl absolute inset-0"
+                        unoptimized
+                      />
+                    </div>
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
+
+            {/* رسالة الخطأ */}
             {error && <p className="text-(--ui-danger) font-medium">{error}</p>}
 
+            {/* بيانات التحليل */}
             {analysisResult && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div
-                  className={`p-6 rounded-3xl shadow-xl hover:scale-102 hover:shadow-2xl transition-transform duration-300
-                  ${
-                    analysisResult?.needs_review
-                      ? "bg-(--ui-warning-bg) border border-(--ui-warning-border)"
-                      : String(analysisResult.prediction)
-                            .toLowerCase()
-                            .includes("normal")
-                        ? "bg-green-600 border-green-700 text-white font-bold"
-                        : String(analysisResult.prediction)
-                              .toLowerCase()
-                              .includes("pneumonia")
-                          ? "bg-red-600 border-red-700 text-white font-bold"
-                          : "bg-(--ui-danger-bg) border border-(--ui-danger-border) font-bold"
-                  }
-                `}
-                >
+                {/* تشخيص */}
+                <div className={`p-6 rounded-3xl shadow-xl hover:scale-102 hover:shadow-2xl transition-transform duration-300 ${
+                  analysisResult?.needs_review
+                    ? "bg-(--ui-warning-bg) border border-(--ui-warning-border)"
+                    : String(analysisResult.prediction).toLowerCase().includes("normal")
+                      ? "bg-green-600 border-green-700 text-white font-bold"
+                      : String(analysisResult.prediction).toLowerCase().includes("pneumonia")
+                        ? "bg-red-600 border-red-700 text-white font-bold"
+                        : "bg-(--ui-danger-bg) border border-(--ui-danger-border) font-bold"
+                }`}>
                   <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold mb-3 text-white">
-                      {t("analysis.results.diagnosis")}
-                    </h2>
+                    <h2 className="text-2xl font-bold mb-3 text-white">{t("analysis.results.diagnosis")}</h2>
                     {analysisResult?.needs_review && (
                       <span className="ml-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-(--ui-warning-bg) text-(--ui-foreground) text-sm font-semibold border border-(--ui-warning-border)">
                         ⚠ {t("analysis.results.needsReview")}
                       </span>
                     )}
                   </div>
-
-                  <p
-                    className={`text-white text-center font-bold ${String(analysisResult.prediction).toLowerCase().includes("normal") || String(analysisResult.prediction).toLowerCase().includes("pneumonia") ? "text-3xl" : "text-lg"}`}
-                  >
+                  <p className={`text-white text-center font-bold ${
+                    String(analysisResult.prediction).toLowerCase().includes("normal") ||
+                    String(analysisResult.prediction).toLowerCase().includes("pneumonia")
+                      ? "text-3xl"
+                      : "text-lg"
+                  }`}>
                     {analysisResult.display_label ?? analysisResult.prediction}
                   </p>
                   {savedToHistory && (
@@ -427,6 +410,7 @@ export default function AnalysisPage() {
                   )}
                 </div>
 
+                {/* شريط الثقة والتفسير */}
                 <div className="p-6 rounded-3xl shadow-xl card-glass hover:scale-102 transition-transform duration-300">
                   <h2 className="text-2xl font-semibold mb-3 text-(--ui-foreground)">
                     {t("analysis.results.confidence")}
@@ -438,30 +422,26 @@ export default function AnalysisPage() {
                   />
                   {analysisResult.explanation && (
                     <p className="mt-4 text-(--ui-muted-foreground) text-sm">
-                      <strong>{t("analysis.results.explanationLabel")}:</strong>{" "}
-                      {analysisResult.explanation}
+                      <strong>{t("analysis.results.explanationLabel")}:</strong> {analysisResult.explanation}
                     </p>
                   )}
                 </div>
               </div>
             )}
 
-            {analysisResult &&
-              !(analysisResult.heatmap_url || analysisResult.heatmapUrl) && (
-                <div className="mt-2">
-                  <h1 className="text-md font-semibold mb-2">
-                    {t("analysis.results.heatmap")}
-                  </h1>
-                  <div className="w-full h-72 rounded-3xl border border-dashed border-(--ui-border) flex items-center justify-center bg-(--ui-surface-2)/40">
-                    <span className="text-(--ui-muted-foreground) text-lg">
-                      {t("analysis.results.noHeatmap")}
-                    </span>
-                  </div>
+            {/* حالة عدم وجود Heatmap */}
+            {analysisResult && !(analysisResult.heatmap_url || analysisResult.heatmapUrl) && (
+              <div className="mt-2">
+                <h1 className="text-md font-semibold mb-2">{t("analysis.results.heatmap")}</h1>
+                <div className="w-full h-72 rounded-3xl border border-dashed border-(--ui-border) flex items-center justify-center bg-(--ui-surface-2)/40">
+                  <span className="text-(--ui-muted-foreground) text-lg">{t("analysis.results.noHeatmap")}</span>
                 </div>
-              )}
+              </div>
+            )}
           </div>
         </div>
 
+        {/* مودال التفاصيل */}
         {showModal && (
           <AnalysisDetailsModal
             record={analysisResult}

@@ -5,8 +5,15 @@ import { rateLimit } from "../../../../lib/security/rateLimiter";
 import { logAudit } from "../../../../lib/security/auditLogger";
 import { createNotificationBestEffort } from "../../../../lib/notifications";
 
+/* ============================================================================
+   GET /api/admin/patients
+   - جلب قائمة المرضى مع بيانات المستخدم والطبيب المرتبط وعدد المواعيد والسجلات الطبية
+============================================================================ */
 export const GET = withRBAC(
   async (request, user) => {
+    // =========================
+    // تحقق من معدل الطلبات (Rate Limit)
+    // =========================
     const rl = await rateLimit(request);
     if (rl.limited) {
       logAudit({
@@ -19,7 +26,11 @@ export const GET = withRBAC(
         status: 429,
       });
     }
+
     try {
+      // =========================
+      // إعداد علاقات Include لجلب بيانات إضافية مع كل مريض
+      // =========================
       const include = {
         user: {
           select: {
@@ -54,16 +65,27 @@ export const GET = withRBAC(
         },
         _count: { select: { appointments: true, medicalRecords: true } },
       };
+
+      // =========================
+      // جلب كل المرضى باستخدام Prisma CRUD abstraction
+      // =========================
       const patients = await getAllRecords("Patient", { include });
 
+      // =========================
+      // تسجيل النشاط في سجل التدقيق
+      // =========================
       logAudit({
         event: "admin_patients_listed",
         userId: user.id,
         ip: request.headers.get("x-forwarded-for"),
         details: { count: patients.length },
       });
+
       return new Response(JSON.stringify(patients), { status: 200 });
     } catch (error) {
+      // =========================
+      // التعامل مع الأخطاء وتسجيلها
+      // =========================
       logAudit({
         event: "admin_patients_list_error",
         userId: user.id,
@@ -75,11 +97,20 @@ export const GET = withRBAC(
       });
     }
   },
-  ["admin"],
+  ["admin"]
 );
 
+/* ============================================================================
+   POST /api/admin/patients
+   - إضافة مريض جديد مع إنشاء مستخدم مرتبط
+   - ربط المريض بطبيب عند وجود doctorId
+   - إشعار الطبيب الجديد (best-effort)
+============================================================================ */
 export const POST = withRBAC(
   async (request, user) => {
+    // =========================
+    // تحقق من معدل الطلبات
+    // =========================
     const rl = await rateLimit(request);
     if (rl.limited) {
       logAudit({
@@ -92,34 +123,49 @@ export const POST = withRBAC(
         status: 429,
       });
     }
+
     try {
       const body = await request.json();
+
+      // =========================
+      // تحقق من الحقول المطلوبة
+      // =========================
       if (!body.name || !body.email || !body.phone) {
         return new Response(
           JSON.stringify({ error: "الاسم والبريد والهاتف مطلوبة" }),
-          { status: 400 },
+          { status: 400 }
         );
       }
 
+      // =========================
+      // إعداد كلمة المرور الافتراضية
+      // =========================
       const defaultPassword = process.env.DEFAULT_PATIENT_PASSWORD;
       const rawPassword =
         body.password ||
         defaultPassword ||
         (process.env.NODE_ENV === "development" ? "changeme" : null);
+
       if (!rawPassword) {
         return new Response(
           JSON.stringify({
             error:
               "Missing password (set DEFAULT_PATIENT_PASSWORD in production)",
           }),
-          { status: 400 },
+          { status: 400 }
         );
       }
 
+      // =========================
+      // تشفير كلمة المرور
+      // =========================
       const bcryptMod = await import("../../../../lib/auth/bcryptWrapper.mjs");
       const bcrypt = bcryptMod?.default || bcryptMod;
       const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
+      // =========================
+      // إنشاء المستخدم المرتبط بالمريض
+      // =========================
       const userCreated = await prisma.user.create({
         data: {
           fullName: body.name,
@@ -129,6 +175,10 @@ export const POST = withRBAC(
           isActive: (body.status || "active") === "active",
         },
       });
+
+      // =========================
+      // إعداد بيانات المريض
+      // =========================
       const data = {
         userId: userCreated.id,
         fullName: body.name,
@@ -143,9 +193,15 @@ export const POST = withRBAC(
           ? { doctor: { connect: { userId: body.doctorId } } }
           : {}),
       };
+
+      // =========================
+      // إنشاء سجل المريض في قاعدة البيانات
+      // =========================
       const patient = await createRecord("Patient", data);
 
-      // Notify assigned doctor (best-effort)
+      // =========================
+      // إشعار الطبيب الجديد إذا تم تعيينه (best-effort)
+      // =========================
       try {
         const assignedDoctorId = body.doctorId
           ? String(body.doctorId).trim()
@@ -162,12 +218,16 @@ export const POST = withRBAC(
         }
       } catch {}
 
+      // =========================
+      // تسجيل النشاط في سجل التدقيق
+      // =========================
       logAudit({
         event: "admin_patient_created",
         userId: user.id,
         ip: request.headers.get("x-forwarded-for"),
         details: { patientId: patient.id },
       });
+
       return new Response(JSON.stringify(patient), { status: 201 });
     } catch (error) {
       logAudit({
@@ -181,5 +241,5 @@ export const POST = withRBAC(
       });
     }
   },
-  ["admin"],
+  ["admin"]
 );
